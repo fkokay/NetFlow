@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/Blazor/">
+    <Project Path="NetFlow.Blazor/NetFlow.Blazor.Shared/NetFlow.Blazor.Shared.csproj" Id="7b9eec5c-964f-48e7-afa7-50e167d78e0f" />
+    <Project Path="NetFlow.Blazor/NetFlow.Blazor.Web.Client/NetFlow.Blazor.Web.Client.csproj" Id="6eefb01f-afac-435a-8bcd-e3cafe36ce62" />
+    <Project Path="NetFlow.Blazor/NetFlow.Blazor.Web/NetFlow.Blazor.Web.csproj" Id="081d15ef-8691-472c-9c17-7a5925595e5e" />
+    <Project Path="NetFlow.Blazor/NetFlow.Blazor/NetFlow.Blazor.csproj" Id="7dd0aa73-ac1d-402b-9227-500640cc99c4">
+      <Deploy Solution="Debug|*" />
+    </Project>
+  </Folder>
+  <Project Path="NetFlow.Api/NetFlow.Api.csproj" />
+  <Project Path="NetFlow.Application/NetFlow.Application.csproj" />
+  <Project Path="NetFlow.Domain/NetFlow.Domain.csproj" />
+  <Project Path="NetFlow.Infrastructure/NetFlow.Infrastructure.csproj" />
+  <Project Path="NetFlow.Netsis/NetFlow.Netsis.csproj" />
+  <Project Path="NetFlow.ReadModel/NetFlow.ReadModel.csproj" />
+</Solution>

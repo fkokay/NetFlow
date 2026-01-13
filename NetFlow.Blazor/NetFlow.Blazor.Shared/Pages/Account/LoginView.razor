@@ -1,0 +1,50 @@
+﻿<div class="login-root">
+    <div class="login-card">
+        <DxFormLayout>
+
+            <DxFormLayoutItem ColSpanMd="12">
+                <h3 class="login-title">NetFlow Giriş</h3>
+            </DxFormLayoutItem>
+
+            <DxFormLayoutItem Caption="Firma">
+                <DxComboBox Data="@Firms"
+                            TextFieldName="FirmName"
+                            ValueFieldName="FirmCode"
+                            @bind-Value="Model.FirmCode"
+                            NullText="Firma seçiniz" />
+            </DxFormLayoutItem>
+
+            <DxFormLayoutItem Caption="E-posta">
+                <DxTextBox @bind-Text="Model.Email" />
+            </DxFormLayoutItem>
+
+            <DxFormLayoutItem Caption="Şifre">
+                <DxTextBox @bind-Text="Model.Password" Password="true" />
+            </DxFormLayoutItem>
+
+            <DxFormLayoutItem ColSpanMd="12">
+                <DxButton Text="Giriş Yap" CssClass="w-100" Click="OnLogin" RenderStyle="ButtonRenderStyle.Primary" />
+            </DxFormLayoutItem>
+
+            @if (!string.IsNullOrEmpty(Error))
+            {
+                <DxFormLayoutItem ColSpanMd="12">
+                    <div class="text-danger">@Error</div>
+                </DxFormLayoutItem>
+            }
+
+        </DxFormLayout>
+    </div>
+</div>
+
+@code {
+    [Parameter] public LoginModel Model { get; set; }
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public EventCallback OnLogin { get; set; }
+
+    public List<FirmModel> Firms { get; set; } = new()
+    {
+        new() { FirmCode="01", FirmName="Merkez" },
+        new() { FirmCode="02", FirmName="Konya Şube" }
+    };
+}

@@ -1,0 +1,36 @@
+﻿@page "/login"
+@using NetFlow.Blazor.Shared.Pages.Account
+@inject IHttpClientFactory Factory
+@inject ITokenStore TokenStore
+@inject NavigationManager Nav
+
+<LoginView Model="Model" Error="Error" OnLogin="DoLogin" />
+
+@code {
+    LoginModel Model = new();
+    string? Error;
+
+    async Task DoLogin()
+    {
+        try
+        {
+            var http = Factory.CreateClient("api");
+
+            var res = await http.PostAsJsonAsync("/api/auth/login", Model);
+            if (!res.IsSuccessStatusCode)
+            {
+                Error = "Hatalı giriş";
+                return;
+            }
+
+            var data = await res.Content.ReadFromJsonAsync<LoginResponse>();
+            await TokenStore.SetAsync(data!.Token);
+
+            Nav.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+    }
+}
