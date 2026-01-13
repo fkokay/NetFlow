@@ -1,0 +1,20 @@
+﻿@page "/login"
+@rendermode InteractiveWebAssembly
+@inject HttpClient Http
+@inject IAppAuthState AppAuth
+@inject NavigationManager Nav
+
+<button @onclick="LoginClick">Login</button>
+
+@code {
+    async Task LoginClick()
+    {
+        Console.WriteLine("Geldi");
+        var response = await Http.PostAsJsonAsync("api/auth/login", new { Email="Email", Password="Password",FirmCode="" });
+        var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+        await ((JwtAppAuthState)AppAuth).SetTokenAsync(result!.Token);
+
+        Nav.NavigateTo("/", true);
+    }
+}

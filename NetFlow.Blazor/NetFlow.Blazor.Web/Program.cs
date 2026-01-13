@@ -1,4 +1,10 @@
+﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Components.Authorization;
+using NetFlow.Blazor.Shared.Auth;
 using NetFlow.Blazor.Shared.Services;
+using NetFlow.Blazor.Web.Auth;
+using NetFlow.Blazor.Web.Client.Auth;
 using NetFlow.Blazor.Web.Components;
 using NetFlow.Blazor.Web.Services;
 
@@ -8,8 +14,20 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
+builder.Services.AddScoped<IAppAuthState, ServerAppAuthState>();
+
+builder.Services.AddAuthentication("Dummy")
+    .AddScheme<AuthenticationSchemeOptions, DummyAuthHandler>("Dummy", _ => { });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = null;   // 🔥 otomatik global authorize kapalı
+});
+
 builder.Services.AddSingleton<IFormFactor, FormFactor>();
 builder.Services.AddDevExpressBlazor();
+
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7071/") });
 
 builder.Services.AddMvc();
 
@@ -29,10 +47,14 @@ else
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
 app.UseAntiforgery();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapStaticAssets();
 
 app.MapRazorComponents<App>()
+    .AllowAnonymous()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(

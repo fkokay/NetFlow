@@ -1,10 +1,5 @@
 <Solution>
-  <Folder Name="/Blazor/">
-    <Project Path="NetFlow.Blazor/NetFlow.Blazor.Shared/NetFlow.Blazor.Shared.csproj" Id="cc8d1dd7-a9b2-43d0-b771-a24e279bb0e4" />
-    <Project Path="NetFlow.Blazor/NetFlow.Blazor.Web.Client/NetFlow.Blazor.Web.Client.csproj" Id="493de2fd-0341-4041-9d0e-8da91a212ba4" />
-    <Project Path="NetFlow.Blazor/NetFlow.Blazor.Web/NetFlow.Blazor.Web.csproj" Id="15a48011-5b84-4ea1-824a-c03b1452a9ac" />
-    <Project Path="NetFlow.Blazor/NetFlow.Blazor/NetFlow.Blazor.csproj" Id="cf67123e-c0ed-4e13-ae37-4cb3f0c5e547" />
-  </Folder>
+  <Folder Name="/Blazor/" />
   <Project Path="NetFlow.Api/NetFlow.Api.csproj" />
   <Project Path="NetFlow.Application/NetFlow.Application.csproj" />
   <Project Path="NetFlow.Domain/NetFlow.Domain.csproj" />
