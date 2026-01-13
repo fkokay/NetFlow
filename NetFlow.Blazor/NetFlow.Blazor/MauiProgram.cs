@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using NetFlow.Blazor.Shared;
 
 namespace NetFlow.Blazor
 {
@@ -16,7 +15,7 @@ namespace NetFlow.Blazor
                 });
 
             builder.Services.AddMauiBlazorWebView();
-            builder.Services.AddSingleton<ITokenStore, MauiTokenStore>();
+
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
             builder.Logging.AddDebug();
