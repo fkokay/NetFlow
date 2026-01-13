@@ -1,7 +1,3 @@
-using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Components.Authorization;
-using NetFlow.Blazor.Shared;
-using NetFlow.Blazor.Web.Client;
 using NetFlow.Blazor.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +13,7 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseBlazorFrameworkFiles();
 app.UseAntiforgery();
 
 if (app.Environment.IsDevelopment())
@@ -28,6 +25,8 @@ else
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
+
+app.UseRouting();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()

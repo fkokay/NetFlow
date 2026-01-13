@@ -16,8 +16,4 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\NetFlow.Blazor.Shared\NetFlow.Blazor.Shared.csproj" />
-  </ItemGroup>
-
 </Project>
