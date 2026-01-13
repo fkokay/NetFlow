@@ -1,50 +1,38 @@
-﻿using Blazored.LocalStorage;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.AspNetCore.Identity;
 using NetFlow.Blazor.Shared.Security;
 using NetFlow.Blazor.Web.Components;
 using NetFlow.Blazor.Web.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// =============================
-// Razor Components (InteractiveServer)
-// =============================
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddDevExpressBlazor();
 
-// =============================
-// Authorization for Blazor
-// =============================
+builder.Services.AddScoped<IPlatformContext, WebPlatformContext>();
+
+// Cookie Auth
 builder.Services.AddAuthorizationCore();
+builder.Services
+    .AddAuthentication("Blazor")
+    .AddScheme<AuthenticationSchemeOptions, BlazorAuthHandler>("Blazor", _ => { });
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+builder.Services.AddScoped<CustomAuthStateProvider>(provider =>
+    (CustomAuthStateProvider)provider.GetRequiredService<AuthenticationStateProvider>());
+builder.Services.AddScoped<ProtectedSessionStorage>();
 
-// =============================
-// LocalStorage (Browser JWT storage)
-// =============================
-builder.Services.AddBlazoredLocalStorage();
-
-// =============================
-// JWT Auth Services
-// =============================
-builder.Services.AddScoped<ITokenStore, WebTokenStore>();
-builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
-
-// =============================
-// HttpClient → API with JWT
-// =============================
-builder.Services.AddTransient<JwtHandler>();
-
-builder.Services.AddHttpClient("api", client =>
+builder.Services.AddHttpClient<ILoginService, WebLoginService>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7071/");
-})
-.AddHttpMessageHandler<JwtHandler>();
+    client.BaseAddress = new Uri("https://localhost:7071/"); // API
+});
 
-builder.Services.AddScoped(sp =>
-    sp.GetRequiredService<IHttpClientFactory>().CreateClient("api"));
-
-// =============================
-// App
-// =============================
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -55,9 +43,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseRouting();
 app.UseAntiforgery();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+    .AddInteractiveServerRenderMode()
+     .AddAdditionalAssemblies(typeof(NetFlow.Blazor.Shared._Imports).Assembly);
 
 app.Run();

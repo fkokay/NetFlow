@@ -8,11 +8,16 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\NetFlow.Blazor.Shared\NetFlow.Blazor.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

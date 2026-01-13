@@ -76,7 +76,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = jwt.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SigningKey))
         };
-    });
+    }).AddCookie("Cookies");
 
 
 var app = builder.Build();

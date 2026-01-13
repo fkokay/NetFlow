@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NetFlow.Application.Auth;
+using NetFlow.Infrastructure.Identity;
+using System.Security.Claims;
 
 namespace NetFlow.Api.Auth
 {
@@ -28,6 +31,28 @@ namespace NetFlow.Api.Auth
             var user = await _users.Authenticate(req.Email, req.Password,req.FirmCode);
             var token = _tokens.CreateToken(user);
             return Ok(new LoginResponse(token));
+        }
+
+        [HttpPost("login-web")]
+        public async Task<IActionResult> LoginWeb(LoginRequest req)
+        {
+            var user = await _users.Authenticate(req.Email, req.Password, req.FirmCode);
+            if (user == null)
+                return Unauthorized();
+
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Name, user.Email),
+        new Claim("UserId", user.Id.ToString()),
+        new Claim("FirmCode", req.FirmCode)
+    };
+
+            var identity = new ClaimsIdentity(claims, "Cookies");
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync("Cookies", principal);
+
+            return Ok();
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using NetFlow.Blazor.Security;
+using NetFlow.Blazor.Shared.Security;
 
 namespace NetFlow.Blazor
 {
@@ -15,6 +17,8 @@ namespace NetFlow.Blazor
                 });
 
             builder.Services.AddMauiBlazorWebView();
+            builder.Services.AddSingleton<IPlatformContext, MauiPlatformContext>();
+            builder.Services.AddSingleton<ILoginService, MauiLoginService>();
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();

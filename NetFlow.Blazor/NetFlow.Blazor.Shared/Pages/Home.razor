@@ -1,4 +1,16 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@attribute [Authorize]
+
+<AuthorizeView>
+    <Authorized>
+        <h1>Hoş Geldiniz!</h1>
+        <p>Giriş başarıyla doğrulandı.</p>
+    </Authorized>
+    <NotAuthorized>
+        <p>Yetkiniz yok veya giriş yapılmadı.</p>
+    </NotAuthorized>
+</AuthorizeView>
 
 <PageTitle>Home</PageTitle>
 

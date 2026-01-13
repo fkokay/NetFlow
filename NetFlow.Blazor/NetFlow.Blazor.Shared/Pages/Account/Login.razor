@@ -1,0 +1,21 @@
+﻿@page "/account/login"
+@inject ILoginService LoginService
+@inject NavigationManager navigationManager
+<DxButton Text="Giriş Yap"
+          CssClass="w-100"
+          RenderStyle="ButtonRenderStyle.Primary"
+          Click="OnLoginClick" />
+
+@code {
+    private async Task OnLoginClick()
+    {
+        await LoginService.LoginAsync(new Auth.LoginRequest
+        {
+            Email = "admin@makrolab.com.tr",
+            Password = "123456",
+            FirmCode = "02"
+        });
+
+        navigationManager.NavigateTo("/");
+    }
+}

@@ -39,12 +39,13 @@ namespace NetFlow.Infrastructure.Auth
 
             var claims = new List<Claim>
         {
+            new(ClaimTypes.Name,snapshot.FullName),
             new("uid", snapshot.Id.ToString()),
             new("fullName",snapshot.FullName),
             new("email", snapshot.Email),
             new("firmId", snapshot.FirmId.ToString()),
             new("firmCode", snapshot.FirmCode),
-            new("role", snapshot.RoleCode),
+            new(ClaimTypes.Role, snapshot.RoleCode),
             new("roleName", snapshot.RoleName),
             new("perms", perms)
         };
