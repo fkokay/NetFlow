@@ -6,13 +6,16 @@ using Microsoft.AspNetCore.Identity;
 using NetFlow.Blazor.Shared.Security;
 using NetFlow.Blazor.Web.Components;
 using NetFlow.Blazor.Web.Security;
+using NetFlow.Blazor.Shared.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAppServices();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddDevExpressBlazor();
+
 
 builder.Services.AddScoped<IPlatformContext, WebPlatformContext>();
 

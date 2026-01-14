@@ -1,4 +1,6 @@
-﻿@inject NavigationManager NavigationManager
+﻿@inject ThemeManager ThemeManager
+@inject SizeModeManager SizeModeManager
+@inject NavigationManager NavigationManager
 
 <!DOCTYPE html>
 <html lang="tr">
@@ -7,10 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="@(new Uri(NavigationManager.BaseUri).LocalPath)" />
-    @DxResourceManager.RegisterTheme(Themes.Fluent.Clone(p => {
-        p.Name = "Fluent-Light";
-        p.Mode = ThemeMode.Light;
-    }))
+    @DxResourceManager.RegisterTheme(ThemeManager.CurrentTheme)
     <ResourcePreloader />
     <link rel="stylesheet" href="_content/NetFlow.Blazor.Shared/app.css" />
     <link rel="stylesheet" href="NetFlow.Blazor.Web.styles.css" />
@@ -19,10 +18,46 @@
     <HeadOutlet @rendermode="new InteractiveServerRenderMode(prerender: false)" />
 </head>
 
-<body>
-    <Routes @rendermode="new InteractiveServerRenderMode(prerender: false)" />
+<body class="@SizeModeManager.GetClassName(SizeMode)">
+    @if (RenderModeForPage != null)
+    {
+        <div class="loading-panel" style="height: 100%; width: 100%">
+            <div class="loader">
+                <span class="spinner"></span>
+                <span class="label">Loading...</span>
+            </div>
+        </div>
+        <script>
+            const observer = new MutationObserver((mutations) => {
+                const mutation = mutations.find(m => m.target.matches(".page"));
+                if(mutation && mutation.type == "childList") {
+                    observer.disconnect();
+                    document.querySelector(".loading-panel")?.remove();
+                }
+            });
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        </script>
+    }
+    <Routes @rendermode="RenderModeForPage" />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
 
 </html>
+
+@code{
+    [CascadingParameter]
+    HttpContext HttpContext { get; set; } = default!;
+    [CascadingParameter(Name = "ParentSizeMode")]
+    SizeMode SizeMode { get; set; }
+    IComponentRenderMode? RenderModeForPage => new InteractiveServerRenderMode(false);
+
+    protected override async Task OnInitializedAsync()
+    {
+        ThemeManager.ObtainTheme(HttpContext?.Request.Cookies.Select(x => new KeyValuePairSerializer<string, string>(x.Key, x.Value)).ToList());
+        await base.OnInitializedAsync();
+    }
+}
