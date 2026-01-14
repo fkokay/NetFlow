@@ -31,12 +31,12 @@ namespace NetFlow.Infrastructure.Identity
         .SingleOrDefaultAsync(u => u.Email == email && u.Password == password && u.Active);
 
             if (user == null)
-                throw new InvalidLoginException();
+                throw new InvalidLoginException("E-posta adresi veya şifre hatalı ya da kullanıcı aktif değil");
 
             var firm = user.Firms.FirstOrDefault(f => f.Firm.FirmCode == firmCode);
 
             if (firm == null)
-                throw new InvalidLoginException("User not assigned to this firm");
+                throw new InvalidLoginException("Kullanıcı seçilen firmaya tanımlı değil.");
 
             return UserEntityMapper.Map(user, firm);
         }

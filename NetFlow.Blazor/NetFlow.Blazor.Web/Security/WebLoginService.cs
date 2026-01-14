@@ -23,16 +23,24 @@ namespace NetFlow.Blazor.Web.Security
         {
             var response = await _http.PostAsJsonAsync("api/auth/login", req);
 
+            var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
             if (!response.IsSuccessStatusCode)
-                throw new Exception("Kullanıcı adı veya şifre hatalı");
+            {
+                var message = result?.ErrorMessage
+                              ?? "Giriş işlemi başarısız";
 
-            var result = await response.Content.ReadFromJsonAsync<LoginResponse>()
-                         ?? throw new Exception("LoginResponse boş geldi");
+                throw new Exception(message);
+            }
 
-            if (string.IsNullOrEmpty(result.Token))
-                throw new Exception("Token boş geldi");
+            if (result == null)
+                throw new Exception("LoginResponse boş geldi");
+
+            if (string.IsNullOrWhiteSpace(result.Token))
+                throw new Exception(result.ErrorMessage ?? "Token boş geldi");
 
             await _authenticationStateProvider.UpdateAuthenticationState(result.Token);
         }
+
     }
 }

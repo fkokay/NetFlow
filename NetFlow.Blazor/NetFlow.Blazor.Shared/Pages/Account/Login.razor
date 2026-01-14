@@ -1,12 +1,72 @@
 ﻿@page "/account/login"
 @rendermode InteractiveServer
 @layout AccountLayout
+@using System.ComponentModel.DataAnnotations
 @inject ILoginService LoginService
 @inject NavigationManager navigationManager
 
 <PageTitle>Giriş Yap</PageTitle>
+
+
+<div class="@(isBusy ? "loading-overlay-active" : "d-none")">
+    <DxLoadingPanel Visible="isBusy"
+                    IsContentBlocked="true"
+                    ApplyBackgroundShading="true"
+                    IndicatorAreaVisible="true"
+                    CssClass="full-screen-loader"
+                    Text="Giriş yapılıyor, lütfen bekleyin...">
+    </DxLoadingPanel>
+</div>
+
+@* --- HATA POPUP --- *@
+<DxPopup @bind-Visible="@isErrorPopupVisible"
+         HeaderText="Sistem Uyarısı"
+         Width="420px"
+         ShowFooter="true"
+         ShowCloseButton="true"
+         CloseOnEscape="true" 
+         CloseOnOutsideClick="false"
+         Context="PopupContext"
+         CssClass="modern-error-window"
+         HeaderCssClass="custom-popup-header"
+         HorizontalAlignment="HorizontalAlignment.Center"
+         VerticalAlignment="VerticalAlignment.Center">
+
+    <HeaderContentTemplate>
+        <div style="display: flex; align-items: center; gap: 10px; color: var(--dxds-color-surface-danger-default-rest);">
+            <span style="font-weight: 700; font-size: 1rem;">Güvenlik Uyarısı</span>
+        </div>
+    </HeaderContentTemplate>
+
+    <BodyContentTemplate>
+        <div style="display: flex; flex-direction: column; align-items: center; padding: 25px 15px; text-align: center;">
+            <div class="error-icon-wrapper">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <h4 style="margin-bottom: 10px; color: var(--dxds-color-content-neutral-default-rest); font-weight: 700;">İşlem Başarısız</h4>
+            <p style="color: #6c757d; font-size: 1rem; line-height: 1.5; margin: 0;">@errorMessage</p>
+        </div>
+    </BodyContentTemplate>
+
+    <FooterContentTemplate>
+        <div style="display: flex; justify-content: center; width: 100%; padding: 5px;">
+            <DxButton Text="Tamam"
+                      RenderStyle="ButtonRenderStyle.Danger"
+                      RenderStyleMode="ButtonRenderStyleMode.Contained"
+                      Click="() => isErrorPopupVisible = false"
+                      Width="130px"
+                      Height="38px" />
+        </div>
+    </FooterContentTemplate>
+</DxPopup>
+
+@* --- GİRİŞ FORMU --- *@
 <div class="block-content card">
-    <EditForm Model="@Input" method="post" OnValidSubmit="LoginUser" FormName="login" Context="Login">
+    <EditForm Model="@Input" OnValidSubmit="LoginUser" FormName="login" Context="Login">
         <DataAnnotationsValidator />
         <DxFormLayout CaptionPosition=@CaptionPosition.Vertical>
             <DxFormLayoutItem ColSpanMd="12">
@@ -14,6 +74,7 @@
                     <div class="title-text">Giriş Yap</div>
                 </div>
             </DxFormLayoutItem>
+
             <DxFormLayoutItem Caption="Firma Seçiniz" ColSpanMd="12">
                 <DxComboBox Data="@Firms"
                             @bind-Value="@Input.FirmCode"
@@ -22,26 +83,38 @@
                             NullText="Lütfen bir firma seçin..." />
                 <ValidationMessage For="() => Input.FirmCode" class="text-danger" />
             </DxFormLayoutItem>
+
             <DxFormLayoutItem Caption="E-Posta" ColSpanMd="12" BeginRow="true">
-                <DxTextBox name="Input.Email" type="email" @bind-Text="@Input.Email" BindValueMode="BindValueMode.OnInput" />
+                <DxTextBox name="Input.Email" @bind-Text="@Input.Email" BindValueMode="BindValueMode.OnInput" />
                 <ValidationMessage class="text-danger" For="() => Input.Email" />
             </DxFormLayoutItem>
+
             <DxFormLayoutItem Caption="Şifre" ColSpanMd="12" BeginRow="true">
                 <DxTextBox name="Input.Password" @bind-Text="@Input.Password" BindValueMode="BindValueMode.OnInput" Password="true" />
                 <ValidationMessage class="text-danger" For="() => Input.Password" />
             </DxFormLayoutItem>
+
             <DxFormLayoutItem ColSpanMd="12" BeginRow="true">
-                <DxCheckBox name="Input.RememberMe" InputId="rememberme" @bind-Checked="@Input.RememberMe">Beni hatırla?</DxCheckBox>
+                <DxCheckBox name="Input.RememberMe" @bind-Checked="@Input.RememberMe">Beni hatırla?</DxCheckBox>
             </DxFormLayoutItem>
+
             <DxFormLayoutItem ColSpanMd="12" BeginRow="true">
-                <DxButton CssClass="w-100" SubmitFormOnClick="true" Text="Giriş"></DxButton>
+                <DxButton CssClass="w-100"
+                          SubmitFormOnClick="true"
+                          Text="Giriş"
+                          Enabled="!isBusy">
+                </DxButton>
             </DxFormLayoutItem>
         </DxFormLayout>
     </EditForm>
 </div>
 
+
+
 @code {
     private string? errorMessage;
+    private bool isErrorPopupVisible;
+    private bool isBusy;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
@@ -57,30 +130,44 @@
 
     private async Task LoginUser()
     {
-        await LoginService.LoginAsync(new Auth.LoginRequest
-        {
-            Email = Input.Email,
-            Password = Input.Password,
-            FirmCode = Input.FirmCode
-        });
+        if (isBusy) return;
 
-        navigationManager.NavigateTo("/");
+        try
+        {
+            isBusy = true;
+            errorMessage = null;
+            StateHasChanged();
+
+            await LoginService.LoginAsync(new Auth.LoginRequest
+            {
+                Email = Input.Email,
+                Password = Input.Password,
+                FirmCode = Input.FirmCode
+            });
+
+            navigationManager.NavigateTo(ReturnUrl ?? "/");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            isErrorPopupVisible = true;
+        }
+        finally
+        {
+            isBusy = false;
+            StateHasChanged();
+        }
     }
 
     private sealed class InputModel
     {
-        [Required]
+        [Required(ErrorMessage = "Firma seçimi zorunludur.")]
         public string FirmCode { get; set; } = "";
-
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "E-Posta adresi zorunludur.")]
+        [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz.")]
         public string Email { get; set; } = "";
-
-        [Required]
-        [DataType(DataType.Password)]
+        [Required(ErrorMessage = "Şifre zorunludur.")]
         public string Password { get; set; } = "";
-
-        [Display(Name = "Beni hatırla?")]
         public bool RememberMe { get; set; }
     }
 }

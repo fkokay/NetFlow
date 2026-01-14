@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NetFlow.Application.Auth;
+using NetFlow.Domain.Identity.Exceptions;
 using NetFlow.Infrastructure.Identity;
 using System.Security.Claims;
 
@@ -22,37 +23,33 @@ namespace NetFlow.Api.Auth
         }
 
         public sealed record LoginRequest(string Email, string Password,string FirmCode);
-        public sealed record LoginResponse(string Token);
+        public sealed record LoginResponse(string Token,string? ErrorMessage=null);
 
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest req)
         {
-            var user = await _users.Authenticate(req.Email, req.Password,req.FirmCode);
-            var token = _tokens.CreateToken(user);
-            return Ok(new LoginResponse(token));
-        }
+            try
+            {
+                var user = await _users.Authenticate(req.Email, req.Password, req.FirmCode);
+                var token = _tokens.CreateToken(user);
 
-        [HttpPost("login-web")]
-        public async Task<IActionResult> LoginWeb(LoginRequest req)
-        {
-            var user = await _users.Authenticate(req.Email, req.Password, req.FirmCode);
-            if (user == null)
-                return Unauthorized();
-
-            var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.Name, user.Email),
-        new Claim("UserId", user.Id.ToString()),
-        new Claim("FirmCode", req.FirmCode)
-    };
-
-            var identity = new ClaimsIdentity(claims, "Cookies");
-            var principal = new ClaimsPrincipal(identity);
-
-            await HttpContext.SignInAsync("Cookies", principal);
-
-            return Ok();
+                return Ok(new LoginResponse(token));
+            }
+            catch (InvalidLoginException ex)
+            {
+                return Unauthorized(new LoginResponse(
+                    Token: null,
+                    ErrorMessage: ex.Message
+                ));
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new LoginResponse(
+                    Token: null,
+                    ErrorMessage: "Beklenmeyen bir hata oluştu"
+                ));
+            }
         }
     }
 }
