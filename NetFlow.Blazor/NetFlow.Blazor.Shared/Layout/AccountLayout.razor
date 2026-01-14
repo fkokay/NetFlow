@@ -1,0 +1,17 @@
+﻿@inherits LayoutComponentBase
+<DxStackLayout Orientation="Orientation.Vertical" CssClass="w-100">
+    <Items>
+        <DxStackLayoutItem Length="auto">
+            <Template>
+                <div class="account-title">
+                    <div class="account-title-text">Net Flow</div>
+                </div>
+            </Template>
+        </DxStackLayoutItem>
+        <DxStackLayoutItem Length="1fr">
+            <Template>
+                @Body
+            </Template>
+        </DxStackLayoutItem>
+    </Items>
+</DxStackLayout>
