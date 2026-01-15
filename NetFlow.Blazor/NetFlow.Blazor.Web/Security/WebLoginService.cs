@@ -4,6 +4,7 @@ using NetFlow.Blazor.Shared.Auth;
 using NetFlow.Blazor.Shared.Security;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using static DevExpress.Data.Helpers.FindSearchRichParser;
 
 namespace NetFlow.Blazor.Web.Security
 {

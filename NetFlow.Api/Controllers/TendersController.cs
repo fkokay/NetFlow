@@ -20,9 +20,9 @@ namespace NetFlow.Api.Controllers
             _read = read;
         }
 
-        // GET api/tenders?firmId=1
+        // GET api/tenders
         [HttpGet]
-        public async Task<IActionResult> List([FromQuery]PagedRequest pagedRequest)
+        public async Task<IActionResult> List([FromQuery] PagedRequest pagedRequest)
         {
             if (_current.User == null)
             {

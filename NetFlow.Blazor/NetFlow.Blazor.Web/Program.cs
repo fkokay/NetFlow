@@ -32,26 +32,22 @@ builder.Services.AddScoped<CustomAuthStateProvider>(provider =>
     (CustomAuthStateProvider)provider.GetRequiredService<AuthenticationStateProvider>());
 builder.Services.AddScoped<ProtectedSessionStorage>();
 
-builder.Services.AddHttpClient<ILoginService, WebLoginService>(client =>
+builder.Services.AddScoped<ILoginService>(sp =>
 {
-    client.BaseAddress = new Uri("https://localhost:7071/"); // API
+    var factory = sp.GetRequiredService<IHttpClientFactory>();
+    var http = factory.CreateClient("ApiClient");
+
+    return new WebLoginService(
+        http,
+        sp.GetRequiredService<AuthenticationStateProvider>());
 });
-
-
-builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddScoped<NetFlow.Blazor.Web.Security.ITokenStore, ServerTokenStore>();
-builder.Services.AddScoped<JwtAuthorizationHandler>();
+builder.Services.AddScoped<IApiClientFactory,ApiClientFactory>();
 
 builder.Services.AddHttpClient("ApiClient", client =>
 {
     client.BaseAddress = new Uri("https://localhost:7071/");
-    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-})
-.AddHttpMessageHandler<JwtAuthorizationHandler>();
+});
 
-
-builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
