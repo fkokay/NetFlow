@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NetFlow.Application.Common.Pagination;
+using NetFlow.Application.Firms;
 using NetFlow.Domain.Identity;
 using NetFlow.ReadModel.Assets;
 using NetFlow.ReadModel.Firms;
@@ -12,10 +13,12 @@ namespace NetFlow.Api.Controllers
     public class FirmsController : Controller
     {
         private readonly FirmReadService _read;
+        private readonly FirmWriteService _write;
 
-        public FirmsController(FirmReadService read)
+        public FirmsController(FirmReadService read,FirmWriteService write)
         {
             _read = read;
+            _write = write;
         }
 
         // GET api/firms
@@ -30,5 +33,17 @@ namespace NetFlow.Api.Controllers
             var row = await _read.GetAsync(id);
             return row is null ? NotFound() : Ok(row);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateFirmRequest request)
+        {
+            var id = await _write.CreateAsync(request);
+
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
+
     }
 }
