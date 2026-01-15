@@ -11,13 +11,15 @@ public sealed class TenderAuthorityReadService
     private readonly ReadModelOptions _opt;
     public TenderAuthorityReadService(ReadModelOptions opt) => _opt = opt;
 
-   
+
     public async Task<PagedResult> ListAsync(int tenderId, PagedRequest pagedRequest)
     {
         using var cn = new SqlConnection(_opt.ConnectionString);
         var parameters = new DynamicParameters();
+
         parameters.Add("TenderId", tenderId);
-        string whereSql = "WHERE (@TenderId IS NULL OR TenderId = @TenderId)";
+
+        string whereSql = "WHERE TenderId = @TenderId";
 
         if (!string.IsNullOrEmpty(pagedRequest.filter))
         {
@@ -32,17 +34,17 @@ public sealed class TenderAuthorityReadService
         );
 
         string countSql = $@"
-                SELECT COUNT(1)
-                FROM dbo.VW_TenderAuthority WITH (NOLOCK)
-                {whereSql}
-            ";
+            SELECT COUNT(1)
+            FROM dbo.VW_TenderAuthority WITH (NOLOCK)
+            {whereSql}
+        ";
 
         int totalCount = cn.ExecuteScalar<int>(
             countSql,
             parameters
         );
 
-        if (pagedRequest.isCountQuery != null && pagedRequest.isCountQuery.HasValue)
+        if (pagedRequest.isCountQuery == true)
         {
             return new PagedResult
             {
@@ -55,12 +57,12 @@ public sealed class TenderAuthorityReadService
         parameters.Add("@Take", pagedRequest.take ?? 10);
 
         string dataSql = $@"
-            SELECT *
-            FROM dbo.VW_TenderAuthority WITH (NOLOCK)
-            {whereSql}
-            ORDER BY {orderBy}
-            OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
-            ";
+        SELECT *
+        FROM dbo.VW_TenderAuthority WITH (NOLOCK)
+        {whereSql}
+        ORDER BY {orderBy}
+        OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
+    ";
 
         var data = cn.Query<AssetDto>(
             dataSql,
@@ -77,7 +79,8 @@ public sealed class TenderAuthorityReadService
     public async Task<TenderAuthorityDto?> GetAsync(int id)
     {
         using var cn = new SqlConnection(_opt.ConnectionString);
-        return await cn.QueryFirstOrDefaultAsync<TenderAuthorityDto>(
-            "SELECT * FROM dbo.VW_TenderAuthority WHERE Id=@Id", new { Id = id });
+
+        var sql = "SELECT TOP 1 * FROM dbo.VW_TenderAuthority WITH (NOLOCK) WHERE Id=@Id";
+        return await cn.QueryFirstOrDefaultAsync<TenderAuthorityDto>(sql, new { Id = id });
     }
 }

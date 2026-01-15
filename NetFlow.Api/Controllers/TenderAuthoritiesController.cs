@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NetFlow.Application.Common.Pagination;
 using NetFlow.Domain.Common;
 
 [ApiController]
@@ -14,8 +15,7 @@ public class TenderAuthorityController : ControllerBase
 
     // GET api/tender-authorities?tenderId=5
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] int tenderId)
-        => Ok(await _read.ListAsync(tenderId));
+    public async Task<IActionResult> List([FromQuery] int tenderId, [FromQuery] PagedRequest pagedRequest)=> Ok(await _read.ListAsync(tenderId, pagedRequest));
 
     // GET api/tender-authorities/12
     [HttpGet("{id:int}")]
