@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NetFlow.Application.Common.Pagination;
 using NetFlow.Domain.Identity;
 using NetFlow.ReadModel.Tenders;
 
@@ -21,7 +22,15 @@ namespace NetFlow.Api.Controllers
 
         // GET api/tenders?firmId=1
         [HttpGet]
-        public async Task<IActionResult> List() => Ok(await _read.ListAsync(_current.User.Firm.Id));
+        public async Task<IActionResult> List(PagedRequest pagedRequest)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(await _read.ListAsync(_current.User.Firm.Id,pagedRequest));
+        }
 
         // GET api/tenders/10
         [HttpGet("{id:int}")]
