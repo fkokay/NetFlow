@@ -1,6 +1,9 @@
 @page "/tender/detail/{Id:int}"
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+
 
 <div class="tender-detail-wrapper" style="padding: 1.5rem; background-color: #f8f9fa; min-height: 100vh;">
     @if (Model == null)
@@ -247,9 +250,9 @@
     {
         try
         {
-            // var result = await TenderApiClient.Detail(Id);
-            // if (result != null && result.Success) Model = result.Data;
-            // else NavigationManager.NavigateTo("/tender/list");
+            
+            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+            Model = new TenderModel();
         }
         catch
         {

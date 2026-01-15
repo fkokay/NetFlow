@@ -1,6 +1,8 @@
 @page "/role/list"
 @implements IDisposable
-@inject NavigationManager Navigation
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
 
 <div class="content-root">
     <div class="card toolbar">
@@ -30,77 +32,71 @@
                 </Template>
             </DxToolbarItem>
 
-            <DxToolbarItem Tooltip="Refresh" Click="LoadGridDataAsync"
-                           Alignment="ToolbarItemAlignment.Right"
-                           IconCssClass="refresh-icon icon medium-icon" />
+            <DxToolbarItem Tooltip="Refresh" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
         </DxToolbar>
     </div>
 
-    <DxLoadingPanel Visible="@(!IsDataLoaded)"
-                    IsContentBlocked="true"
-                    IndicatorVisible="true"
-                    Text="Loading...">
 
-        <DxGrid @ref="Grid"
-                Data="Data"
-                KeyFieldName="Id"
-                SearchText="@SearchText"
-                EditMode="GridEditMode.PopupEditForm"
-                PopupEditFormCssClass="pw-800"
-                CustomizeEditModel="Grid_CustomizeEditModel"
-                EditModelSaving="Grid_EditModelSaving"
-                DataItemDeleting="Grid_DataItemDeleting"
-                ShowAllRows="true"
-                HighlightRowOnHover="true">
-
-            <Columns>
-                <DxGridSelectionColumn Width="75px" />
-                <DxGridDataColumn FieldName="Id" Visible="false" />
-                <DxGridDataColumn Caption="Ad" FieldName="Name" />
-                <DxGridCommandColumn Width="6em"
-                                     EditButtonVisible="true"
-                                     DeleteButtonVisible="true" />
-            </Columns>
+    <div class="role-list-root">
+        <div class="h-100">
+            <DxGrid @ref="Grid"
+                    Data="@Data"
+                    VirtualScrollingEnabled="true"
+                    ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                    ShowFilterRow="true"
+                    ShowSearchBox="false"
+                    SearchText="@SearchText"
+                    TextWrapEnabled="false">
+                <Columns>
+                    <DxGridSelectionColumn Width="75px" />
+                    <DxGridDataColumn FieldName="Id" Visible="false" />
+                    <DxGridDataColumn Caption="Ad" FieldName="Name" />
+                    <DxGridCommandColumn Width="6em"
+                                         EditButtonVisible="true"
+                                         DeleteButtonVisible="true" />
+                </Columns>
 
 
-            <EditFormTemplate Context="editContext">
-                @{
-                    var role = (RoleModel)editContext.EditModel;
-                }
+                <EditFormTemplate Context="editContext">
+                    @{
+                        var role = (RoleModel)editContext.EditModel;
+                    }
 
-                <DxFormLayout CssClass="w-100">
-                    <DxFormLayoutItem Caption="Rol Adý">
-                        <DxTextBox @bind-Text="role.Name" />
-                    </DxFormLayoutItem>
-                </DxFormLayout>
-            </EditFormTemplate>
+                    <DxFormLayout CssClass="w-100">
+                        <DxFormLayoutItem Caption="Rol Adý">
+                            <DxTextBox @bind-Text="role.Name" />
+                        </DxFormLayoutItem>
+                    </DxFormLayout>
+                </EditFormTemplate>
 
-        </DxGrid>
-    </DxLoadingPanel>
+                <GroupSummary>
+                    <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
+                </GroupSummary>
+                <TotalSummary>
+                    <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" FooterColumnName="Id" />
+                </TotalSummary>
+            </DxGrid>
+        </div>
+    </div>
+
 </div>
 
 @code {
-    List<RoleModel>? Data;
-    bool IsDataLoaded;
-    string? SearchText;
-    IGrid? Grid;
+    [CascadingParameter(Name = "ParentSizeMode")]
+    SizeMode SizeMode { get; set; }
+    GridDevExtremeDataSource<RoleModel> Data { get; set; } = null!;
+    IGrid? Grid { get; set; }
+    string? SearchText { get; set; }
 
-    protected override async Task OnInitializedAsync()
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await LoadGridDataAsync();
-    }
+        if (!firstRender)
+            return;
 
-    async Task LoadGridDataAsync()
-    {
-        IsDataLoaded = false;
-        // Data = await RoleApiClient.GetListAsync();
-        Data = new List<RoleModel>
-        {
-            new RoleModel{Id=1,Name="Admin"},
-            new RoleModel{Id=2,Name="Kullanýcý"}
-        };
-
-        IsDataLoaded = true;
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        Data = new GridDevExtremeDataSource<RoleModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/roles"));
+        await InvokeAsync(StateHasChanged);
     }
 
     
@@ -146,7 +142,7 @@
         => Grid!.ShowColumnChooser();
     void OnAddClick()
     {
-        Navigation.NavigateTo("/role/create");
+        NavigationManager.NavigateTo("/role/create");
     }
 
     Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Roles");

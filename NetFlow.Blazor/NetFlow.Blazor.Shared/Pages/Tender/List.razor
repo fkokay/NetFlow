@@ -39,9 +39,30 @@
                     TextWrapEnabled="false">
                 <Columns>
                     <DxGridSelectionColumn Width="75px" />
-                    <DxGridDataColumn Caption="İhale Kodu" FieldName="TenderCode" Visible="false" />
-                    <DxGridDataColumn Caption="Firma Adı" FieldName="FirmName" />
+                    <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
+                    <DxGridDataColumn Caption="Firma" FieldName="FirmName" />
+                    <DxGridDataColumn Caption="İhale Kodu" FieldName="TenderCode">
+                        <CellDisplayTemplate>
+                            <a href="javascript:void(0);"
+                               style="text-decoration:none; font-weight:bold; color: #0056b3;"
+                               @onclick="() => OnTenderCodeClick((TenderModel)context.DataItem)"
+                               @onclick:stopPropagation>
+                                @context.Value
+                            </a>
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
 
+                    <DxGridDataColumn Caption="İhale Adı" FieldName="TenderName" />
+                    <DxGridDataColumn Caption="Kamu/Kurum Kodu" FieldName="PublicAuthorityCode" />
+                    <DxGridDataColumn Caption="Kamu/Kurum Ünvanı" FieldName="PublicAuthorityName" />
+                    <DxGridDataColumn Caption="İhale Türü" FieldName="TenderType" />
+                    <DxGridDataColumn Caption="İhale Metodu" FieldName="TenderMethod" />
+                    <DxGridDataColumn Caption="İhale Başlangıç Tarihi" FieldName="TenderStartDate" />
+                    <DxGridDataColumn Caption="İhale Bitiş Tarihi" FieldName="TenderEndDate" />
+                    <DxGridDataColumn Caption="İhale Miktarı" FieldName="TenderQuantity" />
+                    <DxGridDataColumn Caption="İhale Tutarı" FieldName="TenderAmount" />
+                    <DxGridDataColumn Caption="İhale Durumu" FieldName="TenderStatus" />
+                    <DxGridDataColumn Caption="Sözleşme Tarihi" FieldName="ContractDate" />
                 </Columns>
                 <GroupSummary>
                     <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
@@ -67,9 +88,7 @@
             return;
 
         var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
-
         Data = new GridDevExtremeDataSource<TenderModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/tenders"));
-
         await InvokeAsync(StateHasChanged);
     }
 
@@ -86,7 +105,13 @@
     Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Satış Siparişleri");
 
     Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Seçili Satış Siparişleri", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
-
+    void OnTenderCodeClick(TenderModel tender)
+    {
+        if (tender != null)
+        {
+            NavigationManager.NavigateTo($"/tender/detail/{tender.Id}");
+        }
+    }
     string GetSiparisPanelWidth() => SizeMode switch
     {
         SizeMode.Small => "20.25rem",
