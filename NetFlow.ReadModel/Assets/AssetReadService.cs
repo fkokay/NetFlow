@@ -18,11 +18,7 @@ namespace NetFlow.ReadModel.Assets
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
             var parameters = new DynamicParameters();
-
-
             parameters.Add("TenderId", tenderId);
-
-
             string whereSql = "WHERE (@TenderId IS NULL OR TenderId = @TenderId)";
 
             if (!string.IsNullOrEmpty(pagedRequest.filter))
@@ -38,10 +34,10 @@ namespace NetFlow.ReadModel.Assets
             );
 
             string countSql = $@"
-        SELECT COUNT(1)
-        FROM dbo.VW_Asset WITH (NOLOCK)
-        {whereSql}
-    ";
+                SELECT COUNT(1)
+                FROM dbo.VW_Asset WITH (NOLOCK)
+                {whereSql}
+            ";
 
             int totalCount = cn.ExecuteScalar<int>(
                 countSql,
@@ -61,12 +57,12 @@ namespace NetFlow.ReadModel.Assets
             parameters.Add("@Take", pagedRequest.take ?? 10);
 
             string dataSql = $@"
-        SELECT *
-        FROM dbo.VW_Asset WITH (NOLOCK)
-        {whereSql}
-        ORDER BY {orderBy}
-        OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
-        ";
+            SELECT *
+            FROM dbo.VW_Asset WITH (NOLOCK)
+            {whereSql}
+            ORDER BY {orderBy}
+            OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
+            ";
 
             var data = cn.Query<AssetDto>(
                 dataSql,

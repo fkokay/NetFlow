@@ -1,6 +1,8 @@
 @page "/firm/list"
 @implements IDisposable
-@inject NavigationManager Navigation
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
 
 <div class="content-root">
     <div class="card toolbar">
@@ -28,47 +30,44 @@
                     </div>
                 </Template>
             </DxToolbarItem>
-            <DxToolbarItem Tooltip="Refresh" BeginGroup="true" Click="@LoadGridDataAsync" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
+            <DxToolbarItem Tooltip="Refresh" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
         </DxToolbar>
     </div>
     <div class="Firm-list-root">
         <div class="h-100">
-            <DxLoadingPanel Visible="@(!IsDataLoaded)" IsContentBlocked="true" IsContentVisible="false" IndicatorVisible="true" IndicatorAreaVisible="true" ZIndex="101" Text="Yükleniyor...">
-
-                <DxGrid @ref="Grid"
-                        Data="Data"
-                        KeyFieldName="Id"
-                        CssClass="Firm-list"
-                        SearchText="@SearchText"
-                        EditMode="GridEditMode.PopupEditForm"
-                        PopupEditFormCssClass="pw-800"
-                        SkeletonRowsEnabled="true"
-                        ColumnResizeMode="GridColumnResizeMode.NextColumn"
-                        FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
-                        TextWrapEnabled="false"
-                        FocusedRowEnabled="true"
-                        ShowAllRows="true"
-                        VirtualScrollingEnabled="true"
-                        RowClick="@OnRowClick"
-                        HighlightRowOnHover="true"
-                        DataItemDeleting="Grid_DataItemDeleting"
-                        CustomizeEditModel="Grid_CustomizeEditModel"
-                        EditModelSaving="Grid_EditModelSaving">
-                    <Columns>
-                        <DxGridSelectionColumn Width="75px" />
-                        <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
-                        <DxGridDataColumn Caption="Firma Kodu" FieldName="FirmCode" />
-                        <DxGridDataColumn Caption="Firma Adý" FieldName="FirmName" />
-                        <DxGridCommandColumn Width="6em" DeleteButtonVisible="true" EditButtonVisible="true" />
-                    </Columns>
-                    <GroupSummary>
-                        <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
-                    </GroupSummary>
-                    <TotalSummary>
-                        <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" FooterColumnName="Id" />
-                    </TotalSummary>
-                </DxGrid>
-            </DxLoadingPanel>
+            <DxGrid @ref="Grid"
+                    Data="Data"
+                    KeyFieldName="Id"
+                    CssClass="Firm-list"
+                    SearchText="@SearchText"
+                    EditMode="GridEditMode.PopupEditForm"
+                    PopupEditFormCssClass="pw-800"
+                    SkeletonRowsEnabled="true"
+                    ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                    FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                    TextWrapEnabled="false"
+                    FocusedRowEnabled="true"
+                    ShowAllRows="true"
+                    VirtualScrollingEnabled="true"
+                    RowClick="@OnRowClick"
+                    HighlightRowOnHover="true"
+                    DataItemDeleting="Grid_DataItemDeleting"
+                    CustomizeEditModel="Grid_CustomizeEditModel"
+                    EditModelSaving="Grid_EditModelSaving">
+                <Columns>
+                    <DxGridSelectionColumn Width="75px" />
+                    <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
+                    <DxGridDataColumn Caption="Firma Kodu" FieldName="FirmCode" />
+                    <DxGridDataColumn Caption="Firma Adý" FieldName="FirmName" />
+                    <DxGridCommandColumn Width="6em" DeleteButtonVisible="true" EditButtonVisible="true" />
+                </Columns>
+                <GroupSummary>
+                    <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
+                </GroupSummary>
+                <TotalSummary>
+                    <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" FooterColumnName="Id" />
+                </TotalSummary>
+            </DxGrid>
         </div>
     </div>
 </div>
@@ -78,36 +77,26 @@
 
     [CascadingParameter(Name = "ParentSizeMode")]
     SizeMode SizeMode { get; set; }
-    List<FirmModel>? Data { get; set; }
     bool IsDataLoaded { get; set; }
     bool IsFirmPanelOpen { get; set; }
     bool IsFirmPanelPinned { get; set; }
     bool IsActiveFirmLoading { get; set; }
     DrawerMode DrawerMode => IsFirmPanelPinned ? DrawerMode.Shrink : DrawerMode.Overlap;
     FirmModel? ActiveFirm { get; set; }
-
     IGrid? Grid { get; set; }
     string? SearchText { get; set; }
+    GridDevExtremeDataSource<FirmModel> Data { get; set; } = null!;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await LoadGridDataAsync();
-        await base.OnInitializedAsync();
-    }
+        if (!firstRender)
+            return;
 
-    async Task LoadGridDataAsync()
-    {
-        IsDataLoaded = false;
-        // Data = await FirmApiClient.GetListAsync();
-        Data = new List<FirmModel>
-        {
-            new FirmModel{Id=1,FirmCode="120-000",FirmName="Test"},
-            new FirmModel{Id=1,FirmCode="120-001",FirmName="Test2"}
-        };
-        IsDataLoaded = true;
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        Data = new GridDevExtremeDataSource<FirmModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/firms"));
+        await InvokeAsync(StateHasChanged);
     }
-
-    void OnAddClick() => Navigation.NavigateTo("/firm/create");
+    void OnAddClick() => NavigationManager.NavigateTo("/firm/create");
 
 
     void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e)
@@ -115,13 +104,13 @@
         if (e.IsNew)
         {
             e.EditModel = new FirmModel();
-            Navigation.NavigateTo("/firm/create");
+            NavigationManager.NavigateTo("/firm/create");
         }
         else
         {
             e.EditModel = e.DataItem;
             var firm = (FirmModel)e.DataItem;
-            Navigation.NavigateTo($"/firm/edit/{firm.Id}");
+            NavigationManager.NavigateTo($"/firm/edit/{firm.Id}");
         }
     }
 

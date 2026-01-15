@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NetFlow.Application.Common.Pagination;
+using NetFlow.Domain.Identity;
 using NetFlow.ReadModel.Assets;
 using NetFlow.ReadModel.Firms;
 
@@ -19,8 +21,7 @@ namespace NetFlow.Api.Controllers
         // GET api/firms
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> List()
-            => Ok(await _read.ListAsync());
+        public async Task<IActionResult> List([FromQuery] PagedRequest pagedRequest) => Ok(await _read.ListAsync(pagedRequest));
 
         // GET api/firms/15
         [HttpGet("{id:int}")]
