@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NetFlow.Application.Common.Pagination;
+using NetFlow.Domain.Identity;
 using NetFlow.ReadModel.Guarantees;
 
 namespace NetFlow.Api.Controllers
@@ -8,15 +10,24 @@ namespace NetFlow.Api.Controllers
     public class GuaranteesController : ControllerBase
     {
         private readonly GuaranteeReadService _read;
+        protected readonly CurrentUser _current;
 
-        public GuaranteesController(GuaranteeReadService read)
+        public GuaranteesController(GuaranteeReadService read, CurrentUser current)
         {
             _read = read;
+            _current = current;
         }
 
         [HttpGet]
-        public async Task<IActionResult> List([FromQuery] int? firmId)
-            => Ok(await _read.ListAsync(firmId));
+        public async Task<IActionResult> List([FromQuery] PagedRequest pagedRequest)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(await _read.ListAsync(_current.User.Firm.Id, pagedRequest));
+        }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(int id)
