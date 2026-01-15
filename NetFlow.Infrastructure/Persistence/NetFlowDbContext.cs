@@ -3,6 +3,7 @@ using NetFlow.Application.Common.Interfaces;
 using NetFlow.Domain.Entities;
 using NetFlow.Domain.Firms;
 using NetFlow.Domain.Tenders;
+using NetFlow.Infrastructure.Persistence.EntityConfigurations;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -27,5 +28,11 @@ namespace NetFlow.Infrastructure.Persistence
         public DbSet<RolePermissionEntity> RolePermissions => Set<RolePermissionEntity>();
 
         public DbSet<FirmEntity> Firms => Set<FirmEntity>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(NetFlowDbContext).Assembly);
+        }
     }
 }

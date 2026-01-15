@@ -12,6 +12,7 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
     {
         public void Configure(EntityTypeBuilder<UserInFirmEntity> builder)
         {
+            builder.ToTable("UserInFirm");
             builder.HasKey(x => new { x.UserId, x.FirmId });
 
             builder

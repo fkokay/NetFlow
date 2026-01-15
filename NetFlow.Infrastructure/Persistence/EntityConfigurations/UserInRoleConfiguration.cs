@@ -12,6 +12,7 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
     {
         public void Configure(EntityTypeBuilder<UserInRoleEntity> builder)
         {
+            builder.ToTable("UserInRole");
             builder.HasKey(x => new { x.UserId, x.RoleId });
         }
     }

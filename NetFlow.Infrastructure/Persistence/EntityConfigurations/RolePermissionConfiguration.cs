@@ -11,6 +11,7 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
     {
         public void Configure(EntityTypeBuilder<RolePermissionEntity> builder)
         {
+            builder.ToTable("RolePermission");
             builder.HasKey(x => new { x.RoleId, x.PermissionId });
         }
     }

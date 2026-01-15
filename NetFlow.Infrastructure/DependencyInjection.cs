@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NetFlow.Application.Auth;
+using NetFlow.Application.Common.Interfaces;
 using NetFlow.Domain.Common;
 using NetFlow.Infrastructure.Common;
 using NetFlow.Infrastructure.Identity;
@@ -24,6 +25,7 @@ namespace NetFlow.Infrastructure
                 return new CachedFileSqlProvider(sqlPath, firm);
             });
             
+            services.AddScoped<INetFlowDbContext, NetFlowDbContext> ();
             services.AddDbContext<NetFlowDbContext>(options => options.UseSqlServer(config.GetConnectionString("MakroFlow")));
 
             services.AddScoped<IUserService, UserService>();
