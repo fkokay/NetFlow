@@ -1,8 +1,12 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
+using NetFlow.Application.Common.Pagination;
+using NetFlow.Application.Common.Utils;
 using System;
 using System.Collections.Generic;
+using System.IO.Pipelines;
 using System.Text;
+using System.Xml.Linq;
 
 
 namespace NetFlow.ReadModel.Tenders
@@ -13,19 +17,53 @@ namespace NetFlow.ReadModel.Tenders
 
         public TenderReadService(ReadModelOptions opt) => _opt = opt;
 
-        public async Task<IReadOnlyList<TenderDto>> ListAsync(int? firmId = null)
+        public async Task<PagedResult> ListAsync(int firmId, PagedRequest pagedRequest)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
+            var parameters = new DynamicParameters();
+            parameters.Add("FirmId", firmId);
 
-            var sql = """
-        SELECT *
-        FROM dbo.VW_Tender WITH (NOLOCK)
-        WHERE (@FirmId IS NULL OR FirmId = @FirmId)
-        ORDER BY Id DESC
-        """;
+            string whereSql = "WHERE FirmId = @FirmId";
+            if (!string.IsNullOrEmpty(pagedRequest.Filter))
+            {
+                var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);
+                whereSql += " AND " + sql;
+                parameters.AddDynamicParams(p);
+            }
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "Id DESC");
+            string countSql = $@"
+                SELECT COUNT(1) FROM dbo.VW_Tender WITH (NOLOCK)
+                {whereSql}
+            ";
 
-            var rows = await cn.QueryAsync<TenderDto>(sql, new { FirmId = firmId });
-            return rows.AsList();
+            string dataSql = $@"
+                SELECT * FROM dbo.VW_Tender WITH (NOLOCK)
+                {whereSql}
+                ORDER BY {orderBy}
+                OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
+            ";
+
+            int totalCount = cn.ExecuteScalar<int>(
+                countSql, parameters
+            );
+
+
+            if (pagedRequest.IsCountQuery != null && pagedRequest.IsCountQuery.HasValue)
+            {
+                return new PagedResult
+                {
+                    data = Array.Empty<TenderDto>(),
+                    totalCount = totalCount
+                };
+            }
+
+            var data = cn.Query<TenderDto>(dataSql, parameters).ToList();
+
+            return new PagedResult
+            {
+                data = data,
+                totalCount = totalCount
+            };
         }
 
         public async Task<TenderDto?> GetAsync(int id)
@@ -36,4 +74,6 @@ namespace NetFlow.ReadModel.Tenders
             return await cn.QueryFirstOrDefaultAsync<TenderDto>(sql, new { Id = id });
         }
     }
+
+
 }

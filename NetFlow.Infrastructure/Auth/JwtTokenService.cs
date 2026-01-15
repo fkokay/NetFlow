@@ -80,11 +80,13 @@ namespace NetFlow.Infrastructure.Auth
                 return null;
             }
 
+            string? name = jwt.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
             string? uid = jwt.Claims.FirstOrDefault(x => x.Type == "uid")?.Value;
+            string? fullName = jwt.Claims.FirstOrDefault(x => x.Type == "fullName")?.Value;
             string? email = jwt.Claims.FirstOrDefault(x => x.Type == "email")?.Value;
             string? firmId = jwt.Claims.FirstOrDefault(x => x.Type == "firmId")?.Value;
             string? firmCode = jwt.Claims.FirstOrDefault(x => x.Type == "firmCode")?.Value;
-            string? role = jwt.Claims.FirstOrDefault(x => x.Type == "role")?.Value;
+            string? role = jwt.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Role)?.Value;
             string? roleName = jwt.Claims.FirstOrDefault(x => x.Type == "roleName")?.Value;
             string? perms = jwt.Claims.FirstOrDefault(x => x.Type == "perms")?.Value;
 
@@ -95,6 +97,8 @@ namespace NetFlow.Infrastructure.Auth
             return new UserSnapshot
             {
                 Id = id,
+                Name = name ?? string.Empty,
+                FullName = fullName ?? string.Empty,
                 Email = email,
                 FirmId = Convert.ToInt32(firmId),
                 FirmCode = firmCode,
