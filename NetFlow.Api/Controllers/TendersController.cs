@@ -21,7 +21,11 @@ namespace NetFlow.Api.Controllers
 
         // GET api/tenders?firmId=1
         [HttpGet]
-        public async Task<IActionResult> List() => Ok(await _read.ListAsync(_current.User.Firm.Id));
+        public async Task<IActionResult> List() {
+            var details = await _read.ListAsync(_current.User.Firm.Id);
+            return Ok(details);
+        } 
+        
 
         // GET api/tenders/10
         [HttpGet("{id:int}")]

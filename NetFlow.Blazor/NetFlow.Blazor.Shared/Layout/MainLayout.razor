@@ -35,7 +35,7 @@
                             <Template>
                                 <div class="custom-item">
                                     <DxSearchBox CssClass="search-textbox"
-                                                 NullText="Search"
+                                                 NullText="Ara"
                                                  BindValueMode="BindValueMode.OnInput"
                                                  ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
                                                  @bind-Text=SearchManager.SearchText />
@@ -99,35 +99,7 @@
                       ZIndex="102"
                       PanelWidth="22rem">
                 <BodyTemplate>
-                    <DxTreeView AllowSelectNodes="true"
-                                SelectionChanged="@(e => CurrentModule = e.NodeInfo?.Text)"
-                                NodeExpandCollapseAction="TreeViewNodeExpandCollapseAction.NodeClick"
-                                AnimationType="LayoutAnimationType.Slide"
-                                ShowFilterPanel="true"
-                                TextWrapEnabled="true"
-                                FilterMode="NavigationFilterMode.Nodes"
-                                CssClass="main-menu">
-                        <Nodes>
-                            <DxTreeViewNode Text="Contacts" AllowSelection="false" Expanded="true" IconCssClass="crm-icon icon medium-icon">
-                                <Nodes>
-                                    <DxTreeViewNode Text="Contact List" NavigateUrl="ContactList" />
-                                    <DxTreeViewNode Text="Contact Details" NavigateUrl="ContactDetails" />
-                                </Nodes>
-                            </DxTreeViewNode>
-                            <DxTreeViewNode Text="Planning" AllowSelection="false" Expanded="true" IconCssClass="planning-icon icon medium-icon">
-                                <Nodes>
-                                    <DxTreeViewNode Text="Task List" NavigateUrl="TaskList" />
-                                    <DxTreeViewNode Text="Scheduler" NavigateUrl="Scheduler" />
-                                </Nodes>
-                            </DxTreeViewNode>
-                            <DxTreeViewNode Text="Analytics" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
-                                <Nodes>
-                                    <DxTreeViewNode Text="Dashboard" NavigateUrl="Dashboard" />
-                                    <DxTreeViewNode Text="Sales Analysis" NavigateUrl="SalesAnalysis" />
-                                </Nodes>
-                            </DxTreeViewNode>
-                        </Nodes>
-                    </DxTreeView>
+                    <NavMenu CurrentModule="@CurrentModule" />
                 </BodyTemplate>
                 <TargetContent>
                     <div class="module-content" @key="@ThemeManager.CurrentTheme.Name">

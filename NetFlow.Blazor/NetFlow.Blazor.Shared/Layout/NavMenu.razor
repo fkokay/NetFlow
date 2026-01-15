@@ -1,0 +1,70 @@
+<DxTreeView AllowSelectNodes="true"
+            SelectionChanged="@(e => CurrentModule = e.NodeInfo?.Text)"
+            NodeExpandCollapseAction="TreeViewNodeExpandCollapseAction.NodeClick"
+            AnimationType="LayoutAnimationType.Slide"
+            ShowFilterPanel="true"
+            TextWrapEnabled="true"
+            FilterNullText="Menü'de ara..."
+            FilterMode="NavigationFilterMode.Nodes"
+            CssClass="main-menu">
+    <Nodes>
+        <DxTreeViewNode Text="Teminat Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="crm-icon icon medium-icon">
+            <Nodes>
+                <DxTreeViewNode Text="Teminat Listesi" NavigateUrl="ContactList" />
+            </Nodes>
+        </DxTreeViewNode>
+        <DxTreeViewNode Text="Ýhale Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="planning-icon icon medium-icon">
+            <Nodes>
+                <DxTreeViewNode Text="Ýhale Listesi" NavigateUrl="TaskList" />
+            </Nodes>
+        </DxTreeViewNode>
+        <DxTreeViewNode Text="Satýþ Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+            <Nodes>
+                <DxTreeViewNode Text="Satýþ Sipariþleri" NavigateUrl="Dashboard" />
+                <DxTreeViewNode Text="Satýþ Ýrsaliyeleri" NavigateUrl="SalesAnalysis" />
+                <DxTreeViewNode Text="Satýþ Faturalarý" NavigateUrl="SalesAnalysis" />
+            </Nodes>
+        </DxTreeViewNode>
+        <DxTreeViewNode Text="Satýnalma Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+            <Nodes>
+                <DxTreeViewNode Text="Satýnalma Sipariþleri" NavigateUrl="Dashboard" />
+                <DxTreeViewNode Text="Satýnalma Ýrsaliyeleri" NavigateUrl="SalesAnalysis" />
+                <DxTreeViewNode Text="Satýnalma Faturalarý" NavigateUrl="SalesAnalysis" />
+            </Nodes>
+        </DxTreeViewNode>
+        <DxTreeViewNode Text="Sevkiyat Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+            <Nodes>
+                <DxTreeViewNode Text="Sevkiyat Emirleri" NavigateUrl="Dashboard" />
+                <DxTreeViewNode Text="Sevkiyat Listesi" NavigateUrl="SalesAnalysis" />
+            </Nodes>
+        </DxTreeViewNode>
+        <DxTreeViewNode Text="Müþteri Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+            <Nodes>
+                <DxTreeViewNode Text="Müþteri Listesi" NavigateUrl="SalesAnalysis" />
+            </Nodes>
+        </DxTreeViewNode>
+        <DxTreeViewNode Text="Malzeme Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+            <Nodes>
+                <DxTreeViewNode Text="Malzeme Listesi" NavigateUrl="SalesAnalysis" />
+            </Nodes>
+        </DxTreeViewNode>
+        <DxTreeViewNode Text="Demirbaþ Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+            <Nodes>
+                <DxTreeViewNode Text="Demirbaþ Listesi" NavigateUrl="SalesAnalysis" />
+            </Nodes>
+        </DxTreeViewNode>
+        <DxTreeViewNode Text="Ayarlar" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+            <Nodes>
+                <DxTreeViewNode Text="Firma Listesi" NavigateUrl="#" />
+                <DxTreeViewNode Text="Roller" NavigateUrl="#" />
+                <DxTreeViewNode Text="Kullanýcýlar" NavigateUrl="#" />
+                <DxTreeViewNode Text="Modüller" NavigateUrl="#" />
+            </Nodes>
+        </DxTreeViewNode>
+    </Nodes>
+</DxTreeView>
+
+@code {
+    [Parameter]
+    public string? CurrentModule { get; set; }
+}

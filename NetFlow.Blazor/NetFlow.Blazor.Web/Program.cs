@@ -4,9 +4,10 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Identity;
 using NetFlow.Blazor.Shared.Security;
+using NetFlow.Blazor.Shared.Services;
 using NetFlow.Blazor.Web.Components;
 using NetFlow.Blazor.Web.Security;
-using NetFlow.Blazor.Shared.Services;
+using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,22 @@ builder.Services.AddHttpClient<ILoginService, WebLoginService>(client =>
 {
     client.BaseAddress = new Uri("https://localhost:7071/"); // API
 });
+
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<NetFlow.Blazor.Web.Security.ITokenStore, ServerTokenStore>();
+builder.Services.AddScoped<JwtAuthorizationHandler>();
+
+builder.Services.AddHttpClient("ApiClient", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7071/");
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+})
+.AddHttpMessageHandler<JwtAuthorizationHandler>();
+
+
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 

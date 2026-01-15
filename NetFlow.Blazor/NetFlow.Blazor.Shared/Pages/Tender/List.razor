@@ -1,0 +1,97 @@
+﻿@page "/tender/list"
+@inject NavigationManager NavigationManager
+@inject IHttpClientFactory HttpClientFactory
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar Title="İhale Listesi" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <DxToolbarItem Tooltip="Sütun Seçici" Alignment="ToolbarItemAlignment.Right" Click="OnColumnChooserItemClick" IconCssClass="column-chooser-icon icon medium-icon" />
+            <DxToolbarItem Text="Dışarı Aktarı" Alignment="ToolbarItemAlignment.Right" IconCssClass="export-icon icon medium-icon">
+                <Items>
+                    <DxToolbarItem Text="Excel → Tüm Kayıtlar" Click="ExportAllDataToExcel" />
+                    <DxToolbarItem Text="Excel → Seçili Kayıtlar" Click="ExportSelectedRowsToExcel" />
+                    <DxToolbarItem Text="CSV → Tüm Kayıtlar" Click="ExportAllDataToCsv" />
+                    <DxToolbarItem Text="CSV → Seçili Kayıtlar" Click="ExportSelectedRowsDataToCsv" />
+                    <DxToolbarItem Text="PDF → Tüm Kayıtlar" Click="ExportAllDataToPdf" />
+                    <DxToolbarItem Text="PDF → Seçili Kayıtlar" Click="ExportSelectedRowsDataToPdf" />
+                </Items>
+            </DxToolbarItem>
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right" CssClass="search-textbox-item" Tooltip="Search">
+                <Template Context="SearchContext">
+                    <div class="custom-item">
+                        <DxSearchBox CssClass="search-textbox" NullText="Ara" BindValueMode="BindValueMode.OnInput" ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" @bind-Text=SearchText />
+                    </div>
+                </Template>
+            </DxToolbarItem>
+            <DxToolbarItem Tooltip="Refresh" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
+        </DxToolbar>
+    </div>
+    <div class="tender-list-root">
+        <div class="h-100">
+            <DxGrid @ref="Grid"
+                    Data="@Data"
+                    VirtualScrollingEnabled="true"
+                    ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                    ShowFilterRow="true"
+                    ShowSearchBox="false"
+                    SearchText="@SearchText"
+                    TextWrapEnabled="false">
+                <Columns>
+                    <DxGridSelectionColumn Width="75px" />
+                    <DxGridDataColumn Caption="İhale Kodu" FieldName="TenderCode" Visible="false" />
+                    <DxGridDataColumn Caption="Firma Adı" FieldName="FirmName" />
+                    
+                </Columns>
+                <GroupSummary>
+                    <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
+                </GroupSummary>
+                <TotalSummary>
+                    <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" FooterColumnName="Id" />
+                </TotalSummary>
+            </DxGrid>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter(Name = "ParentSizeMode")]
+    SizeMode SizeMode { get; set; }
+    GridDevExtremeDataSource<TenderModel> Data { get; set; } = null!;
+    IGrid? Grid { get; set; }
+    string? SearchText { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        var client = HttpClientFactory.CreateClient("ApiClient");
+
+        Data = new GridDevExtremeDataSource<TenderModel>(
+            client,
+            NavigationManager.ToAbsoluteUri("api/tenders"));
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    void OnColumnChooserItemClick(ToolbarItemClickEventArgs e) => Grid!.ShowColumnChooser();
+
+    Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Satış Siparişleri");
+
+    Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Seçili Satış Siparişleri", new GridXlExportOptions { ExportSelectedRowsOnly = true });
+
+    Task ExportAllDataToCsv() => Grid!.ExportToCsvAsync("Satış Siparişleri");
+
+    Task ExportSelectedRowsDataToCsv() => Grid!.ExportToCsvAsync("Seçili Satış Siparişleri", new GridCsvExportOptions { ExportSelectedRowsOnly = true });
+
+    Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Satış Siparişleri");
+
+    Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Seçili Satış Siparişleri", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
+
+    string GetSiparisPanelWidth() => SizeMode switch
+    {
+        SizeMode.Small => "20.25rem",
+        SizeMode.Large => "27rem",
+        _ => "23.625rem",
+    };
+}
