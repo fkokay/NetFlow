@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace NetFlow.Infrastructure.Persistence.Entities
+namespace NetFlow.Application.Firms
 {
-    [Table("Firm")]
-    public sealed class FirmEntity
+    public class CreateFirmRequest
     {
-        public int Id { get; set; }
         public string FirmCode { get; set; } = string.Empty;
         public string FirmName { get; set; } = string.Empty;
         public string? TaxNumber { get; set; } = string.Empty;
@@ -27,7 +24,5 @@ namespace NetFlow.Infrastructure.Persistence.Entities
         public string? EFATSeri { get; set; } = string.Empty;
         public string? EARSSeri { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
-
-        public ICollection<UserInFirmEntity> Users { get; set; } = new List<UserInFirmEntity>();
     }
 }

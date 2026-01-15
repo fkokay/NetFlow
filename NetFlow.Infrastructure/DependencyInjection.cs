@@ -23,9 +23,8 @@ namespace NetFlow.Infrastructure
                 var firm = sp.GetRequiredService<ICurrentFirmProvider>();
                 return new CachedFileSqlProvider(sqlPath, firm);
             });
-
-            services.AddDbContext<TenderFlowDbContext>(options => options.UseSqlServer(config.GetConnectionString("MakroFlow")));
-            services.AddDbContext<IdentityDbContext>(options => options.UseSqlServer(config.GetConnectionString("MakroFlow")));
+            
+            services.AddDbContext<NetFlowDbContext>(options => options.UseSqlServer(config.GetConnectionString("MakroFlow")));
 
             services.AddScoped<IUserService, UserService>();
             return services;

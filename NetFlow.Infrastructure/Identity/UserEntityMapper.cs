@@ -1,5 +1,5 @@
-﻿using NetFlow.Domain.Identity;
-using NetFlow.Infrastructure.Persistence.Entities;
+﻿using NetFlow.Domain.Entities;
+using NetFlow.Domain.Identity;
 using System;
 using System.Collections.Generic;
 using System.Text;

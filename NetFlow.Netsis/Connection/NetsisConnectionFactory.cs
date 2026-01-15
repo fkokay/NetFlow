@@ -9,10 +9,10 @@ namespace NetFlow.Netsis.Connection
 {
     public sealed class NetsisConnectionFactory
     {
-        private readonly IdentityDbContext _db;
+        private readonly NetFlowDbContext _db;
         private readonly ICurrentFirmProvider _firm;
 
-        public NetsisConnectionFactory(IdentityDbContext db, ICurrentFirmProvider firm)
+        public NetsisConnectionFactory(NetFlowDbContext db, ICurrentFirmProvider firm)
         {
             _db = db;
             _firm = firm;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NetFlow.Infrastructure.Persistence.Entities
+namespace NetFlow.Domain.Entities
 {
     public class UserPermissionEntity
     {

@@ -14,8 +14,8 @@ namespace NetFlow.Infrastructure.Identity
 {
     public sealed class UserService : IUserService
     {
-        private readonly IdentityDbContext _context;
-        public UserService(IdentityDbContext context)
+        private readonly NetFlowDbContext _context;
+        public UserService(NetFlowDbContext context)
         {
             _context = context;
         }
