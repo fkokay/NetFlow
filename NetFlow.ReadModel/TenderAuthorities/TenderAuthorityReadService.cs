@@ -48,7 +48,7 @@ public sealed class TenderAuthorityReadService
         {
             return new PagedResult
             {
-                data = Array.Empty<AssetDto>(),
+                data = Array.Empty<TenderAuthorityDto>(),
                 totalCount = totalCount
             };
         }
@@ -64,7 +64,7 @@ public sealed class TenderAuthorityReadService
         OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
     ";
 
-        var data = cn.Query<AssetDto>(
+        var data = cn.Query<TenderAuthorityDto>(
             dataSql,
             parameters
         ).ToList();

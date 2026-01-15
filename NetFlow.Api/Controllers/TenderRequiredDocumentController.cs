@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NetFlow.Application.Common.Pagination;
 using NetFlow.Domain.Common;
 using NetFlow.ReadModel.TenderDocuments;
 
@@ -19,8 +20,8 @@ namespace NetFlow.Api.Controllers
 
         // GET api/tender-documents?tenderId=5
         [HttpGet]
-        public async Task<IActionResult> List([FromQuery] int tenderId)
-            => Ok(await _read.ListAsync(tenderId));
+        public async Task<IActionResult> List([FromQuery] int tenderId, [FromQuery] PagedRequest pagedRequest) => Ok(await _read.ListAsync(tenderId, pagedRequest));
+
 
     }
 }
