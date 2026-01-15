@@ -1,7 +1,9 @@
 ﻿@page "/asset/list"
 
 @implements IDisposable
-@inject NavigationManager Navigation
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
 
 <div class="content-root">
     <div class="card toolbar">
@@ -29,75 +31,72 @@
                     </div>
                 </Template>
             </DxToolbarItem>
-            <DxToolbarItem Tooltip="Refresh" BeginGroup="true" Click="@LoadGridDataAsync" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
+            <DxToolbarItem Tooltip="Refresh" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
         </DxToolbar>
     </div>
-    <div class="Asset-list-root">
+    <div class="asset-list-root">
         <div class="h-100">
-            <DxLoadingPanel Visible="@(!IsDataLoaded)" IsContentBlocked="true" IsContentVisible="false" IndicatorVisible="true" IndicatorAreaVisible="true" ZIndex="101" Text="Yükleniyor...">
+            <DxGrid @ref="Grid"
+                    Data="Data"
+                    KeyFieldName="Id"
+                    CssClass="Asset-list"
+                    SearchText="@SearchText"
+                    EditMode="GridEditMode.PopupEditForm"
+                    PopupEditFormCssClass="pw-800"
+                    SkeletonRowsEnabled="true"
+                    ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                    FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                    TextWrapEnabled="false"
+                    FocusedRowEnabled="true"
+                    ShowAllRows="true"
+                    VirtualScrollingEnabled="true"
+                    RowClick="@OnRowClick"
+                    HighlightRowOnHover="true"
+                    DataItemDeleting="Grid_DataItemDeleting"
+                    CustomizeEditModel="Grid_CustomizeEditModel"
+                    EditModelSaving="Grid_EditModelSaving">
+                <Columns>
+                    <DxGridSelectionColumn Width="75px" />
+                    <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
+                    <DxGridDataColumn Caption="İhale Kodu" FieldName="TenderCode" />
+                    <DxGridDataColumn Caption="İhale Adı" FieldName="TenderName" />
+                    <DxGridDataColumn Caption="İhale Kodu" FieldName="AssetCode">
+                        <CellDisplayTemplate>
+                            <a href="javascript:void(0);"
+                               style="text-decoration:none; font-weight:bold; color: #0056b3;"
+                               @onclick="() => OnAssetCodeClick((AssetModel)context.DataItem)"
+                               @onclick:stopPropagation>
+                                @context.Value
+                            </a>
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
 
-                <DxGrid @ref="Grid"
-                        Data="Data"
-                        KeyFieldName="Id"
-                        CssClass="Asset-list"
-                        SearchText="@SearchText"
-                        EditMode="GridEditMode.PopupEditForm"
-                        PopupEditFormCssClass="pw-800"
-                        SkeletonRowsEnabled="true"
-                        ColumnResizeMode="GridColumnResizeMode.NextColumn"
-                        FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
-                        TextWrapEnabled="false"
-                        FocusedRowEnabled="true"
-                        ShowAllRows="true"
-                        VirtualScrollingEnabled="true"
-                        RowClick="@OnRowClick"
-                        HighlightRowOnHover="true"
-                        DataItemDeleting="Grid_DataItemDeleting"
-                        CustomizeEditModel="Grid_CustomizeEditModel"
-                        EditModelSaving="Grid_EditModelSaving">
-                    <Columns>
-                        <DxGridSelectionColumn Width="75px" />
-                        <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
-                        <DxGridDataColumn Caption="İhale Kodu" FieldName="TenderCode" />
-                        <DxGridDataColumn Caption="İhale Adı" FieldName="TenderName" />
-                        <DxGridDataColumn Caption="İhale Kodu" FieldName="AssetCode">
-                            <CellDisplayTemplate>
-                                <a href="javascript:void(0);"
-                                   style="text-decoration:none; font-weight:bold; color: #0056b3;"
-                                   @onclick="() => OnAssetCodeClick((AssetModel)context.DataItem)"
-                                   @onclick:stopPropagation>
-                                    @context.Value
-                                </a>
-                            </CellDisplayTemplate>
-                        </DxGridDataColumn>
+                    <DxGridDataColumn Caption="Demirbaş Kodu" FieldName="AssetCode" />
+                    <DxGridDataColumn Caption="Demirbaş Adı" FieldName="AssetName" />
+                    <DxGridDataColumn Caption="Demirbaş Tipi" FieldName="AssetType" />
+                    <DxGridDataColumn Caption="Marka" FieldName="Brand" />
+                    <DxGridDataColumn Caption="Model" FieldName="Model" />
+                    <DxGridDataColumn Caption="Seri Numarası" FieldName="SerialNumber" />
+                    <DxGridDataColumn Caption="Kurulum Tarihi" FieldName="InstallationDate" />
+                    <DxGridDataColumn Caption="Lokasyon" FieldName="Location" />
+                    <DxGridDataColumn Caption="Durum" FieldName="Status" />
+                    <DxGridDataColumn Caption="Garanti Bitiş" FieldName="WarrantyExpiryDate" />
+                    <DxGridDataColumn Caption="Bakım Var mı" FieldName="HasMaintenancePlan" />
+                    <DxGridDataColumn Caption="Bakım Periyodu (Gün)" FieldName="MaintenancePeriodDays" />
+                    <DxGridDataColumn Caption="Netsis Stok Kodu" FieldName="NetsisStockCode" />
+                    <DxGridDataColumn Caption="Netsis Fiş No" FieldName="NetsisTransactionRef" />
+                    <DxGridDataColumn Caption="Netsis Kaynaklı" FieldName="IsFromNetsis" />
+                    <DxGridDataColumn Caption="Açıklama" FieldName="Notes" />
+                    <DxGridCommandColumn Width="6em" DeleteButtonVisible="true" EditButtonVisible="true" />
+                </Columns>
 
-                        <DxGridDataColumn Caption="Demirbaş Kodu" FieldName="AssetCode" />
-                        <DxGridDataColumn Caption="Demirbaş Adı" FieldName="AssetName" />
-                        <DxGridDataColumn Caption="Demirbaş Tipi" FieldName="AssetType" />
-                        <DxGridDataColumn Caption="Marka" FieldName="Brand" />
-                        <DxGridDataColumn Caption="Model" FieldName="Model" />
-                        <DxGridDataColumn Caption="Seri Numarası" FieldName="SerialNumber" />
-                        <DxGridDataColumn Caption="Kurulum Tarihi" FieldName="InstallationDate" />
-                        <DxGridDataColumn Caption="Lokasyon" FieldName="Location" />
-                        <DxGridDataColumn Caption="Durum" FieldName="Status" />
-                        <DxGridDataColumn Caption="Garanti Bitiş" FieldName="WarrantyExpiryDate" />
-                        <DxGridDataColumn Caption="Bakım Var mı" FieldName="HasMaintenancePlan" />
-                        <DxGridDataColumn Caption="Bakım Periyodu (Gün)" FieldName="MaintenancePeriodDays" />
-                        <DxGridDataColumn Caption="Netsis Stok Kodu" FieldName="NetsisStockCode" />
-                        <DxGridDataColumn Caption="Netsis Fiş No" FieldName="NetsisTransactionRef" />
-                        <DxGridDataColumn Caption="Netsis Kaynaklı" FieldName="IsFromNetsis" />
-                        <DxGridDataColumn Caption="Açıklama" FieldName="Notes" />
-                        <DxGridCommandColumn Width="6em" DeleteButtonVisible="true" EditButtonVisible="true" />
-                    </Columns>
-
-                    <GroupSummary>
-                        <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
-                    </GroupSummary>
-                    <TotalSummary>
-                        <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" FooterColumnName="Id" />
-                    </TotalSummary>
-                </DxGrid>
-            </DxLoadingPanel>
+                <GroupSummary>
+                    <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
+                </GroupSummary>
+                <TotalSummary>
+                    <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" FooterColumnName="Id" />
+                </TotalSummary>
+            </DxGrid>
         </div>
     </div>
 </div>
@@ -107,43 +106,35 @@
 
     [CascadingParameter(Name = "ParentSizeMode")]
     SizeMode SizeMode { get; set; }
-    List<AssetModel>? Data { get; set; }
+    GridDevExtremeDataSource<AssetModel> Data { get; set; } = null!;
+    IGrid? Grid { get; set; }
+    string? SearchText { get; set; }
     bool IsDataLoaded { get; set; }
     bool IsAssetPanelOpen { get; set; }
     bool IsAssetPanelPinned { get; set; }
     bool IsActiveAssetLoading { get; set; }
     DrawerMode DrawerMode => IsAssetPanelPinned ? DrawerMode.Shrink : DrawerMode.Overlap;
     AssetModel? ActiveAsset { get; set; }
+  
 
-    IGrid? Grid { get; set; }
-    string? SearchText { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await LoadGridDataAsync();
-        await base.OnInitializedAsync();
+        if (!firstRender)
+            return;
+
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        Data = new GridDevExtremeDataSource<AssetModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/assets"));
+        await InvokeAsync(StateHasChanged);
     }
 
-    async Task LoadGridDataAsync()
-    {
-        IsDataLoaded = false;
-        // Data = await AssetApiClient.GetListAsync();
-        Data = new List<AssetModel>
-        {
-            new AssetModel { Id = 1, AssetCode = "A001", AssetName = "Laptop", AssetType = "Electronics", Brand = "Dell", Model = "XPS 13", SerialNumber = "SN123456", InstallationDate = DateTime.Now.AddYears(-1), Location = "Office", Status = "Active", Notes = "Company laptop" },
-            new AssetModel { Id = 2, AssetCode = "A002", AssetName = "Projector", AssetType = "Electronics", Brand = "Epson", Model = "EB-X41", SerialNumber = "SN654321", InstallationDate = DateTime.Now.AddMonths(-6), Location = "Conference Room", Status = "Active", Notes = "4K Projector" },
-            new AssetModel { Id = 3, AssetCode = "A003", AssetName = "Office Chair", AssetType = "Furniture", Brand = "Ikea", Model = "Markus", SerialNumber = "SN789012", InstallationDate = DateTime.Now.AddYears(-2), Location = "Office", Status = "Active", Notes = "Ergonomic chair" }
-        };
-        IsDataLoaded = true;
-    }
-
-    void OnAddClick() => Navigation.NavigateTo("#");
+    void OnAddClick() => NavigationManager.NavigateTo("#");
 
     void OnAssetCodeClick(AssetModel asset)
     {
         if (asset != null)
         {
-            Navigation.NavigateTo($"/asset/detail/{asset.Id}");
+            NavigationManager.NavigateTo($"/asset/detail/{asset.Id}");
         }
     }
 
