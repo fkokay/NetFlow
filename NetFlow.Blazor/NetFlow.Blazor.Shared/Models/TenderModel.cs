@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace NetFlow.Blazor.Shared.Models
@@ -30,5 +31,15 @@ namespace NetFlow.Blazor.Shared.Models
         public DateTime? DocumentUploadDate { get; set; }
         public DateTime? ContractDate { get; set; }
         public DateTime CreatedAt { get; set; }
+        [NotMapped]
+        public List<TenderDeviceModel> Devices { get; set; } = new();
+        [NotMapped]
+        public List<TenderOpexModel> Opexs { get; set; } = new();
+        [NotMapped]
+        public List<TenderCapexModel> Capexs { get; set; } = new();
+        [NotMapped]
+        public List<TenderReaktifModel> Reaktifs { get; set; } = new();
+        [NotMapped]
+        public List<TenderRequiredDocument> Documents { get; set; } = new();
     }
 }

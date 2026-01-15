@@ -1,0 +1,215 @@
+@page "/user/list"
+@implements IDisposable
+@inject NavigationManager Navigation
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar Title="Kullanýcý Listesi" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <DxToolbarItem Text="@UserRoleFilterValue" RenderStyleMode="ToolbarItemRenderStyleMode.Plain">
+                <Items>
+                    <DxToolbarItem Text="Tümü" Click="FilterByUserRole" />
+                    @foreach (var role in UserRoles)
+                    {
+                        <DxToolbarItem Text="@role" Click="FilterByUserRole" />
+                    }
+                </Items>
+            </DxToolbarItem>
+
+            <DxToolbarItem Text="Yeni Kullanýcý"
+                           Click="OnAddClick"
+                           Alignment="ToolbarItemAlignment.Right"
+                           IconCssClass="add-icon icon medium-icon" />
+
+            <DxToolbarItem Tooltip="Sütun Seçici"
+                           Alignment="ToolbarItemAlignment.Right"
+                           Click="OnColumnChooserItemClick"
+                           IconCssClass="column-chooser-icon icon medium-icon" />
+
+            <DxToolbarItem Text="Dýþarý Aktarý"
+                           Alignment="ToolbarItemAlignment.Right"
+                           IconCssClass="export-icon icon medium-icon">
+                <Items>
+                    <DxToolbarItem Text="Export all data to Excel" Click="ExportAllDataToExcel" />
+                    <DxToolbarItem Text="Export selected rows to Excel" Click="ExportSelectedRowsToExcel" />
+                    <DxToolbarItem Text="Export all data to CSV" Click="ExportAllDataToCsv" />
+                    <DxToolbarItem Text="Export selected rows to CSV" Click="ExportSelectedRowsDataToCsv" />
+                    <DxToolbarItem Text="Export all data to PDF" Click="ExportAllDataToPdf" />
+                    <DxToolbarItem Text="Export selected rows to PDF" Click="ExportSelectedRowsDataToPdf" />
+                </Items>
+            </DxToolbarItem>
+
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
+                           CssClass="search-textbox-item"
+                           Tooltip="Search">
+                <Template>
+                    <DxSearchBox CssClass="search-textbox"
+                                 NullText="Ara"
+                                 BindValueMode="BindValueMode.OnInput"
+                                 ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                 @bind-Text="SearchText" />
+                </Template>
+            </DxToolbarItem>
+
+            <DxToolbarItem Tooltip="Refresh"
+                           BeginGroup="true"
+                           Click="@LoadGridDataAsync"
+                           Alignment="ToolbarItemAlignment.Right"
+                           IconCssClass="refresh-icon icon medium-icon" />
+        </DxToolbar>
+    </div>
+
+    <div class="User-list-root h-100">
+        <DxLoadingPanel Visible="@(!IsDataLoaded)"
+                        IsContentBlocked="true"
+                        IndicatorVisible="true"
+                        Text="Loading...">
+
+            <DxGrid @ref="Grid"
+                    Data="Data"
+                    KeyFieldName="Id"
+                    CssClass="User-list"
+                    SearchText="@SearchText"
+                    EditMode="GridEditMode.PopupEditForm"
+                    PopupEditFormCssClass="pw-800"
+                    SkeletonRowsEnabled="true"
+                    ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                    FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                    TextWrapEnabled="false"
+                    FocusedRowEnabled="true"
+                    ShowAllRows="true"
+                    VirtualScrollingEnabled="true"
+                    HighlightRowOnHover="true"
+                    RowClick="OnRowClick"
+                    DataItemDeleting="Grid_DataItemDeleting">
+
+                <Columns>
+                    <DxGridSelectionColumn Width="75px" />
+                    <DxGridDataColumn FieldName="Id" Visible="false" />
+                    <DxGridDataColumn Caption="Ad" FieldName="FirstName" />
+                    <DxGridDataColumn Caption="Soyadý" FieldName="LastName" />
+                    <DxGridDataColumn Caption="Email" FieldName="Email" />
+                    <DxGridDataColumn Caption="Telefon" FieldName="Phone" />
+                    <DxGridDataColumn Caption="Aktif" FieldName="Active" />
+                    <DxGridDataColumn Caption="Roller" FieldName="Roles" />
+                    <DxGridCommandColumn Width="6em"
+                                         DeleteButtonVisible="true"
+                                         EditButtonVisible="false" />
+                </Columns>
+
+            </DxGrid>
+        </DxLoadingPanel>
+    </div>
+</div>
+
+@code {
+    CancellationTokenSource disposalTokenSource = new();
+
+    [CascadingParameter(Name = "ParentSizeMode")]
+    SizeMode SizeMode { get; set; }
+
+    List<UserModel>? Data { get; set; }
+    bool IsDataLoaded { get; set; }
+    IGrid? Grid { get; set; }
+
+    string? SearchText { get; set; }
+    string UserRoleFilterValue { get; set; } = "Tümü";
+    string[] UserRoles { get; } = { "Administrator", "Satýþ", "Satýnalma", "Sevkiyat", "Kullanýcý" };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGridDataAsync();
+    }
+
+    async Task LoadGridDataAsync()
+    {
+        IsDataLoaded = false;
+        // Data = await UserApiClient.GetListAsync();
+        Data = new List<UserModel>
+{
+    new UserModel
+    {
+        Id = 1,
+        FirstName = "Ahmet",
+        LastName = "Yýlmaz",
+        Email = "ahmet.yilmaz@mail.com",
+        Phone = "05551234567",
+        Password = "123456",
+        Active = true,
+        Roles = "Admin",
+        RoleIds = new List<int> { 1 }
+    },
+    new UserModel
+    {
+        Id = 2,
+        FirstName = "Ayþe",
+        LastName = "Demir",
+        Email = "ayse.demir@mail.com",
+        Phone = "05559876543",
+        Password = "654321",
+        Active = true,
+        Roles = "User",
+        RoleIds = new List<int> { 2 }
+    },
+    new UserModel
+    {
+        Id = 3,
+        FirstName = "Mehmet",
+        LastName = "Kaya",
+        Email = "mehmet.kaya@mail.com",
+        Phone = null,
+        Password = "password",
+        Active = false,
+        Roles = "User,Editor",
+        RoleIds = new List<int> { 2, 3 }
+    }
+};
+
+        IsDataLoaded = true;
+    }
+
+    async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
+    {
+        var user = (UserModel)e.DataItem;
+
+        // var response = await UserApiClient.DeleteAsync(user.Id);
+
+        // if (response.Success)
+        // {
+        //     Data?.Remove(user);
+        //     StateHasChanged();
+        // }
+    }
+
+    void OnAddClick()
+    {
+        Navigation.NavigateTo("/user/create");
+    }
+
+    void OnColumnChooserItemClick(ToolbarItemClickEventArgs e)
+        => Grid?.ShowColumnChooser();
+
+    void FilterByUserRole(ToolbarItemClickEventArgs item)
+    {
+        UserRoleFilterValue = item.Info.Text;
+        Grid?.FilterBy(
+            "Roles",
+            GridFilterRowOperatorType.Contains,
+            UserRoleFilterValue != "Tümü" ? UserRoleFilterValue : null
+        );
+    }
+
+    void OnRowClick(GridRowClickEventArgs args) { }
+
+    Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Users");
+    Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Selected Users", new() { ExportSelectedRowsOnly = true });
+    Task ExportAllDataToCsv() => Grid!.ExportToCsvAsync("Users");
+    Task ExportSelectedRowsDataToCsv() => Grid!.ExportToCsvAsync("Selected Users", new() { ExportSelectedRowsOnly = true });
+    Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Users");
+    Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Selected Users", new() { ExportSelectedRowsOnly = true });
+
+    public void Dispose()
+    {
+        disposalTokenSource.Cancel();
+        disposalTokenSource.Dispose();
+    }
+}

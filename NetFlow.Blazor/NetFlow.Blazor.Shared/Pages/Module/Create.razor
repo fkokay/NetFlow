@@ -1,0 +1,150 @@
+﻿@page "/module/create"
+@inject NavigationManager Navigation
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <Items>
+                <DxToolbarItem IconCssClass="back-icon icon medium-icon" Tooltip="Go to Back" Click="@NavigateBack" />
+                <DxToolbarItem>
+                    <Template>
+                        <div class="custom-item">
+                            <div class="title">Modül Tanımlama</div>
+                        </div>
+                    </Template>
+                </DxToolbarItem>
+                <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                    <Template>
+                        <DxButton Text="Kaydet"
+                                  Click="SaveFromOutside"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  RenderStyle="ButtonRenderStyle.Success" />
+                    </Template>
+                </DxToolbarItem>
+            </Items>
+        </DxToolbar>
+    </div>
+    <div class="module-create">
+        <EditForm EditContext="@editContext" Context="formContext">
+            <DataAnnotationsValidator />
+
+            <DxFormLayout ColSpanMd="6">
+                <DxFormLayoutItem Caption="Kodu">
+                    <DxTextBox @bind-Text="model.Code"
+                               ValidationEnabled="true"
+                               ShowValidationIcon="true" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="Adı">
+                    <DxTextBox @bind-Text="model.Name"
+                               ValidationEnabled="true"
+                               ShowValidationIcon="true" />
+                </DxFormLayoutItem>
+                <DxFormLayoutItem ColSpanMd="12">
+                    <ValidationSummary />
+                </DxFormLayoutItem>
+            </DxFormLayout>
+        </EditForm>
+
+    </div>
+</div>
+
+<DxPopup @bind-Visible="popupVisible"
+         HeaderText="@popupTitle"
+         Width="420px"
+         ShowFooter="true"
+         CloseOnOutsideClick="false"
+         HeaderCssClass="@(isSuccess ? "dx-bg-success" : "dx-bg-danger")"
+         AnimationType="PopupAnimationType.Fade">
+
+    <HeaderTemplate>
+        <div style="background-color: @(isSuccess ? "#28a745" : "#dc3545"); color: white; padding: 12px 16px; width: 100%;">
+            <span style="font-weight: bold; font-size: 1.1rem;">@popupTitle</span>
+        </div>
+    </HeaderTemplate>
+    <BodyTemplate>
+        <div style="display: flex; align-items: flex-start; padding: 25px;">
+            <div style="margin-right: 20px;">
+                @if (isSuccess)
+                {
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9f7ef; color: #28a745; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">
+                        ✓
+                    </div>
+                }
+                else
+                {
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background-color: #fdeaea; color: #dc3545; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">
+                        !
+                    </div>
+                }
+            </div>
+            <div style="flex: 1;">
+                <h5 style="margin: 0 0 8px 0; font-weight: bold; color: #333;">
+                    @(isSuccess ? "İşlem Tamamlandı" : "Bir Hata Oluştu")
+                </h5>
+                <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.5;">
+                    @popupMessage
+                </p>
+            </div>
+        </div>
+    </BodyTemplate>
+    <FooterTemplate>
+        <div style="padding: 12px; display: flex; justify-content: flex-end; border-top: 1px solid #eee; background-color: #fafafa; width: 100%;">
+            <DxButton Text="Kapat"
+                      RenderStyle="@(isSuccess ? ButtonRenderStyle.Success : ButtonRenderStyle.Danger)"
+                      Click="OnPopupOk"
+                      Width="110px" />
+        </div>
+    </FooterTemplate>
+</DxPopup>
+
+@code {
+    private ModuleModel model = new();
+    private EditContext editContext;
+    private bool isSaving, popupVisible, isSuccess;
+    private string popupTitle = "", popupMessage = "";
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(model);
+    }
+
+    private async Task SaveFromOutside()
+    {
+        if (isSaving) return;
+        var isValid = editContext.Validate();
+        if (!isValid) return;
+        await HandleValidSubmit();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (isSaving) return;
+        isSaving = true;
+        try
+        {
+            // var response = await ModuleApi.CreateAsync(model);
+            // isSuccess = response.Success;
+            // popupTitle = isSuccess ? "Başarılı" : "Hata";
+            // popupMessage = response.Message ?? (isSuccess ? "Modül başarıyla oluşturuldu." : "İşlem sırasında bir hata meydana geldi.");
+        }
+        catch
+        {
+            isSuccess = false;
+            popupTitle = "Bağlantı Hatası";
+            popupMessage = "Sunucu yanıt vermiyor. Lütfen ağ bağlantınızı kontrol edin.";
+        }
+        finally
+        {
+            popupVisible = true;
+            isSaving = false;
+        }
+    }
+
+    private void HandleInvalidSubmit() => popupVisible = false;
+    private void OnPopupOk()
+    {
+        popupVisible = false;
+        if (isSuccess) Navigation.NavigateTo("/module/list");
+    }
+    private void NavigateBack() => Navigation.NavigateTo("/Module/List");
+}

@@ -1,0 +1,88 @@
+@page "/asset/detail/{Id:int}"
+@inject NavigationManager Navigation
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar Title="Demirbaþ" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+
+            <DxToolbarItem Text="Listeye Dön"
+                           Alignment="ToolbarItemAlignment.Right"
+                           Click="GoBack"
+                           IconCssClass="back-icon icon medium-icon" />
+
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
+                           CssClass="search-textbox-item"
+                           Tooltip="Search">
+                <Template Context="SearchContext">
+                    <div class="custom-item">
+                        <DxSearchBox CssClass="search-textbox"
+                                     NullText="Ara"
+                                     BindValueMode="BindValueMode.OnInput"
+                                     ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                     @bind-Text="SearchText" />
+                    </div>
+                </Template>
+            </DxToolbarItem>
+
+        </DxToolbar>
+    </div>
+
+    <div class="Asset-list-root">
+        <div class="h-100">
+            <DxLoadingPanel Visible="@(!IsLoaded)"
+                            IsContentBlocked="true"
+                            IsContentVisible="false"
+                            IndicatorVisible="true"
+                            Text="Yükleniyor...">
+
+                <DxGrid @ref="Grid"
+                        Data="Data"
+                        KeyFieldName="Id"
+                        CssClass="Asset-list"
+                        SearchText="@SearchText"
+                        ShowAllRows="true"
+                        HighlightRowOnHover="true"
+                        VirtualScrollingEnabled="false">
+
+                    <Columns>
+                        <DxGridSelectionColumn Width="75px" />
+                        <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
+                        <DxGridDataColumn Caption="Demirbaþ Kodu" FieldName="AssetCode" />
+                        <DxGridDataColumn Caption="Demirbaþ Adý" FieldName="AssetName" />
+                        <DxGridDataColumn Caption="Demirbaþ Tipi" FieldName="AssetType" />
+                        <DxGridDataColumn Caption="Marka" FieldName="Brand" />
+                        <DxGridDataColumn Caption="Model" FieldName="Model" />
+                        <DxGridDataColumn Caption="Seri Numarasý" FieldName="SerialNumber" />
+                        <DxGridDataColumn Caption="Kurulum Tarihi" FieldName="InstallationDate" />
+                        <DxGridDataColumn Caption="Lokasyon" FieldName="Location" />
+                        <DxGridDataColumn Caption="Durum" FieldName="Status" />
+                        <DxGridDataColumn Caption="Açýklama" FieldName="Notes" />
+                    </Columns>
+
+                </DxGrid>
+
+            </DxLoadingPanel>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    List<AssetModel> Data = new();
+    bool IsLoaded;
+    string? SearchText;
+    IGrid? Grid;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //var asset = await AssetApiClient.GetByIdAsync(Id);
+        Data.Add(new AssetModel { Id = 1, AssetCode = "A001", AssetName = "Laptop", AssetType = "Electronics", Brand = "Dell", Model = "XPS 13", SerialNumber = "SN123456", InstallationDate = DateTime.Now.AddYears(-1), Location = "Office", Status = "Active", Notes = "Company laptop" });
+        IsLoaded = true;
+    }
+
+    void GoBack()
+    {
+        Navigation.NavigateTo("/asset/list");
+    }
+}

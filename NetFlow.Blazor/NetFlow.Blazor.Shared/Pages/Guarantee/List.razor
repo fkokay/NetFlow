@@ -1,0 +1,194 @@
+﻿@page "/guarantee/list"
+@implements IDisposable
+
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar Title="Teminat Listesi" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <DxToolbarItem Text="@GuaranteeTypeFilterValue" RenderStyleMode="ToolbarItemRenderStyleMode.Plain">
+                <Items>
+                    <DxToolbarItem Text="Tümü" Click="FilterByGuaranteeType" />
+                    @foreach (var status in GuaranteeTypes)
+                    {
+                        <DxToolbarItem Text="@status" Click="FilterByGuaranteeType" />
+                    }
+                </Items>
+            </DxToolbarItem>
+            <DxToolbarItem Tooltip="Column Chooser" Alignment="ToolbarItemAlignment.Right" Click="OnColumnChooserItemClick" IconCssClass="column-chooser-icon icon medium-icon" />
+            <DxToolbarItem Text="Export" Alignment="ToolbarItemAlignment.Right" IconCssClass="export-icon icon medium-icon">
+                <Items>
+                    <DxToolbarItem Text="Export all data to Excel" Click="ExportAllDataToExcel" />
+                    <DxToolbarItem Text="Export selected rows to Excel" Click="ExportSelectedRowsToExcel" />
+                    <DxToolbarItem Text="Export all data to CSV" Click="ExportAllDataToCsv" />
+                    <DxToolbarItem Text="Export selected rows to CSV" Click="ExportSelectedRowsDataToCsv" />
+                    <DxToolbarItem Text="Export all data to PDF" Click="ExportAllDataToPdf" />
+                    <DxToolbarItem Text="Export selected rows to PDF" Click="ExportSelectedRowsDataToPdf" />
+                </Items>
+            </DxToolbarItem>
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right" CssClass="search-textbox-item" Tooltip="Search">
+                <Template Context="SearchContext">
+                    <div class="custom-item">
+                        <DxSearchBox CssClass="search-textbox"
+                                     NullText="Search"
+                                     BindValueMode="BindValueMode.OnInput"
+                                     ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                     @bind-Text=SearchText />
+                    </div>
+                </Template>
+            </DxToolbarItem>
+            <DxToolbarItem Tooltip="Refresh" BeginGroup="true" Click="@LoadGridDataAsync" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
+        </DxToolbar>
+    </div>
+    <div class="Guarantee-list-root">
+        <div class="h-100">
+            <DxLoadingPanel Visible="@(!IsDataLoaded)"
+                            IsContentBlocked="true"
+                            IsContentVisible="false"
+                            IndicatorVisible="true"
+                            IndicatorAreaVisible="true"
+                            ZIndex="101"
+                            Text="Loading...">
+
+                <DxGrid @ref="Grid"
+                        Data="Data"
+                        KeyFieldName="Id"
+                        CssClass="Guarantee-list"
+                        SearchText="@SearchText"
+                        EditMode="GridEditMode.PopupEditForm"
+                        PopupEditFormCssClass="pw-800"
+                        SkeletonRowsEnabled="true"
+                        ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                        FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                        TextWrapEnabled="false"
+                        FocusedRowEnabled="true"
+                        ShowAllRows="true"
+                        VirtualScrollingEnabled="true"
+                        RowClick="@OnRowClick"
+                        HighlightRowOnHover="true">
+                    <Columns>
+                        <DxGridSelectionColumn Width="75px" />
+                        <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
+                        <DxGridDataColumn Caption="Firma" FieldName="FirmName" />
+                        <DxGridDataColumn Caption="Konu" FieldName="Subject" />
+                        <DxGridDataColumn Caption="Teminat Belge No" FieldName="GuaranteeNumber" />
+                        <DxGridDataColumn Caption="Teminat Türü" FieldName="GuaranteeType" />
+                        <DxGridDataColumn Caption="Teminat Şekli" FieldName="GuaranteeForm" />
+                        <DxGridDataColumn Caption="Teminat Tutarı" FieldName="GuaranteeAmount" />
+                        <DxGridDataColumn Caption="Teminat Kominsyon Oranı" FieldName="CommissionRate" />
+                        <DxGridDataColumn Caption="Toplam Komisyon Tutarı" FieldName="CommissionAmount" />
+                        <DxGridDataColumn Caption="Teminat Komisyon Dönemi" FieldName="GuaranteeCommissionPeriodName" />
+                        <DxGridDataColumn Caption="Banka" FieldName="BankName" />
+                        <DxGridDataColumn Caption="Banka Şubesi" FieldName="BankBranchName" />
+                        <DxGridDataColumn Caption="Ünvanı" FieldName="PublicAuthorityName" />
+                        <DxGridDataColumn Caption="Düzenlenme Tarihi" FieldName="GuaranteeDate" />
+                        <DxGridCommandColumn Width="6em" DeleteButtonVisible="false" />
+                    </Columns>
+                    <GroupSummary>
+                        <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
+                    </GroupSummary>
+                    <TotalSummary>
+                        <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" FooterColumnName="Id" />
+                    </TotalSummary>
+                </DxGrid>
+            </DxLoadingPanel>
+        </div>
+    </div>
+</div>
+
+@code {
+    CancellationTokenSource disposalTokenSource = new CancellationTokenSource();
+
+    [CascadingParameter(Name = "ParentSizeMode")]
+    SizeMode SizeMode { get; set; }
+    List<GuaranteeModel>? Data { get; set; }
+    bool IsDataLoaded { get; set; }
+    bool IsGuaranteePanelOpen { get; set; }
+    bool IsGuaranteePanelPinned { get; set; }
+    bool IsActiveGuaranteeLoading { get; set; }
+    DrawerMode DrawerMode => IsGuaranteePanelPinned ? DrawerMode.Shrink : DrawerMode.Overlap;
+    GuaranteeModel? ActiveGuarantee { get; set; }
+
+    IGrid? Grid { get; set; }
+    string? SearchText { get; set; }
+    string GuaranteeTypeFilterValue { get; set; } = "Tümü";
+    string[] GuaranteeTypes { get; } = new[] { "Geçici", "Kati" };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGridDataAsync();
+        await base.OnInitializedAsync();
+    }
+
+    async Task LoadGridDataAsync()
+    {
+        IsDataLoaded = false;
+        // Data = await GuaranteeApiClient.GetListAsync();
+        Data=new List<GuaranteeModel>
+        {
+            new GuaranteeModel{Id=1,FirmName="Firma A",Subject="Konu 1",GuaranteeNumber="GBN001",GuaranteeType="Geçici",GuaranteeForm="Nakit",GuaranteeAmount=10000,CommissionRate=1.5m,CommissionAmount=150,GuaranteeCommissionPeriodName="Aylık",BankName="Banka X",BankBranchName="Şube Y",PublicAuthorityName="Yetkili Z",GuaranteeDate=DateTime.Now.AddMonths(-1)},
+            new GuaranteeModel{Id=2,FirmName="Firma B",Subject="Konu 2",GuaranteeNumber="GBN002",GuaranteeType="Kati",GuaranteeForm="Teminat Mektubu",GuaranteeAmount=20000,CommissionRate=2.0m,CommissionAmount=400,GuaranteeCommissionPeriodName="Yıllık",BankName="Banka Y",BankBranchName="Şube Z",PublicAuthorityName="Yetkili A",GuaranteeDate=DateTime.Now.AddMonths(-2)},
+        };
+        IsDataLoaded = true;
+    }
+
+    void OnDataChanged(List<GuaranteeModel> data) => Data = data;
+
+    void OnPinClick() => IsGuaranteePanelPinned = !IsGuaranteePanelPinned;
+
+    void OnCloseClick()
+    {
+        IsGuaranteePanelOpen = false;
+        IsGuaranteePanelPinned = false;
+    }
+
+    string GetPinButtonIconCss() => $"{(IsGuaranteePanelPinned ? "pinned-icon" : "unpinned-icon")} medium-icon";
+
+    void OnColumnChooserItemClick(ToolbarItemClickEventArgs e) => Grid!.ShowColumnChooser();
+
+    Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Guarantees");
+
+    Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Selected Guarantees", new GridXlExportOptions { ExportSelectedRowsOnly = true });
+
+    Task ExportAllDataToCsv() => Grid!.ExportToCsvAsync("Guarantees");
+
+    Task ExportSelectedRowsDataToCsv() => Grid!.ExportToCsvAsync("Selected Guarantees", new GridCsvExportOptions { ExportSelectedRowsOnly = true });
+
+    Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Guarantees");
+
+    Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Selected Guarantees", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
+
+    void FilterByGuaranteeType(ToolbarItemClickEventArgs item)
+    {
+        GuaranteeTypeFilterValue = item.Info.Text;
+        Grid!.FilterBy("GuaranteeType", GridFilterRowOperatorType.Equal, GuaranteeTypeFilterValue != "Tümü" ? GuaranteeTypeFilterValue : null);
+    }
+
+    async void OnRowClick(GridRowClickEventArgs args)
+    {
+        if (!IsGuaranteePanelOpen)
+        {
+            IsGuaranteePanelOpen = true;
+            ActiveGuarantee = null;
+        }
+        IsActiveGuaranteeLoading = true;
+        var guarantee = (GuaranteeModel)Grid!.GetDataItem(args.VisibleIndex);
+        ActiveGuarantee = guarantee;
+        IsActiveGuaranteeLoading = false;
+        StateHasChanged();
+    }
+
+    string GetGuaranteePanelWidth() => SizeMode switch
+    {
+        SizeMode.Small => "20.25rem",
+        SizeMode.Large => "27rem",
+        _ => "23.625rem",
+    };
+
+    void IDisposable.Dispose()
+    {
+        disposalTokenSource.Cancel();
+        disposalTokenSource.Dispose();
+    }
+}
+
+

@@ -1,0 +1,17 @@
+﻿namespace NetFlow.Blazor.Shared.Models
+{
+    public class TenderRequiredDocument
+    {
+        public int Id { get; set; }
+        public int TenderId { get; set; }
+        public int DocumentId { get; set; }
+        public bool IsMandatory { get; set; } = true;
+        public bool Submitted { get; set; } = false;
+        public DateTime? SubmissionDate { get; set; }
+        public string DocumentName { get; set; } = string.Empty;
+        public string? FileName { get; set; }
+        public int? TenderRequiredDocumentFileId { get; set; }
+        public string? FileType { get; set; }
+        public byte[]? FileContent { get; set; }
+    }
+}

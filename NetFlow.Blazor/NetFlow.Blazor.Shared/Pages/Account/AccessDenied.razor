@@ -1,0 +1,31 @@
+@page "/account/access-denied"
+@layout AccountLayout
+@implements IDisposable
+
+<PageTitle>Eriþim Engellendi</PageTitle>
+
+<div class="main-content">
+    <div class="block-content card">
+        <div class="title">
+            <div class="title-header-text text-danger">Eriþim Engellendi</div>
+            <div class="title-content-text text-danger">
+                Bu sayfaya eriþiminiz yok.
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    CancellationTokenSource disposalTokenSource = new CancellationTokenSource();
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+
+    void IDisposable.Dispose()
+    {
+        disposalTokenSource.Cancel();
+        disposalTokenSource.Dispose();
+    }
+}

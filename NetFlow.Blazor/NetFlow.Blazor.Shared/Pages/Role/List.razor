@@ -1,0 +1,165 @@
+@page "/role/list"
+@implements IDisposable
+@inject NavigationManager Navigation
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar Title="Rol Listesi" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <DxToolbarItem Text="Yeni Rol" Click="OnAddClick" Alignment="ToolbarItemAlignment.Right" IconCssClass="add-icon icon medium-icon" />
+            <DxToolbarItem Tooltip="Sütun Seçici" Alignment="ToolbarItemAlignment.Right"
+                           Click="OnColumnChooserItemClick"
+                           IconCssClass="column-chooser-icon icon medium-icon" />
+
+            <DxToolbarItem Text="Dýþarý Aktarý" Alignment="ToolbarItemAlignment.Right"
+                           IconCssClass="export-icon icon medium-icon">
+                <Items>
+                    <DxToolbarItem Text="Export all data to Excel" Click="ExportAllDataToExcel" />
+                    <DxToolbarItem Text="Export selected rows to Excel" Click="ExportSelectedRowsToExcel" />
+                    <DxToolbarItem Text="Export all data to CSV" Click="ExportAllDataToCsv" />
+                    <DxToolbarItem Text="Export selected rows to CSV" Click="ExportSelectedRowsDataToCsv" />
+                    <DxToolbarItem Text="Export all data to PDF" Click="ExportAllDataToPdf" />
+                    <DxToolbarItem Text="Export selected rows to PDF" Click="ExportSelectedRowsDataToPdf" />
+                </Items>
+            </DxToolbarItem>
+
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right" CssClass="search-textbox-item">
+                <Template>
+                    <DxSearchBox NullText="Ara"
+                                 BindValueMode="BindValueMode.OnInput"
+                                 @bind-Text="SearchText" />
+                </Template>
+            </DxToolbarItem>
+
+            <DxToolbarItem Tooltip="Refresh" Click="LoadGridDataAsync"
+                           Alignment="ToolbarItemAlignment.Right"
+                           IconCssClass="refresh-icon icon medium-icon" />
+        </DxToolbar>
+    </div>
+
+    <DxLoadingPanel Visible="@(!IsDataLoaded)"
+                    IsContentBlocked="true"
+                    IndicatorVisible="true"
+                    Text="Loading...">
+
+        <DxGrid @ref="Grid"
+                Data="Data"
+                KeyFieldName="Id"
+                SearchText="@SearchText"
+                EditMode="GridEditMode.PopupEditForm"
+                PopupEditFormCssClass="pw-800"
+                CustomizeEditModel="Grid_CustomizeEditModel"
+                EditModelSaving="Grid_EditModelSaving"
+                DataItemDeleting="Grid_DataItemDeleting"
+                ShowAllRows="true"
+                HighlightRowOnHover="true">
+
+            <Columns>
+                <DxGridSelectionColumn Width="75px" />
+                <DxGridDataColumn FieldName="Id" Visible="false" />
+                <DxGridDataColumn Caption="Ad" FieldName="Name" />
+                <DxGridCommandColumn Width="6em"
+                                     EditButtonVisible="true"
+                                     DeleteButtonVisible="true" />
+            </Columns>
+
+
+            <EditFormTemplate Context="editContext">
+                @{
+                    var role = (RoleModel)editContext.EditModel;
+                }
+
+                <DxFormLayout CssClass="w-100">
+                    <DxFormLayoutItem Caption="Rol Adý">
+                        <DxTextBox @bind-Text="role.Name" />
+                    </DxFormLayoutItem>
+                </DxFormLayout>
+            </EditFormTemplate>
+
+        </DxGrid>
+    </DxLoadingPanel>
+</div>
+
+@code {
+    List<RoleModel>? Data;
+    bool IsDataLoaded;
+    string? SearchText;
+    IGrid? Grid;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGridDataAsync();
+    }
+
+    async Task LoadGridDataAsync()
+    {
+        IsDataLoaded = false;
+        // Data = await RoleApiClient.GetListAsync();
+        Data = new List<RoleModel>
+        {
+            new RoleModel{Id=1,Name="Admin"},
+            new RoleModel{Id=2,Name="Kullanýcý"}
+        };
+
+        IsDataLoaded = true;
+    }
+
+    
+    async void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e)
+    {
+        if (!e.IsNew)
+        {
+            var role = (RoleModel)e.DataItem;
+            // var freshRole = await RoleApiClient.GetByIdAsync(role.Id);
+
+            // if (freshRole != null)
+            //     e.EditModel = freshRole;
+        }
+    }
+
+
+    async Task Grid_EditModelSaving(GridEditModelSavingEventArgs e)
+    {
+        if (!e.IsNew)
+        {
+            var model = (RoleModel)e.EditModel;
+            // var response = await RoleApiClient.UpdateAsync(model.Id,model);
+
+            // if (response.Success)
+            //     await LoadGridDataAsync();
+        }
+    }
+
+
+    async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
+    {
+        var role = (RoleModel)e.DataItem;
+        // var response = await RoleApiClient.DeleteAsync(role.Id);
+
+        // if (response.Success)
+        // {
+        //     Data?.Remove(role);
+        //     StateHasChanged();
+        // }
+    }
+
+    void OnColumnChooserItemClick(ToolbarItemClickEventArgs e)
+        => Grid!.ShowColumnChooser();
+    void OnAddClick()
+    {
+        Navigation.NavigateTo("/role/create");
+    }
+
+    Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Roles");
+    Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Selected Roles",
+        new GridXlExportOptions { ExportSelectedRowsOnly = true });
+
+    Task ExportAllDataToCsv() => Grid!.ExportToCsvAsync("Roles");
+    Task ExportSelectedRowsDataToCsv() => Grid!.ExportToCsvAsync("Selected Roles",
+        new GridCsvExportOptions { ExportSelectedRowsOnly = true });
+
+    Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Roles");
+    Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Selected Roles",
+        new GridPdfExportOptions { ExportSelectedRowsOnly = true });
+
+    public void Dispose() { }
+}

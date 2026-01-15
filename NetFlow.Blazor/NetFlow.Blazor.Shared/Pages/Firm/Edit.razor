@@ -1,0 +1,224 @@
+﻿@page "/firm/edit/{Id:int}"
+
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <Items>
+                <DxToolbarItem IconCssClass="back-icon icon medium-icon" Tooltip="Go to Back" Click="@NavigateBack" />
+                <DxToolbarItem>
+                    <Template>
+                        <div class="custom-item">
+                            <div class="title">Firma Düzenleme</div>
+                        </div>
+                    </Template>
+                </DxToolbarItem>
+                <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                    <Template>
+                        <DxButton Text="Kaydet"
+                                  Click="SaveFromOutside"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  RenderStyle="ButtonRenderStyle.Success" />
+                    </Template>
+                </DxToolbarItem>
+            </Items>
+        </DxToolbar>
+    </div>
+
+    <div class="firm-edit">
+        @if (editContext != null)
+        {
+            <EditForm EditContext="@editContext" Context="formContext">
+                <DataAnnotationsValidator />
+
+                <DxFormLayout ColSpanMd="6">
+
+                    <DxFormLayoutItem Caption="Kodu">
+                        <DxTextBox @bind-Text="model.FirmCode" ValidationEnabled="true" ShowValidationIcon="true" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Firma Adı">
+                        <DxTextBox @bind-Text="model.FirmName" ValidationEnabled="true" ShowValidationIcon="true" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Vergi Numarası">
+                        <DxTextBox @bind-Text="model.TaxNumber" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Ticaret Sicil No">
+                        <DxTextBox @bind-Text="model.RegisterNumber" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Netsis REST API" ColSpanMd="12">
+                        <DxTextBox @bind-Text="model.NetsisRestApiUrl" Placeholder="https://netsis-api.firma.com" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="DB Sunucu">
+                        <DxTextBox @bind-Text="model.NetsisDbServer" Placeholder="SERVER\INSTANCE veya IP" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="DB Adı">
+                        <DxTextBox @bind-Text="model.NetsisDbName" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="DB Kullanıcı">
+                        <DxTextBox @bind-Text="model.NetsisDbUser" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="DB Şifre">
+                        <DxTextBox @bind-Text="model.NetsisDbPassword" Password="true" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Uygulama Adı" ColSpanMd="12">
+                        <DxTextBox @bind-Text="model.NetsisApplicationName" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Netsis Kullanıcı">
+                        <DxTextBox @bind-Text="model.NetsisUser" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Netsis Şifre">
+                        <DxTextBox @bind-Text="model.NetsisPassword" Password="true" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Şirket Kodu">
+                        <DxSpinEdit @bind-Value="model.NetsisCompanyCode" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Şube Kodu">
+                        <DxSpinEdit @bind-Value="model.NetsisBranchCode" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="e-İrsaliye Seri">
+                        <DxTextBox @bind-Text="model.EIRSSeri" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="e-Fatura Seri">
+                        <DxTextBox @bind-Text="model.EFATSeri" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="e-Arşiv Seri">
+                        <DxTextBox @bind-Text="model.EARSSeri" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <ValidationSummary />
+                    </DxFormLayoutItem>
+
+                </DxFormLayout>
+            </EditForm>
+        }
+        else
+        {
+            <div class="p-4 text-center">
+                <p>Veriler yükleniyor...</p>
+            </div>
+        }
+    </div>
+</div>
+
+
+<DxPopup @bind-Visible="popupVisible" Width="460px" ShowFooter="true" CloseOnOutsideClick="false">
+    <HeaderTemplate>
+        <div style="background: @(isSuccess ? "linear-gradient(90deg,#28a745,#218838)" : "linear-gradient(90deg,#dc3545,#b02a37)"); color:white; padding:14px 18px; width:100%; display:flex; align-items:center; gap:12px;">
+            <div style="width:36px;height:36px;border-radius:50%; background:rgba(255,255,255,0.2); display:flex;align-items:center;justify-content:center; font-size:20px;font-weight:bold;">
+                @(isSuccess ? "✓" : "!")
+            </div>
+            <div>
+                <div style="font-size:1.05rem;font-weight:600;">@(isSuccess ? "Güncelleme Başarılı" : "Güncelleme Hatası")</div>
+                <div style="font-size:12px;opacity:.85">@popupTitle</div>
+            </div>
+        </div>
+    </HeaderTemplate>
+    <BodyTemplate>
+        <div style="padding:28px 26px;display:flex;gap:20px;">
+            <div style="width:60px;height:60px;border-radius:50%; background-color:@(isSuccess ? "#e9f7ef" : "#fdeaea"); color:@(isSuccess ? "#28a745" : "#dc3545"); display:flex;align-items:center;justify-content:center; font-size:28px;font-weight:bold;">
+                @(isSuccess ? "✓" : "!")
+            </div>
+            <div style="flex:1;">
+                <h5 style="margin:0 0 6px 0;font-weight:600;color:#222;">@(isSuccess ? "Kayıt başarıyla güncellendi" : "İşlem tamamlanamadı")</h5>
+                <p style="margin:0;color:#555;font-size:14px;line-height:1.6;">@popupMessage</p>
+            </div>
+        </div>
+    </BodyTemplate>
+    <FooterTemplate>
+        <div style="padding:14px 18px; display:flex; justify-content:flex-end; border-top:1px solid #eee; background:#fafafa; width:100%;">
+            <DxButton Text="Kapat" Width="130px" RenderStyle="@(isSuccess? ButtonRenderStyle.Success: ButtonRenderStyle.Danger)" Click="OnPopupOk" />
+        </div>
+    </FooterTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private FirmModel model = new();
+    private EditContext? editContext;
+    private bool isSaving, popupVisible, isSuccess;
+    private string popupTitle = "", popupMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id > 0)
+        {
+            //var firm = await FirmApi.GetByIdAsync(Id);
+            // if (firm == null)
+            // {
+            //     Navigation.NavigateTo("/firm/list");
+            //     return;
+            // }
+            // model = firm;
+        }
+        else
+        {
+            model = new FirmModel();
+        }
+        editContext = new EditContext(model);
+    }
+
+    private async Task SaveFromOutside()
+    {
+        if (isSaving || editContext == null) return;
+        if (!editContext.Validate()) return;
+        await HandleValidSubmit();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (isSaving) return;
+        isSaving = true;
+
+        try
+        {
+            // var response = await FirmApi.UpdateAsync(Id, model);
+
+            // isSuccess = response.Success;
+            // popupTitle = isSuccess ? "Başarılı" : "Hata";
+            // popupMessage = response.Message ?? (isSuccess
+            //     ? (Id == 0 ? "Firma başarıyla oluşturuldu." : "Firma başarıyla güncellendi.")
+            //     : "İşlem sırasında hata oluştu.");
+        }
+        catch
+        {
+            isSuccess = false;
+            popupTitle = "Bağlantı Hatası";
+            popupMessage = "Sunucu yanıt vermiyor.";
+        }
+        finally
+        {
+            popupVisible = true;
+            isSaving = false;
+        }
+    }
+
+    private void OnPopupOk()
+    {
+        popupVisible = false;
+        if (isSuccess)
+            Navigation.NavigateTo("/firm/list");
+    }
+
+    private void NavigateBack() => Navigation.NavigateTo("/firm/list");
+}
