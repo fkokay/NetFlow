@@ -1,10 +1,12 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
 using NetFlow.Application.Common.Pagination;
+using NetFlow.Application.Common.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO.Pipelines;
 using System.Text;
+using System.Xml.Linq;
 
 
 namespace NetFlow.ReadModel.Tenders
@@ -18,32 +20,48 @@ namespace NetFlow.ReadModel.Tenders
         public async Task<PagedResult> ListAsync(int firmId, PagedRequest pagedRequest)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
+            var parameters = new DynamicParameters();
+            parameters.Add("FirmId", firmId);
 
-            const string sql = """
-                SELECT COUNT(1)
-                FROM dbo.VW_Tender WITH (NOLOCK)
-                WHERE (@FirmId IS NULL OR FirmId = @FirmId);
-
-                SELECT *
-                FROM dbo.VW_Tender WITH (NOLOCK)
-                WHERE (@FirmId IS NULL OR FirmId = @FirmId)
-                ORDER BY Id DESC
-                OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY;
-            """;
-
-            using var multi = await cn.QueryMultipleAsync(sql, new
+            string whereSql = "WHERE FirmId = @FirmId";
+            if (!string.IsNullOrEmpty(pagedRequest.Filter))
             {
-                FirmId = firmId,
-                Skip = pagedRequest.Skip,
-                Take = pagedRequest.Take
-            });
+                var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);
+                whereSql += " AND " + sql;
+                parameters.AddDynamicParams(p);
+            }
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "Id DESC");
+            string countSql = $@"
+                SELECT COUNT(1) FROM dbo.VW_Tender WITH (NOLOCK)
+                {whereSql}
+            ";
 
-            var totalCount = await multi.ReadSingleAsync<int>();
-            var items = (await multi.ReadAsync<TenderDto>()).AsList();
+            string dataSql = $@"
+                SELECT * FROM dbo.VW_Tender WITH (NOLOCK)
+                {whereSql}
+                ORDER BY {orderBy}
+                OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
+            ";
+
+            int totalCount = cn.ExecuteScalar<int>(
+                countSql, parameters
+            );
+
+
+            if (pagedRequest.IsCountQuery != null && pagedRequest.IsCountQuery.HasValue)
+            {
+                return new PagedResult
+                {
+                    data = Array.Empty<TenderDto>(),
+                    totalCount = totalCount
+                };
+            }
+
+            var data = cn.Query<TenderDto>(dataSql, parameters).ToList();
 
             return new PagedResult
             {
-                data = items,
+                data = data,
                 totalCount = totalCount
             };
         }
@@ -56,4 +74,6 @@ namespace NetFlow.ReadModel.Tenders
             return await cn.QueryFirstOrDefaultAsync<TenderDto>(sql, new { Id = id });
         }
     }
+
+
 }

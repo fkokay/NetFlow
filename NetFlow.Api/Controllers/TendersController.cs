@@ -22,7 +22,7 @@ namespace NetFlow.Api.Controllers
 
         // GET api/tenders?firmId=1
         [HttpGet]
-        public async Task<IActionResult> List(PagedRequest pagedRequest)
+        public async Task<IActionResult> List([FromQuery]PagedRequest pagedRequest)
         {
             if (_current.User == null)
             {
