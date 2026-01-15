@@ -1,5 +1,6 @@
 ﻿@page "/tender/list"
 @inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
 
 <div class="content-root">
@@ -40,7 +41,7 @@
                     <DxGridSelectionColumn Width="75px" />
                     <DxGridDataColumn Caption="İhale Kodu" FieldName="TenderCode" Visible="false" />
                     <DxGridDataColumn Caption="Firma Adı" FieldName="FirmName" />
-                    
+
                 </Columns>
                 <GroupSummary>
                     <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
@@ -65,11 +66,9 @@
         if (!firstRender)
             return;
 
-        var client = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
 
-        Data = new GridDevExtremeDataSource<TenderModel>(
-            client,
-            NavigationManager.ToAbsoluteUri("api/tenders"));
+        Data = new GridDevExtremeDataSource<TenderModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/tenders"));
 
         await InvokeAsync(StateHasChanged);
     }

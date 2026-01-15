@@ -6,11 +6,11 @@ namespace NetFlow.Application.Common.Pagination
 {
     public class PagedRequest
     {
-        public string? Filter { get; set; }
-        public string? Sort { get; set; }
-        public int? Skip { get; set; }
-        public int? Take { get; set; }
-        public bool? RequireTotalCount { get; set; }
-        public bool? IsCountQuery { get; set; }
+        public string? filter { get; set; }
+        public string? sort { get; set; }
+        public int? skip { get; set; }
+        public int? take { get; set; }
+        public bool? requireTotalCount { get; set; }
+        public bool? isCountQuery { get; set; }
     }
 }

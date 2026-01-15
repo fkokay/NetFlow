@@ -68,6 +68,7 @@ namespace NetFlow.Blazor.Web.Security
             var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
 
             var claims = new List<Claim>();
+            claims.Add(new Claim("access_token", jwt));
 
             if (keyValuePairs != null)
             {
