@@ -54,11 +54,11 @@ namespace NetFlow.Application.Users
             await _db.SaveChangesAsync();
             return user.Id;
         }
-
-
         public async Task<int> EditAsync(EditUserRequest request)
         {
             var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == request.Id);
+            if (user == null)
+                throw new Exception("User not found");
 
             user.FirstName = request.FirstName;
             user.LastName = request.LastName;
@@ -68,6 +68,7 @@ namespace NetFlow.Application.Users
 
             if (!string.IsNullOrWhiteSpace(request.Password))
                 user.Password = request.Password;
+
 
             var oldRoles = _db.UserInRoles.Where(x => x.UserId == user.Id);
             _db.UserInRoles.RemoveRange(oldRoles);
@@ -85,12 +86,31 @@ namespace NetFlow.Application.Users
             }
 
 
+            var oldFirms = _db.UserInFirms.Where(x => x.UserId == user.Id);
+            _db.UserInFirms.RemoveRange(oldFirms);
+
+            if (
+                request.FirmIds != null && request.FirmIds.Any() &&
+                request.RoleIds != null && request.RoleIds.Any()
+            )
+            {
+                foreach (var firmId in request.FirmIds)
+                {
+                    foreach (var roleId in request.RoleIds)
+                    {
+                        _db.UserInFirms.Add(new UserInFirmEntity
+                        {
+                            UserId = user.Id,
+                            FirmId = firmId,
+                            RoleId = roleId
+                        });
+                    }
+                }
+            }
+
             await _db.SaveChangesAsync();
             return user.Id;
-
         }
-
-
         public async Task DeleteAsync(int id)
         {
             
