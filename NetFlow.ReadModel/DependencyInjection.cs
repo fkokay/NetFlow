@@ -11,6 +11,7 @@ using NetFlow.ReadModel.TenderExternalQuality;
 using NetFlow.ReadModel.TenderOpex;
 using NetFlow.ReadModel.TenderReaktif;
 using NetFlow.ReadModel.Tenders;
+using NetFlow.ReadModel.Users;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -40,6 +41,7 @@ namespace NetFlow.ReadModel
             services.AddScoped<RoleReadService>();
             services.AddScoped<AssetReadService>();
             services.AddScoped<ModuleReadService>();
+            services.AddScoped<UserReadService>();
 
             return services;
         }

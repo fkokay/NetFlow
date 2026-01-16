@@ -18,8 +18,9 @@ namespace NetFlow.Blazor.Shared.Models
         public string? Phone { get; set; }
         [Required(ErrorMessage = "Şifre zorunludur")]
         public string Password { get; set; }
-        public bool Active { get; set; }
+        public bool Active { get; set; } = true;
         public string Roles { get; set; } = string.Empty;
         public List<int>? RoleIds { get; set; } = new List<int>();
+        public List<int>? FirmIds { get; set; } = new List<int>();
     }
 }

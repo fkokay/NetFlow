@@ -1,13 +1,15 @@
-@page "/user/list"
+ï»¿@page "/user/list"
 @implements IDisposable
-@inject NavigationManager Navigation
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
 
 <div class="content-root">
     <div class="card toolbar">
-        <DxToolbar Title="Kullanýcý Listesi" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+        <DxToolbar Title="KullanÄ±cÄ± Listesi" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
             <DxToolbarItem Text="@UserRoleFilterValue" RenderStyleMode="ToolbarItemRenderStyleMode.Plain">
                 <Items>
-                    <DxToolbarItem Text="Tümü" Click="FilterByUserRole" />
+                    <DxToolbarItem Text="TÃ¼mÃ¼" Click="FilterByUserRole" />
                     @foreach (var role in UserRoles)
                     {
                         <DxToolbarItem Text="@role" Click="FilterByUserRole" />
@@ -15,17 +17,17 @@
                 </Items>
             </DxToolbarItem>
 
-            <DxToolbarItem Text="Yeni Kullanýcý"
+            <DxToolbarItem Text="Yeni KullanÄ±cÄ±"
                            Click="OnAddClick"
                            Alignment="ToolbarItemAlignment.Right"
                            IconCssClass="add-icon icon medium-icon" />
 
-            <DxToolbarItem Tooltip="Sütun Seçici"
+            <DxToolbarItem Tooltip="SÃ¼tun SeÃ§ici"
                            Alignment="ToolbarItemAlignment.Right"
                            Click="OnColumnChooserItemClick"
                            IconCssClass="column-chooser-icon icon medium-icon" />
 
-            <DxToolbarItem Text="Dýþarý Aktarý"
+            <DxToolbarItem Text="DÄ±ÅŸarÄ± AktarÄ±"
                            Alignment="ToolbarItemAlignment.Right"
                            IconCssClass="export-icon icon medium-icon">
                 <Items>
@@ -59,45 +61,39 @@
     </div>
 
     <div class="User-list-root h-100">
-        <DxLoadingPanel Visible="@(!IsDataLoaded)"
-                        IsContentBlocked="true"
-                        IndicatorVisible="true"
-                        Text="Loading...">
+        <DxGrid @ref="Grid"
+                Data="Data"
+                KeyFieldName="Id"
+                CssClass="User-list"
+                SearchText="@SearchText"
+                EditMode="GridEditMode.PopupEditForm"
+                PopupEditFormCssClass="pw-800"
+                SkeletonRowsEnabled="true"
+                ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                TextWrapEnabled="false"
+                FocusedRowEnabled="true"
+                ShowAllRows="true"
+                VirtualScrollingEnabled="true"
+                HighlightRowOnHover="true"
+                RowClick="OnRowClick"
+                DataItemDeleting="Grid_DataItemDeleting">
 
-            <DxGrid @ref="Grid"
-                    Data="Data"
-                    KeyFieldName="Id"
-                    CssClass="User-list"
-                    SearchText="@SearchText"
-                    EditMode="GridEditMode.PopupEditForm"
-                    PopupEditFormCssClass="pw-800"
-                    SkeletonRowsEnabled="true"
-                    ColumnResizeMode="GridColumnResizeMode.NextColumn"
-                    FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
-                    TextWrapEnabled="false"
-                    FocusedRowEnabled="true"
-                    ShowAllRows="true"
-                    VirtualScrollingEnabled="true"
-                    HighlightRowOnHover="true"
-                    RowClick="OnRowClick"
-                    DataItemDeleting="Grid_DataItemDeleting">
+            <Columns>
+                <DxGridSelectionColumn Width="75px" />
+                <DxGridDataColumn FieldName="Id" Visible="false" />
+                <DxGridDataColumn Caption="Ad" FieldName="FirstName" />
+                <DxGridDataColumn Caption="SoyadÄ±" FieldName="LastName" />
+                <DxGridDataColumn Caption="Email" FieldName="Email" />
+                <DxGridDataColumn Caption="Telefon" FieldName="Phone" />
+                <DxGridDataColumn Caption="Aktif" FieldName="Active" />
+                <DxGridDataColumn Caption="Roller" FieldName="Roles" />
+                <DxGridCommandColumn Width="6em"
+                                     DeleteButtonVisible="true"
+                                     EditButtonVisible="false" />
+            </Columns>
 
-                <Columns>
-                    <DxGridSelectionColumn Width="75px" />
-                    <DxGridDataColumn FieldName="Id" Visible="false" />
-                    <DxGridDataColumn Caption="Ad" FieldName="FirstName" />
-                    <DxGridDataColumn Caption="Soyadý" FieldName="LastName" />
-                    <DxGridDataColumn Caption="Email" FieldName="Email" />
-                    <DxGridDataColumn Caption="Telefon" FieldName="Phone" />
-                    <DxGridDataColumn Caption="Aktif" FieldName="Active" />
-                    <DxGridDataColumn Caption="Roller" FieldName="Roles" />
-                    <DxGridCommandColumn Width="6em"
-                                         DeleteButtonVisible="true"
-                                         EditButtonVisible="false" />
-                </Columns>
-
-            </DxGrid>
-        </DxLoadingPanel>
+        </DxGrid>
     </div>
 </div>
 
@@ -106,87 +102,77 @@
 
     [CascadingParameter(Name = "ParentSizeMode")]
     SizeMode SizeMode { get; set; }
-
-    List<UserModel>? Data { get; set; }
+    GridDevExtremeDataSource<UserModel> Data { get; set; } = null!;
     bool IsDataLoaded { get; set; }
     IGrid? Grid { get; set; }
-
     string? SearchText { get; set; }
-    string UserRoleFilterValue { get; set; } = "Tümü";
-    string[] UserRoles { get; } = { "Administrator", "Satýþ", "Satýnalma", "Sevkiyat", "Kullanýcý" };
+    string UserRoleFilterValue { get; set; } = "TÃ¼mÃ¼";
+    string[] UserRoles { get; } = { "Administrator", "SatÄ±ÅŸ", "SatÄ±nalma", "Sevkiyat", "KullanÄ±cÄ±" };
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!firstRender) return;
         await LoadGridDataAsync();
     }
 
     async Task LoadGridDataAsync()
     {
-        IsDataLoaded = false;
-        // Data = await UserApiClient.GetListAsync();
-        Data = new List<UserModel>
-{
-    new UserModel
-    {
-        Id = 1,
-        FirstName = "Ahmet",
-        LastName = "Yýlmaz",
-        Email = "ahmet.yilmaz@mail.com",
-        Phone = "05551234567",
-        Password = "123456",
-        Active = true,
-        Roles = "Admin",
-        RoleIds = new List<int> { 1 }
-    },
-    new UserModel
-    {
-        Id = 2,
-        FirstName = "Ayþe",
-        LastName = "Demir",
-        Email = "ayse.demir@mail.com",
-        Phone = "05559876543",
-        Password = "654321",
-        Active = true,
-        Roles = "User",
-        RoleIds = new List<int> { 2 }
-    },
-    new UserModel
-    {
-        Id = 3,
-        FirstName = "Mehmet",
-        LastName = "Kaya",
-        Email = "mehmet.kaya@mail.com",
-        Phone = null,
-        Password = "password",
-        Active = false,
-        Roles = "User,Editor",
-        RoleIds = new List<int> { 2, 3 }
-    }
-};
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        Data = new GridDevExtremeDataSource<UserModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/users"));
 
-        IsDataLoaded = true;
+        if (Grid != null) Grid.Reload();
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+    async Task Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e)
+    {
+        if (!e.IsNew)
+        {
+            var user = (UserModel)e.DataItem;
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+            var freshUser = await client.GetFromJsonAsync<UserModel>($"api/users/{user.Id}");
+            if (freshUser != null)
+                e.EditModel = freshUser;
+        }
+    }
+
+    async Task Grid_EditModelSaving(GridEditModelSavingEventArgs e)
+    {
+        var model = (UserModel)e.EditModel;
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+
+        if (!e.IsNew)
+        {
+            var response = await client.PutAsJsonAsync("api/users", model);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadGridDataAsync();
+            }
+        }
     }
 
     async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
     {
+        e.Cancel = true;
+
         var user = (UserModel)e.DataItem;
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        var response = await client.DeleteAsync($"api/users/{user.Id}");
 
-        // var response = await UserApiClient.DeleteAsync(user.Id);
-
-        // if (response.Success)
-        // {
-        //     Data?.Remove(user);
-        //     StateHasChanged();
-        // }
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadGridDataAsync();
+        }
     }
 
-    void OnAddClick()
-    {
-        Navigation.NavigateTo("/user/create");
-    }
+    void OnAddClick() => NavigationManager.NavigateTo("/user/create");
 
-    void OnColumnChooserItemClick(ToolbarItemClickEventArgs e)
-        => Grid?.ShowColumnChooser();
+    void OnColumnChooserItemClick(ToolbarItemClickEventArgs e) => Grid?.ShowColumnChooser();
 
     void FilterByUserRole(ToolbarItemClickEventArgs item)
     {
@@ -194,7 +180,7 @@
         Grid?.FilterBy(
             "Roles",
             GridFilterRowOperatorType.Contains,
-            UserRoleFilterValue != "Tümü" ? UserRoleFilterValue : null
+            UserRoleFilterValue != "TÃ¼mÃ¼" ? UserRoleFilterValue : null
         );
     }
 

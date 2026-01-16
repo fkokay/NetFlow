@@ -106,7 +106,6 @@
     bool IsActiveModuleLoading { get; set; }
     DrawerMode DrawerMode => IsModulePanelPinned ? DrawerMode.Shrink : DrawerMode.Overlap;
     ModuleModel? ActiveModule { get; set; }
-
     IGrid? Grid { get; set; }
     string? SearchText { get; set; }
 
@@ -120,7 +119,6 @@
     {
         var httpClient = HttpClientFactory.CreateClient("ApiClient");
         var client = await ApiClientFactory.CreateAsync(httpClient);
-        // Endpoint URL'i kontrol et (api/modules)
         Data = new GridDevExtremeDataSource<ModuleModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/modules"));
 
         if (Grid != null) Grid.Reload();

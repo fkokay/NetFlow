@@ -1,4 +1,4 @@
-﻿namespace NetFlow.Application.Role
+﻿namespace NetFlow.Application.Roles
 {
     public class EditRoleRequest
     {
