@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Guarantees\" />
     <Folder Include="Assets\" />
     <Folder Include="Documents\" />
+    <Folder Include="Guarantees\" />
     <Folder Include="Tenders\" />
   </ItemGroup>
 

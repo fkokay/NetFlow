@@ -3,40 +3,28 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NetFlow.Application.Common.Pagination;
 using NetFlow.Application.Firms;
-using NetFlow.Application.Role;
-using NetFlow.Domain.Identity;
-using NetFlow.ReadModel.Roles;
-using NetFlow.ReadModel.Tenders;
+using NetFlow.Application.Modules;
+using NetFlow.ReadModel.Firms;
+using NetFlow.ReadModel.Modules;
 
 namespace NetFlow.Api.Controllers
 {
     [ApiController]
-    [Route("api/roles")]
-    [Authorize]
-    public class RolesController : ControllerBase
+    [Route("api/modules")]
+    public class ModulesController : ControllerBase
     {
-        protected readonly CurrentUser _current;
-        private readonly RoleReadService _read;
-        private readonly RoleWriteService _write;
-        public RolesController(CurrentUser current, RoleReadService read, RoleWriteService write)
+        private readonly ModuleReadService _read;
+        private readonly ModuleWriteService _write;
+
+        public ModulesController(ModuleReadService read, ModuleWriteService write)
         {
-            _current = current;
             _read = read;
             _write = write;
         }
 
-        // GET api/roles
         [HttpGet]
-        public async Task<IActionResult> List([FromQuery] PagedRequest pagedRequest)
-        {
-            if (_current.User == null)
-            {
-                return NotFound();
-            }
-            return Ok(await _read.ListAsync(_current.User.Firm.Id, pagedRequest));
-        }
+        public async Task<IActionResult> List([FromQuery] PagedRequest pagedRequest) => Ok(await _read.ListAsync(pagedRequest));
 
-        // GET api/roles/10
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -45,7 +33,7 @@ namespace NetFlow.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateRoleRequest request)
+        public async Task<IActionResult> Create([FromBody] CreateModuleRequest request)
         {
             var id = await _write.CreateAsync(request);
 
@@ -55,7 +43,7 @@ namespace NetFlow.Api.Controllers
                 null);
         }
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] EditRoleRequest request)
+        public async Task<IActionResult> Update([FromBody] EditModuleRequest request)
         {
             var id = await _write.EditAsync(request);
             return CreatedAtAction(

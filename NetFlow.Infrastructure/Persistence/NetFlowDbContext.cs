@@ -28,6 +28,7 @@ namespace NetFlow.Infrastructure.Persistence
         public DbSet<RolePermissionEntity> RolePermissions => Set<RolePermissionEntity>();
 
         public DbSet<FirmEntity> Firms => Set<FirmEntity>();
+        public DbSet<ModuleEntity> Modules => Set<ModuleEntity>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

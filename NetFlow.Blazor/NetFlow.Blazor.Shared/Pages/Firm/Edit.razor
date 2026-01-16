@@ -1,8 +1,11 @@
 ﻿@page "/firm/edit/{Id:int}"
 
-@inject NavigationManager Navigation
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http.Json
 
 <div class="content-root">
     <div class="card toolbar">
@@ -20,6 +23,7 @@
                     <Template>
                         <DxButton Text="Kaydet"
                                   Click="SaveFromOutside"
+                                  Enabled="!isSaving"
                                   RenderStyleMode="ButtonRenderStyleMode.Outline"
                                   RenderStyle="ButtonRenderStyle.Success" />
                     </Template>
@@ -114,6 +118,7 @@
         else
         {
             <div class="p-4 text-center">
+                <DxWaitIndicator Visible="true" />
                 <p>Veriler yükleniyor...</p>
             </div>
         }
@@ -128,7 +133,7 @@
                 @(isSuccess ? "✓" : "!")
             </div>
             <div>
-                <div style="font-size:1.05rem;font-weight:600;">@(isSuccess ? "Güncelleme Başarılı" : "Güncelleme Hatası")</div>
+                <div style="font-size:1.05rem;font-weight:600;">@(isSuccess ? "İşlem Başarılı" : "İşlem Hatası")</div>
                 <div style="font-size:12px;opacity:.85">@popupTitle</div>
             </div>
         </div>
@@ -139,7 +144,7 @@
                 @(isSuccess ? "✓" : "!")
             </div>
             <div style="flex:1;">
-                <h5 style="margin:0 0 6px 0;font-weight:600;color:#222;">@(isSuccess ? "Kayıt başarıyla güncellendi" : "İşlem tamamlanamadı")</h5>
+                <h5 style="margin:0 0 6px 0;font-weight:600;color:#222;">@(isSuccess ? "Bilgiler Güncellendi" : "Hata Oluştu")</h5>
                 <p style="margin:0;color:#555;font-size:14px;line-height:1.6;">@popupMessage</p>
             </div>
         </div>
@@ -163,19 +168,31 @@
     {
         if (Id > 0)
         {
-            //var firm = await FirmApi.GetByIdAsync(Id);
-            // if (firm == null)
-            // {
-            //     Navigation.NavigateTo("/firm/list");
-            //     return;
-            // }
-            // model = firm;
+            try
+            {
+                var httpClient = HttpClientFactory.CreateClient("ApiClient");
+                var client = await ApiClientFactory.CreateAsync(httpClient);
+
+                var result = await client.GetFromJsonAsync<FirmModel>($"api/firms/{Id}");
+
+                if (result != null)
+                {
+                    model = result;
+                    editContext = new EditContext(model);
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("/firm/list");
+                }
+            }
+            catch (Exception ex)
+            {
+                popupTitle = "Yükleme Hatası";
+                popupMessage = "Veriler getirilirken bir hata oluştu: " + ex.Message;
+                isSuccess = false;
+                popupVisible = true;
+            }
         }
-        else
-        {
-            model = new FirmModel();
-        }
-        editContext = new EditContext(model);
     }
 
     private async Task SaveFromOutside()
@@ -192,19 +209,30 @@
 
         try
         {
-            // var response = await FirmApi.UpdateAsync(Id, model);
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
 
-            // isSuccess = response.Success;
-            // popupTitle = isSuccess ? "Başarılı" : "Hata";
-            // popupMessage = response.Message ?? (isSuccess
-            //     ? (Id == 0 ? "Firma başarıyla oluşturuldu." : "Firma başarıyla güncellendi.")
-            //     : "İşlem sırasında hata oluştu.");
+            var response = await client.PutAsJsonAsync("api/firms", model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                isSuccess = true;
+                popupTitle = "Başarılı";
+                popupMessage = "Firma bilgileri başarıyla güncellendi.";
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                isSuccess = false;
+                popupTitle = "Sunucu Hatası";
+                popupMessage = string.IsNullOrEmpty(errorMsg) ? "Güncelleme sırasında bir hata oluştu." : errorMsg;
+            }
         }
-        catch
+        catch (Exception ex)
         {
             isSuccess = false;
             popupTitle = "Bağlantı Hatası";
-            popupMessage = "Sunucu yanıt vermiyor.";
+            popupMessage = "Sunucuyla iletişim kurulamadı: " + ex.Message;
         }
         finally
         {
@@ -217,8 +245,8 @@
     {
         popupVisible = false;
         if (isSuccess)
-            Navigation.NavigateTo("/firm/list");
+            NavigationManager.NavigateTo("/firm/list");
     }
 
-    private void NavigateBack() => Navigation.NavigateTo("/firm/list");
+    private void NavigateBack() => NavigationManager.NavigateTo("/firm/list");
 }

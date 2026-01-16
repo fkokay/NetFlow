@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NetFlow.Application.Firms;
+using NetFlow.Application.Modules;
+using NetFlow.Application.Role;
 using NetFlow.Application.Shipping;
 using System;
 using System.Collections.Generic;
@@ -15,6 +17,8 @@ namespace NetFlow.Application
             //services.AddScoped<CreateOrderHandler>();
             services.AddScoped<ShipmentService>();
             services.AddScoped<FirmWriteService>();
+            services.AddScoped<RoleWriteService>();
+            services.AddScoped<ModuleWriteService>();
             return services;
         }
     }
