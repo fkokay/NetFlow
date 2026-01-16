@@ -39,7 +39,10 @@ namespace NetFlow.Netsis.Repositories
             return dto.Select(x =>
                       ShipmentOrder.Create(
                           x.SIPARIS_NO,
+                          x.CARI_KODU,
+                          x.CARI_ADI,
                           x.STOK_KODU,
+                          x.STOK_ADI,
                           x.MIKTAR,
                           x.DEPO_KODU,
                           x.DEPO_BAKIYE
