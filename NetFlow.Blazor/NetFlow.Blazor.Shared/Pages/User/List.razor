@@ -119,26 +119,22 @@
     {
         var httpClient = HttpClientFactory.CreateClient("ApiClient");
         var client = await ApiClientFactory.CreateAsync(httpClient);
-        // Not: DevExtremeDataSource için API endpoint'inizin LoadOptions desteklemesi önerilir.
         Data = new GridDevExtremeDataSource<UserModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/users"));
 
         if (Grid != null) Grid.Reload();
         await InvokeAsync(StateHasChanged);
     }
 
-    // --- DÜZENLEME BUTONUNA BASINCA ÇALIŞACAK KISIM ---
+
     void OnEditStart(GridEditStartEventArgs e)
     {
-        // 1. Grid'in varsayılan edit formunu/popubını açmasını engelle
         e.Cancel = true;
-
-        // 2. İlgili satırın modelini al
         var user = (UserModel)e.DataItem;
 
-        // 3. Düzenleme sayfasına yönlendir (örn: /user/edit/5)
+
         NavigationManager.NavigateTo($"/user/edit/{user.Id}");
     }
-    // ------------------------------------------------
+
 
     async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
     {

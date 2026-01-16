@@ -1,0 +1,193 @@
+@page "/user/edit/{Id:int}"
+@using System.ComponentModel.DataAnnotations
+@using System.Net.Http.Json
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager NavigationManager
+
+<div class="content-root">
+    <div class="card toolbar mb-3">
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <Items>
+                <DxToolbarItem IconCssClass="back-icon icon medium-icon"
+                               Tooltip="Geri Dön"
+                               Click="@(() => NavigationManager.NavigateTo("/user/list"))" />
+
+                <DxToolbarItem>
+                    <Template>
+                        <div class="custom-item">
+                            <div class="title" style="font-weight: bold; font-size: 1.1rem;">Kullanýcý Güncelleme</div>
+                        </div>
+                    </Template>
+                </DxToolbarItem>
+
+                <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                    <Template>
+                        <DxButton Text="Kaydet"
+                                  Click="HandleValidSubmit"
+                                  Enabled="!isSaving"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  RenderStyle="ButtonRenderStyle.Success" />
+                    </Template>
+                </DxToolbarItem>
+            </Items>
+        </DxToolbar>
+    </div>
+
+    @if (User == null)
+    {
+        <div class="text-center p-5">
+            <DxLoadingPanel Visible="true" IsContentBlocked="true" Text="Kullanýcý verileri yükleniyor..." />
+        </div>
+    }
+    else
+    {
+        <div class="card p-3 shadow-sm">
+            <DxFormLayout>
+                <DxFormLayoutItem ColSpanMd="12" Context="formLayoutContext">
+                    <DxTabs @bind-ActiveTabIndex="@ActiveTabIndex">
+
+                        <DxTabPage Text="Kullanýcý Bilgileri">
+                            <div class="p-4">
+                                <DxFormLayout CaptionPosition="CaptionPosition.Vertical">
+                                    <DxFormLayoutItem Caption="Ad" ColSpanMd="6">
+                                        <DxTextBox @bind-Text="@User.FirstName" ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                                    </DxFormLayoutItem>
+
+                                    <DxFormLayoutItem Caption="Soyad" ColSpanMd="6">
+                                        <DxTextBox @bind-Text="@User.LastName" ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                                    </DxFormLayoutItem>
+
+                                    <DxFormLayoutItem Caption="E-posta" ColSpanMd="6">
+                                        <DxTextBox @bind-Text="@User.Email" />
+                                    </DxFormLayoutItem>
+
+                                    <DxFormLayoutItem Caption="Telefon" ColSpanMd="6">
+                                        <DxTextBox @bind-Text="@User.Phone" />
+                                    </DxFormLayoutItem>
+
+                                    <DxFormLayoutItem Caption="Þifre" ColSpanMd="6">
+                                        <DxTextBox @bind-Text="@User.Password" Password="true" />
+                                    </DxFormLayoutItem>
+
+                                    <DxFormLayoutItem Caption="Durum" ColSpanMd="6">
+                                        <DxCheckBox @bind-Checked="@User.Active">Aktif</DxCheckBox>
+                                    </DxFormLayoutItem>
+
+                                    <DxFormLayoutItem Caption="Yetkili Firmalar" ColSpanMd="12" CssClass="mt-2">
+                                        <DxTagBox TData="FirmSelectModel"
+                                                  TValue="int"
+                                                  Data="@AvailableFirms"
+                                                  TextFieldName="FirmName"
+                                                  ValueFieldName="Id"
+                                                  Values="@User.FirmIds"
+                                                  ValuesExpression="@(() => User.FirmIds)"
+                                                  ValuesChanged="@((IEnumerable<int> values) => User.FirmIds = values.ToList())"
+                                                  NullText="Firma seçiniz..."
+                                                  ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                                  TagDecorationMode="TagDecorationMode.Rounded" />
+                                    </DxFormLayoutItem>
+                                </DxFormLayout>
+                            </div>
+                        </DxTabPage>
+
+                        <DxTabPage Text="Rol Ýþlemleri">
+                            <div class="p-4">
+                                <DxFormLayout CaptionPosition="CaptionPosition.Vertical">
+                                    <DxFormLayoutItem Caption="Kullanýcý Rolleri" ColSpanMd="12">
+                                        <DxTagBox TData="RoleSelectModel"
+                                                  TValue="int"
+                                                  Data="@AvailableRoles"
+                                                  TextFieldName="Name"
+                                                  ValueFieldName="Id"
+                                                  Values="@User.RoleIds"
+                                                  ValuesExpression="@(() => User.RoleIds)"
+                                                  ValuesChanged="@((IEnumerable<int> values) => User.RoleIds = values.ToList())"
+                                                  NullText="Rol seçiniz..."
+                                                  ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                                  TagDecorationMode="TagDecorationMode.Rounded" />
+                                    </DxFormLayoutItem>
+                                </DxFormLayout>
+                            </div>
+                        </DxTabPage>
+                    </DxTabs>
+                </DxFormLayoutItem>
+            </DxFormLayout>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private UserModel? User { get; set; }
+    private int ActiveTabIndex { get; set; } = 0;
+    private bool isSaving = false;
+    private List<RoleSelectModel> AvailableRoles = new();
+    private List<FirmSelectModel> AvailableFirms = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUserAsync();
+        await LoadFirmsAsync();
+        await LoadRolesAsync();
+    }
+
+    private async Task LoadUserAsync()
+    {
+        try
+        {
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+            User = await client.GetFromJsonAsync<UserModel>($"api/users/{Id}");
+
+            if (User != null)
+            {
+                User.RoleIds ??= new List<int>();
+                User.FirmIds ??= new List<int>();
+            }
+        }
+        catch (Exception ex) { Console.WriteLine($"Yükleme Hatasý: {ex.Message}"); }
+    }
+
+    private async Task LoadFirmsAsync()
+    {
+        try
+        {
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+            var result = await client.GetFromJsonAsync<List<FirmSelectModel>>("api/firms/simple");
+            if (result != null) AvailableFirms = result;
+        }
+        catch (Exception ex) { Console.WriteLine($"Firma Hatasý: {ex.Message}"); }
+    }
+
+    private async Task LoadRolesAsync()
+    {
+        try
+        {
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+            var result = await client.GetFromJsonAsync<List<RoleSelectModel>>("api/roles/simple");
+            if (result != null) AvailableRoles = result;
+        }
+        catch (Exception ex) { Console.WriteLine($"Rol Hatasý: {ex.Message}"); }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (User == null || isSaving) return;
+        isSaving = true;
+        try
+        {
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+            var response = await client.PutAsJsonAsync("api/users", User);
+            if (response.IsSuccessStatusCode)
+                NavigationManager.NavigateTo("/user/list");
+        }
+        catch (Exception ex) { Console.WriteLine($"Kaydetme Hatasý: {ex.Message}"); }
+        finally { isSaving = false; }
+    }
+
+    public class FirmSelectModel { public int Id { get; set; } public string FirmName { get; set; } = string.Empty; }
+}

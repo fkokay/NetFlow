@@ -5,9 +5,9 @@ using System.Text;
 
 namespace NetFlow.Domain.Netsis.Customers
 {
-    public class InvalidProductNameException : DomainException
+    public class InvalidCustomerNameException : DomainException
     {
-        public InvalidProductNameException() : base("CUSTOMER_INVALID_NAME", "Geçersiz müşteri adı")
+        public InvalidCustomerNameException() : base("CUSTOMER_INVALID_NAME", "Geçersiz müşteri adı")
         {
         }
     }

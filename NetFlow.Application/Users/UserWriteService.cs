@@ -60,6 +60,7 @@ namespace NetFlow.Application.Users
             if (user == null)
                 throw new Exception("User not found");
 
+            // Kullanıcı bilgileri
             user.FirstName = request.FirstName;
             user.LastName = request.LastName;
             user.Email = request.Email;
@@ -69,48 +70,39 @@ namespace NetFlow.Application.Users
             if (!string.IsNullOrWhiteSpace(request.Password))
                 user.Password = request.Password;
 
+            
+            var oldFirmRoles = _db.UserInFirms.Where(x => x.UserId == user.Id);
+            _db.UserInFirms.RemoveRange(oldFirmRoles);
 
-            var oldRoles = _db.UserInRoles.Where(x => x.UserId == user.Id);
-            _db.UserInRoles.RemoveRange(oldRoles);
+       
+            var firmIds = request.FirmIds?
+                .Where(x => x > 0)
+                .Distinct()
+                .ToList();
 
-            if (request.RoleIds != null && request.RoleIds.Any())
+           
+            var selectedRoleId = request.RoleIds?
+                .Where(x => x > 0)
+                .Distinct()
+                .FirstOrDefault();
+
+            // 4️⃣ Seçilen rolü tüm firmalara ata
+            if (firmIds != null && firmIds.Any() && selectedRoleId > 0)
             {
-                foreach (var roleId in request.RoleIds)
+                var newRows = firmIds.Select(firmId => new UserInFirmEntity
                 {
-                    _db.UserInRoles.Add(new UserInRoleEntity
-                    {
-                        UserId = user.Id,
-                        RoleId = roleId
-                    });
-                }
-            }
+                    UserId = user.Id,
+                    FirmId = firmId,
+                    RoleId = selectedRoleId.Value
+                });
 
-
-            var oldFirms = _db.UserInFirms.Where(x => x.UserId == user.Id);
-            _db.UserInFirms.RemoveRange(oldFirms);
-
-            if (
-                request.FirmIds != null && request.FirmIds.Any() &&
-                request.RoleIds != null && request.RoleIds.Any()
-            )
-            {
-                foreach (var firmId in request.FirmIds)
-                {
-                    foreach (var roleId in request.RoleIds)
-                    {
-                        _db.UserInFirms.Add(new UserInFirmEntity
-                        {
-                            UserId = user.Id,
-                            FirmId = firmId,
-                            RoleId = roleId
-                        });
-                    }
-                }
+                await _db.UserInFirms.AddRangeAsync(newRows);
             }
 
             await _db.SaveChangesAsync();
             return user.Id;
         }
+
         public async Task DeleteAsync(int id)
         {
             var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == id);

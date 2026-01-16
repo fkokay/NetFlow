@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using NetFlow.Application.Common.Pagination;
 using NetFlow.Application.Common.Utils;
+using NetFlow.ReadModel.Firms;
 using NetFlow.ReadModel.Guarantees;
 using NetFlow.ReadModel.Tenders;
 using System;
@@ -62,7 +63,21 @@ namespace NetFlow.ReadModel.Roles
             };
         }
 
+        public async Task<List<RoleSelectDto>> GetRoleListAsync()
+        {
+            using var cn = new SqlConnection(_opt.ConnectionString);
 
+            const string sql = @"
+                SELECT
+                    Id,
+                    Name
+                FROM Role WITH (NOLOCK)
+                ORDER BY Name
+            ";
+
+            var data = await cn.QueryAsync<RoleSelectDto>(sql);
+            return data.ToList();
+        }
         public async Task<RoleDto?> GetAsync(int id)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);

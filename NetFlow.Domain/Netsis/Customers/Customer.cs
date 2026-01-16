@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using NetFlow.Domain.Netsis.Customers;
 
 namespace NetFlow.Domain.Netsis.Customers
 {

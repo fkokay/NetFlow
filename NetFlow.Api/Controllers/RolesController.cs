@@ -35,7 +35,8 @@ namespace NetFlow.Api.Controllers
             }
             return Ok(await _read.ListAsync(_current.User.Firm.Id, pagedRequest));
         }
-
+        [HttpGet("simple")]
+        public async Task<IActionResult> List() => Ok(await _read.GetRoleListAsync());
         // GET api/roles/10
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(int id)
