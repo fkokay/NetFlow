@@ -113,24 +113,24 @@ namespace NetFlow.Application.Users
         }
         public async Task DeleteAsync(int id)
         {
-            
+            var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == id);
+            if (user == null)
+                throw new Exception("User not found");
+
             var userRoles = await _db.UserInRoles
                 .Where(x => x.UserId == id)
                 .ToListAsync();
+            _db.UserInRoles.RemoveRange(userRoles);
 
-            if (userRoles.Any())
-                _db.UserInRoles.RemoveRange(userRoles);
             var userFirms = await _db.UserInFirms
                 .Where(x => x.UserId == id)
                 .ToListAsync();
-            if (userFirms.Any())
-                _db.UserInFirms.RemoveRange(userFirms);
-            var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == id);
-            if (user != null)
-                _db.Users.Remove(user);
+            _db.UserInFirms.RemoveRange(userFirms);
 
+            _db.Users.Remove(user);
             await _db.SaveChangesAsync();
         }
+
 
     }
 }
