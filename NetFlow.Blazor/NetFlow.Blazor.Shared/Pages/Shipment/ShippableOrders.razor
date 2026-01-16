@@ -1,0 +1,45 @@
+﻿@page "/shipment/shippable-orders"
+
+<div class="content-root">
+    <div class="filter-section mb-3 rounded border bg-white p-3 shadow-sm">
+        <DxFormLayout>
+            <DxFormLayoutItem Caption="Cari Hesap" ColSpanMd="4">
+                <DxTextBox @bind-Text="@FilterRequest.Customer" ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" NullText="Cari Kodu Seçiniz...">
+                    <Buttons>
+                        <DxEditorButton IconCssClass="add-icon icon medium-icon" Click="OnCariSelectorClick" />
+                    </Buttons>
+                </DxTextBox>
+            </DxFormLayoutItem>
+            <DxFormLayoutItem ColSpanMd="8">
+                <div class="align-items-center d-flex h-100"><DxCheckBox @bind-Checked="@FilterRequest.HasBalance">Bakiyesi Olanlar</DxCheckBox></div>
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Başlangıç" ColSpanMd="3">
+                <DxDateEdit @bind-Date="@FilterRequest.StartDate" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Bitiş" ColSpanMd="3">
+                <DxDateEdit @bind-Date="@FilterRequest.EndDate" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Depo" ColSpanMd="4">
+                <DxComboBox Data="@Warehouses" @bind-Value="@FilterRequest.Warehouse" ValueFieldName="DEPO_KODU" TextFieldName="DEPO_TANIMI" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem ColSpanMd="2">
+                <DxButton Text="Filtrele" RenderStyle="ButtonRenderStyle.Primary" Click="@LoadGridDataAsync" Width="100%" />
+            </DxFormLayoutItem>
+        </DxFormLayout>
+    </div>
+</div>
+
+@code {
+    private ShippableOrdersFilterRequest FilterRequest { get; set; } = new ShippableOrdersFilterRequest();
+    private List<WarehouseModel> Warehouses { get; set; } = new List<WarehouseModel>();
+
+    void OnCariSelectorClick()
+    {
+        // Cari selector logic here
+    }
+
+    async Task LoadGridDataAsync()
+    {
+        // Load grid data logic here
+    }
+}
