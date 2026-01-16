@@ -13,8 +13,7 @@ namespace NetFlow.ReadModel.Firms
     {
         private readonly ReadModelOptions _opt;
         public FirmReadService(ReadModelOptions opt) => _opt = opt;
-
-       public async Task<PagedResult> ListAsync(PagedRequest pagedRequest)
+        public async Task<PagedResult> ListAsync(PagedRequest pagedRequest)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
             var parameters = new DynamicParameters();
@@ -75,6 +74,22 @@ namespace NetFlow.ReadModel.Firms
                 totalCount = totalCount
             };
         }
+        public async Task<List<FirmSelectDto>> GetFirmListAsync()
+        {
+            using var cn = new SqlConnection(_opt.ConnectionString);
+
+            const string sql = @"
+                SELECT
+                    Id,
+                    FirmName
+                FROM dbo.VW_Firm WITH (NOLOCK)
+                ORDER BY FirmName
+            ";
+
+            var data = await cn.QueryAsync<FirmSelectDto>(sql);
+            return data.ToList();
+        }
+
         public async Task<FirmDto?> GetAsync(int id)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);

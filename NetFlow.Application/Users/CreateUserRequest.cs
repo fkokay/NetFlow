@@ -14,5 +14,6 @@ namespace NetFlow.Application.Users
         public bool Active { get; set; }
         public string? Password { get; set; }
         public string Roles { get; set; } = string.Empty;
+        public List<int>? FirmIds { get; set; } = new List<int>();
     }
 }

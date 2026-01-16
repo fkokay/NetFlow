@@ -26,4 +26,5 @@ namespace NetFlow.ReadModel.Firms
         public string? EARSSeri { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
     }
+
 }

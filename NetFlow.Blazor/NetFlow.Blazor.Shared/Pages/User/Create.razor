@@ -1,4 +1,5 @@
 ﻿@page "/user/create"
+@using System.Net.Http.Json
 @inject NavigationManager NavigationManager
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
@@ -7,7 +8,7 @@
     <div class="card toolbar">
         <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
             <Items>
-                <DxToolbarItem IconCssClass="back-icon icon medium-icon" Tooltip="Go to Back" Click="@NavigateBack" />
+                <DxToolbarItem IconCssClass="back-icon icon medium-icon" Tooltip="Geri Dön" Click="@NavigateBack" />
                 <DxToolbarItem>
                     <Template>
                         <div class="custom-item">
@@ -19,6 +20,7 @@
                     <Template>
                         <DxButton Text="Kaydet"
                                   Click="SaveFromOutside"
+                                  Enabled="!isSaving"
                                   RenderStyleMode="ButtonRenderStyleMode.Outline"
                                   RenderStyle="ButtonRenderStyle.Success" />
                     </Template>
@@ -26,41 +28,43 @@
             </Items>
         </DxToolbar>
     </div>
-    <div class="user-create">
+
+    <div class="user-create p-3">
         <EditForm EditContext="@editContext" Context="formContext">
             <DataAnnotationsValidator />
 
-            <DxFormLayout ColSpanMd="6">
-                <DxFormLayoutItem Caption="Adı">
-                    <DxTextBox @bind-Text="model.FirstName"
-                               ValidationEnabled="true"
-                               ShowValidationIcon="true" />
+            <DxFormLayout>
+                <DxFormLayoutItem Caption="Adı" ColSpanMd="6">
+                    <DxTextBox @bind-Text="model.FirstName" ValidationEnabled="true" ShowValidationIcon="true" />
                 </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="Soyadı">
-                    <DxTextBox @bind-Text="model.LastName"
-                               ValidationEnabled="true"
-                               ShowValidationIcon="true" />
+                <DxFormLayoutItem Caption="Soyadı" ColSpanMd="6">
+                    <DxTextBox @bind-Text="model.LastName" ValidationEnabled="true" ShowValidationIcon="true" />
                 </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="Telefon">
-                    <DxTextBox @bind-Text="model.Phone"
-                               ValidationEnabled="true"
-                               ShowValidationIcon="true" />
+                <DxFormLayoutItem Caption="Telefon" ColSpanMd="6">
+                    <DxTextBox @bind-Text="model.Phone" ValidationEnabled="true" ShowValidationIcon="true" />
                 </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="Mail">
-                    <DxTextBox @bind-Text="model.Email"
-                               InputMode="InputMode.Email"
-                               ValidationEnabled="true"
-                               ShowValidationIcon="true" />
+                <DxFormLayoutItem Caption="Mail" ColSpanMd="6">
+                    <DxTextBox @bind-Text="model.Email" InputMode="InputMode.Email" ValidationEnabled="true" ShowValidationIcon="true" />
                 </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="Şifre">
-                    <DxTextBox @bind-Text="model.Password"
-                               Password="true"
-                               ValidationEnabled="true"
-                               ShowValidationIcon="true" />
+                <DxFormLayoutItem Caption="Şifre" ColSpanMd="12">
+                    <DxTextBox @bind-Text="model.Password" Password="true" ValidationEnabled="true" ShowValidationIcon="true" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Yetkili Firmalar" ColSpanMd="12">
+                    <DxTagBox TData="FirmSelectModel"
+                              TValue="int"
+                              Data="@Firms"
+                              TextFieldName="FirmName"
+                              ValueFieldName="Id"
+                              Values="@model.FirmIds"
+                              ValuesExpression="@(() => model.FirmIds)"
+                              ValuesChanged="@((IEnumerable<int> values) => model.FirmIds = values.ToList())"
+                              NullText="Firma seçiniz..."
+                              ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem ColSpanMd="12">
@@ -68,83 +72,85 @@
                 </DxFormLayoutItem>
             </DxFormLayout>
         </EditForm>
-
     </div>
 </div>
 
-<DxPopup @bind-Visible="popupVisible"
-         HeaderText="@popupTitle"
-         Width="420px"
-         ShowFooter="true"
-         CloseOnOutsideClick="false"
-         HeaderCssClass="@(isSuccess ? "dx-bg-success" : "dx-bg-danger")"
-         AnimationType="PopupAnimationType.Fade">
-
+@* Popup Bildirim *@
+<DxPopup @bind-Visible="popupVisible" HeaderText="@popupTitle" Width="420px" ShowFooter="true" CloseOnOutsideClick="false">
     <HeaderTemplate>
         <div style="background-color: @(isSuccess ? "#28a745" : "#dc3545"); color: white; padding: 12px 16px; width: 100%;">
-            <span style="font-weight: bold; font-size: 1.1rem;">@popupTitle</span>
+            <span style="font-weight: bold;">@popupTitle</span>
         </div>
     </HeaderTemplate>
     <BodyTemplate>
         <div style="display: flex; align-items: flex-start; padding: 25px;">
-            <div style="margin-right: 20px;">
-                @if (isSuccess)
-                {
-                    <div style="width: 50px; height: 50px; border-radius: 50%; background-color: #e9f7ef; color: #28a745; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">
-                        ✓
-                    </div>
-                }
-                else
-                {
-                    <div style="width: 50px; height: 50px; border-radius: 50%; background-color: #fdeaea; color: #dc3545; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">
-                        !
-                    </div>
-                }
-            </div>
             <div style="flex: 1;">
-                <h5 style="margin: 0 0 8px 0; font-weight: bold; color: #333;">
-                    @(isSuccess ? "İşlem Tamamlandı" : "Bir Hata Oluştu")
-                </h5>
-                <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.5;">
-                    @popupMessage
-                </p>
+                <h5 style="font-weight: bold; color: #333;">@(isSuccess ? "İşlem Tamamlandı" : "Bir Hata Oluştu")</h5>
+                <p style="color: #666; font-size: 14px;">@popupMessage</p>
             </div>
         </div>
     </BodyTemplate>
     <FooterTemplate>
-        <div style="padding: 12px; display: flex; justify-content: flex-end; border-top: 1px solid #eee; background-color: #fafafa; width: 100%;">
-            <DxButton Text="Kapat"
-                      RenderStyle="@(isSuccess ? ButtonRenderStyle.Success : ButtonRenderStyle.Danger)"
-                      Click="OnPopupOk"
-                      Width="110px" />
+        <div style="padding: 12px; display: flex; justify-content: flex-end; width: 100%;">
+            <DxButton Text="Kapat" RenderStyle="@(isSuccess? ButtonRenderStyle.Success: ButtonRenderStyle.Danger)" Click="OnPopupOk" Width="110px" />
         </div>
     </FooterTemplate>
 </DxPopup>
 
 @code {
     private UserModel model = new();
-    private EditContext editContext;
+    private EditContext editContext = null!;
     private bool isSaving, popupVisible, isSuccess;
     private string popupTitle = "", popupMessage = "";
+    private List<FirmSelectModel> Firms { get; set; } = new();
 
     protected override void OnInitialized()
     {
+        model.FirmIds ??= new List<int>();
         editContext = new EditContext(model);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadFirmsAsync();
+        }
+    }
+
+    private async Task LoadFirmsAsync()
+    {
+        try
+        {
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+
+            var result = await client.GetFromJsonAsync<List<FirmSelectModel>>("api/firms/simple");
+
+            if (result != null)
+            {
+                Firms = result;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Firma yükleme hatası: {ex.Message}");
+        }
     }
 
     private async Task SaveFromOutside()
     {
         if (isSaving) return;
-        var isValid = editContext.Validate();
-        if (!isValid) return;
-        await HandleValidSubmit();
+        if (editContext.Validate())
+        {
+            await HandleValidSubmit();
+        }
     }
 
     private async Task HandleValidSubmit()
     {
-        if (isSaving) return;
         isSaving = true;
-
         try
         {
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
@@ -152,42 +158,32 @@
 
             var response = await client.PostAsJsonAsync("api/users", model);
 
-            if (response.IsSuccessStatusCode)
-            {
-                isSuccess = true;
-                popupTitle = "Başarılı";
-                popupMessage = "Kullanıcı başarıyla oluşturuldu.";
-            }
+            isSuccess = response.IsSuccessStatusCode;
+            popupTitle = isSuccess ? "Başarılı" : "Hata";
+
+            if (!isSuccess)
+                popupMessage = await response.Content.ReadAsStringAsync();
             else
-            {
-                var errorMsg = await response.Content.ReadAsStringAsync();
-                isSuccess = false;
-                popupTitle = "İşlem Başarısız";
-                popupMessage = string.IsNullOrEmpty(errorMsg) ? "Kullanıcı oluşturulurken bir hata oluştu." : errorMsg;
-            }
+                popupMessage = "Kullanıcı başarıyla oluşturuldu.";
         }
         catch (Exception ex)
         {
             isSuccess = false;
             popupTitle = "Bağlantı Hatası";
-            popupMessage = "Sunucu yanıt vermiyor. Lütfen ağ bağlantınızı kontrol edin.";
-            
+            popupMessage = ex.Message;
         }
         finally
         {
-            popupVisible = true;
             isSaving = false;
-            StateHasChanged();
+            popupVisible = true;
+            await InvokeAsync(StateHasChanged);
         }
     }
-
-    private void HandleInvalidSubmit() => popupVisible = false;
 
     private void OnPopupOk()
     {
         popupVisible = false;
-        if (isSuccess)
-            NavigationManager.NavigateTo("/user/list");
+        if (isSuccess) NavigationManager.NavigateTo("/user/list");
     }
 
     private void NavigateBack() => NavigationManager.NavigateTo("/user/list");
