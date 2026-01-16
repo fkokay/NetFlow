@@ -25,7 +25,10 @@ namespace NetFlow.ReadModel.Users
                 parameters.AddDynamicParams(p);
             }
 
-            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.sort, "usr.Id DESC");
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(
+                pagedRequest.sort,
+                "usr.Id DESC"
+            );
 
             string countSql = @"
                 SELECT COUNT(1)
@@ -33,25 +36,37 @@ namespace NetFlow.ReadModel.Users
             ";
 
             string dataSql = $@"
-                SELECT
-                    usr.Id,
-                    usr.FirstName,
-                    usr.LastName,
-                    usr.Email,
-                    usr.Phone,
-                    usr.Password,
-                    usr.Active,
-                    STUFF((
-                        SELECT ', ' + role.Name
-                        FROM [UserInRole] userRole
-                        INNER JOIN [Role] role ON role.Id = userRole.RoleId
-                        WHERE userRole.UserId = usr.Id
-                        FOR XML PATH(''), TYPE
-                    ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS Roles
-                FROM [User] usr WITH (NOLOCK)
-                ORDER BY {orderBy}
-                OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
-            ";
+                    SELECT
+                        usr.Id,
+                        usr.FirstName,
+                        usr.LastName,
+                        usr.Email,
+                        usr.Phone,
+                        usr.Password,
+                        usr.Active,
+
+                        -- 🔹 Roles
+                        STUFF((
+                            SELECT ', ' + r.Name
+                            FROM [UserInRole] ur
+                            INNER JOIN [Role] r ON r.Id = ur.RoleId
+                            WHERE ur.UserId = usr.Id
+                            FOR XML PATH(''), TYPE
+                        ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS Roles,
+
+                        -- 🔹 Firms
+                        STUFF((
+                            SELECT ', ' + f.FirmName
+                            FROM [UserInFirm] uf
+                            INNER JOIN [Firm] f ON f.Id = uf.FirmId
+                            WHERE uf.UserId = usr.Id
+                            FOR XML PATH(''), TYPE
+                        ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS Firms
+
+                    FROM [User] usr WITH (NOLOCK)
+                    ORDER BY {orderBy}
+                    OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
+                ";
 
             int totalCount = await cn.ExecuteScalarAsync<int>(countSql, parameters);
 
@@ -76,32 +91,51 @@ namespace NetFlow.ReadModel.Users
             };
         }
 
+
         public async Task<UserDto?> GetAsync(int id)
         {
             const string sql = @"
-        
-                SELECT TOP (1)
-                    usr.Id,
-                    usr.FirstName,
-                    usr.LastName,
-                    usr.Email,
-                    usr.Phone,
-                    usr.Password,
-                    usr.Active,
-                    STUFF((
-                        SELECT ', ' + r.Name
-                        FROM [UserInRole] ur
-                        INNER JOIN [Role] r ON r.Id = ur.RoleId
-                        WHERE ur.UserId = usr.Id
-                        FOR XML PATH(''), TYPE
-                    ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS Roles
-                FROM [User] usr WITH (NOLOCK)
-                WHERE usr.Id = @Id;
+       
+                 SELECT TOP (1)
+                     usr.Id,
+                     usr.FirstName,
+                     usr.LastName,
+                     usr.Email,
+                     usr.Phone,
+                     usr.Password,
+                     usr.Active,
 
-                SELECT
-                    RoleId
-                FROM [UserInRole] WITH (NOLOCK)
-                WHERE UserId = @Id;
+                     STUFF((
+                         SELECT ', ' + r.Name
+                         FROM [UserInRole] ur
+                         INNER JOIN [Role] r ON r.Id = ur.RoleId
+                         WHERE ur.UserId = usr.Id
+                         FOR XML PATH(''), TYPE
+                     ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS Roles,
+
+                     -- Firms (string)
+                     STUFF((
+                         SELECT ', ' + f.FirmName
+                         FROM [UserInFirm] uf
+                         INNER JOIN [Firm] f ON f.Id = uf.FirmId
+                         WHERE uf.UserId = usr.Id
+                         FOR XML PATH(''), TYPE
+                     ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS Firms
+
+                 FROM [User] usr WITH (NOLOCK)
+                 WHERE usr.Id = @Id;
+
+                 
+                 SELECT
+                     RoleId
+                 FROM [UserInRole] WITH (NOLOCK)
+                 WHERE UserId = @Id;
+
+                 
+                 SELECT
+                     FirmId
+                 FROM [UserInFirm] WITH (NOLOCK)
+                 WHERE UserId = @Id;
             ";
 
             using var cn = new SqlConnection(_opt.ConnectionString);
@@ -112,8 +146,11 @@ namespace NetFlow.ReadModel.Users
                 return null;
 
             user.RoleIds = (await multi.ReadAsync<int>()).ToList();
+            user.FirmIds = (await multi.ReadAsync<int>()).ToList();
+
             return user;
         }
+
 
 
     }

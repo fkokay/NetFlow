@@ -25,6 +25,8 @@ namespace NetFlow.Api.Controllers
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> List([FromQuery] PagedRequest pagedRequest) => Ok(await _read.ListAsync(pagedRequest));
+        [HttpGet("simple")]
+        public async Task<IActionResult> List() => Ok(await _read.GetFirmListAsync());
 
         // GET api/firms/15
         [HttpGet("{id:int}")]

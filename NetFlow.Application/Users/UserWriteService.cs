@@ -37,6 +37,20 @@ namespace NetFlow.Application.Users
                 UserId = user.Id,
                 RoleId = role.Id
             });
+
+            if (request.FirmIds != null && request.FirmIds.Any())
+            {
+                var userFirms = request.FirmIds.Select(firmId =>
+                    new UserInFirmEntity
+                    {
+                        UserId = user.Id,
+                        FirmId = firmId,
+                        RoleId = role?.Id ?? 0 
+                    }).ToList();
+
+                _db.UserInFirms.AddRange(userFirms);
+            }
+
             await _db.SaveChangesAsync();
             return user.Id;
         }
