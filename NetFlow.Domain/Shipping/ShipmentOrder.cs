@@ -6,6 +6,7 @@ namespace NetFlow.Domain.Shipping
 {
     public sealed class ShipmentOrder
     {
+        public int Id { get; }
         public string OrderNo { get; }
         public string CustomerCode { get; }
         public string CustomerName { get; }
@@ -16,6 +17,7 @@ namespace NetFlow.Domain.Shipping
         public decimal AvailableStock { get; }
 
         private ShipmentOrder(
+            int id,
             string orderNo,
             string customerCode,
             string customerName,
@@ -25,6 +27,7 @@ namespace NetFlow.Domain.Shipping
             string warehouse,
             decimal availableStock)
         {
+            Id = id;
             OrderNo = orderNo;
             CustomerCode = customerCode;
             CustomerName = customerName;
@@ -36,6 +39,7 @@ namespace NetFlow.Domain.Shipping
         }
 
         public static ShipmentOrder Create(
+            int id,
             string orderNo,
             string customerCode,
             string customerName,
@@ -55,6 +59,7 @@ namespace NetFlow.Domain.Shipping
                 throw new InvalidShipmentQuantityException();
 
             return new ShipmentOrder(
+                id,
                 orderNo,
                 customerCode,
                 customerName,

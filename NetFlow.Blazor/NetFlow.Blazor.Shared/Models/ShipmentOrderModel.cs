@@ -6,6 +6,7 @@ namespace NetFlow.Blazor.Shared.Models
 {
     public class ShipmentOrderModel
     {
+        public int Id { get; set; }
         public string OrderNo { get; }
         public string CustomerCode { get; }
         public string CustomerName { get; }

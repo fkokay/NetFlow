@@ -47,7 +47,7 @@
             <DxToolbarItem Tooltip="Refresh" BeginGroup="true" Click="@LoadDataAsync" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
         </DxToolbar>
     </div>
-    <DxGrid @ref="Grid" Data="Data" KeyFieldName="ID" CssClass="w-100 shadow-sm" RowClick="@OnRowClick" ShowGroupPanel="true">
+    <DxGrid @ref="Grid" Data="Data" KeyFieldName="Id" CssClass="w-100 shadow-sm" RowClick="@OnRowClick" ShowGroupPanel="true">
         <Columns>
             <DxGridSelectionColumn Width="60px" />
             <DxGridDataColumn Caption="Sipariş No" FieldName="OrderNo" />
