@@ -2,6 +2,7 @@
 using NetFlow.Application.Firms;
 using NetFlow.Application.Modules;
 using NetFlow.Application.Netsis.Customers;
+using NetFlow.Application.Netsis.Orders;
 using NetFlow.Application.Netsis.Products;
 using NetFlow.Application.Netsis.Shipments;
 using NetFlow.Application.Netsis.Warehouses;
@@ -19,6 +20,7 @@ namespace NetFlow.Application
         {
             //NETSİS
             services.AddScoped<CustomerService>();
+            services.AddScoped<OrderService>();
             services.AddScoped<ProductService>();
             services.AddScoped<ShipmentService>();
             services.AddScoped<WarehouseService>();
