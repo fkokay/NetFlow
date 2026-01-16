@@ -24,8 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Sql\ShippableOrders-Firm02.sql" />
-    <Content Include="Sql\ShippableOrders-Firm01.sql" />
     <Content Include="Sql\ShippableOrders.sql" />
   </ItemGroup>
 

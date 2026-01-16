@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NetFlow.Application.Firms;
 using NetFlow.Application.Modules;
+using NetFlow.Application.Netsis.Shipments;
+using NetFlow.Application.Netsis.Warehouses;
 using NetFlow.Application.Roles;
-using NetFlow.Application.Shipping;
 using NetFlow.Application.Users;
 using System;
 using System.Collections.Generic;
@@ -14,9 +15,11 @@ namespace NetFlow.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            //services.AddScoped<ApproveOrderHandler>();
-            //services.AddScoped<CreateOrderHandler>();
+            //NETSİS
             services.AddScoped<ShipmentService>();
+            services.AddScoped<WarehouseService>();
+
+            //NETFLOW
             services.AddScoped<FirmWriteService>();
             services.AddScoped<RoleWriteService>();
             services.AddScoped<ModuleWriteService>();
