@@ -1,5 +1,7 @@
-﻿using NetFlow.Domain.Common;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using NetFlow.Domain.Common;
 using NetFlow.Domain.Firms;
+using NetFlow.Domain.Identity;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -10,14 +12,12 @@ namespace NetFlow.Infrastructure.Common
     public sealed class CachedFileSqlProvider : ISqlProvider, IDisposable
     {
         private readonly string _sqlPath;
-        private readonly ICurrentFirmProvider _firm;
         private readonly ConcurrentDictionary<string, string> _cache = new();
         private readonly FileSystemWatcher _watcher;
 
-        public CachedFileSqlProvider(string sqlPath, ICurrentFirmProvider firm)
+        public CachedFileSqlProvider(string sqlPath)
         {
             _sqlPath = sqlPath;
-            _firm = firm;
             _watcher = new FileSystemWatcher(sqlPath, "*.sql");
             _watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
             _watcher.Changed += Invalidate;
@@ -34,27 +34,13 @@ namespace NetFlow.Infrastructure.Common
 
         public string Get(string name)
         {
-            var firm = _firm.GetFirmCode();
-            var key = $"{firm}:{name}";
-            return _cache.GetOrAdd(key, _ =>
+            return _cache.GetOrAdd(name, _ =>
             {
-                var firmFile = Path.Combine(_sqlPath, InsertFirm(name, firm));
-                if (File.Exists(firmFile))
-                    return File.ReadAllText(firmFile);
-
                 var defaultFile = Path.Combine(_sqlPath, name);
                 if (!File.Exists(defaultFile))
                     throw new Exception($"SQL not found: {name}");
-
                 return File.ReadAllText(defaultFile);
             });
-        }
-
-        private static string InsertFirm(string name, string firm)
-        {
-            var ext = Path.GetExtension(name);               // .sql
-            var baseName = Path.GetFileNameWithoutExtension(name);
-            return $"{baseName}.Firm{firm}{ext}";
         }
 
         public void Dispose()

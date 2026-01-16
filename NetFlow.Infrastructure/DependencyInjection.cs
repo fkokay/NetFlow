@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NetFlow.Application.Auth;
 using NetFlow.Application.Common.Interfaces;
 using NetFlow.Domain.Common;
+using NetFlow.Domain.Identity;
 using NetFlow.Infrastructure.Common;
 using NetFlow.Infrastructure.Identity;
 using NetFlow.Infrastructure.Persistence;
@@ -21,8 +22,7 @@ namespace NetFlow.Infrastructure
 
             services.AddScoped<ISqlProvider>(sp =>
             {
-                var firm = sp.GetRequiredService<ICurrentFirmProvider>();
-                return new CachedFileSqlProvider(sqlPath, firm);
+                return new CachedFileSqlProvider(sqlPath);
             });
             
             services.AddScoped<INetFlowDbContext, NetFlowDbContext> ();

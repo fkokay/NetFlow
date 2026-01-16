@@ -11,12 +11,12 @@ using System.Text;
 
 namespace NetFlow.Netsis.Repositories
 {
-    public class WarehouseReadRepository : IWarehouseReadRepository   
+    public class NetsisWarehouseReadRepository : IWarehouseReadRepository   
     {
         private readonly ISqlProvider _sql;
         private readonly NetsisConnectionFactory _factory;
 
-        public WarehouseReadRepository(ISqlProvider sql, NetsisConnectionFactory factory)
+        public NetsisWarehouseReadRepository(ISqlProvider sql, NetsisConnectionFactory factory)
         {
             _sql = sql;
             _factory = factory;

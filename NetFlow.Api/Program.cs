@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using NetFlow.Api.Auth;
-using NetFlow.Api.Infrastructure;
 using NetFlow.Api.Middlewares;
 using NetFlow.Application;
 using NetFlow.Application.Auth;
@@ -18,7 +17,6 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddScoped<ICurrentFirmProvider, HttpCurrentFirmProvider>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

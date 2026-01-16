@@ -3,12 +3,12 @@ using NetFlow.Api.Dto;
 using NetFlow.Application.Common.Pagination;
 using NetFlow.Application.Netsis.Shipments;
 using NetFlow.Domain.Identity;
-using NetFlow.Domain.Shipping;
+using NetFlow.Domain.Netsis.Shipments;
 
 namespace NetFlow.Api.Controllers.Netsis
 {
     [ApiController]
-    [Route("api/shipments")]
+    [Route("api/netsis/shipments")]
     public class ShipmentsController : ControllerBase
     {
         private readonly ShipmentService _service;
