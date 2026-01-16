@@ -1,5 +1,7 @@
 ﻿@page "/shipment/shippable-orders"
-
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
 <div class="content-root">
     <div class="filter-section mb-3 rounded border bg-white p-3 shadow-sm">
         <DxFormLayout>
@@ -11,7 +13,9 @@
                 </DxTextBox>
             </DxFormLayoutItem>
             <DxFormLayoutItem ColSpanMd="8">
-                <div class="align-items-center d-flex h-100"><DxCheckBox @bind-Checked="@FilterRequest.HasBalance">Bakiyesi Olanlar</DxCheckBox></div>
+                <div class="align-items-center d-flex h-100">
+                    <DxCheckBox @bind-Checked="@FilterRequest.HasBalance">Bakiyesi Olanlar</DxCheckBox>
+                </div>
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Başlangıç" ColSpanMd="3">
                 <DxDateEdit @bind-Date="@FilterRequest.StartDate" />
@@ -23,13 +27,44 @@
                 <DxComboBox Data="@Warehouses" @bind-Value="@FilterRequest.Warehouse" ValueFieldName="DEPO_KODU" TextFieldName="DEPO_TANIMI" />
             </DxFormLayoutItem>
             <DxFormLayoutItem ColSpanMd="2">
-                <DxButton Text="Filtrele" RenderStyle="ButtonRenderStyle.Primary" Click="@LoadGridDataAsync" Width="100%" />
+                <DxButton Text="Filtrele" RenderStyle="ButtonRenderStyle.Primary" Click="@LoadDataAsync" Width="100%" />
             </DxFormLayoutItem>
         </DxFormLayout>
     </div>
+    <div class="card toolbar integrated-toolbar mb-2 shadow-sm">
+        <DxToolbar Title="Sevkiyat Sipariş Listesi">
+            <DxToolbarItem Text="Sevkiyat Oluştur" Alignment="ToolbarItemAlignment.Left" Click="OnSevkiyatOlusturClick" IconCssClass="add-icon icon medium-icon" CssClass="btn-sevkiyat-success" />
+            <DxToolbarItem Tooltip="Sütun Seçici" Alignment="ToolbarItemAlignment.Right" Click="OnColumnChooserItemClick" IconCssClass="column-chooser-icon icon medium-icon" />
+            <DxToolbarItem Text="Dışarı Aktar" Alignment="ToolbarItemAlignment.Right" IconCssClass="export-icon icon medium-icon">
+                <Items>
+                    <DxToolbarItem Text="Excel'e Aktar" Click="ExportAllDataToExcel" />
+                    <DxToolbarItem Text="Seçili Satırları Excel'e Aktar" Click="ExportSelectedRowsToExcel" />
+                </Items>
+            </DxToolbarItem>
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                <Template Context="searchContext"><DxSearchBox NullText="Ara..." @bind-Text=SearchText /></Template>
+            </DxToolbarItem>
+            <DxToolbarItem Tooltip="Refresh" BeginGroup="true" Click="@LoadDataAsync" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
+        </DxToolbar>
+    </div>
+    <DxGrid @ref="Grid" Data="Data" KeyFieldName="ID" CssClass="w-100 shadow-sm" RowClick="@OnRowClick" ShowGroupPanel="true">
+        <Columns>
+            <DxGridSelectionColumn Width="60px" />
+            <DxGridDataColumn Caption="Sipariş No" FieldName="OrderNo" />
+            <DxGridDataColumn Caption="Cari Kodu" FieldName="CustomerCode" />
+            <DxGridDataColumn Caption="Cari Adı" FieldName="CustomerName" GroupIndex="0" />
+            <DxGridDataColumn Caption="Stok Kodu" FieldName="StockCode"></DxGridDataColumn>
+            <DxGridDataColumn Caption="Stok Adı" FieldName="StockName" />
+            <DxGridDataColumn Caption="Miktar" FieldName="Quantity" DisplayFormat="N2" />
+            <DxGridDataColumn Caption="Depo Adı" FieldName="Warehouse" />
+        </Columns>
+    </DxGrid>
 </div>
 
 @code {
+    private IGrid? Grid;
+    private string SearchText { get; set; } = string.Empty;
+    private GridDevExtremeDataSource<ShipmentOrderModel> Data { get; set; } = null!;
     private ShippableOrdersFilterRequest FilterRequest { get; set; } = new ShippableOrdersFilterRequest();
     private List<WarehouseModel> Warehouses { get; set; } = new List<WarehouseModel>();
 
@@ -38,8 +73,27 @@
         // Cari selector logic here
     }
 
-    async Task LoadGridDataAsync()
+    void OnSevkiyatOlusturClick()
     {
-        // Load grid data logic here
+        // Sevkiyat oluştur logic here
     }
+
+    void OnColumnChooserItemClick()
+    {
+        Grid?.ShowColumnChooser();
+    }
+
+    void OnRowClick(GridRowClickEventArgs args)
+    {
+
+    }
+
+    async Task LoadDataAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        Data = new GridDevExtremeDataSource<ShipmentOrderModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/shipments/shippable-orders"));
+    }
+
+    Task ExportAllDataToExcel() => Grid?.ExportToXlsxAsync("Siparis Listesi") ?? Task.CompletedTask;
+    Task ExportSelectedRowsToExcel() => Grid?.ExportToXlsxAsync("Seçili Siparisler", new GridXlExportOptions { ExportSelectedRowsOnly = true }) ?? Task.CompletedTask;
 }
