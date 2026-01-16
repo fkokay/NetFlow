@@ -29,18 +29,18 @@ namespace NetFlow.ReadModel.Users
                 parameters.AddDynamicParams(p);
             }
 
-            // 🔹 OrderBy
+   
             string orderBy = DevExtremeSqlBuilder.BuildOrderBy(
                 pagedRequest.sort,
                 "usr.Id DESC"
             );
 
-            // 🔹 Count
+
             string countSql = $@"
-        SELECT COUNT(1)
-        FROM [User] usr WITH (NOLOCK)
-        {whereSql}
-    ";
+                SELECT COUNT(1)
+                FROM [User] usr WITH (NOLOCK)
+                {whereSql}
+            ";
 
             int totalCount = await cn.ExecuteScalarAsync<int>(countSql, parameters);
 
@@ -56,39 +56,39 @@ namespace NetFlow.ReadModel.Users
             parameters.Add("@Skip", pagedRequest.skip ?? 0);
             parameters.Add("@Take", pagedRequest.take ?? 10);
 
-            // 🔹 Data
+           
             string dataSql = $@"
-        SELECT
-            usr.Id,
-            usr.FirstName,
-            usr.LastName,
-            usr.Email,
-            usr.Phone,
-            usr.Active,
+                 SELECT
+                     usr.Id,
+                     usr.FirstName,
+                     usr.LastName,
+                     usr.Email,
+                     usr.Phone,
+                     usr.Active,
 
-            -- 🔹 Roles (firmadan bağımsız, kullanıcı bazlı)
-            STUFF((
-                SELECT DISTINCT ', ' + r.Name
-                FROM [UserInFirm] uf
-                INNER JOIN [Role] r ON r.Id = uf.RoleId
-                WHERE uf.UserId = usr.Id
-                FOR XML PATH(''), TYPE
-            ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS Roles,
+                     -- 🔹 Roles (firmadan bağımsız, kullanıcı bazlı)
+                     STUFF((
+                         SELECT DISTINCT ', ' + r.Name
+                         FROM [UserInFirm] uf
+                         INNER JOIN [Role] r ON r.Id = uf.RoleId
+                         WHERE uf.UserId = usr.Id
+                         FOR XML PATH(''), TYPE
+                     ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS Roles,
 
-            -- 🔹 Firms
-            STUFF((
-                SELECT DISTINCT ', ' + f.FirmName
-                FROM [UserInFirm] uf
-                INNER JOIN [Firm] f ON f.Id = uf.FirmId
-                WHERE uf.UserId = usr.Id
-                FOR XML PATH(''), TYPE
-            ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS Firms
+                     -- 🔹 Firms
+                     STUFF((
+                         SELECT DISTINCT ', ' + f.FirmName
+                         FROM [UserInFirm] uf
+                         INNER JOIN [Firm] f ON f.Id = uf.FirmId
+                         WHERE uf.UserId = usr.Id
+                         FOR XML PATH(''), TYPE
+                     ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS Firms
 
-        FROM [User] usr WITH (NOLOCK)
-        {whereSql}
-        ORDER BY {orderBy}
-        OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
-    ";
+                 FROM [User] usr WITH (NOLOCK)
+                 {whereSql}
+                 ORDER BY {orderBy}
+                 OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
+             ";
 
             var data = (await cn.QueryAsync<UserDto>(dataSql, parameters)).ToList();
 
@@ -112,7 +112,7 @@ namespace NetFlow.ReadModel.Users
             usr.Password,
             usr.Active,
 
-            -- 🔹 Roles (firmadan BAĞIMSIZ, kullanıcı bazlı)
+            
             STUFF((
                 SELECT DISTINCT ', ' + r.Name
                 FROM [UserInFirm] uf
@@ -121,7 +121,7 @@ namespace NetFlow.ReadModel.Users
                 FOR XML PATH(''), TYPE
             ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS Roles,
 
-            -- 🔹 Firms (tekil)
+           
             STUFF((
                 SELECT DISTINCT ', ' + f.FirmName
                 FROM [UserInFirm] uf
@@ -133,13 +133,13 @@ namespace NetFlow.ReadModel.Users
         FROM [User] usr WITH (NOLOCK)
         WHERE usr.Id = @Id;
 
-        -- 🔹 RoleIds (firmadan BAĞIMSIZ)
+   
         SELECT DISTINCT
             uf.RoleId
         FROM [UserInFirm] uf WITH (NOLOCK)
         WHERE uf.UserId = @Id;
 
-        -- 🔹 FirmIds
+
         SELECT DISTINCT
             uf.FirmId
         FROM [UserInFirm] uf WITH (NOLOCK)
