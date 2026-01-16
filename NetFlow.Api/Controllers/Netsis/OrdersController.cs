@@ -1,12 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NetFlow.Application.Netsis.Orders;
+using NetFlow.Application.Netsis.Products;
+using NetFlow.Domain.Identity;
 
 namespace NetFlow.Api.Controllers.Netsis
 {
-    public class OrdersController : Controller
+    [ApiController]
+    [Route("api/netsis/orders")]
+    public class OrdersController : ControllerBase
     {
-        public IActionResult Index()
+        private readonly OrderService _service;
+        private readonly CurrentUser _currentUser;
+
+        public OrdersController(OrderService service, CurrentUser currentUser)
         {
-            return View();
+            _service = service;
+            _currentUser = currentUser;
+        }
+
+        [HttpGet("list")]
+        public async Task<IActionResult> List()
+        {
+            var data = await _service.GetCustomers();
+            return Ok(data);
         }
     }
 }

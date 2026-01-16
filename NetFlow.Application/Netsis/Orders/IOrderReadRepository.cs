@@ -1,10 +1,12 @@
-﻿using System;
+﻿using NetFlow.Domain.Netsis.Orders;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace NetFlow.Application.Netsis.Orders
 {
-    internal class IOrderReadRepository
+    public interface IOrderReadRepository
     {
+        Task<List<Order>> GetOrders();
     }
 }
