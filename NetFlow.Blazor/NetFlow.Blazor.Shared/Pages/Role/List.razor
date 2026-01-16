@@ -12,7 +12,7 @@
                            Click="OnColumnChooserItemClick"
                            IconCssClass="column-chooser-icon icon medium-icon" />
 
-            <DxToolbarItem Text="Dýþarý Aktarý" Alignment="ToolbarItemAlignment.Right"
+            <DxToolbarItem Text="Dýþarý Aktar" Alignment="ToolbarItemAlignment.Right"
                            IconCssClass="export-icon icon medium-icon">
                 <Items>
                     <DxToolbarItem Text="Export all data to Excel" Click="ExportAllDataToExcel" />
@@ -32,7 +32,7 @@
                 </Template>
             </DxToolbarItem>
 
-            <DxToolbarItem Tooltip="Refresh" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
+            <DxToolbarItem Tooltip="Refresh" Click="LoadGridDataAsync" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
         </DxToolbar>
     </div>
 
@@ -41,15 +41,21 @@
         <div class="h-100">
             <DxGrid @ref="Grid"
                     Data="@Data"
+                    KeyFieldName="Id"
                     VirtualScrollingEnabled="true"
                     ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
                     ShowFilterRow="true"
                     ShowSearchBox="false"
                     SearchText="@SearchText"
+                    EditMode="GridEditMode.PopupEditForm"
+                    DataItemDeleting="Grid_DataItemDeleting"
+                    CustomizeEditModel="Grid_CustomizeEditModel"
+                    EditModelSaving="Grid_EditModelSaving"
                     TextWrapEnabled="false">
                 <Columns>
                     <DxGridSelectionColumn Width="75px" />
                     <DxGridDataColumn FieldName="Id" Visible="false" />
+                    <DxGridDataColumn Caption="Kodu" FieldName="Code" />
                     <DxGridDataColumn Caption="Ad" FieldName="Name" />
                     <DxGridCommandColumn Width="6em"
                                          EditButtonVisible="true"
@@ -63,7 +69,10 @@
                     }
 
                     <DxFormLayout CssClass="w-100">
-                        <DxFormLayoutItem Caption="Rol Adý">
+                        <DxFormLayoutItem Caption="Kodu" ColSpanMd="12">
+                            <DxTextBox @bind-Text="role.Code" />
+                        </DxFormLayoutItem>
+                        <DxFormLayoutItem Caption="Rol Adý" ColSpanMd="12">
                             <DxTextBox @bind-Text="role.Name" />
                         </DxFormLayoutItem>
                     </DxFormLayout>
@@ -93,68 +102,81 @@
         if (!firstRender)
             return;
 
-        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        await LoadGridDataAsync();
+    }
+
+    async Task LoadGridDataAsync()
+    {
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
         Data = new GridDevExtremeDataSource<RoleModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/roles"));
+
+        if (Grid != null)
+            Grid.Reload();
+
         await InvokeAsync(StateHasChanged);
     }
 
-    
-    async void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e)
+    async Task Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e)
     {
         if (!e.IsNew)
         {
             var role = (RoleModel)e.DataItem;
-            // var freshRole = await RoleApiClient.GetByIdAsync(role.Id);
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
 
-            // if (freshRole != null)
-            //     e.EditModel = freshRole;
+            var freshRole = await client.GetFromJsonAsync<RoleModel>($"api/roles/{role.Id}");
+            if (freshRole != null)
+                e.EditModel = freshRole;
+        }
+        else
+        {
+            e.EditModel = new RoleModel();
         }
     }
-
 
     async Task Grid_EditModelSaving(GridEditModelSavingEventArgs e)
     {
+        var model = (RoleModel)e.EditModel;
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+
         if (!e.IsNew)
         {
-            var model = (RoleModel)e.EditModel;
-            // var response = await RoleApiClient.UpdateAsync(model.Id,model);
-
-            // if (response.Success)
-            //     await LoadGridDataAsync();
+            var response = await client.PutAsJsonAsync("api/roles", model);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadGridDataAsync();
+            }
         }
+        else{}
     }
-
 
     async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
     {
+        e.Cancel = true; 
         var role = (RoleModel)e.DataItem;
-        // var response = await RoleApiClient.DeleteAsync(role.Id);
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        var response = await client.DeleteAsync($"api/roles/{role.Id}");
 
-        // if (response.Success)
-        // {
-        //     Data?.Remove(role);
-        //     StateHasChanged();
-        // }
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadGridDataAsync();
+        }
     }
 
     void OnColumnChooserItemClick(ToolbarItemClickEventArgs e)
         => Grid!.ShowColumnChooser();
-    void OnAddClick()
-    {
-        NavigationManager.NavigateTo("/role/create");
-    }
+
+    void OnAddClick() => NavigationManager.NavigateTo("/role/create");
 
     Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Roles");
-    Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Selected Roles",
-        new GridXlExportOptions { ExportSelectedRowsOnly = true });
-
+    Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Selected Roles", new GridXlExportOptions { ExportSelectedRowsOnly = true });
     Task ExportAllDataToCsv() => Grid!.ExportToCsvAsync("Roles");
-    Task ExportSelectedRowsDataToCsv() => Grid!.ExportToCsvAsync("Selected Roles",
-        new GridCsvExportOptions { ExportSelectedRowsOnly = true });
-
+    Task ExportSelectedRowsDataToCsv() => Grid!.ExportToCsvAsync("Selected Roles", new GridCsvExportOptions { ExportSelectedRowsOnly = true });
     Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Roles");
-    Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Selected Roles",
-        new GridPdfExportOptions { ExportSelectedRowsOnly = true });
+    Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Selected Roles", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
 
     public void Dispose() { }
 }

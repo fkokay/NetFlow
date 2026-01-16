@@ -17,6 +17,7 @@ namespace NetFlow.Application.Common.Interfaces
         DbSet<UserInFirmEntity> UserInFirms { get; }
         DbSet<UserInRoleEntity> UserInRoles { get; }
         DbSet<RolePermissionEntity> RolePermissions { get; }
+        DbSet<ModuleEntity> Modules { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

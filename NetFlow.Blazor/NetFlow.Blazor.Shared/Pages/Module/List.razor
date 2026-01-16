@@ -1,6 +1,8 @@
 @page "/module/list"
 @implements IDisposable
-@inject NavigationManager Navigation
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
 
 <div class="content-root">
     <div class="card toolbar">
@@ -33,70 +35,61 @@
     </div>
     <div class="Module-list-root">
         <div class="h-100">
-            <DxLoadingPanel Visible="@(!IsDataLoaded)"
-                            IsContentBlocked="true"
-                            IsContentVisible="false"
-                            IndicatorVisible="true"
-                            IndicatorAreaVisible="true"
-                            ZIndex="101"
-                            Text="Loading...">
+            <DxGrid @ref="Grid"
+                    Data="Data"
+                    KeyFieldName="Id"
+                    CssClass="Module-list"
+                    SearchText="@SearchText"
+                    EditMode="GridEditMode.PopupEditForm"
+                    PopupEditFormCssClass="pw-800"
+                    SkeletonRowsEnabled="true"
+                    ColumnResizeMode="GridColumnResizeMode.NextColumn"
+                    FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                    TextWrapEnabled="false"
+                    FocusedRowEnabled="true"
+                    ShowAllRows="true"
+                    VirtualScrollingEnabled="true"
+                    RowClick="@OnRowClick"
+                    HighlightRowOnHover="true"
+                    CustomizeEditModel="Grid_CustomizeEditModel"
+                    EditModelSaving="Grid_EditModelSaving"
+                    DataItemDeleting="Grid_DataItemDeleting">
+                <Columns>
+                    <DxGridSelectionColumn Width="75px" />
+                    <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
+                    <DxGridDataColumn Caption="Kodu" FieldName="Code" />
+                    <DxGridDataColumn Caption="Ad" FieldName="Name" />
+                    <DxGridDataColumn Caption="Aktif" FieldName="IsActive" />
+                    <DxGridCommandColumn Width="6em"
+                                         EditButtonVisible="true"
+                                         DeleteButtonVisible="true" />
+                </Columns>
+                <EditFormTemplate Context="editContext">
+                    @{
+                        var module = (ModuleModel)editContext.EditModel;
+                    }
 
-                <DxGrid @ref="Grid"
-                        Data="Data"
-                        KeyFieldName="Id"
-                        CssClass="Module-list"
-                        SearchText="@SearchText"
-                        EditMode="GridEditMode.PopupEditForm"
-                        PopupEditFormCssClass="pw-800"
-                        SkeletonRowsEnabled="true"
-                        ColumnResizeMode="GridColumnResizeMode.NextColumn"
-                        FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
-                        TextWrapEnabled="false"
-                        FocusedRowEnabled="true"
-                        ShowAllRows="true"
-                        VirtualScrollingEnabled="true"
-                        RowClick="@OnRowClick"
-                        HighlightRowOnHover="true"
-                        CustomizeEditModel="Grid_CustomizeEditModel"
-                        EditModelSaving="Grid_EditModelSaving"
-                        DataItemDeleting="Grid_DataItemDeleting">
-                    <Columns>
-                        <DxGridSelectionColumn Width="75px" />
-                        <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
-                        <DxGridDataColumn Caption="Kodu" FieldName="Code" />
-                        <DxGridDataColumn Caption="Ad" FieldName="Name" />
-                        <DxGridDataColumn Caption="Aktif" FieldName="IsActive" />
-                        <DxGridCommandColumn Width="6em"
-                                             EditButtonVisible="true"
-                                             DeleteButtonVisible="true" />
-                    </Columns>
-                    <EditFormTemplate Context="editContext">
-                        @{
-                            var module = (ModuleModel)editContext.EditModel;
-                        }
-
-                        <DxFormLayout CssClass="w-100">
-                            <DxFormLayoutItem Caption="Modül Kodu">
-                                <DxTextBox @bind-Text="module.Code" />
-                            </DxFormLayoutItem>
-                            <DxFormLayoutItem Caption="Modül Adý">
-                                <DxTextBox @bind-Text="module.Name" />
-                            </DxFormLayoutItem>
-                            <DxFormLayoutItem Caption="Aktif">
-                                <DxCheckBox @bind-Checked="module.IsActive" />
-                            </DxFormLayoutItem>
-                        </DxFormLayout>
-                    </EditFormTemplate>
+                    <DxFormLayout CssClass="w-100">
+                        <DxFormLayoutItem Caption="Modül Kodu">
+                            <DxTextBox @bind-Text="module.Code" />
+                        </DxFormLayoutItem>
+                        <DxFormLayoutItem Caption="Modül Adý">
+                            <DxTextBox @bind-Text="module.Name" />
+                        </DxFormLayoutItem>
+                        <DxFormLayoutItem Caption="Aktif">
+                            <DxCheckBox @bind-Checked="module.IsActive" />
+                        </DxFormLayoutItem>
+                    </DxFormLayout>
+                </EditFormTemplate>
 
 
-                    <GroupSummary>
-                        <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
-                    </GroupSummary>
-                    <TotalSummary>
-                        <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" FooterColumnName="Id" />
-                    </TotalSummary>
-                </DxGrid>
-            </DxLoadingPanel>
+                <GroupSummary>
+                    <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
+                </GroupSummary>
+                <TotalSummary>
+                    <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" FooterColumnName="Id" />
+                </TotalSummary>
+            </DxGrid>
         </div>
     </div>
 </div>
@@ -106,7 +99,7 @@
 
     [CascadingParameter(Name = "ParentSizeMode")]
     SizeMode SizeMode { get; set; }
-    List<ModuleModel>? Data { get; set; }
+    GridDevExtremeDataSource<ModuleModel> Data { get; set; } = null!;
     bool IsDataLoaded { get; set; }
     bool IsModulePanelOpen { get; set; }
     bool IsModulePanelPinned { get; set; }
@@ -118,26 +111,23 @@
     string? SearchText { get; set; }
 
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!firstRender) return;
         await LoadGridDataAsync();
-        await base.OnInitializedAsync();
     }
 
     async Task LoadGridDataAsync()
     {
-        IsDataLoaded = false;
-        //Data = await ModuleApiClient.GetListAsync();
-        Data = new List<ModuleModel>
-        {
-            new ModuleModel{ Id=1, Code="MOD001", Name="Modül 1", IsActive=true },
-            new ModuleModel{ Id=2, Code="MOD002", Name="Modül 2", IsActive=false },
-            new ModuleModel{ Id=3, Code="MOD003", Name="Modül 3", IsActive=true },
-        };
-        IsDataLoaded = true;
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        Data = new GridDevExtremeDataSource<ModuleModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/modules"));
+
+        if (Grid != null) Grid.Reload();
+        await InvokeAsync(StateHasChanged);
     }
 
-    void OnDataChanged(List<ModuleModel> data) => Data = data;
+    void OnDataChanged(GridDevExtremeDataSource<ModuleModel> data) => Data = data;
 
     void OnPinClick() => IsModulePanelPinned = !IsModulePanelPinned;
 
@@ -220,7 +210,7 @@
     };
     void OnAddClick()
     {
-        Navigation.NavigateTo("/module/create");
+        NavigationManager.NavigateTo("/module/create");
     }
     void IDisposable.Dispose()
     {

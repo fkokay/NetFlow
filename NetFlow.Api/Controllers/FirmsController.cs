@@ -15,7 +15,7 @@ namespace NetFlow.Api.Controllers
         private readonly FirmReadService _read;
         private readonly FirmWriteService _write;
 
-        public FirmsController(FirmReadService read,FirmWriteService write)
+        public FirmsController(FirmReadService read, FirmWriteService write)
         {
             _read = read;
             _write = write;
@@ -44,6 +44,21 @@ namespace NetFlow.Api.Controllers
                 new { id },
                 null);
         }
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] EditFirmRequest request)
+        {
+            var id = await _write.EditAsync(request);
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
 
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _write.DeleteAsync(id);
+            return Ok();
+        }
     }
 }

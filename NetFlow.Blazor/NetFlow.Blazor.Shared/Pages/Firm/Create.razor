@@ -1,5 +1,7 @@
 ﻿@page "/firm/create"
-@inject NavigationManager Navigation
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
 
 <div class="content-root">
     <div class="card toolbar">
@@ -192,27 +194,44 @@
     private async Task SaveFromOutside()
     {
         if (isSaving) return;
-        var isValid = editContext.Validate();
-        if (!isValid) return;
-        await HandleValidSubmit();
+      
+        if (editContext.Validate())
+        {
+            await HandleValidSubmit();
+        }
     }
 
     private async Task HandleValidSubmit()
     {
         if (isSaving) return;
         isSaving = true;
+
         try
         {
-            // var response = await FirmApi.CreateAsync(model);
-            // isSuccess = response.Success;
-            // popupTitle = isSuccess ? "Başarılı" : "Hata";
-            // popupMessage = response.Message ?? (isSuccess ? "Firma başarıyla oluşturuldu." : "İşlem sırasında bir hata meydana geldi.");
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+
+            var response = await client.PostAsJsonAsync("api/firms", model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                isSuccess = true;
+                popupTitle = "Başarılı";
+                popupMessage = "Firma başarıyla oluşturuldu.";
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                isSuccess = false;
+                popupTitle = "Hata";
+                popupMessage = error;
+            }
         }
-        catch
+        catch (Exception ex)
         {
             isSuccess = false;
             popupTitle = "Bağlantı Hatası";
-            popupMessage = "Sunucu yanıt vermiyor. Lütfen ağ bağlantınızı kontrol edin.";
+            popupMessage = ex.Message;
         }
         finally
         {
@@ -222,10 +241,12 @@
     }
 
     private void HandleInvalidSubmit() => popupVisible = false;
+
     private void OnPopupOk()
     {
         popupVisible = false;
-        if (isSuccess) Navigation.NavigateTo("/firm/list");
+        if (isSuccess) NavigationManager.NavigateTo("/firm/list");
     }
-    private void NavigateBack() => Navigation.NavigateTo("/Firm/List");
+
+    private void NavigateBack() => NavigationManager.NavigateTo("/firm/list");
 }

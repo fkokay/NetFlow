@@ -1,5 +1,7 @@
 ﻿@page "/role/create"
-@inject NavigationManager Navigation
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
 
 <div class="content-root">
     <div class="card toolbar">
@@ -29,13 +31,20 @@
             <DataAnnotationsValidator />
 
             <DxFormLayout ColSpanMd="6">
+
+                <DxFormLayoutItem Caption="Kodu">
+                    <DxTextBox @bind-Text="model.Code"
+                               ValidationEnabled="true"
+                               ShowValidationIcon="true" />
+                </DxFormLayoutItem>
+
                 <DxFormLayoutItem Caption="Adı">
                     <DxTextBox @bind-Text="model.Name"
                                ValidationEnabled="true"
                                ShowValidationIcon="true" />
                 </DxFormLayoutItem>
 
-
+               
                 <DxFormLayoutItem ColSpanMd="12">
                     <ValidationSummary />
                 </DxFormLayoutItem>
@@ -119,10 +128,24 @@
         isSaving = true;
         try
         {
-            //var response = await RoleApi.CreateAsync(model);
-            // isSuccess = response.Success;
-            // popupTitle = isSuccess ? "Başarılı" : "Hata";
-            // popupMessage = response.Message ?? (isSuccess ? "Rol başarıyla oluşturuldu." : "İşlem sırasında bir hata meydana geldi.");
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+
+            var response = await client.PostAsJsonAsync("api/roles", model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                isSuccess = true;
+                popupTitle = "Başarılı";
+                popupMessage = "Rol başarıyla oluşturuldu.";
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                isSuccess = false;
+                popupTitle = "Hata";
+                popupMessage = error;
+            }
         }
         catch
         {
@@ -141,7 +164,7 @@
     private void OnPopupOk()
     {
         popupVisible = false;
-        if (isSuccess) Navigation.NavigateTo("/role/list");
+        if (isSuccess) NavigationManager.NavigateTo("/role/list");
     }
-    private void NavigateBack() => Navigation.NavigateTo("/Role/List");
+    private void NavigateBack() => NavigationManager.NavigateTo("/Role/List");
 }

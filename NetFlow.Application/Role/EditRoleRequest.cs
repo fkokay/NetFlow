@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace NetFlow.ReadModel.Roles
+﻿namespace NetFlow.Application.Role
 {
-    public class RoleDto
+    public class EditRoleRequest
     {
         public int Id { get; set; }
         public string Code { get; set; }

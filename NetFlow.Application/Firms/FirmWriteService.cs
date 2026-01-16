@@ -1,4 +1,5 @@
-﻿using NetFlow.Application.Common.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using NetFlow.Application.Common.Interfaces;
 using NetFlow.Domain.Entities;
 using NetFlow.Domain.Firms;
 using System;
@@ -44,6 +45,39 @@ namespace NetFlow.Application.Firms
             await _db.SaveChangesAsync();
 
             return firm.Id;
+        }
+        public async Task<int> EditAsync(EditFirmRequest request)
+        {
+            var firm = await _db.Firms.FirstOrDefaultAsync(x => x.Id == request.Id);
+            firm.FirmCode = request.FirmCode;
+            firm.FirmName = request.FirmName;
+            firm.TaxNumber = request.TaxNumber;
+            firm.RegisterNumber = request.RegisterNumber;
+            firm.NetsisRestApiUrl = request.NetsisRestApiUrl;
+            firm.NetsisDbServer = request.NetsisDbServer;
+            firm.NetsisDbName = request.NetsisDbName;
+            firm.NetsisDbUser = request.NetsisDbUser;
+            firm.NetsisDbPassword = request.NetsisDbPassword;
+            firm.NetsisApplicationName = request.NetsisApplicationName;
+            firm.NetsisUser = request.NetsisUser;
+            firm.NetsisPassword = request.NetsisPassword;
+            firm.NetsisCompanyCode = request.NetsisCompanyCode;
+            firm.NetsisBranchCode = request.NetsisBranchCode;
+            firm.EIRSSeri = request.EIRSSeri;
+            firm.EFATSeri = request.EFATSeri;
+            firm.EARSSeri = request.EARSSeri;
+            _db.Firms.Update(firm);
+            await _db.SaveChangesAsync();
+            return firm.Id;
+        }
+        public async Task DeleteAsync(int id)
+        {
+            var firm = await _db.Firms.FirstOrDefaultAsync(x => x.Id == id);
+            if (firm != null)
+            {
+                _db.Firms.Remove(firm);
+                await _db.SaveChangesAsync();
+            }
         }
     }
 }
