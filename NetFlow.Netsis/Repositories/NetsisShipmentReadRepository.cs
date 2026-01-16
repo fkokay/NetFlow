@@ -1,6 +1,6 @@
 ﻿using Dapper;
-using NetFlow.Application.Shipping;
-using NetFlow.Domain.Shipping;
+using NetFlow.Application.Netsis.Shipments;
+using NetFlow.Domain.Netsis.Shipments;
 using NetFlow.Infrastructure.Common;
 using NetFlow.Netsis.Connection;
 using NetFlow.Netsis.Dto;

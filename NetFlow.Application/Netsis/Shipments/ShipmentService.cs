@@ -1,9 +1,9 @@
-﻿using NetFlow.Domain.Shipping;
+﻿using NetFlow.Domain.Netsis.Shipments;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace NetFlow.Application.Shipping
+namespace NetFlow.Application.Netsis.Shipments
 {
     public sealed class ShipmentService
     {

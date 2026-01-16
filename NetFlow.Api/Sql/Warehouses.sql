@@ -1,0 +1,5 @@
+SELECT  
+[Code]=DEPO_KODU,
+[Name]=DEPO_ADI,
+[BranchCode]=SUBE_KODU 
+FROM TBLSTOKDP  

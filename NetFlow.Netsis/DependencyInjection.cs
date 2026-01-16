@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using NetFlow.Application.Shipping;
+using NetFlow.Application.Netsis.Shipments;
 using NetFlow.Netsis.Connection;
 using NetFlow.Netsis.Repositories;
 using System;

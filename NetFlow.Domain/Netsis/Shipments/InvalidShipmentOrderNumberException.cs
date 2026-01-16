@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace NetFlow.Domain.Shipping
+namespace NetFlow.Domain.Netsis.Shipments
 {
     public sealed class InvalidShipmentOrderNumberException : DomainException
     {
