@@ -12,6 +12,6 @@ namespace NetFlow.Blazor.Shared.Models
         public string Code { get; set; } = string.Empty;
         [Required(ErrorMessage = "Modül Adı zorunludur")]
         public string Name { get; set; } = string.Empty;
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }

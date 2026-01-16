@@ -1,5 +1,7 @@
 ﻿@page "/user/create"
-@inject NavigationManager Navigation
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
 
 <div class="content-root">
     <div class="card toolbar">
@@ -142,31 +144,51 @@
     {
         if (isSaving) return;
         isSaving = true;
+
         try
         {
-        //     var response = await UserApi.CreateAsync(model);
-        //     isSuccess = response.Success;
-        //     popupTitle = isSuccess ? "Başarılı" : "Hata";
-        //     popupMessage = response.Message ?? (isSuccess ? "Kullanıcı başarıyla oluşturuldu." : "İşlem sırasında bir hata meydana geldi.");
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+
+            var response = await client.PostAsJsonAsync("api/users", model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                isSuccess = true;
+                popupTitle = "Başarılı";
+                popupMessage = "Kullanıcı başarıyla oluşturuldu.";
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                isSuccess = false;
+                popupTitle = "İşlem Başarısız";
+                popupMessage = string.IsNullOrEmpty(errorMsg) ? "Kullanıcı oluşturulurken bir hata oluştu." : errorMsg;
+            }
         }
-        catch
+        catch (Exception ex)
         {
             isSuccess = false;
             popupTitle = "Bağlantı Hatası";
             popupMessage = "Sunucu yanıt vermiyor. Lütfen ağ bağlantınızı kontrol edin.";
+            
         }
         finally
         {
             popupVisible = true;
             isSaving = false;
+            StateHasChanged();
         }
     }
 
     private void HandleInvalidSubmit() => popupVisible = false;
+
     private void OnPopupOk()
     {
         popupVisible = false;
-        if (isSuccess) Navigation.NavigateTo("/user/list");
+        if (isSuccess)
+            NavigationManager.NavigateTo("/user/list");
     }
-    private void NavigateBack() => Navigation.NavigateTo("/User/List");
+
+    private void NavigateBack() => NavigationManager.NavigateTo("/user/list");
 }

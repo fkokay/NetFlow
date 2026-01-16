@@ -1,5 +1,7 @@
 ﻿@page "/module/create"
-@inject NavigationManager Navigation
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
 
 <div class="content-root">
     <div class="card toolbar">
@@ -120,31 +122,49 @@
     {
         if (isSaving) return;
         isSaving = true;
+
         try
         {
-            // var response = await ModuleApi.CreateAsync(model);
-            // isSuccess = response.Success;
-            // popupTitle = isSuccess ? "Başarılı" : "Hata";
-            // popupMessage = response.Message ?? (isSuccess ? "Modül başarıyla oluşturuldu." : "İşlem sırasında bir hata meydana geldi.");
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+            var response = await client.PostAsJsonAsync("api/modules", model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                isSuccess = true;
+                popupTitle = "Başarılı";
+                popupMessage = "Modül başarıyla oluşturuldu.";
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                isSuccess = false;
+                popupTitle = "Hata";
+                popupMessage = !string.IsNullOrEmpty(errorContent) ? errorContent : "Modül oluşturulurken bir hata meydana geldi.";
+            }
         }
-        catch
+        catch (Exception ex)
         {
             isSuccess = false;
             popupTitle = "Bağlantı Hatası";
-            popupMessage = "Sunucu yanıt vermiyor. Lütfen ağ bağlantınızı kontrol edin.";
+            popupMessage = "Sunucu yanıt vermiyor. Lütfen ağ bağlantınızı kontrol edin. Hata: " + ex.Message;
         }
         finally
         {
             popupVisible = true;
             isSaving = false;
+            StateHasChanged(); // Arayüzü güncellemek için
         }
     }
 
     private void HandleInvalidSubmit() => popupVisible = false;
+
     private void OnPopupOk()
     {
         popupVisible = false;
-        if (isSuccess) Navigation.NavigateTo("/module/list");
+        if (isSuccess)
+            NavigationManager.NavigateTo("/module/list");
     }
-    private void NavigateBack() => Navigation.NavigateTo("/Module/List");
+
+    private void NavigateBack() => NavigationManager.NavigateTo("/module/list");
 }

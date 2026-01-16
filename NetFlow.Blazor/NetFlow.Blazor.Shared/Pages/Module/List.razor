@@ -106,10 +106,8 @@
     bool IsActiveModuleLoading { get; set; }
     DrawerMode DrawerMode => IsModulePanelPinned ? DrawerMode.Shrink : DrawerMode.Overlap;
     ModuleModel? ActiveModule { get; set; }
-
     IGrid? Grid { get; set; }
     string? SearchText { get; set; }
-
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -128,9 +126,7 @@
     }
 
     void OnDataChanged(GridDevExtremeDataSource<ModuleModel> data) => Data = data;
-
     void OnPinClick() => IsModulePanelPinned = !IsModulePanelPinned;
-
     void OnCloseClick()
     {
         IsModulePanelOpen = false;
@@ -138,21 +134,13 @@
     }
 
     string GetPinButtonIconCss() => $"{(IsModulePanelPinned ? "pinned-icon" : "unpinned-icon")} medium-icon";
-
     void OnColumnChooserItemClick(ToolbarItemClickEventArgs e) => Grid!.ShowColumnChooser();
-
     Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Modules");
-
     Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Selected Modules", new GridXlExportOptions { ExportSelectedRowsOnly = true });
-
     Task ExportAllDataToCsv() => Grid!.ExportToCsvAsync("Modules");
-
     Task ExportSelectedRowsDataToCsv() => Grid!.ExportToCsvAsync("Selected Modules", new GridCsvExportOptions { ExportSelectedRowsOnly = true });
-
     Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Modules");
-
     Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Selected Modules", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
-
 
     async void OnRowClick(GridRowClickEventArgs args)
     {
@@ -167,51 +155,65 @@
         IsActiveModuleLoading = false;
         StateHasChanged();
     }
+
     async void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e)
     {
         if (!e.IsNew)
         {
             var module = (ModuleModel)e.DataItem;
-            // var freshModule = await ModuleApiClient.GetByIdAsync(module.Id);
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
 
-            // if (freshModule != null)
-            //     e.EditModel = freshModule;
+            // Güncel veriyi çekme
+            var freshModule = await client.GetFromJsonAsync<ModuleModel>($"api/modules/{module.Id}");
+            if (freshModule != null)
+                e.EditModel = freshModule;
         }
     }
+
     async Task Grid_EditModelSaving(GridEditModelSavingEventArgs e)
     {
+        var model = (ModuleModel)e.EditModel;
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+
         if (!e.IsNew)
         {
-            var model = (ModuleModel)e.EditModel;
-            // var response = await ModuleApiClient.UpdateAsync(model.Id, model);
+            var response = await client.PutAsJsonAsync("api/modules", model);
 
-            // if (response.Success)
-            //     await LoadGridDataAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadGridDataAsync();
+            }
         }
     }
-
 
     async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
     {
-        var module = (ModuleModel)e.DataItem;
-        // var response = await ModuleApiClient.DeleteAsync(module.Id);
 
-        // if (response.Success)
-        // {
-        //     Data?.Remove(module);
-        //     StateHasChanged();
-        // }
+        e.Cancel = true;
+
+        var module = (ModuleModel)e.DataItem;
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+
+        var response = await client.DeleteAsync($"api/modules/{module.Id}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadGridDataAsync();
+        }
     }
+
     string GetModulePanelWidth() => SizeMode switch
     {
         SizeMode.Small => "20.25rem",
         SizeMode.Large => "27rem",
         _ => "23.625rem",
     };
-    void OnAddClick()
-    {
-        NavigationManager.NavigateTo("/module/create");
-    }
+
+    void OnAddClick() => NavigationManager.NavigateTo("/module/create");
+
     void IDisposable.Dispose()
     {
         disposalTokenSource.Cancel();

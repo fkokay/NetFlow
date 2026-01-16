@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NetFlow.Application.Role
+namespace NetFlow.Application.Roles
 {
     public class CreateRoleRequest
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NetFlow.Application.Common.Interfaces;
-using NetFlow.Application.Role;
+using NetFlow.Application.Roles;
 using NetFlow.Domain.Entities;
 using System;
 using System.Collections.Generic;
