@@ -1,12 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NetFlow.Application.Netsis.Customers;
+using NetFlow.Application.Netsis.Warehouses;
+using NetFlow.Domain.Identity;
 
 namespace NetFlow.Api.Controllers.Netsis
 {
-    public class CustomersController : Controller
+    [ApiController]
+    [Route("api/netsis/customers")]
+    public class CustomersController : ControllerBase
     {
-        public IActionResult Index()
+        private readonly CustomerService _service;
+        private readonly CurrentUser _currentUser;
+
+        public CustomersController(CustomerService service, CurrentUser currentUser)
         {
-            return View();
+            _service = service;
+            _currentUser = currentUser;
+        }
+
+        [HttpGet("list")]
+        public async Task<IActionResult> List()
+        {
+            var data = await _service.GetCustomers();
+            return Ok(data);
         }
     }
 }

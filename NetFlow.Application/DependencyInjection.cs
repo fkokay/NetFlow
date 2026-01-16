@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NetFlow.Application.Firms;
 using NetFlow.Application.Modules;
+using NetFlow.Application.Netsis.Customers;
+using NetFlow.Application.Netsis.Products;
 using NetFlow.Application.Netsis.Shipments;
 using NetFlow.Application.Netsis.Warehouses;
 using NetFlow.Application.Roles;
@@ -16,6 +18,8 @@ namespace NetFlow.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             //NETSİS
+            services.AddScoped<CustomerService>();
+            services.AddScoped<ProductService>();
             services.AddScoped<ShipmentService>();
             services.AddScoped<WarehouseService>();
 

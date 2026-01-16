@@ -10,7 +10,7 @@ namespace NetFlow.Api.Controllers.Netsis
 {
     [ApiController]
     [Route("api/netsis/warehouses")]
-    public class WarehousesController : Controller
+    public class WarehousesController : ControllerBase
     {
         private readonly WarehouseService _service;
         private readonly CurrentUser _currentUser;

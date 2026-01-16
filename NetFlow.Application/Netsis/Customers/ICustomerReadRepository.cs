@@ -1,10 +1,13 @@
-﻿using System;
+﻿using NetFlow.Domain.Netsis.Customers;
+using NetFlow.Domain.Netsis.Warehouses;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace NetFlow.Application.Netsis.Customers
 {
-    internal class ICustomerReadRepository
+    public interface ICustomerReadRepository
     {
+        Task<List<Customer>> GetCustomers();
     }
 }
