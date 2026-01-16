@@ -1,5 +1,6 @@
 ﻿@page "/user/list"
 @implements IDisposable
+@using System.Threading
 @inject NavigationManager NavigationManager
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
@@ -27,7 +28,7 @@
                            Click="OnColumnChooserItemClick"
                            IconCssClass="column-chooser-icon icon medium-icon" />
 
-            <DxToolbarItem Text="Dışarı Aktarı"
+            <DxToolbarItem Text="Dışarı Aktar"
                            Alignment="ToolbarItemAlignment.Right"
                            IconCssClass="export-icon icon medium-icon">
                 <Items>
@@ -45,7 +46,7 @@
                            Tooltip="Search">
                 <Template>
                     <DxSearchBox CssClass="search-textbox"
-                                 NullText="Ara"
+                                 NullText="Ara..."
                                  BindValueMode="BindValueMode.OnInput"
                                  ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
                                  @bind-Text="SearchText" />
@@ -67,7 +68,6 @@
                 CssClass="User-list"
                 SearchText="@SearchText"
                 EditMode="GridEditMode.PopupEditForm"
-                PopupEditFormCssClass="pw-800"
                 SkeletonRowsEnabled="true"
                 ColumnResizeMode="GridColumnResizeMode.NextColumn"
                 FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
@@ -77,6 +77,7 @@
                 VirtualScrollingEnabled="true"
                 HighlightRowOnHover="true"
                 RowClick="OnRowClick"
+                EditStart="OnEditStart"
                 DataItemDeleting="Grid_DataItemDeleting">
 
             <Columns>
@@ -91,9 +92,8 @@
                 <DxGridDataColumn Caption="Roller" FieldName="Roles" />
                 <DxGridCommandColumn Width="6em"
                                      DeleteButtonVisible="true"
-                                     EditButtonVisible="false" />
+                                     EditButtonVisible="true" />
             </Columns>
-
         </DxGrid>
     </div>
 </div>
@@ -104,7 +104,6 @@
     [CascadingParameter(Name = "ParentSizeMode")]
     SizeMode SizeMode { get; set; }
     GridDevExtremeDataSource<UserModel> Data { get; set; } = null!;
-    bool IsDataLoaded { get; set; }
     IGrid? Grid { get; set; }
     string? SearchText { get; set; }
     string UserRoleFilterValue { get; set; } = "Tümü";
@@ -120,46 +119,30 @@
     {
         var httpClient = HttpClientFactory.CreateClient("ApiClient");
         var client = await ApiClientFactory.CreateAsync(httpClient);
+        // Not: DevExtremeDataSource için API endpoint'inizin LoadOptions desteklemesi önerilir.
         Data = new GridDevExtremeDataSource<UserModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/users"));
 
         if (Grid != null) Grid.Reload();
         await InvokeAsync(StateHasChanged);
     }
 
-
-    async Task Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e)
+    // --- DÜZENLEME BUTONUNA BASINCA ÇALIŞACAK KISIM ---
+    void OnEditStart(GridEditStartEventArgs e)
     {
-        if (!e.IsNew)
-        {
-            var user = (UserModel)e.DataItem;
-            var httpClient = HttpClientFactory.CreateClient("ApiClient");
-            var client = await ApiClientFactory.CreateAsync(httpClient);
-            var freshUser = await client.GetFromJsonAsync<UserModel>($"api/users/{user.Id}");
-            if (freshUser != null)
-                e.EditModel = freshUser;
-        }
-    }
+        // 1. Grid'in varsayılan edit formunu/popubını açmasını engelle
+        e.Cancel = true;
 
-    async Task Grid_EditModelSaving(GridEditModelSavingEventArgs e)
-    {
-        var model = (UserModel)e.EditModel;
-        var httpClient = HttpClientFactory.CreateClient("ApiClient");
-        var client = await ApiClientFactory.CreateAsync(httpClient);
+        // 2. İlgili satırın modelini al
+        var user = (UserModel)e.DataItem;
 
-        if (!e.IsNew)
-        {
-            var response = await client.PutAsJsonAsync("api/users", model);
-            if (response.IsSuccessStatusCode)
-            {
-                await LoadGridDataAsync();
-            }
-        }
+        // 3. Düzenleme sayfasına yönlendir (örn: /user/edit/5)
+        NavigationManager.NavigateTo($"/user/edit/{user.Id}");
     }
+    // ------------------------------------------------
 
     async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
     {
         e.Cancel = true;
-
         var user = (UserModel)e.DataItem;
         var httpClient = HttpClientFactory.CreateClient("ApiClient");
         var client = await ApiClientFactory.CreateAsync(httpClient);
@@ -173,7 +156,7 @@
 
     void OnAddClick() => NavigationManager.NavigateTo("/user/create");
 
-    void OnColumnChooserItemClick(ToolbarItemClickEventArgs e) => Grid?.ShowColumnChooser();
+    void OnColumnChooserItemClick() => Grid?.ShowColumnChooser();
 
     void FilterByUserRole(ToolbarItemClickEventArgs item)
     {
