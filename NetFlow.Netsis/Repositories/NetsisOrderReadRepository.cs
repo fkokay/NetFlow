@@ -41,14 +41,7 @@ namespace NetFlow.Netsis.Repositories
                           x.TIPI,
                           x.ACIKLAMA,
                           x.GENELTOPLAM
-
-
                       )).ToList();
-        }
-
-        public Task<List<Order>> GetOrders()
-        {
-            throw new NotImplementedException();
         }
     }
 }
