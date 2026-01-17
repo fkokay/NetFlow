@@ -155,7 +155,7 @@
         {
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
-            var result = await client.GetFromJsonAsync<List<FirmSelectModel>>("api/firms/simple");
+            var result = await client.GetFromJsonAsync<List<FirmSelectModel>>("api/firms/firmlist");
             if (result != null) AvailableFirms = result;
         }
         catch (Exception ex) { Console.WriteLine($"Firma Hatasý: {ex.Message}"); }
@@ -167,7 +167,7 @@
         {
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
-            var result = await client.GetFromJsonAsync<List<RoleSelectModel>>("api/roles/simple");
+            var result = await client.GetFromJsonAsync<List<RoleSelectModel>>("api/roles/rolelist");
             if (result != null) AvailableRoles = result;
         }
         catch (Exception ex) { Console.WriteLine($"Rol Hatasý: {ex.Message}"); }
