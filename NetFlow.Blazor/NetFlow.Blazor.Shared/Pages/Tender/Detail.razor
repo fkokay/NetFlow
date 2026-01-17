@@ -1,9 +1,9 @@
 @page "/tender/detail/{Id:int}"
+@using System.Net.Http.Json
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
-
 
 <div class="tender-detail-wrapper" style="padding: 1.5rem; background-color: #f8f9fa; min-height: 100vh;">
     @if (Model == null)
@@ -16,7 +16,7 @@
     }
     else
     {
-        @* Üst Baþlýk Bölümü *@
+     
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
             <div>
                 <h4 style="margin: 0; font-weight: 700; color: #333;">
@@ -34,6 +34,7 @@
                 <Template>
                     <div class="tender-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
 
+                       
                         <div class="tender-left" style="flex: 1; min-width: 300px; max-width: 400px;">
                             <div class="tender-card" style="padding:1.5rem; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                                 <div style="text-align:center;margin-bottom:2rem;">
@@ -61,7 +62,7 @@
 
                                 <h6 style="font-weight:700;border-bottom:1px solid #eee;margin-bottom:1rem; padding-bottom: 0.5rem;">GENEL BÝLGÝLER</h6>
                                 <div style="display:flex;flex-direction:column;gap:8px;font-size:.85rem;">
-                                    <div style="display:flex;justify-content:space-between;"><span>Ýhale:</span><span style="font-weight:600;">@Model.TenderName</span></div>
+                                    <div style="display:flex;justify-content:space-between;"><span>Ýhale:</span><span style="font-weight:600; text-align:right;">@Model.TenderName</span></div>
                                     <div style="display:flex;justify-content:space-between;"><span>Baþlangýç:</span><span>@Model.TenderStartDate.ToShortDateString()</span></div>
                                     <div style="display:flex;justify-content:space-between;"><span>Bitiþ:</span><span>@Model.TenderEndDate.ToShortDateString()</span></div>
                                     <div style="display:flex;justify-content:space-between;"><span>Tür:</span><span>@Model.TenderType</span></div>
@@ -73,7 +74,7 @@
 
                         <div class="tender-right" style="flex: 3; min-width: 600px;">
                             <div class="tender-card" style="background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden;">
-                                <DxTabs @bind-ActiveTabIndex="@ActiveTabIndex" style="padding:.5rem 1rem 0 1rem;">
+                                <DxTabs ActiveTabIndex="@ActiveTabIndex" ActiveTabIndexChanged="OnActiveTabIndexChanged" style="padding:.5rem 1rem 0 1rem;">
                                     <DxTabPage Text="Cihazlar" />
                                     <DxTabPage Text="Opex" />
                                     <DxTabPage Text="Capex" />
@@ -85,7 +86,7 @@
                                     @switch (ActiveTabIndex)
                                     {
                                         case 0:
-                                            <DxGrid Data="Model.Devices" ShowSearchBox="true" Height="500px">
+                                            <DxGrid Data="DeviceDataSource" ShowSearchBox="true" Height="500px">
                                                 <Columns>
                                                     <DxGridDataColumn FieldName="SupplyType" Caption="Tedarik Türü" />
                                                     <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
@@ -97,13 +98,11 @@
                                                     <DxGridDataColumn FieldName="LinkUnitPrice" Caption="Link" DisplayFormat="n2" />
                                                     <DxGridDataColumn FieldName="PurchasePrice" Caption="Satýnlama" DisplayFormat="n2" />
                                                     <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
-                                                    <DxGridDataColumn FieldName="CreatedAt" Caption="Kayýt Tarihi" />
                                                 </Columns>
                                             </DxGrid>
                                             break;
-
                                         case 1:
-                                            <DxGrid Data="Model.Opexs" ShowSearchBox="true" Height="500px">
+                                            <DxGrid Data="OpexDataSource" ShowSearchBox="true" Height="500px">
                                                 <Columns>
                                                     <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
                                                     <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
@@ -113,22 +112,19 @@
                                                 </Columns>
                                             </DxGrid>
                                             break;
-
                                         case 2:
-                                            <DxGrid Data="Model.Capexs" ShowSearchBox="true" Height="500px">
+                                            <DxGrid Data="CapexDataSource" ShowSearchBox="true" Height="500px">
                                                 <Columns>
                                                     <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
                                                     <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
                                                     <DxGridDataColumn FieldName="AssetCode" Caption="Demirbaþ Kodu" />
                                                     <DxGridDataColumn FieldName="Quantity" Caption="Miktar" />
                                                     <DxGridDataColumn FieldName="Unit" Caption="Birim" />
-                                                    <DxGridDataColumn FieldName="CreatedAt" Caption="Kayýt Tarihi" />
                                                 </Columns>
                                             </DxGrid>
                                             break;
-
                                         case 3:
-                                            <DxGrid Data="Model.Reaktifs" ShowSearchBox="true" Height="500px">
+                                            <DxGrid Data="ReaktifDataSource" ShowSearchBox="true" Height="500px">
                                                 <Columns>
                                                     <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
                                                     <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
@@ -136,16 +132,13 @@
                                                     <DxGridDataColumn FieldName="SutCode" Caption="Sut Kodu" />
                                                     <DxGridDataColumn FieldName="TestName" Caption="Test Adý" />
                                                     <DxGridDataColumn FieldName="TestCount" Caption="Test Sayýsý" />
-                                                    <DxGridDataColumn FieldName="SutPoint" Caption="SUT Puaný" />
-                                                    <DxGridDataColumn FieldName="TotalSutPoint" Caption="Toplam SUT Puaný" />
                                                     <DxGridDataColumn FieldName="UnitPrice" Caption="Birim Fiyat" DisplayFormat="n2" />
                                                     <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
                                                 </Columns>
                                             </DxGrid>
                                             break;
-
                                         case 4:
-                                            <DxGrid Data="Model.Documents" Height="500px">
+                                            <DxGrid Data="RequiredDocumentDataSource" Height="500px">
                                                 <Columns>
                                                     <DxGridDataColumn FieldName="DocumentName" Caption="Belge" />
                                                     <DxGridDataColumn FieldName="IsMandatory" Caption="Zorunlu" Width="100px" TextAlignment="GridTextAlignment.Center">
@@ -156,7 +149,6 @@
                                                             }
                                                         </CellDisplayTemplate>
                                                     </DxGridDataColumn>
-
                                                     <DxGridDataColumn FieldName="Submitted" Caption="Durum" Width="100px" TextAlignment="GridTextAlignment.Center">
                                                         <CellDisplayTemplate Context="ctx">
                                                             @{
@@ -165,7 +157,6 @@
                                                             }
                                                         </CellDisplayTemplate>
                                                     </DxGridDataColumn>
-
                                                     <DxGridDataColumn FieldName="SubmissionDate" Caption="Yüklenme Tarihi" TextAlignment="GridTextAlignment.Center">
                                                         <CellDisplayTemplate Context="ctx">
                                                             @{
@@ -185,11 +176,9 @@
                                                         <CellDisplayTemplate Context="ctx">
                                                             @{
                                                                 var doc3 = (TenderRequiredDocument)ctx.DataItem;
-                                                                if (doc3.TenderRequiredDocumentFileId.HasValue && doc3.FileContent != null)
+                                                                if (doc3.TenderRequiredDocumentFileId.HasValue)
                                                                 {
-                                                                    <DxButton RenderStyle="ButtonRenderStyle.Primary"
-                                                                              RenderStyleMode="ButtonRenderStyleMode.Outline"
-                                                                              SizeMode="SizeMode.Small"
+                                                                    <DxButton RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Outline" SizeMode="SizeMode.Small"
                                                                               Click="@(() => HandleFileAction(doc3))"
                                                                               IconCssClass="@(doc3.FileType == "application/pdf" ? "ti ti-file-text text-danger" : "ti ti-file-text text-primary")" />
                                                                 }
@@ -214,15 +203,7 @@
     }
 </div>
 
-<DxWindow Visible="@PdfModalVisible"
-          VisibleChanged="@((value) => PdfModalVisible = value)"
-          HeaderText="Belge Görüntüleme"
-          Width="90vw"
-          Height="85vh"
-          AllowResize="true"
-          ShowCloseButton="true"
-          CloseOnEscape="true"
-          HeaderCssClass="font-weight-bold">
+<DxWindow Visible="@PdfModalVisible" VisibleChanged="@((value) => PdfModalVisible = value)" HeaderText="Belge Görüntüleme" Width="90vw" Height="85vh" AllowResize="true" ShowCloseButton="true" CloseOnEscape="true" HeaderCssClass="font-weight-bold">
     <BodyTemplate>
         <iframe src="@PdfDataUrl" style="width:100%; height:100%; border:none;"></iframe>
     </BodyTemplate>
@@ -246,13 +227,33 @@
     private bool PdfModalVisible { get; set; }
     private string PdfDataUrl { get; set; } = "";
 
+    private GridDevExtremeDataSource<TenderDeviceModel>? DeviceDataSource { get; set; }
+    private GridDevExtremeDataSource<TenderOpexModel>? OpexDataSource { get; set; }
+    private GridDevExtremeDataSource<TenderCapexModel>? CapexDataSource { get; set; }
+    private GridDevExtremeDataSource<TenderReaktifModel>? ReaktifDataSource { get; set; }
+    private GridDevExtremeDataSource<TenderRequiredDocument>? RequiredDocumentDataSource { get; set; }
+
     protected override async Task OnInitializedAsync()
+    {
+        await LoadMainModel();
+    }
+
+    private async Task LoadMainModel()
     {
         try
         {
-            
             var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
-            Model = new TenderModel();
+            var response = await client.GetAsync($"api/tenders/{Id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                Model = await response.Content.ReadFromJsonAsync<TenderModel>();
+                await LoadTabData(ActiveTabIndex);
+            }
+            else
+            {
+                NavigationManager.NavigateTo("/tender/list");
+            }
         }
         catch
         {
@@ -260,19 +261,60 @@
         }
     }
 
+    private async Task OnActiveTabIndexChanged(int index)
+    {
+        ActiveTabIndex = index;
+        await LoadTabData(index);
+    }
+
+    private async Task LoadTabData(int index)
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        string baseUrl = "https://localhost:7071/api";
+
+        switch (index)
+        {
+            case 0:
+                DeviceDataSource = new GridDevExtremeDataSource<TenderDeviceModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-devices?tenderId={Id}"));
+                break;
+            case 1:
+                OpexDataSource = new GridDevExtremeDataSource<TenderOpexModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-opex?tenderId={Id}"));
+                break;
+            case 2:
+                CapexDataSource = new GridDevExtremeDataSource<TenderCapexModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-capex?tenderId={Id}"));
+                break;
+            case 3:
+                ReaktifDataSource = new GridDevExtremeDataSource<TenderReaktifModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-reaktif?tenderId={Id}"));
+                break;
+            case 4:
+                RequiredDocumentDataSource = new GridDevExtremeDataSource<TenderRequiredDocument>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-documents?tenderId={Id}"));
+                break;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
     private async Task HandleFileAction(TenderRequiredDocument doc)
     {
-        if (doc.FileContent == null) return;
-        string base64String = Convert.ToBase64String(doc.FileContent);
+        try
+        {
+       
+            if (doc.FileContent == null) return;
 
-        if (doc.FileType == "application/pdf")
-        {
-            PdfDataUrl = $"data:application/pdf;base64,{base64String}";
-            PdfModalVisible = true;
+            string base64String = Convert.ToBase64String(doc.FileContent);
+
+            if (doc.FileType == "application/pdf")
+            {
+                PdfDataUrl = $"data:application/pdf;base64,{base64String}";
+                PdfModalVisible = true;
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("downloadFileFromBase64", doc.FileName, base64String, doc.FileType);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("downloadFileFromBase64", doc.FileName, base64String, doc.FileType);
+            Console.WriteLine(ex.Message);
         }
     }
 }

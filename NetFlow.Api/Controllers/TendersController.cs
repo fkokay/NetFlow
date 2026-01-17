@@ -8,7 +8,6 @@ namespace NetFlow.Api.Controllers
 {
     [ApiController]
     [Route("api/tenders")]
-    [Authorize]
     public class TendersController : ControllerBase
     {
         protected readonly CurrentUser _current;
