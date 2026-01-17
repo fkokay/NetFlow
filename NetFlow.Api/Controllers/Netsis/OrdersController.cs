@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NetFlow.Application.Netsis.Orders;
 using NetFlow.Application.Netsis.Products;
+using NetFlow.Domain.Common.Pagination;
 using NetFlow.Domain.Identity;
 
 namespace NetFlow.Api.Controllers.Netsis
@@ -19,9 +20,9 @@ namespace NetFlow.Api.Controllers.Netsis
         }
 
         [HttpGet("list")]
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> List([FromQuery] short orderType, [FromQuery] PagedRequest request)
         {
-            var data = await _service.GetCustomers();
+            var data = await _service.GetOrders(orderType,request);
             return Ok(data);
         }
     }

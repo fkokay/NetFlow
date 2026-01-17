@@ -6,15 +6,15 @@ namespace NetFlow.Domain.Netsis.Orders
 {
     public class Order
     {
-        public short BranchCode { get; set; }
-        public string OrderType { get; set; } = string.Empty;
-        public string OrderNumber { get; set; } = string.Empty;
-        public string CustomerCode { get; set; } = string.Empty;
-        public string CustomerName { get; set; } = string.Empty;
-        public DateTime OrderDate { get; set; }
-        public short? OrderStatus { get; set; }
-        public string? Description { get; set; }
-        public double NetTotal { get; set; }
+        public short BranchCode { get; }
+        public string OrderType { get;  } 
+        public string OrderNumber { get;  } 
+        public string CustomerCode { get;  } 
+        public string CustomerName { get;  } 
+        public DateTime OrderDate { get;  }
+        public short? OrderStatus { get;  }
+        public string? Description { get;  }
+        public double NetTotal { get;  }
 
         public Order(short branchCode, string orderType, string orderNumber, string customerCode, string customerName, DateTime orderDate, short? orderStatus, string? description, double netTotal)
         {

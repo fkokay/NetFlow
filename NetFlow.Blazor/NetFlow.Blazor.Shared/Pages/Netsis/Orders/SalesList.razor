@@ -1,0 +1,97 @@
+﻿@page "/netsis/orders/sales/list"
+@using Microsoft.AspNetCore.WebUtilities
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+<div class="content-root">
+    <div class="card toolbar integrated-toolbar mb-2 shadow-sm">
+        <DxToolbar Title="Sipariş Listesi">
+            <DxToolbarItem Tooltip="Sütun Seçici" Alignment="ToolbarItemAlignment.Right" Click="OnColumnChooserItemClick" IconCssClass="column-chooser-icon icon medium-icon" />
+            <DxToolbarItem Text="Dışarı Aktar" Alignment="ToolbarItemAlignment.Right" IconCssClass="export-icon icon medium-icon">
+                <Items>
+                    <DxToolbarItem Text="Excel'e Aktar" Click="ExportAllDataToExcel" />
+                    <DxToolbarItem Text="Seçili Satırları Excel'e Aktar" Click="ExportSelectedRowsToExcel" />
+                </Items>
+            </DxToolbarItem>
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                <Template Context="searchContext"><DxSearchBox NullText="Ara..." @bind-Text=SearchText /></Template>
+            </DxToolbarItem>
+            <DxToolbarItem Tooltip="Refresh" BeginGroup="true" Click="@LoadDataAsync" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
+        </DxToolbar>
+    </div>
+    <DxGrid @ref="Grid"
+            Data="@Data"
+            VirtualScrollingEnabled="true"
+            ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+            ShowGroupPanel="true"
+            ShowFilterRow="true"
+            ShowSearchBox="false"
+            SearchText="@SearchText"
+            TextWrapEnabled="false">
+        <Columns>
+            <DxGridSelectionColumn Width="60px" />
+            <DxGridDataColumn Caption="Şube Kodu" FieldName="BranchCode" Visible="false" />
+            <DxGridDataColumn Caption="Sipariş No" FieldName="OrderNumber" />
+            <DxGridDataColumn Caption="Müşteri Kodu" FieldName="CustomerCode" />
+            <DxGridDataColumn Caption="Müşteri Adı" FieldName="CustomerName" />
+            <DxGridDataColumn Caption="Sipariş Tarihi" FieldName="OrderDate" />
+            <DxGridDataColumn Caption="Sipariş Durumu" FieldName="OrderStatus" >
+                <CellDisplayTemplate>
+                    <span class="status @(context.Value.ToString() == "2" ? "status-success" : "status-danger")">@(context.Value.ToString() == "2" ? "Onaylandı" : "Onay Bekliyor")</span>
+                </CellDisplayTemplate>
+            </DxGridDataColumn>
+            <DxGridDataColumn Caption="Sipariş Tutarı" FieldName="NetTotal" DisplayFormat="N2" />
+            <DxGridDataColumn Caption="Açıklama" FieldName="Description" />
+            <DxGridCommandColumn Width="6em">
+                <CellDisplayTemplate Context="cellContext">
+                    @if ((cellContext.DataItem as OrderModel)?.OrderStatus != 2)
+                    {
+                        <DxButton Text="Onayla"
+                                  CssClass="dx-button-success"
+                                  SizeMode="SizeMode.Small"
+                                  Click="@(() => ConfirmShipment(cellContext.DataItem))" />
+                    }
+                </CellDisplayTemplate>
+            </DxGridCommandColumn>
+        </Columns>
+    </DxGrid>
+</div>
+
+@code {
+    private IGrid? Grid;
+    private string SearchText { get; set; } = string.Empty;
+    private GridDevExtremeDataSource<OrderModel> Data { get; set; } = null!;
+
+    void OnColumnChooserItemClick()
+    {
+        Grid?.ShowColumnChooser();
+    }
+
+    void OnRowClick(GridRowClickEventArgs args)
+    {
+
+    }
+
+    void ConfirmShipment(object item)
+    {
+        
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        await LoadDataAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected async Task LoadDataAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        Data = new GridDevExtremeDataSource<OrderModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/netsis/orders/list?orderType=6"));
+    }
+
+    Task ExportAllDataToExcel() => Grid?.ExportToXlsxAsync("Siparis Listesi") ?? Task.CompletedTask;
+    Task ExportSelectedRowsToExcel() => Grid?.ExportToXlsxAsync("Seçili Siparisler", new GridXlExportOptions { ExportSelectedRowsOnly = true }) ?? Task.CompletedTask;
+}

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NetFlow.Blazor.Shared.Models
+namespace NetFlow.Blazor.Shared.Models.Netsis
 {
     public class ShipmentOrderModel
     {

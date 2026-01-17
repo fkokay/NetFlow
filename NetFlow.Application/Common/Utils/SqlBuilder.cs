@@ -9,77 +9,138 @@ namespace NetFlow.Application.Common.Utils
 {
     public static class DevExtremeSqlBuilder
     {
-        public static (string Sql, DynamicParameters Params) Compile(string filterJson)
+        public static (string Sql, DynamicParameters Params) Compile(string filterJson, Dictionary<string, string>? fieldMap = null)
         {
-            var p = new DynamicParameters();
-            int i = 0;
+            if (string.IsNullOrWhiteSpace(filterJson))
+                return ("1=1", new DynamicParameters());
 
-            var token = JToken.Parse(filterJson);   // 🔥 string → JSON
+            var parameters = new DynamicParameters();
+            int index = 0;
+
+            var token = JToken.Parse(filterJson);
+
+            string ResolveColumn(string field)
+            {
+                // 🔹 fieldMap varsa ve eşleşme varsa onu kullan
+                if (fieldMap != null &&
+                    fieldMap.Count > 0 &&
+                    fieldMap.TryGetValue(field, out var mapped))
+                {
+                    return mapped;
+                }
+
+                // 🔹 Aksi halde alan adını olduğu gibi kullan
+                return field;
+            }
 
             string Build(JToken f)
             {
+                // 🔹 Basit filtre: ["Field", "op", value]
                 if (f is JArray arr && arr.Count == 3 && arr[0].Type == JTokenType.String)
                 {
-                    string field = arr[0].ToString();
-                    string op = arr[1].ToString();
-                    var val = arr[2];
+                    string field = arr[0]!.ToString();
+                    string op = arr[1]!.ToString().ToLowerInvariant();
+                    var valueToken = arr[2];
 
-                    string param = "@p" + i++;
-                    p.Add(param, val.ToObject<object>());
+                    string dbColumn = ResolveColumn(field);
+
+                    string param = "@p" + index++;
+                    object? value = valueToken.Type == JTokenType.Null
+                        ? null
+                        : valueToken.ToObject<object>();
+
+                    parameters.Add(param, value);
 
                     return op switch
                     {
-                        "contains" => $"{field} LIKE '%' + {param} + '%'",
-                        "=" => $"{field} = {param}",
-                        ">" => $"{field} > {param}",
-                        "<" => $"{field} < {param}",
-                        ">=" => $"{field} >= {param}",
-                        "<=" => $"{field} <= {param}",
-                        _ => throw new NotSupportedException(op)
+                        "contains" => $"{dbColumn} LIKE '%' + {param} + '%'",
+                        "startswith" => $"{dbColumn} LIKE {param} + '%'",
+                        "endswith" => $"{dbColumn} LIKE '%' + {param}",
+
+                        "=" => $"{dbColumn} = {param}",
+                        "<>" => $"{dbColumn} <> {param}",
+                        ">" => $"{dbColumn} > {param}",
+                        "<" => $"{dbColumn} < {param}",
+                        ">=" => $"{dbColumn} >= {param}",
+                        "<=" => $"{dbColumn} <= {param}",
+
+                        _ => throw new NotSupportedException($"Operator not supported: {op}")
                     };
                 }
+
+                // 🔹 Mantıksal grup: [cond, "and"/"or", cond, ...]
                 if (f is JArray logic)
                 {
                     var parts = new List<string>();
 
-                    for (int i = 0; i < logic.Count; i++)
+                    foreach (var item in logic)
                     {
-                        if (logic[i].Type == JTokenType.String)
+                        if (item.Type == JTokenType.String)
                         {
-                            parts.Add(logic[i].ToString().ToUpper());
+                            var keyword = item.ToString().ToUpperInvariant();
+                            if (keyword != "AND" && keyword != "OR")
+                                throw new NotSupportedException($"Invalid logical operator: {keyword}");
+
+                            parts.Add(keyword);
                         }
                         else
                         {
-                            parts.Add(Build(logic[i]));
+                            parts.Add(Build(item));
                         }
                     }
 
                     return "(" + string.Join(" ", parts) + ")";
                 }
 
-                throw new NotSupportedException("Invalid DevExtreme filter");
+                throw new NotSupportedException("Invalid DevExtreme filter format");
             }
 
-            string sql = Build(token);
-            return (sql, p);
+            return (Build(token), parameters);
         }
 
-        public static string BuildOrderBy(string? sortJson, string defaultOrder)
+        public static string BuildOrderBy(string? sortJson, string defaultOrder, Dictionary<string, string>? fieldMap = null)
         {
-            if (string.IsNullOrEmpty(sortJson))
+            if (string.IsNullOrWhiteSpace(sortJson))
                 return defaultOrder;
 
-            var arr = JArray.Parse(sortJson);
+            JArray arr;
+            try
+            {
+                arr = JArray.Parse(sortJson);
+            }
+            catch
+            {
+                return defaultOrder;
+            }
+
+            string ResolveColumn(string field)
+            {
+                if (fieldMap != null &&
+                    fieldMap.Count > 0 &&
+                    fieldMap.TryGetValue(field, out var mapped))
+                {
+                    return mapped;
+                }
+                return field;
+            }
+
             var orders = new List<string>();
 
             foreach (var s in arr)
             {
-                string field = s["selector"]!.ToString();
+                var field = s["selector"]?.ToString();
+                if (string.IsNullOrWhiteSpace(field))
+                    continue;
+
                 bool desc = s["desc"]?.ToObject<bool>() ?? false;
-                orders.Add($"{field} {(desc ? "DESC" : "ASC")}");
+
+                var column = ResolveColumn(field);
+                orders.Add($"{column} {(desc ? "DESC" : "ASC")}");
             }
 
-            return string.Join(", ", orders);
+            return orders.Count > 0
+                ? "ORDER BY " + string.Join(", ", orders)
+                : defaultOrder;
         }
     }
 

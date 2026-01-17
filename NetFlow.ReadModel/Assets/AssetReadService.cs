@@ -31,6 +31,7 @@ namespace NetFlow.ReadModel.Assets
             string orderBy = DevExtremeSqlBuilder.BuildOrderBy(
                 pagedRequest.sort,
                 "Id DESC"
+                
             );
 
             string countSql = $@"
