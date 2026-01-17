@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NetFlow.Application.Common.Pagination
+namespace NetFlow.Domain.Common.Pagination
 {
     public class PagedRequest
     {

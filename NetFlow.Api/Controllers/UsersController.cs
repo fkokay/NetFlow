@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NetFlow.Application.Common.Pagination;
 using NetFlow.Application.Users;
+using NetFlow.Domain.Common.Pagination;
 using NetFlow.ReadModel.Users;
 
 namespace NetFlow.Api.Controllers

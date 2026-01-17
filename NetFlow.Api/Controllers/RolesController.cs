@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NetFlow.Application.Common.Pagination;
 using NetFlow.Application.Firms;
 using NetFlow.Application.Roles;
+using NetFlow.Domain.Common.Pagination;
 using NetFlow.Domain.Identity;
 using NetFlow.ReadModel.Roles;
 using NetFlow.ReadModel.Tenders;

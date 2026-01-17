@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NetFlow.Application.Common.Pagination;
 using NetFlow.Application.Firms;
 using NetFlow.Application.Modules;
+using NetFlow.Domain.Common.Pagination;
 using NetFlow.ReadModel.Firms;
 using NetFlow.ReadModel.Modules;
 

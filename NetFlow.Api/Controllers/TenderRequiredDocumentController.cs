@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using NetFlow.Application.Common.Pagination;
 using NetFlow.Domain.Common;
+using NetFlow.Domain.Common.Pagination;
 using NetFlow.ReadModel.TenderDocuments;
 
 namespace NetFlow.Api.Controllers

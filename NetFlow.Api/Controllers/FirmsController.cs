@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NetFlow.Application.Common.Pagination;
 using NetFlow.Application.Firms;
+using NetFlow.Domain.Common.Pagination;
 using NetFlow.Domain.Identity;
 using NetFlow.ReadModel.Assets;
 using NetFlow.ReadModel.Firms;

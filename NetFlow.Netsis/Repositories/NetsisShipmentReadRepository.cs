@@ -1,9 +1,11 @@
 ﻿using Dapper;
 using NetFlow.Application.Netsis.Shipments;
+using NetFlow.Domain.Common.Pagination;
 using NetFlow.Domain.Netsis.Shipments;
 using NetFlow.Infrastructure.Common;
 using NetFlow.Netsis.Connection;
 using NetFlow.Netsis.Dto;
+using NetFlow.Netsis.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -21,7 +23,7 @@ namespace NetFlow.Netsis.Repositories
             _factory = factory;
         }
 
-        public async Task<List<ShipmentOrder>> GetShippableOrders(ShipmentShippableOrderFilter f)
+        public async Task<PagedResult> GetShippableOrders(ShipmentShippableOrderFilter filter)
         {
             using var con = _factory.Create();
 
@@ -29,16 +31,27 @@ namespace NetFlow.Netsis.Repositories
 
             var dto = await con.QueryAsync<ShipmentShippableOrderDto>(sql, new
             {
-                CARI_KODU = f.CustomerCode,
-                BASTAR = f.StartDate,
-                BITTAR = f.EndDate,
-                DEPO_KODU = f.Warehouse,
-                HAS_BALANCE = f.HasBalance ? 1 : 0
+                CARI_KODU = filter.Customer,
+                BASTAR = filter.StartDate,
+                BITTAR = filter.EndDate,
+                DEPO_KODU = filter.Warehouse,
+                HAS_BALANCE = filter.HasBalance ? 1 : 0
             });
 
-            return dto.Select(x =>
+            if (filter.isCountQuery != null && filter.isCountQuery.HasValue)
+            {
+                return new PagedResult
+                {
+                    data = Array.Empty<ShipmentOrder>(),
+                    totalCount = dto.Count(),
+                };
+            }
+
+            return new PagedResult()
+            {
+                data = dto.Select(NetsisUtils.FixAllStrings).Select(x =>
                       ShipmentOrder.Create(
-                          x.ID, 
+                          x.ID,
                           x.SIPARIS_NO,
                           x.CARI_KODU,
                           x.CARI_ADI,
@@ -47,7 +60,9 @@ namespace NetFlow.Netsis.Repositories
                           x.MIKTAR,
                           x.DEPO_KODU,
                           x.DEPO_BAKIYE
-                      )).ToList();
+                      )).ToList(),
+                totalCount = dto.Count(),
+            };
         }
     }
 }

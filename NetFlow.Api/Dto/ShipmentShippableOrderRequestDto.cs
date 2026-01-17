@@ -1,11 +1,13 @@
-﻿namespace NetFlow.Api.Dto
+﻿using NetFlow.Domain.Common.Pagination;
+
+namespace NetFlow.Api.Dto
 {
-    public class ShipmentShippableOrderRequestDto
+    public class ShipmentShippableOrderRequestDto : PagedRequest
     {
-        public string? Cari { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-        public string? Depo { get; set; }
-        public bool HasBalance { get; set; }
+        public string? customer { get; set; }
+        public DateTime? startDate { get; set; }
+        public DateTime? endDate { get; set; }
+        public short? warehouse { get; set; }
+        public bool hasBalance { get; set; } = false;
     }
 }

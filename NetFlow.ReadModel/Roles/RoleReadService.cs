@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
-using NetFlow.Application.Common.Pagination;
 using NetFlow.Application.Common.Utils;
+using NetFlow.Domain.Common.Pagination;
 using NetFlow.ReadModel.Firms;
 using NetFlow.ReadModel.Guarantees;
 using NetFlow.ReadModel.Tenders;

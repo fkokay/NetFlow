@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace NetFlow.Application.Common.Pagination
+namespace NetFlow.Domain.Common.Pagination
 {
     public class PagedResult
     {

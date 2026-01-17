@@ -1,29 +1,26 @@
-﻿using NetFlow.Domain.Common;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using NetFlow.Domain.Common.Pagination;
 
 namespace NetFlow.Domain.Netsis.Shipments
 {
-    public class ShipmentShippableOrderFilter
+    public class ShipmentShippableOrderFilter : PagedRequest
     {
-        public string? CustomerCode { get; }
+        public string? Customer { get; }
         public DateTime? StartDate { get; }
         public DateTime? EndDate { get; }
-        public string? Warehouse { get; }
+        public short? Warehouse { get; }
         public bool HasBalance { get; }
 
         public ShipmentShippableOrderFilter(
-            string? customerCode,
+            string? customer,
             DateTime? startDate,
             DateTime? endDate,
-            string? warehouse,
+            short? warehouse,
             bool hasBalance)
         {
             if (startDate.HasValue && endDate.HasValue && startDate > endDate)
                 throw new InvalidShipmentDateException();
 
-            CustomerCode = customerCode;
+            Customer = customer;
             StartDate = startDate;
             EndDate = endDate;
             Warehouse = warehouse;

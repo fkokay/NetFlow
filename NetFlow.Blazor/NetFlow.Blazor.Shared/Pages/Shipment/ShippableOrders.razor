@@ -1,4 +1,5 @@
 ﻿@page "/shipment/shippable-orders"
+@using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager NavigationManager
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
@@ -47,16 +48,24 @@
             <DxToolbarItem Tooltip="Refresh" BeginGroup="true" Click="@LoadDataAsync" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
         </DxToolbar>
     </div>
-    <DxGrid @ref="Grid" Data="Data" KeyFieldName="Id" CssClass="w-100 shadow-sm" RowClick="@OnRowClick" ShowGroupPanel="true">
+    <DxGrid @ref="Grid"
+            Data="@Data"
+            VirtualScrollingEnabled="true"
+            ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+            ShowGroupPanel="true"
+            ShowFilterRow="true"
+            ShowSearchBox="false"
+            SearchText="@SearchText"
+            TextWrapEnabled="false">
         <Columns>
             <DxGridSelectionColumn Width="60px" />
-            <DxGridDataColumn Caption="Sipariş No" FieldName="OrderNo" />
-            <DxGridDataColumn Caption="Cari Kodu" FieldName="CustomerCode" />
-            <DxGridDataColumn Caption="Cari Adı" FieldName="CustomerName" GroupIndex="0" />
+            <DxGridDataColumn Caption="Sipariş No" FieldName="OrderNo"/>
+            <DxGridDataColumn Caption="Cari Kodu" FieldName="CustomerCode"/>
+            <DxGridDataColumn Caption="Cari Adı" FieldName="CustomerName"/>
             <DxGridDataColumn Caption="Stok Kodu" FieldName="StockCode"></DxGridDataColumn>
-            <DxGridDataColumn Caption="Stok Adı" FieldName="StockName" />
+            <DxGridDataColumn Caption="Stok Adı" FieldName="StockName"/>
             <DxGridDataColumn Caption="Miktar" FieldName="Quantity" DisplayFormat="N2" />
-            <DxGridDataColumn Caption="Depo Adı" FieldName="Warehouse" />
+            <DxGridDataColumn Caption="Depo Adı" FieldName="Warehouse"/>
         </Columns>
     </DxGrid>
 </div>
@@ -90,8 +99,32 @@
 
     async Task LoadDataAsync()
     {
+        string customer = FilterRequest.Customer ?? string.Empty;
+        short? warehouse = FilterRequest.Warehouse;
+        DateTime? startDate = FilterRequest.StartDate;
+        DateTime? endDate = FilterRequest.EndDate;
+        bool hasBalance = FilterRequest.HasBalance;
+
+
+        var query = new Dictionary<string, string?>()
+        {
+            ["customer"] = FilterRequest.Customer,
+            ["warehouse"] = FilterRequest.Warehouse?.ToString(),
+            ["startDate"] = FilterRequest.StartDate?.ToString("yyyy-MM-dd"),
+            ["endDate"] = FilterRequest.EndDate?.ToString("yyyy-MM-dd"),
+            ["hasBalance"] = FilterRequest.HasBalance.ToString().ToLower()
+        };
+
+        var url = QueryHelpers.AddQueryString(
+        "api/netsis/shipments/shippable-orders",
+            query.Where(x => !string.IsNullOrWhiteSpace(x.Value))
+                 .ToDictionary(x => x.Key, x => x.Value!)
+        );
+
+
+
         var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
-        Data = new GridDevExtremeDataSource<ShipmentOrderModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/shipments/shippable-orders"));
+        Data = new GridDevExtremeDataSource<ShipmentOrderModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/netsis/shipments/shippable-orders"));
     }
 
     Task ExportAllDataToExcel() => Grid?.ExportToXlsxAsync("Siparis Listesi") ?? Task.CompletedTask;
