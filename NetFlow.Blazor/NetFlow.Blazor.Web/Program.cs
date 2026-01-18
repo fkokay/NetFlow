@@ -27,10 +27,12 @@ builder.Services
     .AddScheme<AuthenticationSchemeOptions, BlazorAuthHandler>("Blazor", _ => { });
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<ProtectedLocalStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<CustomAuthStateProvider>(provider =>
-    (CustomAuthStateProvider)provider.GetRequiredService<AuthenticationStateProvider>());
-builder.Services.AddScoped<ProtectedSessionStorage>();
+    (CustomAuthStateProvider)provider.GetRequiredService<AuthenticationStateProvider>()
+);
+
 
 builder.Services.AddScoped<ILoginService>(sp =>
 {
@@ -41,7 +43,8 @@ builder.Services.AddScoped<ILoginService>(sp =>
         http,
         sp.GetRequiredService<AuthenticationStateProvider>());
 });
-builder.Services.AddScoped<IApiClientFactory,ApiClientFactory>();
+
+builder.Services.AddScoped<IApiClientFactory, ApiClientFactory>();
 
 builder.Services.AddHttpClient("ApiClient", client =>
 {

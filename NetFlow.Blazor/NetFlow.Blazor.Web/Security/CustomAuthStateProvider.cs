@@ -7,19 +7,19 @@ namespace NetFlow.Blazor.Web.Security
 {
     public class CustomAuthStateProvider : AuthenticationStateProvider
     {
-        private readonly ProtectedSessionStorage _sessionStorage;
+        private readonly ProtectedLocalStorage _localStorage;
         private ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
 
-        public CustomAuthStateProvider(ProtectedSessionStorage sessionStorage)
+        public CustomAuthStateProvider(ProtectedLocalStorage localStorage)
         {
-            _sessionStorage = sessionStorage;
+            _localStorage = localStorage;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             try
             {
-                var result = await _sessionStorage.GetAsync<string>("authToken");
+                var result = await _localStorage.GetAsync<string>("authToken");
                 var token = result.Success ? result.Value : null;
 
                 if (string.IsNullOrWhiteSpace(token))
@@ -46,7 +46,7 @@ namespace NetFlow.Blazor.Web.Security
 
             if (!string.IsNullOrWhiteSpace(token))
             {
-                await _sessionStorage.SetAsync("authToken", token);
+                await _localStorage.SetAsync("authToken", token);
 
                 var claims = ParseClaimsFromJwt(token);
                 var identity = new ClaimsIdentity(claims, "CustomAuth");
@@ -54,7 +54,7 @@ namespace NetFlow.Blazor.Web.Security
             }
             else
             {
-                await _sessionStorage.DeleteAsync("authToken");
+                await _localStorage.DeleteAsync("authToken");
                 claimsPrincipal = _anonymous;
             }
 
