@@ -8,7 +8,7 @@ namespace NetFlow.Netsis.Dto
     {
         public short SUBE_KODU { get; set; }
         public short ISLETME_KODU { get; set; }
-        public string CARI_KOD { get; set; }
-        public string CARI_ISIM { get; set; }
+        public string CARI_KOD { get; set; } = string.Empty;
+        public string CARI_ISIM { get; set; } = string.Empty;
     }
 }

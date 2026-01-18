@@ -182,7 +182,7 @@
 
 @code {
     private FirmModel model = new();
-    private EditContext editContext;
+    private EditContext editContext = default!;
     private bool isSaving, popupVisible, isSuccess;
     private string popupTitle = "", popupMessage = "";
 

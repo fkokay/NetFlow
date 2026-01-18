@@ -106,7 +106,7 @@
     IGrid? Grid { get; set; }
     string? SearchText { get; set; }
     SizeMode SizeMode { get; set; }
-    private bool isSaving, popupVisible, isSuccess;
+    private bool popupVisible, isSuccess;
     private string popupTitle = "", popupMessage = "";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

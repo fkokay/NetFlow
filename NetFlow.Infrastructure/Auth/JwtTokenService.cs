@@ -25,7 +25,7 @@ namespace NetFlow.Infrastructure.Auth
             var snapshot = new UserSnapshot
             {
                 Id = user.Id.Value,
-                FullName = user.FullName,
+                Name = user.FullName,
                 Email = user.Email,
                 FirmId = user.Firm.Id,
                 FirmCode = user.Firm.Code,
@@ -40,7 +40,7 @@ namespace NetFlow.Infrastructure.Auth
 
             var claims = new List<Claim>
         {
-            new(ClaimTypes.Name,snapshot.FullName),
+            new(ClaimTypes.Name,snapshot.Name),
             new(ClaimTypes.NameIdentifier, snapshot.Id.ToString()),
             new(ClaimTypes.Email, snapshot.Email),
             new("FirmId", snapshot.FirmId.ToString()),
