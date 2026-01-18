@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NetFlow.Application.Firms;
 using NetFlow.Application.Modules;
+using NetFlow.Application.Netsis.AccountingVouchers;
 using NetFlow.Application.Netsis.Customers;
 using NetFlow.Application.Netsis.Orders;
 using NetFlow.Application.Netsis.Products;
@@ -24,6 +25,7 @@ namespace NetFlow.Application
             services.AddScoped<ProductService>();
             services.AddScoped<ShipmentService>();
             services.AddScoped<WarehouseService>();
+            services.AddScoped<AccountingVoucherService>();
 
             //NETFLOW
             services.AddScoped<FirmWriteService>();

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using NetFlow.Application.Netsis.AccountingVouchers;
 using NetFlow.Application.Netsis.Customers;
 using NetFlow.Application.Netsis.Orders;
 using NetFlow.Application.Netsis.Products;
@@ -22,6 +23,7 @@ namespace NetFlow.Netsis
             services.AddScoped<IShipmentReadRepository, NetsisShipmentReadRepository>();
             services.AddScoped<IWarehouseReadRepository, NetsisWarehouseReadRepository>();
             services.AddScoped<IOrderReadRepository, NetsisOrderReadRepository>();
+            services.AddScoped<IAccountingVoucherReadRepository, NetsisAccountingVoucherReadRepository>();
             return services;
         }
     }
