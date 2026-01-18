@@ -125,6 +125,10 @@ body {
     mask-image: url("images/icons/ai-chat.svg");
 }
 
+.settings-icon {
+    mask-image: url("images/icons/settings.svg");
+}
+
 .notification {
     position: relative;
 }

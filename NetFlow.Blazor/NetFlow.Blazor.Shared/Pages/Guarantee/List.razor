@@ -65,7 +65,16 @@
                     <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
                     <DxGridDataColumn Caption="Firma" FieldName="FirmName" />
                     <DxGridDataColumn Caption="Konu" FieldName="Subject" />
-                    <DxGridDataColumn Caption="Teminat Belge No" FieldName="GuaranteeNumber" />
+                    <DxGridDataColumn Caption="Teminat Belge No" FieldName="GuaranteeNumber">
+                        <CellDisplayTemplate>
+                            <a href="javascript:void(0);"
+                               style="text-decoration:none; font-weight:bold; color: #0056b3;"
+                               @onclick="() => OnGuaranteeDetailsClick((GuaranteeModel)context.DataItem)"
+                               @onclick:stopPropagation>
+                               @context.Value
+                            </a>
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
                     <DxGridDataColumn Caption="Teminat Türü" FieldName="GuaranteeType" />
                     <DxGridDataColumn Caption="Teminat Şekli" FieldName="GuaranteeForm" />
                     <DxGridDataColumn Caption="Teminat Tutarı" FieldName="GuaranteeAmount" />
@@ -159,6 +168,14 @@
         ActiveGuarantee = guarantee;
         IsActiveGuaranteeLoading = false;
         StateHasChanged();
+    }
+
+    void OnGuaranteeDetailsClick(GuaranteeModel guarantee)
+    {
+        if (guarantee != null)
+        {
+            NavigationManager.NavigateTo($"/guarantee/details/{guarantee.Id}");
+        }
     }
 
     string GetGuaranteePanelWidth() => SizeMode switch
