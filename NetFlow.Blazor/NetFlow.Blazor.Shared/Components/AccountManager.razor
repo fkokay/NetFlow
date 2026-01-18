@@ -46,12 +46,12 @@
                         <Items>
                             <DxStackLayoutItem>
                                 <Template>
-                                    <DxButton Text="Log in with different account" RenderStyle="ButtonRenderStyle.None" Click="@OnLoginClick" CssClass="button" IconCssClass="icon medium-icon person-add-icon" />
+                                    <DxButton Text="Firma Değiştir" RenderStyle="ButtonRenderStyle.None" Click="@OnLoginClick" CssClass="button" IconCssClass="icon medium-icon person-add-icon" />
                                 </Template>
                             </DxStackLayoutItem>
                             <DxStackLayoutItem>
                                 <Template>
-                                    <DxButton Text="Log out" RenderStyle="ButtonRenderStyle.None" Click="@OnLogoutClick" CssClass="button" IconCssClass="icon medium-icon sign-out-icon" />
+                                    <DxButton Text="Oturumu kapat" RenderStyle="ButtonRenderStyle.None" Click="@OnLogoutClick" CssClass="button" IconCssClass="icon medium-icon sign-out-icon" />
                                 </Template>
                             </DxStackLayoutItem>
                         </Items>
@@ -69,15 +69,15 @@
     [CascadingParameter(Name = "ParentSizeMode")]
     SizeMode SizeMode { get; set; }
 
-    void OnLogoutClick() => NavigationManager.NavigateTo(GetUrl("Logout"), true);
+    void OnLogoutClick() => NavigationManager.NavigateTo(GetUrl("logout"), true);
 
-    void OnLoginClick() => NavigationManager.NavigateTo(GetUrl("Login"), true);
+    void OnLoginClick() => NavigationManager.NavigateTo(GetUrl("login"), true);
 
-    void OnManageAccountClick() => NavigationManager.NavigateTo("Account/Manage", true);
+    void OnManageAccountClick() => NavigationManager.NavigateTo("/account/manage", true);
 
     string GetUrl(string page) {
         var currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        return NavigationManager.GetUriWithQueryParameters($"Account/{page}", new Dictionary<string, object?> { ["ReturnUrl"] = currentUrl });
+        return NavigationManager.GetUriWithQueryParameters($"account/{page}", new Dictionary<string, object?> { ["ReturnUrl"] = currentUrl });
     }
 
     string GetSizeModeCssClass() => SizeMode switch {

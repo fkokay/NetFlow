@@ -9,13 +9,15 @@ namespace NetFlow.Domain.Identity
     {
         public int Id { get; }
         public string Code { get; }
-        public FirmId(int id,string code)
+        public string Name { get; }
+        public FirmId(int id,string code,string name)
         {
             if (id <= 0)
                 throw new InvalidEmailException();
 
             Id = id;
             Code = code;
+            Name = name;
         }
     }
 }

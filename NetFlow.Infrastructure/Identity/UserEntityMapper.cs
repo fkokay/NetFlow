@@ -15,7 +15,7 @@ namespace NetFlow.Infrastructure.Identity
             foreach (var rp in uif.Role.RolePermissions)
                 role.Grant(rp.Permission.Code);
 
-            var domain = User.Create(user.Id, user.FirstName + " " + user.LastName, user.Email, uif.Firm.Id, uif.Firm.FirmCode, role);
+            var domain = User.Create(user.Id, user.FirstName + " " + user.LastName, user.Email, uif.Firm.Id, uif.Firm.FirmCode, uif.Firm.FirmName, role);
 
             return domain;
         }

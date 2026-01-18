@@ -29,6 +29,7 @@ namespace NetFlow.Infrastructure.Auth
                 Email = user.Email,
                 FirmId = user.Firm.Id,
                 FirmCode = user.Firm.Code,
+                FirmName = user.Firm.Name,
                 RoleCode = user.Role.Code,
                 RoleName = user.Role.Name,
                 Permissions = user.Permissions.ToList()
@@ -40,14 +41,14 @@ namespace NetFlow.Infrastructure.Auth
             var claims = new List<Claim>
         {
             new(ClaimTypes.Name,snapshot.FullName),
-            new("uid", snapshot.Id.ToString()),
-            new("fullName",snapshot.FullName),
-            new("email", snapshot.Email),
-            new("firmId", snapshot.FirmId.ToString()),
-            new("firmCode", snapshot.FirmCode),
+            new(ClaimTypes.NameIdentifier, snapshot.Id.ToString()),
+            new(ClaimTypes.Email, snapshot.Email),
+            new("FirmId", snapshot.FirmId.ToString()),
+            new("FirmCode", snapshot.FirmCode),
+            new("FirmName",snapshot.FirmName),
             new(ClaimTypes.Role, snapshot.RoleCode),
-            new("roleName", snapshot.RoleName),
-            new("perms", perms)
+            new("RoleName", snapshot.RoleName),
+            new("Permissions", perms)
         };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_opt.SigningKey));
@@ -81,14 +82,14 @@ namespace NetFlow.Infrastructure.Auth
             }
 
             string? name = jwt.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
-            string? uid = jwt.Claims.FirstOrDefault(x => x.Type == "uid")?.Value;
-            string? fullName = jwt.Claims.FirstOrDefault(x => x.Type == "fullName")?.Value;
-            string? email = jwt.Claims.FirstOrDefault(x => x.Type == "email")?.Value;
-            string? firmId = jwt.Claims.FirstOrDefault(x => x.Type == "firmId")?.Value;
-            string? firmCode = jwt.Claims.FirstOrDefault(x => x.Type == "firmCode")?.Value;
+            string? uid = jwt.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            string? email = jwt.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+            string? firmId = jwt.Claims.FirstOrDefault(x => x.Type == "FirmId")?.Value;
+            string? firmCode = jwt.Claims.FirstOrDefault(x => x.Type == "FirmCode")?.Value;
+            string? firmName = jwt.Claims.FirstOrDefault(x => x.Type == "FirmName")?.Value;
             string? role = jwt.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Role)?.Value;
-            string? roleName = jwt.Claims.FirstOrDefault(x => x.Type == "roleName")?.Value;
-            string? perms = jwt.Claims.FirstOrDefault(x => x.Type == "perms")?.Value;
+            string? roleName = jwt.Claims.FirstOrDefault(x => x.Type == "RoleName")?.Value;
+            string? perms = jwt.Claims.FirstOrDefault(x => x.Type == "Permissions")?.Value;
 
             if (!int.TryParse(uid, out var id)) return null;
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(firmCode) || string.IsNullOrWhiteSpace(role))
@@ -98,10 +99,10 @@ namespace NetFlow.Infrastructure.Auth
             {
                 Id = id,
                 Name = name ?? string.Empty,
-                FullName = fullName ?? string.Empty,
                 Email = email,
                 FirmId = Convert.ToInt32(firmId),
-                FirmCode = firmCode,
+                FirmCode = firmCode ?? string.Empty,
+                FirmName = firmName ?? string.Empty,
                 RoleCode = role,
                 RoleName = roleName ?? role,
                 Permissions = string.IsNullOrWhiteSpace(perms)

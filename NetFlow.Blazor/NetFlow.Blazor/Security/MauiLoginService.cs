@@ -26,5 +26,10 @@ namespace NetFlow.Blazor.Security
 
             await _token.SetAsync(jwt!.Token);
         }
+
+        public Task LogoutAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -43,5 +43,9 @@ namespace NetFlow.Blazor.Web.Security
             await _authenticationStateProvider.UpdateAuthenticationState(result.Token);
         }
 
+        public Task LogoutAsync()
+        {
+            return _authenticationStateProvider.UpdateAuthenticationState(null);
+        }
     }
 }

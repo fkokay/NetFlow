@@ -8,5 +8,6 @@ namespace NetFlow.Blazor.Shared.Security
     public interface ILoginService
     {
         Task LoginAsync(LoginRequest req);
+        Task LogoutAsync();
     }
 }

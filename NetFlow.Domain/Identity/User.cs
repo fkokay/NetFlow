@@ -25,12 +25,12 @@ namespace NetFlow.Domain.Identity
             Role = role;
         }
 
-        public static User Create(int id,string fullName, string email, int firmId, string firmCode, Role role)
+        public static User Create(int id,string fullName, string email, int firmId, string firmCode,string firmName, Role role)
         {
             if (string.IsNullOrWhiteSpace(email))
                 throw new InvalidEmailException();
 
-            return new User(new UserId(id),fullName, email, new FirmId(firmId, firmCode), role);
+            return new User(new UserId(id),fullName, email, new FirmId(firmId, firmCode,firmName), role);
         }
 
         public void Grant(string permission)
