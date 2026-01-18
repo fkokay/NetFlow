@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using NetFlow.ReadModel.Assets;
 using NetFlow.ReadModel.Firms;
+using NetFlow.ReadModel.GuaranteeCommissions;
 using NetFlow.ReadModel.Guarantees;
 using NetFlow.ReadModel.Modules;
 using NetFlow.ReadModel.Roles;
@@ -38,6 +39,7 @@ namespace NetFlow.ReadModel
             services.AddScoped<TenderRequiredDocumentReadService>();
             services.AddScoped<TenderExternalQualityReadService>();
             services.AddScoped<GuaranteeReadService>();
+            services.AddScoped<GuaranteeCommissionReadService>();
             services.AddScoped<RoleReadService>();
             services.AddScoped<AssetReadService>();
             services.AddScoped<ModuleReadService>();

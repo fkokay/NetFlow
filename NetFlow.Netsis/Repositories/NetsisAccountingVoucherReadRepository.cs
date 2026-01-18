@@ -95,7 +95,7 @@ namespace NetFlow.Netsis.Repositories
                 countSql, parameters
             );
 
-            if (request.isCountQuery != null && request.isCountQuery.HasValue)
+            if (request.isCountQuery != null && request.isCountQuery.Value)
             {
                 return new PagedResult
                 {

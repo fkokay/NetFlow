@@ -93,7 +93,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "MakroFlow API");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "NetFlow API");
         c.RoutePrefix = "swagger";
     });
 }

@@ -1,6 +1,192 @@
 ﻿@page "/guarantee/details/{Id:int}"
-<h3>Details</h3>
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+
+<div class="guarantee-detail-wrapper">
+    @if (Model == null)
+    {
+        <div class="guarantee-loading-wrapper">
+            <DxLoadingPanel Visible="true" Text="Teminat detayları yükleniyor..." IsContentBlocked="true" />
+        </div>
+    }
+    else
+    {
+        <div class="card toolbar">
+            <DxToolbar Title="Teminat Mektubu Detayı" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+
+            </DxToolbar>
+        </div>
+
+        <DxFormLayout>
+            <DxFormLayoutItem ColSpanMd="12">
+                <Template>
+                    <div class="guarantee-row">
+                        <div class="guarantee-left">
+                            <div class="guarantee-card">
+                                <div class="guarantee-card-header">
+                                    <div class="guarantee-card-header-box">
+                                        <i class="ti ti-gavel" style="color:#696cff;"></i>
+                                        <div>@Model.GuaranteeNumber</div>
+                                        <small>Teminat No</small>
+                                    </div>
+                                    <div class="guarantee-card-header-box">
+                                        <i class="ti ti-currency-dollar" style="color:#71dd37;"></i>
+                                        <div>@Model.GuaranteeAmount.ToString("n2") @Model.Currency</div>
+                                        <small>Teminat Tutarı</small>
+                                    </div>
+                                </div>
+                                <div class="guarantee-card-header">
+                                    <div class="guarantee-card-header-box">
+                                        <i class="ti ti-gavel" style="color:#696cff;"></i>
+                                        <div>@Model.GuaranteeType</div>
+                                        <small>Teminat Türü</small>
+                                    </div>
+                                    <div class="guarantee-card-header-box">
+                                        <i class="ti ti-currency-dollar" style="color:#71dd37;"></i>
+                                        <div>@Model.GuaranteeDate</div>
+                                        <small>Teminat Tarihi</small>
+                                    </div>
+                                </div>
+                                <div class="guarantee-card-content">
+                                    <h6 class="guarantee-card-title">GENEL BİLGİLER</h6>
+                                    <div class="guarantee-card-details">
+                                        @if (Model.GuaranteeType == "Geçici")
+                                        {
+                                            <div class="guarantee-card-details-item">
+                                                <span>Muhasebe Hesap Plan Kodu :</span>
+                                                <span style="font-weight:600; text-align:right;"></span>
+                                            </div>
+                                            <div class="guarantee-card-details-item">
+                                                <span>Muhasebe Hesap Plan Adı :</span>
+                                                <span style="font-weight:600; text-align:right;"></span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="guarantee-card-details-item">
+                                                <span>Müşteri Kodu :</span>
+                                                <span style="font-weight:600; text-align:right;">@Model.PublicAuthorityCode</span>
+                                            </div>
+                                            <div class="guarantee-card-details-item">
+                                                <span>Müşteri Adı :</span>
+                                                <span style="font-weight:600; text-align:right;">@Model.PublicAuthorityName</span>
+                                            </div>
+                                        }
+                                        <div class="guarantee-card-details-item">
+                                            <span>Başlangıç Tarihi :</span>
+                                            <span style="font-weight:600; text-align:right;">@Model.GuaranteeDate.ToShortDateString()</span>
+                                        </div>
+                                        <div class="guarantee-card-details-item">
+                                            <span>Bitiş Tarihi :</span>
+                                            <span style="font-weight:600; text-align:right;">@Model.ExpiryDate.ToShortDateString()</span>
+                                        </div>
+                                        <div class="guarantee-card-details-item">
+                                            <span>Komisyon Tutarı :</span>
+                                            <span style="font-weight:600; text-align:right;">@Model.CommissionAmount.ToString("n2") @Model.Currency</span>
+                                        </div>
+                                        <div class="guarantee-card-details-item">
+                                            <span>Komisyon Oranı :</span>
+                                            <span style="font-weight:600; text-align:right;">@Model.CommissionRate.ToString("n4")</span>
+                                        </div>
+                                        <div class="guarantee-card-details-item">
+                                            <span>Banka :</span>
+                                            <span style="font-weight:600; text-align:right;">@Model.BankName</span>
+                                        </div>
+                                        <div class="guarantee-card-details-item">
+                                            <span>Banka Şube :</span>
+                                            <span style="font-weight:600; text-align:right;">@Model.BankBranchName</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="guarantee-right">
+                            <div class="guarantee-card">
+                                <DxTabs ActiveTabIndex="@ActiveTabIndex" ActiveTabIndexChanged="OnActiveTabIndexChanged" class="guarantee-tabs">
+                                    <DxTabPage Text="Teminat Komisyonları" />
+                                </DxTabs>
+                                <div class="guarantee-content">
+                                    @switch (ActiveTabIndex)
+                                    {
+                                        case 0:
+                                            <div>
+                                                <DxGrid Data="CommissionDataSource" ShowFilterRow="true" ShowGroupPanel="true" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
+                                                    <Columns>
+                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.Id)" Caption="Id" Visible="false" />
+                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionStartDate)" Caption="Komisyon Başlangıç Tarihi" />
+                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionStartDate)" Caption="Komisyon Bitiş Tarihi" />
+                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionAmount)" Caption="Komisyon Tutarı" DisplayFormat="N2" />
+                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.Currency)" Caption="Para Birimi" />
+                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.PaymentStatus)" Caption="Durumu" />
+                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.Note)" Caption="Açıklama" />
+                                                    </Columns>
+                                                </DxGrid>
+                                            </div>
+                                            break;
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Template>
+            </DxFormLayoutItem>
+        </DxFormLayout>
+    }
+</div>
 
 @code {
     [Parameter] public int Id { get; set; }
+
+    private GuaranteeModel? Model { get; set; }
+    private int ActiveTabIndex { get; set; } = 0;
+    private GridDevExtremeDataSource<GuaranteeCommissionModel>? CommissionDataSource { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+            var response = await client.GetAsync($"api/guarantees/{Id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                Model = await response.Content.ReadFromJsonAsync<GuaranteeModel>();
+                await LoadTabData(ActiveTabIndex);
+            }
+            else
+            {
+                NavigationManager.NavigateTo("/guarantee/list");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task OnActiveTabIndexChanged(int index)
+    {
+        ActiveTabIndex = index;
+        await LoadTabData(index);
+    }
+
+    private async Task LoadTabData(int index)
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        string baseUrl = "https://localhost:7071/api";
+
+        switch (index)
+        {
+            case 0:
+                CommissionDataSource = new GridDevExtremeDataSource<GuaranteeCommissionModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/guarantee-commissions?guaranteeId={Id}"));
+                break;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
 }
