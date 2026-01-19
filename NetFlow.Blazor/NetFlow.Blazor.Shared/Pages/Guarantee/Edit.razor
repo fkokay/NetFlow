@@ -1,0 +1,263 @@
+﻿@page "/guarantee/edit/{Id:int}"
+
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http.Json
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <Items>
+                <DxToolbarItem IconCssClass="back-icon icon medium-icon" Tooltip="Geri Dön" Click="@NavigateBack" />
+                <DxToolbarItem>
+                    <Template>
+                        <div class="custom-item">
+                            <div class="title">Teminat Düzenleme</div>
+                        </div>
+                    </Template>
+                </DxToolbarItem>
+                <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                    <Template>
+                        <DxButton Text="Kaydet"
+                                  Click="SaveFromOutside"
+                                  Enabled="!isSaving"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  RenderStyle="ButtonRenderStyle.Success" />
+                    </Template>
+                </DxToolbarItem>
+            </Items>
+        </DxToolbar>
+    </div>
+
+    <div class="guarantee-edit">
+        @if (editContext != null)
+        {
+            <EditForm EditContext="@editContext" Context="formContext">
+                <DataAnnotationsValidator />
+
+                <DxFormLayout ColSpanMd="6">
+                    @* TEMEL BİLGİLER *@
+                    <DxFormLayoutItem Caption="Konu" ColSpanMd="12">
+                        <DxTextBox @bind-Text="model.Subject" ValidationEnabled="true" ShowValidationIcon="true" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Teminat Belge No">
+                        <DxTextBox @bind-Text="model.GuaranteeNumber" ValidationEnabled="true" ShowValidationIcon="true" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Firma">
+                        <DxTextBox @bind-Text="model.FirmName" ReadOnly="true" />
+                    </DxFormLayoutItem>
+
+                    
+                    <DxFormLayoutItem Caption="Teminat Türü">
+                        <DxComboBox Data="@(new List<string> { "Geçici", "Kati", "Avans" })" @bind-Value="model.GuaranteeType" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Teminat Şekli">
+                        <DxComboBox Data="@(new List<string> { "Banka Mektubu", "Nakit", "Çek-Senet" })" @bind-Value="model.GuaranteeForm" />
+                    </DxFormLayoutItem>
+
+                    
+                    <DxFormLayoutItem Caption="Teminat Tutarı">
+                        <DxSpinEdit @bind-Value="model.GuaranteeAmount" DisplayFormat="N2" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Para Birimi">
+                        <DxTextBox @bind-Text="model.Currency" MaxLength="3" />
+                    </DxFormLayoutItem>
+
+
+                    <DxFormLayoutItem Caption="Banka Adı">
+                        <DxTextBox @bind-Text="model.BankName" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Banka Şube">
+                        <DxTextBox @bind-Text="model.BankBranchName" />
+                    </DxFormLayoutItem>
+
+
+                    <DxFormLayoutItem Caption="Komisyon Oranı">
+                        <DxSpinEdit @bind-Value="model.CommissionRate" DisplayFormat="N4" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Komisyon Tutarı">
+                        <DxSpinEdit @bind-Value="model.CommissionAmount" DisplayFormat="N2" ReadOnly="true" />
+                    </DxFormLayoutItem>
+
+
+                    <DxFormLayoutItem Caption="Düzenlenme Tarihi">
+                        <DxDateEdit @bind-Date="model.GuaranteeDate" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Vade Tarihi">
+                        <DxDateEdit @bind-Date="model.ExpiryDate" />
+                    </DxFormLayoutItem>
+
+
+                    <DxFormLayoutItem Caption="Muhatap Kurum" ColSpanMd="12">
+                        <DxTextBox @bind-Text="model.PublicAuthorityName" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Takasbank Ref No" ColSpanMd="12">
+                        <DxTextBox @bind-Text="model.TakasbankReferenceNo" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <ValidationSummary />
+                    </DxFormLayoutItem>
+
+                </DxFormLayout>
+            </EditForm>
+        }
+        else
+        {
+            <div class="p-4 text-center">
+                <DxWaitIndicator Visible="true" />
+                <p>Veriler yükleniyor...</p>
+            </div>
+        }
+    </div>
+</div>
+
+<DxPopup @bind-Visible="popupVisible"
+         Width="460px"
+         ShowFooter="true"
+         CloseOnOutsideClick="false">
+    <HeaderTemplate>
+        <div class="popup-adv-header @(isSuccess ? "success" : "danger")">
+            <div class="popup-adv-header-icon">
+                @(isSuccess ? "✓" : "!")
+            </div>
+            <div>
+                <div class="popup-adv-header-title">
+                    @(isSuccess ? "İşlem Başarılı" : "İşlem Hatası")
+                </div>
+                <div class="popup-adv-header-subtitle">
+                    @popupTitle
+                </div>
+            </div>
+        </div>
+    </HeaderTemplate>
+    <BodyTemplate>
+        <div class="popup-adv-body">
+            <div class="popup-adv-body-icon @(isSuccess ? "success" : "danger")">
+                @(isSuccess ? "✓" : "!")
+            </div>
+            <div class="popup-adv-body-content">
+                <h5 class="popup-adv-body-title">
+                    @(isSuccess ? "Bilgiler Güncellendi" : "Hata Oluştu")
+                </h5>
+                <p class="popup-adv-body-message">
+                    @popupMessage
+                </p>
+            </div>
+        </div>
+    </BodyTemplate>
+    <FooterTemplate>
+        <div class="popup-adv-footer">
+            <DxButton Text="Kapat"
+                      Width="130px"
+                      RenderStyle="@(isSuccess ? ButtonRenderStyle.Success : ButtonRenderStyle.Danger)"
+                      Click="OnPopupOk" />
+        </div>
+    </FooterTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private GuaranteeModel model = new();
+    private EditContext? editContext;
+    private bool isSaving, popupVisible, isSuccess;
+    private string popupTitle = "", popupMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id > 0)
+        {
+            try
+            {
+                var httpClient = HttpClientFactory.CreateClient("ApiClient");
+                var client = await ApiClientFactory.CreateAsync(httpClient);
+
+                var result = await client.GetFromJsonAsync<GuaranteeModel>($"api/guarantees/{Id}");
+
+                if (result != null)
+                {
+                    model = result;
+                    editContext = new EditContext(model);
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("/guarantee/list");
+                }
+            }
+            catch (Exception ex)
+            {
+                popupTitle = "Yükleme Hatası";
+                popupMessage = "Veriler getirilirken bir hata oluştu: " + ex.Message;
+                isSuccess = false;
+                popupVisible = true;
+            }
+        }
+    }
+
+    private async Task SaveFromOutside()
+    {
+        if (isSaving || editContext == null) return;
+        if (!editContext.Validate()) return;
+        await HandleValidSubmit();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (isSaving) return;
+        isSaving = true;
+
+        try
+        {
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+
+            var response = await client.PutAsJsonAsync("api/guarantees", model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                isSuccess = true;
+                popupTitle = "Başarılı";
+                popupMessage = "Teminat bilgileri başarıyla güncellendi.";
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                isSuccess = false;
+                popupTitle = "Sunucu Hatası";
+                popupMessage = string.IsNullOrEmpty(errorMsg) ? "Güncelleme sırasında bir hata oluştu." : errorMsg;
+            }
+        }
+        catch (Exception ex)
+        {
+            isSuccess = false;
+            popupTitle = "Bağlantı Hatası";
+            popupMessage = "Sunucuyla iletişim kurulamadı: " + ex.Message;
+        }
+        finally
+        {
+            popupVisible = true;
+            isSaving = false;
+        }
+    }
+
+    private void OnPopupOk()
+    {
+        popupVisible = false;
+        if (isSuccess)
+            NavigationManager.NavigateTo("/guarantee/list");
+    }
+
+    private void NavigateBack() => NavigationManager.NavigateTo("/guarantee/list");
+}

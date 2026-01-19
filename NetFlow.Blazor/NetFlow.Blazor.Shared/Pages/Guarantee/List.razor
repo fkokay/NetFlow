@@ -38,12 +38,11 @@
                     </div>
                 </Template>
             </DxToolbarItem>
-            <DxToolbarItem Tooltip="Refresh" BeginGroup="true"  Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
+            <DxToolbarItem Tooltip="Refresh" Click="LoadGridDataAsync" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
         </DxToolbar>
     </div>
     <div class="Guarantee-list-root">
         <div class="h-100">
-
             <DxGrid @ref="Grid"
                     Data="Data"
                     KeyFieldName="Id"
@@ -59,7 +58,8 @@
                     ShowAllRows="true"
                     VirtualScrollingEnabled="true"
                     RowClick="@OnRowClick"
-                    HighlightRowOnHover="true">
+                    HighlightRowOnHover="true"
+                    CustomizeEditModel="Grid_CustomizeEditModel">
                 <Columns>
                     <DxGridSelectionColumn Width="75px" />
                     <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
@@ -71,13 +71,13 @@
                                style="text-decoration:none; font-weight:bold; color: #0056b3;"
                                @onclick="() => OnGuaranteeDetailsClick((GuaranteeModel)context.DataItem)"
                                @onclick:stopPropagation>
-                               @context.Value
+                                @context.Value
                             </a>
                         </CellDisplayTemplate>
                     </DxGridDataColumn>
                     <DxGridDataColumn Caption="Teminat Türü" FieldName="GuaranteeType" />
                     <DxGridDataColumn Caption="Teminat Şekli" FieldName="GuaranteeForm" />
-                    <DxGridDataColumn Caption="Teminat Tutarı" FieldName="GuaranteeAmount"  DisplayFormat="N2"/>
+                    <DxGridDataColumn Caption="Teminat Tutarı" FieldName="GuaranteeAmount" DisplayFormat="N2" />
                     <DxGridDataColumn Caption="Teminat Kominsyon Oranı" FieldName="CommissionRate" DisplayFormat="N4" Visible="false" />
                     <DxGridDataColumn Caption="Toplam Komisyon Tutarı" FieldName="CommissionAmount" DisplayFormat="N2" />
                     <DxGridDataColumn Caption="Teminat Komisyon Dönemi" FieldName="GuaranteeCommissionPeriodName" Visible="false" />
@@ -85,7 +85,7 @@
                     <DxGridDataColumn Caption="Banka Şubesi" FieldName="BankBranchName" Visible="false" />
                     <DxGridDataColumn Caption="Ünvanı" FieldName="PublicAuthorityName" />
                     <DxGridDataColumn Caption="Düzenlenme Tarihi" FieldName="GuaranteeDate" />
-                    <DxGridCommandColumn Width="6em" DeleteButtonVisible="false" />
+                    <DxGridCommandColumn Width="6em" DeleteButtonVisible="false" EditButtonVisible="true" />
                 </Columns>
                 <GroupSummary>
                     <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
@@ -119,22 +119,16 @@
     {
         if (!firstRender)
             return;
+        await LoadGridDataAsync();
+    }
 
+    async Task LoadGridDataAsync()
+    {
         var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
         Data = new GridDevExtremeDataSource<GuaranteeModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/guarantees"));
+        if (Grid != null) Grid.Reload();
         await InvokeAsync(StateHasChanged);
     }
-
-
-    void OnPinClick() => IsGuaranteePanelPinned = !IsGuaranteePanelPinned;
-
-    void OnCloseClick()
-    {
-        IsGuaranteePanelOpen = false;
-        IsGuaranteePanelPinned = false;
-    }
-
-    string GetPinButtonIconCss() => $"{(IsGuaranteePanelPinned ? "pinned-icon" : "unpinned-icon")} medium-icon";
 
     void OnColumnChooserItemClick(ToolbarItemClickEventArgs e) => Grid!.ShowColumnChooser();
 
@@ -156,18 +150,27 @@
         Grid!.FilterBy("GuaranteeType", GridFilterRowOperatorType.Equal, GuaranteeTypeFilterValue != "Tümü" ? GuaranteeTypeFilterValue : null);
     }
 
-    async void OnRowClick(GridRowClickEventArgs args)
+    async Task OnRowClick(GridRowClickEventArgs args)
     {
-        if (!IsGuaranteePanelOpen)
-        {
-            IsGuaranteePanelOpen = true;
-            ActiveGuarantee = null;
-        }
-        IsActiveGuaranteeLoading = true;
         var guarantee = (GuaranteeModel)Grid!.GetDataItem(args.VisibleIndex);
-        ActiveGuarantee = guarantee;
-        IsActiveGuaranteeLoading = false;
-        StateHasChanged();
+
+        if (guarantee != null)
+        {
+            NavigationManager.NavigateTo($"/guarantee/details/{guarantee.Id}");
+        }
+    }
+
+    void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e)
+    {
+        if (e.IsNew)
+        {
+            NavigationManager.NavigateTo("/guarantee/create");
+        }
+        else
+        {
+            var guarantee = (GuaranteeModel)e.DataItem;
+            NavigationManager.NavigateTo($"/guarantee/edit/{guarantee.Id}");
+        }
     }
 
     void OnGuaranteeDetailsClick(GuaranteeModel guarantee)
@@ -178,18 +181,9 @@
         }
     }
 
-    string GetGuaranteePanelWidth() => SizeMode switch
-    {
-        SizeMode.Small => "20.25rem",
-        SizeMode.Large => "27rem",
-        _ => "23.625rem",
-    };
-
     void IDisposable.Dispose()
     {
         disposalTokenSource.Cancel();
         disposalTokenSource.Dispose();
     }
 }
-
-

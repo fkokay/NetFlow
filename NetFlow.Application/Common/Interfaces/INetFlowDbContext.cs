@@ -18,6 +18,9 @@ namespace NetFlow.Application.Common.Interfaces
         DbSet<UserInRoleEntity> UserInRoles { get; }
         DbSet<RolePermissionEntity> RolePermissions { get; }
         DbSet<ModuleEntity> Modules { get; }
+        DbSet<GuaranteeEntity> Guarantees { get; }
+        DbSet<GuaranteeCommissionPeriodEntity> GuaranteeCommissionPeriods { get; }
+        DbSet<GuaranteeCommissionEntity> GuaranteeCommissions { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

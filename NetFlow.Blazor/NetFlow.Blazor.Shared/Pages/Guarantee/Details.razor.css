@@ -214,3 +214,20 @@
 .guarantee-tabs {
     padding: .5rem 1rem 0 1rem;
 }
+/* Butonu sağa yaslar ve tabloyla arasını açar */
+.grid-header-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px; /* Tablo ile açılan mesafe */
+}
+
+/* Tablo içindeki butonların yan yana dizilimi */
+.grid-cell-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+/* FormLayout içindeki çakışmaları önlemek için genel düzenleme */
+.guarantee-content {
+    padding-top: 10px;
+}

@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NetFlow.Application.Firms;
+using NetFlow.Application.GuaranteeCommissions;
+using NetFlow.Application.Guarantees;
 using NetFlow.Application.Modules;
 using NetFlow.Application.Netsis.AccountingVouchers;
 using NetFlow.Application.Netsis.Customers;
@@ -32,6 +34,8 @@ namespace NetFlow.Application
             services.AddScoped<RoleWriteService>();
             services.AddScoped<ModuleWriteService>();
             services.AddScoped<UserWriteService>();
+            services.AddScoped<GuaranteeWriteService>();
+            services.AddScoped<GuaranteeCommissionWriteService>();
             return services;
         }
     }

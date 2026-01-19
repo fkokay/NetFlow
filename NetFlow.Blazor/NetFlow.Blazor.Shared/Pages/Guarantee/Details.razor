@@ -14,13 +14,12 @@
     {
         <div class="card toolbar">
             <DxToolbar Title="Teminat Mektubu Detayı" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
-
             </DxToolbar>
         </div>
 
         <DxFormLayout>
             <DxFormLayoutItem ColSpanMd="12">
-                <Template>
+                <Template Context="layoutContext">
                     <div class="guarantee-row">
                         <div class="guarantee-left">
                             <div class="guarantee-card">
@@ -43,7 +42,7 @@
                                         <small>Teminat Türü</small>
                                     </div>
                                     <div class="guarantee-card-header-box">
-                                        <i class="ti ti-currency-dollar" style="color:#71dd37;"></i>
+                                        <i class="ti ti-calendar" style="color:#71dd37;"></i>
                                         <div>@Model.GuaranteeDate.ToShortDateString()</div>
                                         <small>Teminat Tarihi</small>
                                     </div>
@@ -101,6 +100,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="guarantee-right">
                             <div class="guarantee-card">
                                 <DxTabs ActiveTabIndex="@ActiveTabIndex" ActiveTabIndexChanged="OnActiveTabIndexChanged" class="guarantee-tabs">
@@ -111,15 +111,31 @@
                                     {
                                         case 0:
                                             <div>
-                                                <DxGrid Data="CommissionDataSource" ShowFilterRow="true" ShowGroupPanel="true" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
+                                                <div class="grid-header-actions" style="margin-bottom: 1rem;">
+                                                    <DxButton Text="Yeni Komisyon Ekle"
+                                                              Click="@(() => NavigationManager.NavigateTo($"/guarantee-commission/add/{Id}"))"
+                                                              RenderStyle="ButtonRenderStyle.Primary"
+                                                              IconCssClass="ti ti-plus" />
+                                                </div>
+
+                                                <DxGrid Data="CommissionDataSource"
+                                                        ShowFilterRow="true"
+                                                        ShowGroupPanel="true"
+                                                        ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                                                        EditStart="OnCommissionEditStart"
+                                                        DataItemDeleting="async (e) => await DeleteCommission(((GuaranteeCommissionModel)e.DataItem).Id)">
                                                     <Columns>
-                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.Id)" Caption="Id" Visible="false" />
-                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionStartDate)" Caption="Komisyon Başlangıç Tarihi" />
-                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionStartDate)" Caption="Komisyon Bitiş Tarihi" />
-                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionAmount)" Caption="Komisyon Tutarı" DisplayFormat="N2" />
-                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.Currency)" Caption="Para Birimi" />
-                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.PaymentStatus)" Caption="Durumu" />
+                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionStartDate)" Caption="Başlangıç Tarihi" />
+                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionEndDate)" Caption="Bitiş Tarihi" />
+                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionAmount)" Caption="Tutar" DisplayFormat="N2" />
+                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.Currency)" Caption="Döviz" />
+                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.PaymentStatus)" Caption="Durum" />
                                                         <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.Note)" Caption="Açıklama" />
+
+                                                        <DxGridCommandColumn Width="120px"
+                                                                             DeleteButtonVisible="true"
+                                                                             EditButtonVisible="true"
+                                                                             NewButtonVisible="false" />
                                                     </Columns>
                                                 </DxGrid>
                                             </div>
@@ -188,5 +204,35 @@
                 break;
         }
         await InvokeAsync(StateHasChanged);
+    }
+
+    // Düzenle butonuna basıldığında tetiklenen metot
+    private void OnCommissionEditStart(GridEditStartEventArgs e)
+    {
+        // Grid'in kendi iç (inline) düzenleme modunu açmasını engelliyoruz
+        e.Cancel = true;
+
+        // Tıklanan satırdaki veriyi alıyoruz
+        var item = (GuaranteeCommissionModel)e.DataItem;
+
+        // Düzenleme sayfasına ID ile yönlendiriyoruz
+        NavigationManager.NavigateTo($"/guarantee-commission/edit/{item.Id}");
+    }
+
+    private async Task DeleteCommission(int commissionId)
+    {
+        try
+        {
+            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+            var response = await client.DeleteAsync($"api/guarantee-commissions/{commissionId}");
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadTabData(ActiveTabIndex);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 }
