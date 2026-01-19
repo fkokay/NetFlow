@@ -9,6 +9,7 @@
         public string UnitCode { get; set; }
         public string UnitName { get; set; }
         public string StockCode { get; set; }
+        public string StockName { get; set; }
         public decimal Quantity { get; set; }
         public string Unit { get; set; }
         public decimal UnitPrice { get; set; }

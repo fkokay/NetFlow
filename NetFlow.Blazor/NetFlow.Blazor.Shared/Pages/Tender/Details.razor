@@ -143,10 +143,12 @@
                                         case 1:
                                             <DxGrid Data="OpexDataSource" ShowSearchBox="true" Height="500px">
                                                 <Columns>
+                                                    <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
                                                     <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
                                                     <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
-                                                    <DxGridDataColumn FieldName="Quantity" Caption="Miktar" />
-                                                    <DxGridDataColumn FieldName="UnitPrice" Caption="Fiyat" DisplayFormat="n2" />
+                                                    <DxGridDataColumn FieldName="StockName" Caption="Stok Adý" />
+                                                    <DxGridDataColumn FieldName="Quantity" Caption="Miktar" DisplayFormat="n2" />
+                                                    <DxGridDataColumn FieldName="UnitPrice" Caption="Tahmini Maliyet Fiyatý" DisplayFormat="n4" />
                                                     <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
                                                 </Columns>
                                             </DxGrid>
@@ -221,10 +223,10 @@
                                                                       TextAlignment="GridTextAlignment.Center">
                                                         <CellDisplayTemplate Context="ctx">
                                                             @{
-                                                                var doc = (TenderRequiredDocument)ctx.DataItem;
-                                                                if (doc.TenderRequiredDocumentFileId.HasValue)
+                                                                var doc3 = (TenderRequiredDocument)ctx.DataItem;
+                                                                if (doc3.TenderRequiredDocumentFileId.HasValue)
                                                                 {
-                                                                    <DxButton RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Outline" SizeMode="SizeMode.Small"
+                                                                    <DxButton Text="Görüntüle" RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Outline" SizeMode="SizeMode.Small"
                                                                               Click="@(() => HandleFileAction(doc3))"
                                                                               IconCssClass="@(doc3.FileType == "application/pdf" ? "ti ti-file-text text-danger" : "ti ti-file-text text-primary")" />
                                                                 }
