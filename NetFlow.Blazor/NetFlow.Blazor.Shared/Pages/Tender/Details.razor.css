@@ -154,3 +154,145 @@
     overflow-y: auto;
     padding: 1rem;
 }
+.tender-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    background: #ffffff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+
+.tender-title {
+    margin: 0;
+    font-weight: 700;
+    color: #333;
+}
+
+    
+    .tender-title span {
+        color: #6c757d;
+        font-weight: 400;
+    }
+/* layout */
+.tender-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.tender-left {
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+}
+
+.tender-right {
+    flex: 3;
+    min-width: 600px;
+}
+
+/* card */
+.tender-card {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tender-card-padding {
+    padding: 1.5rem;
+}
+
+.tender-card-tabs {
+    overflow: hidden;
+}
+
+/* authority section */
+.authority-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.authority-avatar {
+    width: 64px;
+    height: 64px;
+    background: #e7e7ff;
+    color: #696cff;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.authority-title {
+    font-weight: 700;
+}
+
+.authority-badge {
+    background: #f1f2f4;
+    color: #8592a3;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+/* stats */
+.tender-stats {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 2rem;
+}
+
+.tender-stat {
+    flex: 1;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.tender-stat-title {
+    font-weight: 700;
+}
+
+/* section title */
+.tender-section-title {
+    font-weight: 700;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+}
+
+/* info list */
+.tender-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+.tender-info-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.tender-info-strong {
+    font-weight: 600;
+    text-align: right;
+}
+
+/* tabs + content */
+.tender-tabs {
+    padding: 0.5rem 1rem 0 1rem;
+}
+
+.tender-content {
+    padding: 1rem;
+    min-height: 500px;
+}

@@ -5,6 +5,7 @@
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
 
+
 <div class="tender-detail-wrapper">
     @if (Model == null)
     {
@@ -16,13 +17,13 @@
     }
     else
     {
-     
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <div class="tender-header">
             <div>
-                <h4 style="margin: 0; font-weight: 700; color: #333;">
-                    <span style="color: #6c757d; font-weight: 400;">Ýhale Detayý /</span> #@Model.TenderCode
+                <h4 class="tender-title">
+                    <span>Ýhale Detayý /</span> #@Model.TenderCode
                 </h4>
             </div>
+
             <DxButton Text="Listeye Dön"
                       RenderStyle="ButtonRenderStyle.Secondary"
                       IconCssClass="ti ti-arrow-left"
@@ -32,49 +33,85 @@
         <DxFormLayout>
             <DxFormLayoutItem ColSpanMd="12">
                 <Template>
-                    <div class="tender-row" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div class="tender-row">
 
-                       
-                        <div class="tender-left" style="flex: 1; min-width: 300px; max-width: 400px;">
-                            <div class="tender-card" style="padding:1.5rem; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                                <div style="text-align:center;margin-bottom:2rem;">
-                                    <div style="width:64px;height:64px;background:#e7e7ff;color:#696cff;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;font-size:1.8rem;font-weight:700;">
-                                        @(!string.IsNullOrEmpty(Model.PublicAuthorityName) ? Model.PublicAuthorityName[0].ToString().ToUpper() : "?")
+                        <!-- SOL PANEL -->
+                        <div class="tender-left">
+                            <div class="tender-card tender-card-padding">
+
+                                <div class="authority-header">
+                                    <div class="authority-avatar">
+                                        @(!string.IsNullOrEmpty(Model.PublicAuthorityName)
+                                                                            ? Model.PublicAuthorityName[0].ToString().ToUpper()
+                                                                            : "?")
                                     </div>
-                                    <h5 style="font-weight:700;">@Model.PublicAuthorityName</h5>
-                                    <span style="background:#f1f2f4;color:#8592a3;padding:4px 12px;border-radius:4px;font-size:.85rem;">
+
+                                    <h5 class="authority-title">
+                                        @Model.PublicAuthorityName
+                                    </h5>
+
+                                    <span class="authority-badge">
                                         Müþteri No: #@Model.PublicAuthorityCode
                                     </span>
                                 </div>
 
-                                <div style="display:flex;gap:10px;margin-bottom:2rem;">
-                                    <div style="flex:1;background:#f8f9fa;padding:10px;border-radius:6px;text-align:center;">
-                                        <i class="ti ti-gavel" style="color:#696cff;"></i>
-                                        <div style="font-weight:700;">@Model.TenderCode</div>
+                                <div class="tender-stats">
+                                    <div class="tender-stat">
+                                        <i class="ti ti-gavel tender-icon-primary"></i>
+                                        <div class="tender-stat-title">@Model.TenderCode</div>
                                         <small>Ýhale No</small>
                                     </div>
-                                    <div style="flex:1;background:#f8f9fa;padding:10px;border-radius:6px;text-align:center;">
-                                        <i class="ti ti-currency-dollar" style="color:#71dd37;"></i>
-                                        <div style="font-weight:700;">@Model.TenderAmount.ToString("n2")</div>
+
+                                    <div class="tender-stat">
+                                        <i class="ti ti-currency-dollar tender-icon-success"></i>
+                                        <div class="tender-stat-title">
+                                            @Model.TenderAmount.ToString("n2")
+                                        </div>
                                         <small>@Model.Currency</small>
                                     </div>
                                 </div>
 
-                                <h6 style="font-weight:700;border-bottom:1px solid #eee;margin-bottom:1rem; padding-bottom: 0.5rem;">GENEL BÝLGÝLER</h6>
-                                <div style="display:flex;flex-direction:column;gap:8px;font-size:.85rem;">
-                                    <div style="display:flex;justify-content:space-between;"><span>Ýhale:</span><span style="font-weight:600; text-align:right;">@Model.TenderName</span></div>
-                                    <div style="display:flex;justify-content:space-between;"><span>Baþlangýç:</span><span>@Model.TenderStartDate.ToShortDateString()</span></div>
-                                    <div style="display:flex;justify-content:space-between;"><span>Bitiþ:</span><span>@Model.TenderEndDate.ToShortDateString()</span></div>
-                                    <div style="display:flex;justify-content:space-between;"><span>Tür:</span><span>@Model.TenderType</span></div>
-                                    <div style="display:flex;justify-content:space-between;"><span>Metot:</span><span>@Model.TenderMethod</span></div>
-                                    <div style="display:flex;justify-content:space-between;"><span>Sözleþme:</span><span>@(Model.ContractDate?.ToShortDateString() ?? "-")</span></div>
+                                <h6 class="tender-section-title">
+                                    GENEL BÝLGÝLER
+                                </h6>
+
+                                <div class="tender-info">
+                                    <div class="tender-info-row">
+                                        <span>Ýhale:</span>
+                                        <span class="tender-info-strong">@Model.TenderName</span>
+                                    </div>
+                                    <div class="tender-info-row">
+                                        <span>Baþlangýç:</span>
+                                        <span>@Model.TenderStartDate.ToShortDateString()</span>
+                                    </div>
+                                    <div class="tender-info-row">
+                                        <span>Bitiþ:</span>
+                                        <span>@Model.TenderEndDate.ToShortDateString()</span>
+                                    </div>
+                                    <div class="tender-info-row">
+                                        <span>Tür:</span>
+                                        <span>@Model.TenderType</span>
+                                    </div>
+                                    <div class="tender-info-row">
+                                        <span>Metot:</span>
+                                        <span>@Model.TenderMethod</span>
+                                    </div>
+                                    <div class="tender-info-row">
+                                        <span>Sözleþme:</span>
+                                        <span>@(Model.ContractDate?.ToShortDateString() ?? "-")</span>
+                                    </div>
                                 </div>
+
                             </div>
                         </div>
 
-                        <div class="tender-right" style="flex: 3; min-width: 600px;">
-                            <div class="tender-card" style="background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden;">
-                                <DxTabs ActiveTabIndex="@ActiveTabIndex" ActiveTabIndexChanged="OnActiveTabIndexChanged" style="padding:.5rem 1rem 0 1rem;">
+                        <!-- SAÐ PANEL -->
+                        <div class="tender-right">
+                            <div class="tender-card tender-card-tabs">
+
+                                <DxTabs ActiveTabIndex="@ActiveTabIndex"
+                                        ActiveTabIndexChanged="OnActiveTabIndexChanged"
+                                        class="tender-tabs">
                                     <DxTabPage Text="Cihazlar" />
                                     <DxTabPage Text="Opex" />
                                     <DxTabPage Text="Capex" />
@@ -82,7 +119,8 @@
                                     <DxTabPage Text="Belgeler" />
                                 </DxTabs>
 
-                                <div class="tender-content" style="padding: 1rem; min-height: 500px;">
+                                <div class="tender-content">
+
                                     @switch (ActiveTabIndex)
                                     {
                                         case 0:
@@ -96,11 +134,12 @@
                                                     <DxGridDataColumn FieldName="RentUnitPrice" Caption="Kira" DisplayFormat="n2" />
                                                     <DxGridDataColumn FieldName="ServiceUnitPrice" Caption="Servis" DisplayFormat="n2" />
                                                     <DxGridDataColumn FieldName="LinkUnitPrice" Caption="Link" DisplayFormat="n2" />
-                                                    <DxGridDataColumn FieldName="PurchasePrice" Caption="Satýnlama" DisplayFormat="n2" />
+                                                    <DxGridDataColumn FieldName="PurchasePrice" Caption="Satýnalma" DisplayFormat="n2" />
                                                     <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
                                                 </Columns>
                                             </DxGrid>
                                             break;
+
                                         case 1:
                                             <DxGrid Data="OpexDataSource" ShowSearchBox="true" Height="500px">
                                                 <Columns>
@@ -112,6 +151,7 @@
                                                 </Columns>
                                             </DxGrid>
                                             break;
+
                                         case 2:
                                             <DxGrid Data="CapexDataSource" ShowSearchBox="true" Height="500px">
                                                 <Columns>
@@ -123,13 +163,14 @@
                                                 </Columns>
                                             </DxGrid>
                                             break;
+
                                         case 3:
                                             <DxGrid Data="ReaktifDataSource" ShowSearchBox="true" Height="500px">
                                                 <Columns>
                                                     <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
                                                     <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
                                                     <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
-                                                    <DxGridDataColumn FieldName="SutCode" Caption="Sut Kodu" />
+                                                    <DxGridDataColumn FieldName="SutCode" Caption="SUT Kodu" />
                                                     <DxGridDataColumn FieldName="TestName" Caption="Test Adý" />
                                                     <DxGridDataColumn FieldName="TestCount" Caption="Test Sayýsý" />
                                                     <DxGridDataColumn FieldName="UnitPrice" Caption="Birim Fiyat" DisplayFormat="n2" />
@@ -137,48 +178,53 @@
                                                 </Columns>
                                             </DxGrid>
                                             break;
+
                                         case 4:
                                             <DxGrid Data="RequiredDocumentDataSource" Height="500px">
                                                 <Columns>
                                                     <DxGridDataColumn FieldName="DocumentName" Caption="Belge" />
-                                                    <DxGridDataColumn FieldName="IsMandatory" Caption="Zorunlu" Width="100px" TextAlignment="GridTextAlignment.Center">
-                                                        <CellDisplayTemplate Context="ctx">
-                                                            @{
-                                                                var doc1 = (TenderRequiredDocument)ctx.DataItem;
-                                                                <DxCheckBox Checked="@doc1.IsMandatory" Enabled="false" />
-                                                            }
-                                                        </CellDisplayTemplate>
-                                                    </DxGridDataColumn>
-                                                    <DxGridDataColumn FieldName="Submitted" Caption="Durum" Width="100px" TextAlignment="GridTextAlignment.Center">
-                                                        <CellDisplayTemplate Context="ctx">
-                                                            @{
-                                                                var doc2 = (TenderRequiredDocument)ctx.DataItem;
-                                                                <DxCheckBox Checked="@doc2.Submitted" Enabled="false" />
-                                                            }
-                                                        </CellDisplayTemplate>
-                                                    </DxGridDataColumn>
-                                                    <DxGridDataColumn FieldName="SubmissionDate" Caption="Yüklenme Tarihi" TextAlignment="GridTextAlignment.Center">
+
+                                                    <DxGridDataColumn FieldName="IsMandatory" Caption="Zorunlu" Width="100px"
+                                                                      TextAlignment="GridTextAlignment.Center">
                                                         <CellDisplayTemplate Context="ctx">
                                                             @{
                                                                 var doc = (TenderRequiredDocument)ctx.DataItem;
-                                                                if (doc.SubmissionDate.HasValue)
-                                                                {
-                                                                    <span>@doc.SubmissionDate.Value.ToString("dd.MM.yyyy")</span>
-                                                                }
-                                                                else
-                                                                {
-                                                                    <span class="text-muted">-</span>
-                                                                }
+                                                                <DxCheckBox Checked="@doc.IsMandatory" Enabled="false" />
                                                             }
                                                         </CellDisplayTemplate>
                                                     </DxGridDataColumn>
-                                                    <DxGridDataColumn Caption="Ýncele" Width="100px" TextAlignment="GridTextAlignment.Center">
+
+                                                    <DxGridDataColumn FieldName="Submitted" Caption="Durum" Width="100px"
+                                                                      TextAlignment="GridTextAlignment.Center">
                                                         <CellDisplayTemplate Context="ctx">
                                                             @{
-                                                                var doc3 = (TenderRequiredDocument)ctx.DataItem;
-                                                                if (doc3.TenderRequiredDocumentFileId.HasValue)
+                                                                var doc = (TenderRequiredDocument)ctx.DataItem;
+                                                                <DxCheckBox Checked="@doc.Submitted" Enabled="false" />
+                                                            }
+                                                        </CellDisplayTemplate>
+                                                    </DxGridDataColumn>
+
+                                                    <DxGridDataColumn FieldName="SubmissionDate" Caption="Yüklenme Tarihi"
+                                                                      TextAlignment="GridTextAlignment.Center">
+                                                        <CellDisplayTemplate Context="ctx">
+                                                            @{
+                                                                var doc = (TenderRequiredDocument)ctx.DataItem;
+                                                                <span>
+                                                                    @(doc.SubmissionDate.HasValue ? doc.SubmissionDate.Value.ToString("dd.MM.yyyy")
+                                                                                                                        : "-")
+                                                                </span>
+                                                            }
+                                                        </CellDisplayTemplate>
+                                                    </DxGridDataColumn>
+
+                                                    <DxGridDataColumn Caption="Ýncele" Width="100px"
+                                                                      TextAlignment="GridTextAlignment.Center">
+                                                        <CellDisplayTemplate Context="ctx">
+                                                            @{
+                                                                var doc = (TenderRequiredDocument)ctx.DataItem;
+                                                                if (doc.TenderRequiredDocumentFileId.HasValue)
                                                                 {
-                                                                    <DxButton Text="Görüntüle" RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Outline" SizeMode="SizeMode.Small"
+                                                                    <DxButton RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Outline" SizeMode="SizeMode.Small"
                                                                               Click="@(() => HandleFileAction(doc3))"
                                                                               IconCssClass="@(doc3.FileType == "application/pdf" ? "ti ti-file-text text-danger" : "ti ti-file-text text-primary")" />
                                                                 }
@@ -193,12 +239,15 @@
                                             </DxGrid>
                                             break;
                                     }
+
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </Template>
             </DxFormLayoutItem>
+
         </DxFormLayout>
     }
 </div>
