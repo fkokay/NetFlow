@@ -178,7 +178,7 @@
                                                                 var doc3 = (TenderRequiredDocument)ctx.DataItem;
                                                                 if (doc3.TenderRequiredDocumentFileId.HasValue)
                                                                 {
-                                                                    <DxButton RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Outline" SizeMode="SizeMode.Small"
+                                                                    <DxButton Text="Görüntüle" RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Outline" SizeMode="SizeMode.Small"
                                                                               Click="@(() => HandleFileAction(doc3))"
                                                                               IconCssClass="@(doc3.FileType == "application/pdf" ? "ti ti-file-text text-danger" : "ti ti-file-text text-primary")" />
                                                                 }

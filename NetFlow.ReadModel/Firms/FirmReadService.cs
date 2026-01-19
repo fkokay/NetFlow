@@ -74,19 +74,15 @@ namespace NetFlow.ReadModel.Firms
                 totalCount = totalCount
             };
         }
-        public async Task<List<FirmSelectDto>> GetFirmListAsync()
+        public async Task<List<FirmDto>> GetFirmListAsync()
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
 
             const string sql = @"
-                SELECT
-                    Id,
-                    FirmName
-                FROM dbo.VW_Firm WITH (NOLOCK)
-                ORDER BY FirmName
+                SELECT * FROM dbo.VW_Firm WITH (NOLOCK) ORDER BY FirmCode   
             ";
 
-            var data = await cn.QueryAsync<FirmSelectDto>(sql);
+            var data = await cn.QueryAsync<FirmDto>(sql);
             return data.ToList();
         }
 

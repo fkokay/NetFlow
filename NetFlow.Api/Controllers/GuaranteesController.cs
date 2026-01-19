@@ -29,6 +29,39 @@ namespace NetFlow.Api.Controllers
             return Ok(await _read.ListAsync(_current.User.Firm.Id, pagedRequest));
         }
 
+        [HttpGet("expiring")]
+        public async Task<IActionResult> Expiring([FromQuery] PagedRequest pagedRequest)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(await _read.ListAsync(_current.User.Firm.Id, pagedRequest, expiring: true));
+        }
+
+        [HttpGet("active")]
+        public async Task<IActionResult> Active([FromQuery] PagedRequest pagedRequest)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(await _read.ListAsync(_current.User.Firm.Id, pagedRequest, isActive: true));
+        }
+
+        [HttpGet("refunded")]
+        public async Task<IActionResult> Refunded([FromQuery] PagedRequest pagedRequest)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(await _read.ListAsync(_current.User.Firm.Id, pagedRequest, isRefunded: true));
+        }
+
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(int id)
         {

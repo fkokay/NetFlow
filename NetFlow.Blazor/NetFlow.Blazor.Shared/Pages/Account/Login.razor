@@ -3,6 +3,8 @@
 @layout AccountLayout
 @using System.ComponentModel.DataAnnotations
 @inject ILoginService LoginService
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager navigationManager
 
 <PageTitle>Giriş Yap</PageTitle>
@@ -66,47 +68,50 @@
 
 @* --- GİRİŞ FORMU --- *@
 <div class="block-content card">
-    <EditForm Model="@Input" OnValidSubmit="LoginUser" FormName="login" Context="Login">
-        <DataAnnotationsValidator />
-        <DxFormLayout CaptionPosition=@CaptionPosition.Vertical>
-            <DxFormLayoutItem ColSpanMd="12">
-                <div class="title">
-                    <div class="title-text">Giriş Yap</div>
-                </div>
-            </DxFormLayoutItem>
+    @if (Input != null)
+    {
+        <EditForm Model="@Input" OnValidSubmit="LoginUser" FormName="login" Context="Login">
+            <DataAnnotationsValidator />
+            <DxFormLayout CaptionPosition=@CaptionPosition.Vertical>
+                <DxFormLayoutItem ColSpanMd="12">
+                    <div class="title">
+                        <div class="title-text">Giriş Yap</div>
+                    </div>
+                </DxFormLayoutItem>
 
-            <DxFormLayoutItem Caption="Firma Seçiniz" ColSpanMd="12">
-                <DxComboBox Data="@Firms"
-                            @bind-Value="@Input.FirmCode"
-                            TextFieldName="@nameof(FirmModel.FirmName)"
-                            ValueFieldName="@nameof(FirmModel.FirmCode)"
-                            NullText="Lütfen bir firma seçin..." />
-                <ValidationMessage For="() => Input.FirmCode" class="text-danger" />
-            </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="Firma Seçiniz" ColSpanMd="12">
+                    <DxComboBox Data="@Firms"
+                                @bind-Value="@Input.FirmCode"
+                                TextFieldName="@nameof(FirmModel.FirmName)"
+                                ValueFieldName="@nameof(FirmModel.FirmCode)"
+                                NullText="Lütfen bir firma seçin..." />
+                    <ValidationMessage For="() => Input.FirmCode" class="text-danger" />
+                </DxFormLayoutItem>
 
-            <DxFormLayoutItem Caption="E-Posta" ColSpanMd="12" BeginRow="true">
-                <DxTextBox name="Input.Email" @bind-Text="@Input.Email" BindValueMode="BindValueMode.OnInput" />
-                <ValidationMessage class="text-danger" For="() => Input.Email" />
-            </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="E-Posta" ColSpanMd="12" BeginRow="true">
+                    <DxTextBox name="Input.Email" @bind-Text="@Input.Email" BindValueMode="BindValueMode.OnInput" />
+                    <ValidationMessage class="text-danger" For="() => Input.Email" />
+                </DxFormLayoutItem>
 
-            <DxFormLayoutItem Caption="Şifre" ColSpanMd="12" BeginRow="true">
-                <DxTextBox name="Input.Password" @bind-Text="@Input.Password" BindValueMode="BindValueMode.OnInput" Password="true" />
-                <ValidationMessage class="text-danger" For="() => Input.Password" />
-            </DxFormLayoutItem>
+                <DxFormLayoutItem Caption="Şifre" ColSpanMd="12" BeginRow="true">
+                    <DxTextBox name="Input.Password" @bind-Text="@Input.Password" BindValueMode="BindValueMode.OnInput" Password="true" />
+                    <ValidationMessage class="text-danger" For="() => Input.Password" />
+                </DxFormLayoutItem>
 
-            <DxFormLayoutItem ColSpanMd="12" BeginRow="true">
-                <DxCheckBox name="Input.RememberMe" @bind-Checked="@Input.RememberMe">Beni hatırla?</DxCheckBox>
-            </DxFormLayoutItem>
+                <DxFormLayoutItem ColSpanMd="12" BeginRow="true">
+                    <DxCheckBox name="Input.RememberMe" @bind-Checked="@Input.RememberMe">Beni hatırla?</DxCheckBox>
+                </DxFormLayoutItem>
 
-            <DxFormLayoutItem ColSpanMd="12" BeginRow="true">
-                <DxButton CssClass="w-100"
-                          SubmitFormOnClick="true"
-                          Text="Giriş"
-                          Enabled="!isBusy">
-                </DxButton>
-            </DxFormLayoutItem>
-        </DxFormLayout>
-    </EditForm>
+                <DxFormLayoutItem ColSpanMd="12" BeginRow="true">
+                    <DxButton CssClass="w-100"
+                              SubmitFormOnClick="true"
+                              Text="Giriş"
+                              Enabled="!isBusy">
+                    </DxButton>
+                </DxFormLayoutItem>
+            </DxFormLayout>
+        </EditForm>
+    }
 </div>
 
 
@@ -122,11 +127,23 @@
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
-    private List<FirmModel> Firms = new List<FirmModel>
+    private List<FirmModel> Firms = default!;
+
+    override protected void OnInitialized()
     {
-        new FirmModel { FirmCode = "01", FirmName = "Makromed" },
-        new FirmModel { FirmCode = "02", FirmName = "Makrolab" },
-    };
+        Input = new InputModel();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        var result = await client.GetFromJsonAsync<List<FirmModel>>("api/firms/list");
+        if (result != null)
+        {
+            Firms = result;
+        }
+    }
 
     private async Task LoginUser()
     {

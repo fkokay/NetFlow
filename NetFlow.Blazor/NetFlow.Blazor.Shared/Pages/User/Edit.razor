@@ -1,4 +1,4 @@
-@page "/user/edit/{Id:int}"
+ï»¿@page "/user/edit/{Id:int}"
 @using System.ComponentModel.DataAnnotations
 @using System.Net.Http.Json
 @inject IApiClientFactory ApiClientFactory
@@ -10,13 +10,13 @@
         <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
             <Items>
                 <DxToolbarItem IconCssClass="back-icon icon medium-icon"
-                               Tooltip="Geri Dön"
+                               Tooltip="Geri Dï¿½n"
                                Click="@(() => NavigationManager.NavigateTo("/user/list"))" />
 
                 <DxToolbarItem>
                     <Template>
                         <div class="custom-item">
-                            <div class="title" style="font-weight: bold; font-size: 1.1rem;">Kullanýcý Güncelleme</div>
+                            <div class="title" style="font-weight: bold; font-size: 1.1rem;">Kullanï¿½cï¿½ Gï¿½ncelleme</div>
                         </div>
                     </Template>
                 </DxToolbarItem>
@@ -36,8 +36,8 @@
 
     @if (User == null)
     {
-        <div class="text-center p-5">
-            <DxLoadingPanel Visible="true" IsContentBlocked="true" Text="Kullanýcý verileri yükleniyor..." />
+        <div class="p-5 text-center">
+            <DxLoadingPanel Visible="true" IsContentBlocked="true" Text="Kullanï¿½cï¿½ verileri yï¿½kleniyor..." />
         </div>
     }
     else
@@ -47,7 +47,7 @@
                 <DxFormLayoutItem ColSpanMd="12" Context="formLayoutContext">
                     <DxTabs @bind-ActiveTabIndex="@ActiveTabIndex">
 
-                        <DxTabPage Text="Kullanýcý Bilgileri">
+                        <DxTabPage Text="Kullanï¿½cï¿½ Bilgileri">
                             <div class="p-4">
                                 <DxFormLayout CaptionPosition="CaptionPosition.Vertical">
                                     <DxFormLayoutItem Caption="Ad" ColSpanMd="6">
@@ -66,7 +66,7 @@
                                         <DxTextBox @bind-Text="@User.Phone" />
                                     </DxFormLayoutItem>
 
-                                    <DxFormLayoutItem Caption="Þifre" ColSpanMd="6">
+                                    <DxFormLayoutItem Caption="ï¿½ifre" ColSpanMd="6">
                                         <DxTextBox @bind-Text="@User.Password" Password="true" />
                                     </DxFormLayoutItem>
 
@@ -83,7 +83,7 @@
                                                   Values="@User.FirmIds"
                                                   ValuesExpression="@(() => User.FirmIds)"
                                                   ValuesChanged="@((IEnumerable<int> values) => User.FirmIds = values.ToList())"
-                                                  NullText="Firma seçiniz..."
+                                                  NullText="Firma seï¿½iniz..."
                                                   ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
                                                   TagDecorationMode="TagDecorationMode.Rounded" />
                                     </DxFormLayoutItem>
@@ -91,10 +91,10 @@
                             </div>
                         </DxTabPage>
 
-                        <DxTabPage Text="Rol Ýþlemleri">
+                        <DxTabPage Text="Rol ï¿½ï¿½lemleri">
                             <div class="p-4">
                                 <DxFormLayout CaptionPosition="CaptionPosition.Vertical">
-                                    <DxFormLayoutItem Caption="Kullanýcý Rolleri" ColSpanMd="12">
+                                    <DxFormLayoutItem Caption="Kullanï¿½cï¿½ Rolleri" ColSpanMd="12">
                                         <DxTagBox TData="RoleSelectModel"
                                                   TValue="int"
                                                   Data="@AvailableRoles"
@@ -103,7 +103,7 @@
                                                   Values="@User.RoleIds"
                                                   ValuesExpression="@(() => User.RoleIds)"
                                                   ValuesChanged="@((IEnumerable<int> values) => User.RoleIds = values.ToList())"
-                                                  NullText="Rol seçiniz..."
+                                                  NullText="Rol seï¿½iniz..."
                                                   ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
                                                   TagDecorationMode="TagDecorationMode.Rounded" />
                                     </DxFormLayoutItem>
@@ -146,7 +146,7 @@
                 User.FirmIds ??= new List<int>();
             }
         }
-        catch (Exception ex) { Console.WriteLine($"Yükleme Hatasý: {ex.Message}"); }
+        catch (Exception ex) { Console.WriteLine($"Yï¿½kleme Hatasï¿½: {ex.Message}"); }
     }
 
     private async Task LoadFirmsAsync()
@@ -155,10 +155,10 @@
         {
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
-            var result = await client.GetFromJsonAsync<List<FirmSelectModel>>("api/firms/firmlist");
+            var result = await client.GetFromJsonAsync<List<FirmSelectModel>>("api/firms/list");
             if (result != null) AvailableFirms = result;
         }
-        catch (Exception ex) { Console.WriteLine($"Firma Hatasý: {ex.Message}"); }
+        catch (Exception ex) { Console.WriteLine($"Firma Hatasï¿½: {ex.Message}"); }
     }
 
     private async Task LoadRolesAsync()
@@ -170,7 +170,7 @@
             var result = await client.GetFromJsonAsync<List<RoleSelectModel>>("api/roles/rolelist");
             if (result != null) AvailableRoles = result;
         }
-        catch (Exception ex) { Console.WriteLine($"Rol Hatasý: {ex.Message}"); }
+        catch (Exception ex) { Console.WriteLine($"Rol Hatasï¿½: {ex.Message}"); }
     }
 
     private async Task HandleValidSubmit()
@@ -185,7 +185,7 @@
             if (response.IsSuccessStatusCode)
                 NavigationManager.NavigateTo("/user/list");
         }
-        catch (Exception ex) { Console.WriteLine($"Kaydetme Hatasý: {ex.Message}"); }
+        catch (Exception ex) { Console.WriteLine($"Kaydetme Hatasï¿½: {ex.Message}"); }
         finally { isSaving = false; }
     }
 

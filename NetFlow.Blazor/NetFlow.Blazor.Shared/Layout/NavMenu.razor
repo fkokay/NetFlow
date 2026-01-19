@@ -10,47 +10,136 @@
     <Nodes>
         <DxTreeViewNode Text="Teminat Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="crm-icon icon medium-icon">
             <Nodes>
-                <DxTreeViewNode Text="Teminat Listesi" NavigateUrl="/guarantee/list" />
+                <DxTreeViewNode Text="Teminat Havuzu" NavigateUrl="/guarantee/list" />
+                <DxTreeViewNode Text="Aktif Teminatlar" NavigateUrl="/guarantee/active" />
+                <DxTreeViewNode Text="Süresi Yaklaþanlar" NavigateUrl="/guarantee/expiring" />
+                <DxTreeViewNode Text="Ýade Edilenler" NavigateUrl="/guarantee/refunded" />
+                <DxTreeViewNode Text="Teminat Uzatma" NavigateUrl="/guarantee/extensions" />
+                <DxTreeViewNode Text="Teminat Raporlarý" NavigateUrl="/guarantee/reports" />
+                <DxTreeViewNode Text="Teminat Tanýmlarý" NavigateUrl="/guarantee/settings" />
             </Nodes>
         </DxTreeViewNode>
         <DxTreeViewNode Text="Ýhale Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="planning-icon icon medium-icon">
             <Nodes>
-                <DxTreeViewNode Text="Ýhale Listesi" NavigateUrl="/tender/list" />
+                <DxTreeViewNode Text="Ýhale Havuzu" NavigateUrl="/tender/list" />
+                <DxTreeViewNode Text="Teklif Yönetimi" NavigateUrl="/tender/offers" />
+                <DxTreeViewNode Text="Ýhale Kalemleri" NavigateUrl="/tender/items" />
+                <DxTreeViewNode Text="Teminat Yönetimi" NavigateUrl="/tender/guarantees" />
+                <DxTreeViewNode Text="Sözleþmeler" NavigateUrl="/tender/contracts" />
+                <DxTreeViewNode Text="Sipariþe Dönüþenler" NavigateUrl="/tender/orders" />
+                <DxTreeViewNode Text="Ýhale Raporlarý" NavigateUrl="/tender/reports" />
+                <DxTreeViewNode Text="Ýhale Tanýmlarý" NavigateUrl="/tender/settings" />
             </Nodes>
         </DxTreeViewNode>
-        <DxTreeViewNode Text="Satýþ Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+        <DxTreeViewNode Text="Teknik Servis Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="planning-icon icon medium-icon">
             <Nodes>
+                <DxTreeViewNode Text="Servis Talepleri" NavigateUrl="/service/requests" />
+                <DxTreeViewNode Text="Açýk Servisler" NavigateUrl="/service/open" />
+                <DxTreeViewNode Text="Kapalý Servisler" NavigateUrl="/service/closed" />
+                <DxTreeViewNode Text="Ýþ Emirleri" NavigateUrl="/service/work-orders" />
+                <DxTreeViewNode Text="Teknisyen Atamalarý" NavigateUrl="/service/technicians" />
+                <DxTreeViewNode Text="Yedek Parça Kullanýmý" NavigateUrl="/service/parts" />
+                <DxTreeViewNode Text="Garanti & Sözleþmeler" NavigateUrl="/service/warranty" />
+                <DxTreeViewNode Text="Servis Faturalama" NavigateUrl="/service/billing" />
+                <DxTreeViewNode Text="Servis Raporlarý" NavigateUrl="/service/reports" />
+                <DxTreeViewNode Text="Servis Tanýmlarý" NavigateUrl="/service/settings" />
+            </Nodes>
+        </DxTreeViewNode>
+        <DxTreeViewNode Text="Satýþ Yönetimi" Visible="false" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+            <Nodes>
+                <DxTreeViewNode Text="Satýþ Havuzu" NavigateUrl="/sales/dashboard" />
+                <DxTreeViewNode Text="Teklifler" NavigateUrl="/sales/offers" />
                 <DxTreeViewNode Text="Satýþ Sipariþleri" NavigateUrl="/netsis/orders/sales/list" />
-                <DxTreeViewNode Text="Satýþ Ýrsaliyeleri" NavigateUrl="SalesAnalysis" />
-                <DxTreeViewNode Text="Satýþ Faturalarý" NavigateUrl="SalesAnalysis" />
+                <DxTreeViewNode Text="Fiyat & Kampanyalar" NavigateUrl="/sales/pricing" />
+                <DxTreeViewNode Text="Sevkiyat & Ýrsaliye" NavigateUrl="/netsis/shipments/shippable-orders" />
+                <DxTreeViewNode Text="Satýþ Faturalarý" NavigateUrl="/sales/invoices" />
+                <DxTreeViewNode Text="Tahsilat & Risk" NavigateUrl="/sales/collections" />
+                <DxTreeViewNode Text="Satýþ Ýadeleri" NavigateUrl="/sales/returns" />
+                <DxTreeViewNode Text="Satýþ Raporlarý" NavigateUrl="/sales/reports" />
+                <DxTreeViewNode Text="Satýþ Tanýmlarý" NavigateUrl="/sales/settings" />
             </Nodes>
         </DxTreeViewNode>
-        <DxTreeViewNode Text="Satýnalma Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+        <DxTreeViewNode Text="Satýnalma Yönetimi" Visible="false" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
             <Nodes>
+                <DxTreeViewNode Text="Satýnalma Havuzu" NavigateUrl="/purchase/dashboard" />
+                <DxTreeViewNode Text="Satýnalma Talepleri" NavigateUrl="/purchase/requests" />
+                <DxTreeViewNode Text="Teklif Karþýlaþtýrma" NavigateUrl="/purchase/quotes" />
                 <DxTreeViewNode Text="Satýnalma Sipariþleri" NavigateUrl="/netsis/orders/purchase/list" />
-                <DxTreeViewNode Text="Satýnalma Ýrsaliyeleri" NavigateUrl="SalesAnalysis" />
-                <DxTreeViewNode Text="Satýnalma Faturalarý" NavigateUrl="SalesAnalysis" />
+                <DxTreeViewNode Text="Mal Kabul" NavigateUrl="/purchase/receipts" />
+                <DxTreeViewNode Text="Alýþ Faturalarý" NavigateUrl="/purchase/invoices" />
+                <DxTreeViewNode Text="Ýadeler & Düzeltmeler" NavigateUrl="/purchase/returns" />
+                <DxTreeViewNode Text="Tedarikçi Performansý" NavigateUrl="/purchase/suppliers" />
+                <DxTreeViewNode Text="Satýnalma Raporlarý" NavigateUrl="/purchase/reports" />
+                <DxTreeViewNode Text="Satýnalma Tanýmlarý" NavigateUrl="/purchase/settings" />
             </Nodes>
         </DxTreeViewNode>
         <DxTreeViewNode Text="Sevkiyat Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
             <Nodes>
-                <DxTreeViewNode Text="Sevkiyat Emri" NavigateUrl="/netsis/shipments/shippable-orders" />
-                <DxTreeViewNode Text="Sevkiyat Yönetimi" NavigateUrl="/netsis/shipments/management" />
+                <DxTreeViewNode Text="Sevkiyat Havuzu" NavigateUrl="/netsis/shipments/list" />
+                <DxTreeViewNode Text="Sevkiyat Emirleri" NavigateUrl="/netsis/shipments/shippable-orders" />
+                <DxTreeViewNode Text="Toplama & Paketleme" NavigateUrl="/netsis/shipments/picking" />
+                <DxTreeViewNode Text="Yükleme Planý" NavigateUrl="/netsis/shipments/loading" />
+                <DxTreeViewNode Text="Sevkiyat Takibi" NavigateUrl="/netsis/shipments/tracking" />
+                <DxTreeViewNode Text="Ýade Sevkiyatlarý" NavigateUrl="/netsis/shipments/returns" />
+                <DxTreeViewNode Text="Sevkiyat Raporlarý" NavigateUrl="/netsis/shipments/reports" />
+                <DxTreeViewNode Text="Sevkiyat Tanýmlarý" NavigateUrl="/netsis/shipments/settings" />
             </Nodes>
         </DxTreeViewNode>
-        <DxTreeViewNode Text="Müþteri Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+        <DxTreeViewNode Text="Müþteri Yönetimi" Visible="false" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
             <Nodes>
-                <DxTreeViewNode Text="Müþteri Listesi" NavigateUrl="SalesAnalysis" />
+                <DxTreeViewNode Text="Müþteri Listesi" NavigateUrl="/customer/list" />
+                <DxTreeViewNode Text="Yeni Müþteri" NavigateUrl="/customer/create" />
+                <DxTreeViewNode Text="Ýletiþim & Yetkililer" NavigateUrl="/customer/contacts" />
+                <DxTreeViewNode Text="Finans & Risk" NavigateUrl="/customer/finance" />
+                <DxTreeViewNode Text="Sipariþ & Teklifler" NavigateUrl="/customer/orders" />
+                <DxTreeViewNode Text="Sevkiyat & Faturalar" NavigateUrl="/customer/shipments" />
+                <DxTreeViewNode Text="Teknik Servis" NavigateUrl="/customer/service" />
+                <DxTreeViewNode Text="Sözleþmeler" NavigateUrl="/customer/contracts" />
+                <DxTreeViewNode Text="Müþteri Raporlarý" NavigateUrl="/customer/reports" />
+                <DxTreeViewNode Text="Müþteri Tanýmlarý" NavigateUrl="/customer/settings" />
             </Nodes>
         </DxTreeViewNode>
-        <DxTreeViewNode Text="Malzeme Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+        <DxTreeViewNode Text="Malzeme Yönetimi" Visible="false" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
             <Nodes>
-                <DxTreeViewNode Text="Malzeme Listesi" NavigateUrl="SalesAnalysis" />
+                <DxTreeViewNode Text="Malzeme Listesi" NavigateUrl="/material/list" />
+                <DxTreeViewNode Text="Yeni Malzeme" NavigateUrl="/material/create" />
+                <DxTreeViewNode Text="Depo & Lokasyon" NavigateUrl="/material/warehouse" />
+                <DxTreeViewNode Text="Stok Hareketleri" NavigateUrl="/material/movements" />
+                <DxTreeViewNode Text="Seri / Lot Takibi" NavigateUrl="/material/traceability" />
+                <DxTreeViewNode Text="Tüketim & Fire" NavigateUrl="/material/consumption" />
+                <DxTreeViewNode Text="Maliyetlendirme" NavigateUrl="/material/costing" />
+                <DxTreeViewNode Text="Sayým & Envanter" NavigateUrl="/material/counting" />
+                <DxTreeViewNode Text="Malzeme Raporlarý" NavigateUrl="/material/reports" />
+                <DxTreeViewNode Text="Malzeme Tanýmlarý" NavigateUrl="/material/settings" />
             </Nodes>
         </DxTreeViewNode>
         <DxTreeViewNode Text="Demirbaþ Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
             <Nodes>
                 <DxTreeViewNode Text="Demirbaþ Listesi" NavigateUrl="/asset/list" />
+                <DxTreeViewNode Text="Yeni Demirbaþ" NavigateUrl="/asset/create" />
+                <DxTreeViewNode Text="Zimmet Yönetimi" NavigateUrl="/asset/assignments" />
+                <DxTreeViewNode Text="Bakým & Servis" NavigateUrl="/asset/maintenance" />
+                <DxTreeViewNode Text="Amortisman" NavigateUrl="/asset/depreciation" />
+                <DxTreeViewNode Text="Hurda / Satýþ" NavigateUrl="/asset/disposals" />
+                <DxTreeViewNode Text="Demirbaþ Raporlarý" NavigateUrl="/asset/reports" />
+                <DxTreeViewNode Text="Demirbaþ Tanýmlarý" NavigateUrl="/asset/settings" />
+            </Nodes>
+        </DxTreeViewNode>
+        <DxTreeViewNode Text="Üretim Yönetimi"
+                        AllowSelection="false"
+                        Expanded="true"
+                        IconCssClass="planning-icon icon medium-icon" Visible="false">
+            <Nodes>
+                <DxTreeViewNode Text="Üretim Planlama" NavigateUrl="/production/planning" />
+                <DxTreeViewNode Text="Üretim Emirleri" NavigateUrl="/production/orders" />
+                <DxTreeViewNode Text="Reçeteler (BOM)" NavigateUrl="/production/bom" />
+                <DxTreeViewNode Text="MRP & Malzeme Ýhtiyacý" NavigateUrl="/production/mrp" />
+                <DxTreeViewNode Text="Atölye Takibi" NavigateUrl="/production/shopfloor" />
+                <DxTreeViewNode Text="Yarý Mamul & Seri Takibi" NavigateUrl="/production/traceability" />
+                <DxTreeViewNode Text="Maliyetlendirme" NavigateUrl="/production/costing" />
+                <DxTreeViewNode Text="Kalite Kontrol" NavigateUrl="/production/quality" />
+                <DxTreeViewNode Text="Üretim Raporlarý" NavigateUrl="/production/reports" />
+                <DxTreeViewNode Text="Üretim Tanýmlarý" NavigateUrl="/production/settings" />
             </Nodes>
         </DxTreeViewNode>
         <DxTreeViewNode Text="Ayarlar" AllowSelection="false" Expanded="true" IconCssClass="settings-icon icon medium-icon">

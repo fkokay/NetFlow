@@ -15,13 +15,28 @@ namespace NetFlow.ReadModel.Guarantees
         public GuaranteeReadService(ReadModelOptions opt) => _opt = opt;
 
 
-        public async Task<PagedResult> ListAsync(int firmId, PagedRequest pagedRequest)
+        public async Task<PagedResult> ListAsync(int firmId, PagedRequest pagedRequest,bool expiring = false,bool isActive = false,bool isRefunded = false)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
             var parameters = new DynamicParameters();
             parameters.Add("FirmId", firmId);
 
             string whereSql = "WHERE FirmId = @FirmId";
+            if (expiring)
+            {
+                whereSql += " AND ExpiryDate BETWEEN GETDATE() AND DATEADD(MONTH,1,GETDATE())";
+            }
+
+            if (isActive)
+            {
+                whereSql += " AND GETDATE() <= ExpiryDate";
+            }
+
+            if (isRefunded)
+            {
+                whereSql += " AND IsRefunded = 1";
+            }
+
             if (!string.IsNullOrEmpty(pagedRequest.filter))
             {
                 var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.filter);

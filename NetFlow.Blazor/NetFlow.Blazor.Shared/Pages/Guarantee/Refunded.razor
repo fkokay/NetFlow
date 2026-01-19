@@ -1,4 +1,4 @@
-﻿@page "/guarantee/list"
+﻿@page "/guarantee/refunded"
 @implements IDisposable
 @inject NavigationManager NavigationManager
 @inject IApiClientFactory ApiClientFactory
@@ -6,7 +6,7 @@
 
 <div class="content-root">
     <div class="card toolbar">
-        <DxToolbar Title="Teminat Havuzu" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+        <DxToolbar Title="İade Edilen Teminatlar" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
             <DxToolbarItem Text="@GuaranteeTypeFilterValue" RenderStyleMode="ToolbarItemRenderStyleMode.Plain">
                 <Items>
                     <DxToolbarItem Text="Tümü" Click="FilterByGuaranteeType" />
@@ -77,12 +77,12 @@
                     </DxGridDataColumn>
                     <DxGridDataColumn Caption="Teminat Türü" FieldName="GuaranteeType" />
                     <DxGridDataColumn Caption="Teminat Şekli" FieldName="GuaranteeForm" />
-                    <DxGridDataColumn Caption="Teminat Tutarı" FieldName="GuaranteeAmount"  DisplayFormat="N2"/>
-                    <DxGridDataColumn Caption="Teminat Kominsyon Oranı" FieldName="CommissionRate" DisplayFormat="N4" Visible="false" />
-                    <DxGridDataColumn Caption="Toplam Komisyon Tutarı" FieldName="CommissionAmount" DisplayFormat="N2" />
-                    <DxGridDataColumn Caption="Teminat Komisyon Dönemi" FieldName="GuaranteeCommissionPeriodName" Visible="false" />
+                    <DxGridDataColumn Caption="Teminat Tutarı" FieldName="GuaranteeAmount" />
+                    <DxGridDataColumn Caption="Teminat Kominsyon Oranı" FieldName="CommissionRate" />
+                    <DxGridDataColumn Caption="Toplam Komisyon Tutarı" FieldName="CommissionAmount" />
+                    <DxGridDataColumn Caption="Teminat Komisyon Dönemi" FieldName="GuaranteeCommissionPeriodName" />
                     <DxGridDataColumn Caption="Banka" FieldName="BankName" />
-                    <DxGridDataColumn Caption="Banka Şubesi" FieldName="BankBranchName" Visible="false" />
+                    <DxGridDataColumn Caption="Banka Şubesi" FieldName="BankBranchName" />
                     <DxGridDataColumn Caption="Ünvanı" FieldName="PublicAuthorityName" />
                     <DxGridDataColumn Caption="Düzenlenme Tarihi" FieldName="GuaranteeDate" />
                     <DxGridCommandColumn Width="6em" DeleteButtonVisible="false" />
@@ -121,7 +121,7 @@
             return;
 
         var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
-        Data = new GridDevExtremeDataSource<GuaranteeModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/guarantees"));
+        Data = new GridDevExtremeDataSource<GuaranteeModel>(client, NavigationManager.ToAbsoluteUri("https://localhost:7071/api/guarantees/refunded"));
         await InvokeAsync(StateHasChanged);
     }
 
