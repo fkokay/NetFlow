@@ -76,26 +76,44 @@
 </div>
 
 @* Popup Bildirim *@
-<DxPopup @bind-Visible="popupVisible" HeaderText="@popupTitle" Width="420px" ShowFooter="true" CloseOnOutsideClick="false">
+<DxPopup @bind-Visible="popupVisible"
+         HeaderText="@popupTitle"
+         Width="420px"
+         ShowFooter="true"
+         CloseOnOutsideClick="false">
+
     <HeaderTemplate>
-        <div style="background-color: @(isSuccess ? "#28a745" : "#dc3545"); color: white; padding: 12px 16px; width: 100%;">
-            <span style="font-weight: bold;">@popupTitle</span>
+        <div class="popup-notification-header @(isSuccess ? "success" : "danger")">
+            <span class="popup-notification-header-title">
+                @popupTitle
+            </span>
         </div>
     </HeaderTemplate>
+
     <BodyTemplate>
-        <div style="display: flex; align-items: flex-start; padding: 25px;">
-            <div style="flex: 1;">
-                <h5 style="font-weight: bold; color: #333;">@(isSuccess ? "İşlem Tamamlandı" : "Bir Hata Oluştu")</h5>
-                <p style="color: #666; font-size: 14px;">@popupMessage</p>
+        <div class="popup-notification-body">
+            <div class="popup-notification-content">
+                <h5 class="popup-notification-title">
+                    @(isSuccess ? "İşlem Tamamlandı" : "Bir Hata Oluştu")
+                </h5>
+                <p class="popup-notification-message">
+                    @popupMessage
+                </p>
             </div>
         </div>
     </BodyTemplate>
+
     <FooterTemplate>
-        <div style="padding: 12px; display: flex; justify-content: flex-end; width: 100%;">
-            <DxButton Text="Kapat" RenderStyle="@(isSuccess? ButtonRenderStyle.Success: ButtonRenderStyle.Danger)" Click="OnPopupOk" Width="110px" />
+        <div class="popup-notification-footer">
+            <DxButton Text="Kapat"
+                      Width="110px"
+                      RenderStyle="@(isSuccess ? ButtonRenderStyle.Success : ButtonRenderStyle.Danger)"
+                      Click="OnPopupOk" />
         </div>
     </FooterTemplate>
+
 </DxPopup>
+
 
 @code {
     private UserModel model = new();

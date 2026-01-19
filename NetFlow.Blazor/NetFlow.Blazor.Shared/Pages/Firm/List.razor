@@ -68,34 +68,52 @@
         </div>
     </div>
 </div>
-<DxPopup @bind-Visible="popupVisible" Width="460px" ShowFooter="true" CloseOnOutsideClick="false">
+<DxPopup @bind-Visible="popupVisible"
+         Width="460px"
+         ShowFooter="true"
+         CloseOnOutsideClick="false">
+
     <HeaderTemplate>
-        <div style="background: @(isSuccess ? "linear-gradient(90deg,#28a745,#218838)" : "linear-gradient(90deg,#dc3545,#b02a37)"); color:white; padding:14px 18px; width:100%; display:flex; align-items:center; gap:12px;">
-            <div style="width:36px;height:36px;border-radius:50%; background:rgba(255,255,255,0.2); display:flex;align-items:center;justify-content:center; font-size:20px;font-weight:bold;">
+        <div class="popup-gradient-header @(isSuccess ? "success" : "danger")">
+            <div class="popup-gradient-header-icon">
                 @(isSuccess ? "✓" : "!")
             </div>
             <div>
-                <div style="font-size:1.05rem;font-weight:600;">@(isSuccess ? "İşlem Başarılı" : "İşlem Hatası")</div>
-                <div style="font-size:12px;opacity:.85">@popupTitle</div>
+                <div class="popup-gradient-header-title">
+                    @(isSuccess ? "İşlem Başarılı" : "İşlem Hatası")
+                </div>
+                <div class="popup-gradient-header-subtitle">
+                    @popupTitle
+                </div>
             </div>
         </div>
     </HeaderTemplate>
+
     <BodyTemplate>
-        <div style="padding:28px 26px;display:flex;gap:20px;">
-            <div style="width:60px;height:60px;border-radius:50%; background-color:@(isSuccess ? "#e9f7ef" : "#fdeaea"); color:@(isSuccess ? "#28a745" : "#dc3545"); display:flex;align-items:center;justify-content:center; font-size:28px;font-weight:bold;">
+        <div class="popup-gradient-body">
+            <div class="popup-gradient-body-icon @(isSuccess ? "success" : "danger")">
                 @(isSuccess ? "✓" : "!")
             </div>
-            <div style="flex:1;">
-                <h5 style="margin:0 0 6px 0;font-weight:600;color:#222;">@(isSuccess ? "Bilgiler Güncellendi" : "Hata Oluştu")</h5>
-                <p style="margin:0;color:#555;font-size:14px;line-height:1.6;">@popupMessage</p>
+            <div class="popup-gradient-body-content">
+                <h5 class="popup-gradient-body-title">
+                    @(isSuccess ? "Bilgiler Güncellendi" : "Hata Oluştu")
+                </h5>
+                <p class="popup-gradient-body-message">
+                    @popupMessage
+                </p>
             </div>
         </div>
     </BodyTemplate>
+
     <FooterTemplate>
-        <div style="padding:14px 18px; display:flex; justify-content:flex-end; border-top:1px solid #eee; background:#fafafa; width:100%;">
-            <DxButton Text="Kapat" Width="130px" RenderStyle="@(isSuccess? ButtonRenderStyle.Success: ButtonRenderStyle.Danger)" Click="OnPopupOk" />
+        <div class="popup-gradient-footer">
+            <DxButton Text="Kapat"
+                      Width="130px"
+                      RenderStyle="@(isSuccess ? ButtonRenderStyle.Success : ButtonRenderStyle.Danger)"
+                      Click="OnPopupOk" />
         </div>
     </FooterTemplate>
+
 </DxPopup>
 
 @code {
