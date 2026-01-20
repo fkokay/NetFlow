@@ -128,20 +128,7 @@
                         <Template>
                             <DxTabs CssClass="card tabs">
                                 <DxTabPage Text="Cihazlar" CssClass="tab-page">
-                                    <DxGrid Data="DeviceDataSource" ShowSearchBox="true" SearchBoxNullText="Arama yapmak için metin girin…" style="height:100%;">
-                                        <Columns>
-                                            <DxGridDataColumn FieldName="SupplyType" Caption="Tedarik Türü" />
-                                            <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
-                                            <DxGridDataColumn FieldName="Quantity" Caption="Miktar" />
-                                            <DxGridDataColumn FieldName="CustomerCode" Caption="Müşteri Kodu" />
-                                            <DxGridDataColumn FieldName="CustomerName" Caption="Müşteri Ünvanı" />
-                                            <DxGridDataColumn FieldName="RentUnitPrice" Caption="Kira" DisplayFormat="n2" />
-                                            <DxGridDataColumn FieldName="ServiceUnitPrice" Caption="Servis" DisplayFormat="n2" />
-                                            <DxGridDataColumn FieldName="LinkUnitPrice" Caption="Link" DisplayFormat="n2" />
-                                            <DxGridDataColumn FieldName="PurchasePrice" Caption="Satınalma" DisplayFormat="n2" />
-                                            <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
-                                        </Columns>
-                                    </DxGrid>
+                                    <TenderDevice TenderId="Id" />
                                 </DxTabPage>
                                 <DxTabPage Text="Opex" CssClass="tab-page">
                                     <DxGrid Data="OpexDataSource" ShowSearchBox="true" SearchBoxNullText="Arama yapmak için metin girin…" style="height:100%;">
@@ -275,7 +262,6 @@
     private bool PdfModalVisible { get; set; }
     private string PdfDataUrl { get; set; } = "";
 
-    private GridDevExtremeDataSource<TenderDeviceModel>? DeviceDataSource { get; set; }
     private GridDevExtremeDataSource<TenderOpexModel>? OpexDataSource { get; set; }
     private GridDevExtremeDataSource<TenderCapexModel>? CapexDataSource { get; set; }
     private GridDevExtremeDataSource<TenderReaktifModel>? ReaktifDataSource { get; set; }
@@ -325,7 +311,7 @@
         switch (index)
         {
             case 0:
-                DeviceDataSource = new GridDevExtremeDataSource<TenderDeviceModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-devices?tenderId={Id}"));
+
                 break;
             case 1:
                 OpexDataSource = new GridDevExtremeDataSource<TenderOpexModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-opex?tenderId={Id}"));

@@ -1,0 +1,32 @@
+﻿@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+
+<DxGrid Data="DeviceDataSource" ShowSearchBox="true" SearchBoxNullText="Arama yapmak için metin girin…" style="height:100%;">
+    <Columns>
+        <DxGridDataColumn FieldName="SupplyType" Caption="Tedarik Türü" />
+        <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
+        <DxGridDataColumn FieldName="Quantity" Caption="Miktar" />
+        <DxGridDataColumn FieldName="CustomerCode" Caption="Müşteri Kodu" />
+        <DxGridDataColumn FieldName="CustomerName" Caption="Müşteri Ünvanı" />
+        <DxGridDataColumn FieldName="RentUnitPrice" Caption="Kira" DisplayFormat="n2" />
+        <DxGridDataColumn FieldName="ServiceUnitPrice" Caption="Servis" DisplayFormat="n2" />
+        <DxGridDataColumn FieldName="LinkUnitPrice" Caption="Link" DisplayFormat="n2" />
+        <DxGridDataColumn FieldName="PurchasePrice" Caption="Satınalma" DisplayFormat="n2" />
+        <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
+    </Columns>
+</DxGrid>
+@code {
+    private GridDevExtremeDataSource<TenderDeviceModel>? DeviceDataSource { get; set; }
+
+    [Parameter]
+    public int TenderId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        string baseUrl = "https://localhost:7071/api";
+        DeviceDataSource = new GridDevExtremeDataSource<TenderDeviceModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-devices?tenderId={TenderId}"));
+    }
+}
