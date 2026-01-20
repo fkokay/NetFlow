@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
-using NetFlow.Application.Common.Utils;
+using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Domain.Common.Pagination;
 using NetFlow.ReadModel.TenderExternalQuality;
 using System;
@@ -24,15 +24,15 @@ namespace NetFlow.ReadModel.TenderOpex
 
             string whereSql = "WHERE TenderId = @TenderId";
 
-            if (!string.IsNullOrEmpty(pagedRequest.filter))
+            if (!string.IsNullOrEmpty(pagedRequest.Filter))
             {
-                var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.filter);
+                var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);
                 whereSql += " AND " + sql;
                 parameters.AddDynamicParams(p);
             }
 
             string orderBy = DevExtremeSqlBuilder.BuildOrderBy(
-                pagedRequest.sort,
+                pagedRequest.Sort,
                 "Id DESC"
             );
 
@@ -47,7 +47,7 @@ namespace NetFlow.ReadModel.TenderOpex
                 parameters
             );
 
-            if (pagedRequest.isCountQuery == true)
+            if (pagedRequest.IsCountQuery == true)
             {
                 return new PagedResult
                 {
@@ -56,8 +56,8 @@ namespace NetFlow.ReadModel.TenderOpex
                 };
             }
 
-            parameters.Add("@Skip", pagedRequest.skip ?? 0);
-            parameters.Add("@Take", pagedRequest.take ?? 10);
+            parameters.Add("@Skip", pagedRequest.Skip ?? 0);
+            parameters.Add("@Take", pagedRequest.Take ?? 10);
 
             string dataSql = $@"
                 SELECT *

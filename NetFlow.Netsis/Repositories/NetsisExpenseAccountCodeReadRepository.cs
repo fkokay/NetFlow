@@ -1,5 +1,5 @@
 ﻿using Dapper;
-using NetFlow.Application.Common.Utils;
+using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Application.Netsis.ExpenseAccountCodes;
 using NetFlow.Domain.Common.Pagination;
 using NetFlow.Domain.Netsis.ExpenseAccountCodes;
@@ -40,16 +40,16 @@ namespace NetFlow.Netsis.Repositories
             string whereSql = string.Empty;
             var parameters = new DynamicParameters();
 
-            if (!string.IsNullOrEmpty(request.filter))
+            if (!string.IsNullOrEmpty(request.Filter))
             {
-                var (filteSql, p) = DevExtremeSqlBuilder.Compile(request.filter, fieldMap);
+                var (filteSql, p) = DevExtremeSqlBuilder.Compile(request.Filter, fieldMap);
                 whereSql += " AND " + filteSql;
                 parameters.AddDynamicParams(p);
             }
 
-            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(request.sort, "ORDER BY HESAP_KODU DESC", fieldMap);
-            parameters.Add("@Skip", request.skip ?? 0);
-            parameters.Add("@Take", request.take ?? 10);
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(request.Sort, "ORDER BY HESAP_KODU DESC", fieldMap);
+            parameters.Add("@Skip", request.Skip ?? 0);
+            parameters.Add("@Take", request.Take ?? 10);
 
             string dataSql = $@"
                 {sql}
@@ -67,7 +67,7 @@ namespace NetFlow.Netsis.Repositories
                 countSql, parameters
             );
 
-            if (request.isCountQuery != null && request.isCountQuery.HasValue)
+            if (request.IsCountQuery != null && request.IsCountQuery.HasValue)
             {
                 return new PagedResult
                 {

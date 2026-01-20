@@ -93,7 +93,9 @@
                     <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
                 </GroupSummary>
                 <TotalSummary>
-                    <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" FooterColumnName="Id" />
+                    <DxGridSummaryItem DisplayText="Kayıt Sayısı:{0}" FieldName="Id" SummaryType="GridSummaryItemType.Count" />
+                    <DxGridSummaryItem DisplayText="Toplam:{0}" FieldName="GuaranteeAmount" SummaryType="GridSummaryItemType.Sum" FooterColumnName="GuaranteeAmount" />
+                    <DxGridSummaryItem DisplayText="Toplam:{0}" FieldName="CommissionAmount" SummaryType="GridSummaryItemType.Sum" FooterColumnName="CommissionAmount" />
                 </TotalSummary>
             </DxGrid>
         </div>
@@ -104,15 +106,14 @@
     CancellationTokenSource disposalTokenSource = new CancellationTokenSource();
     [CascadingParameter(Name = "ParentSizeMode")]
     SizeMode SizeMode { get; set; }
-    GridDevExtremeDataSource<GuaranteeModel> Data { get; set; } = null!;
-    IGrid? Grid { get; set; }
-    string? SearchText { get; set; }
-    bool IsDataLoaded { get; set; }
+
+    private GridDevExtremeDataSource<GuaranteeModel> Data { get; set; } = null!;
+    private IGrid? Grid { get; set; }
+    private string? SearchText { get; set; }
     bool IsGuaranteePanelOpen { get; set; }
     bool IsGuaranteePanelPinned { get; set; }
     bool IsActiveGuaranteeLoading { get; set; }
     DrawerMode DrawerMode => IsGuaranteePanelPinned ? DrawerMode.Shrink : DrawerMode.Overlap;
-    AssetModel? ActiveAsset { get; set; }
     GuaranteeModel? ActiveGuarantee { get; set; }
     string GuaranteeTypeFilterValue { get; set; } = "Tümü";
     string[] GuaranteeTypes { get; } = new[] { "Geçici", "Kati" };
@@ -134,17 +135,17 @@
 
     void OnColumnChooserItemClick(ToolbarItemClickEventArgs e) => Grid!.ShowColumnChooser();
 
-    Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Guarantees");
+    Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Teminatlar");
 
-    Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Selected Guarantees", new GridXlExportOptions { ExportSelectedRowsOnly = true });
+    Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Seçili Teminatlar", new GridXlExportOptions { ExportSelectedRowsOnly = true });
 
-    Task ExportAllDataToCsv() => Grid!.ExportToCsvAsync("Guarantees");
+    Task ExportAllDataToCsv() => Grid!.ExportToCsvAsync("Teminatlar");
 
-    Task ExportSelectedRowsDataToCsv() => Grid!.ExportToCsvAsync("Selected Guarantees", new GridCsvExportOptions { ExportSelectedRowsOnly = true });
+    Task ExportSelectedRowsDataToCsv() => Grid!.ExportToCsvAsync("Seçili Teminatlar", new GridCsvExportOptions { ExportSelectedRowsOnly = true });
 
-    Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Guarantees");
+    Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Teminatlar");
 
-    Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Selected Guarantees", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
+    Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Seçili Teminatlar", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
 
     void FilterByGuaranteeType(ToolbarItemClickEventArgs item)
     {

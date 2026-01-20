@@ -1,6 +1,7 @@
-﻿using Dapper;
+﻿using Azure.Core;
+using Dapper;
 using Microsoft.Data.SqlClient;
-using NetFlow.Application.Common.Utils;
+using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Domain.Common.Pagination;
 using NetFlow.ReadModel.Tenders;
 using System;
@@ -37,13 +38,13 @@ namespace NetFlow.ReadModel.Guarantees
                 whereSql += " AND IsRefunded = 1";
             }
 
-            if (!string.IsNullOrEmpty(pagedRequest.filter))
+            if (!string.IsNullOrEmpty(pagedRequest.Filter))
             {
-                var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.filter);
+                var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);
                 whereSql += " AND " + sql;
                 parameters.AddDynamicParams(p);
             }
-            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.sort, "Id DESC");
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "ORDER BY Id DESC");
             string countSql = $@"
                 SELECT COUNT(1) FROM dbo.VW_Guarantee WITH (NOLOCK)
                 {whereSql}
@@ -52,7 +53,7 @@ namespace NetFlow.ReadModel.Guarantees
             string dataSql = $@"
                 SELECT * FROM dbo.VW_Guarantee WITH (NOLOCK)
                 {whereSql}
-                ORDER BY {orderBy}
+                {orderBy}
                 OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
             ";
 
@@ -60,7 +61,7 @@ namespace NetFlow.ReadModel.Guarantees
                 countSql, parameters
             );
 
-            if (pagedRequest.isCountQuery != null && pagedRequest.isCountQuery.HasValue)
+            if (pagedRequest.IsCountQuery.HasValue && pagedRequest.IsCountQuery.Value)
             {
                 return new PagedResult
                 {
@@ -68,8 +69,34 @@ namespace NetFlow.ReadModel.Guarantees
                     totalCount = totalCount
                 };
             }
-            parameters.Add("@Skip", pagedRequest.skip ?? 0);
-            parameters.Add("@Take", pagedRequest.take ?? 10);
+
+            if (!string.IsNullOrWhiteSpace(pagedRequest.TotalSummary))
+            {
+                var (summarySqlPart, aliases) =
+                    DevExtremeSqlBuilder.BuildSummary(pagedRequest.TotalSummary);
+
+                string sql = $@"
+                    SELECT {summarySqlPart}
+                    FROM dbo.VW_Guarantee WITH (NOLOCK)
+                    {whereSql};
+                ";
+
+                var row = await cn.QuerySingleAsync(sql, parameters);
+
+                var values = aliases
+                    .Select(a => ((IDictionary<string, object>)row)[a])
+                    .ToArray();
+
+                return new PagedResult
+                {
+                    data = Array.Empty<object>(),
+                    totalCount = totalCount,
+                    summary = values
+                };
+            }
+
+            parameters.Add("@Skip", pagedRequest.Skip ?? 0);
+            parameters.Add("@Take", pagedRequest.Take ?? 10);
             var data = cn.Query<GuaranteeDto>(dataSql, parameters).ToList();
             return new PagedResult
             {

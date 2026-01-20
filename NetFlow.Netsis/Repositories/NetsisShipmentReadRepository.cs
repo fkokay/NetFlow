@@ -38,7 +38,7 @@ namespace NetFlow.Netsis.Repositories
                 HAS_BALANCE = filter.HasBalance ? 1 : 0
             });
 
-            if (filter.isCountQuery != null && filter.isCountQuery.HasValue)
+            if (filter.IsCountQuery != null && filter.IsCountQuery.HasValue)
             {
                 return new PagedResult
                 {

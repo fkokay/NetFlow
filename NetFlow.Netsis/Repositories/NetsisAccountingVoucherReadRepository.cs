@@ -1,6 +1,6 @@
 ﻿using Azure.Core;
 using Dapper;
-using NetFlow.Application.Common.Utils;
+using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Application.Netsis.AccountingVouchers;
 using NetFlow.Domain.Common.Pagination;
 using NetFlow.Domain.Netsis.AccountingVouchers;
@@ -68,16 +68,16 @@ namespace NetFlow.Netsis.Repositories
             var parameters = new DynamicParameters();
             parameters.Add("@HES_KOD", accountCode);
 
-            if (!string.IsNullOrEmpty(request.filter))
+            if (!string.IsNullOrEmpty(request.Filter))
             {
-                var (filteSql, p) = DevExtremeSqlBuilder.Compile(request.filter, fieldMap);
+                var (filteSql, p) = DevExtremeSqlBuilder.Compile(request.Filter, fieldMap);
                 whereSql += " AND " + filteSql;
                 parameters.AddDynamicParams(p);
             }
 
-            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(request.sort, "ORDER BY MUHFIS.TARIH DESC", fieldMap);
-            parameters.Add("@Skip", request.skip ?? 0);
-            parameters.Add("@Take", request.take ?? 10);
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(request.Sort, "ORDER BY MUHFIS.TARIH DESC", fieldMap);
+            parameters.Add("@Skip", request.Skip ?? 0);
+            parameters.Add("@Take", request.Take ?? 10);
 
             string dataSql = $@"
                 {sql}
@@ -95,7 +95,7 @@ namespace NetFlow.Netsis.Repositories
                 countSql, parameters
             );
 
-            if (request.isCountQuery != null && request.isCountQuery.Value)
+            if (request.IsCountQuery != null && request.IsCountQuery.Value)
             {
                 return new PagedResult
                 {

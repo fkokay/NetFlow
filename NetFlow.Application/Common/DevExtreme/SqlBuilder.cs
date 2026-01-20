@@ -3,9 +3,10 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace NetFlow.Application.Common.Utils
+namespace NetFlow.Application.Common.DevExtreme
 {
     public static class DevExtremeSqlBuilder
     {
@@ -141,6 +142,56 @@ namespace NetFlow.Application.Common.Utils
             return orders.Count > 0
                 ? "ORDER BY " + string.Join(", ", orders)
                 : defaultOrder;
+        }
+
+        public static (string Sql, string[] Aliases) BuildSummary(string summaryJson, Dictionary<string, string>? fieldMap = null)
+        {
+            if (string.IsNullOrWhiteSpace(summaryJson))
+                throw new ArgumentNullException(nameof(summaryJson));
+
+            var summaries =
+                JsonSerializer.Deserialize<List<DevExtremeSummaryInfo>>(summaryJson);
+
+            if (summaries == null || summaries.Count == 0)
+                throw new InvalidOperationException("Summary definition is empty.");
+
+            string ResolveColumn(string field)
+            {
+                if (fieldMap != null &&
+                    fieldMap.Count > 0 &&
+                    fieldMap.TryGetValue(field, out var mapped))
+                {
+                    return mapped;
+                }
+
+                return field;
+            }
+
+            var selectParts = new List<string>();
+            var aliases = new List<string>();
+
+            int i = 0;
+            foreach (var s in summaries)
+            {
+                var column = ResolveColumn(s.Selector);
+                var alias = $"S{i++}";
+
+                string sqlPart = s.SummaryType.ToLowerInvariant() switch
+                {
+                    "sum" => $"SUM({column}) AS {alias}",
+                    "count" => $"COUNT({column}) AS {alias}",
+                    "min" => $"MIN({column}) AS {alias}",
+                    "max" => $"MAX({column}) AS {alias}",
+                    "avg" => $"AVG({column}) AS {alias}",
+                    _ => throw new NotSupportedException(
+                            $"SummaryType not supported: {s.SummaryType}")
+                };
+
+                selectParts.Add(sqlPart);
+                aliases.Add(alias);
+            }
+
+            return (string.Join(", ", selectParts), aliases.ToArray());
         }
     }
 

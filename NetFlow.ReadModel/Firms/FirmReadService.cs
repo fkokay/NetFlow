@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
-using NetFlow.Application.Common.Utils;
+using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Domain.Common.Pagination;
 using NetFlow.ReadModel.Guarantees;
 using System;
@@ -20,15 +20,15 @@ namespace NetFlow.ReadModel.Firms
 
             string whereSql = string.Empty;
 
-            if (!string.IsNullOrEmpty(pagedRequest.filter))
+            if (!string.IsNullOrEmpty(pagedRequest.Filter))
             {
-                var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.filter);
+                var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);
                 whereSql = "WHERE " + sql;
                 parameters.AddDynamicParams(p);
             }
 
             string orderBy = DevExtremeSqlBuilder.BuildOrderBy(
-                pagedRequest.sort,
+                pagedRequest.Sort,
                 "Id DESC"
             );
 
@@ -43,7 +43,7 @@ namespace NetFlow.ReadModel.Firms
                 parameters
             );
 
-            if (pagedRequest.isCountQuery != null && pagedRequest.isCountQuery.HasValue)
+            if (pagedRequest.IsCountQuery != null && pagedRequest.IsCountQuery.HasValue)
             {
                 return new PagedResult
                 {
@@ -52,8 +52,8 @@ namespace NetFlow.ReadModel.Firms
                 };
             }
 
-            parameters.Add("@Skip", pagedRequest.skip ?? 0);
-            parameters.Add("@Take", pagedRequest.take ?? 10);
+            parameters.Add("@Skip", pagedRequest.Skip ?? 0);
+            parameters.Add("@Take", pagedRequest.Take ?? 10);
 
             string dataSql = $@"
                 SELECT *

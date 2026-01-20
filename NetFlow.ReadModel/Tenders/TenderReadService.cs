@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
-using NetFlow.Application.Common.Utils;
+using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Domain.Common.Pagination;
 using System;
 using System.Collections.Generic;
@@ -24,13 +24,13 @@ namespace NetFlow.ReadModel.Tenders
             parameters.Add("FirmId", firmId);
 
             string whereSql = "WHERE FirmId = @FirmId";
-            if (!string.IsNullOrEmpty(pagedRequest.filter))
+            if (!string.IsNullOrEmpty(pagedRequest.Filter))
             {
-                var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.filter);
+                var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);
                 whereSql += " AND " + sql;
                 parameters.AddDynamicParams(p);
             }
-            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.sort, "Id DESC");
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "Id DESC");
             string countSql = $@"
                 SELECT COUNT(1) FROM dbo.VW_Tender WITH (NOLOCK)
                 {whereSql}
@@ -48,7 +48,7 @@ namespace NetFlow.ReadModel.Tenders
             );
 
 
-            if (pagedRequest.isCountQuery != null && pagedRequest.isCountQuery.HasValue)
+            if (pagedRequest.IsCountQuery != null && pagedRequest.IsCountQuery.HasValue)
             {
                 return new PagedResult
                 {
@@ -57,8 +57,8 @@ namespace NetFlow.ReadModel.Tenders
                 };
             }
 
-            parameters.Add("@Skip", pagedRequest.skip ?? 0);
-            parameters.Add("@Take", pagedRequest.take ?? 10);
+            parameters.Add("@Skip", pagedRequest.Skip ?? 0);
+            parameters.Add("@Take", pagedRequest.Take ?? 10);
 
             var data = cn.Query<TenderDto>(dataSql, parameters).ToList();
 

@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
-using NetFlow.Application.Common.Utils;
+using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Domain.Common.Pagination;
 using NetFlow.ReadModel.Guarantees;
 using System;
@@ -21,13 +21,13 @@ namespace NetFlow.ReadModel.GuaranteeCommissions
             parameters.Add("GuaranteeId", guaranteeId);
 
             string whereSql = "WHERE GuaranteeId = @GuaranteeId";
-            if (!string.IsNullOrEmpty(pagedRequest.filter))
+            if (!string.IsNullOrEmpty(pagedRequest.Filter))
             {
-                var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.filter);
+                var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);
                 whereSql += " AND " + sql;
                 parameters.AddDynamicParams(p);
             }
-            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.sort, "ORDER BY Id DESC");
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "ORDER BY Id DESC");
             string countSql = $@"
                 SELECT COUNT(1) FROM dbo.VW_GuaranteeCommission WITH (NOLOCK)
                 {whereSql}
@@ -44,7 +44,7 @@ namespace NetFlow.ReadModel.GuaranteeCommissions
                 countSql, parameters
             );
 
-            if (pagedRequest.isCountQuery != null && pagedRequest.isCountQuery.HasValue)
+            if (pagedRequest.IsCountQuery != null && pagedRequest.IsCountQuery.HasValue)
             {
                 return new PagedResult
                 {
@@ -52,8 +52,8 @@ namespace NetFlow.ReadModel.GuaranteeCommissions
                     totalCount = totalCount
                 };
             }
-            parameters.Add("@Skip", pagedRequest.skip ?? 0);
-            parameters.Add("@Take", pagedRequest.take ?? 10);
+            parameters.Add("@Skip", pagedRequest.Skip ?? 0);
+            parameters.Add("@Take", pagedRequest.Take ?? 10);
             var data = cn.Query<GuaranteeCommissionDto>(dataSql, parameters).ToList();
             return new PagedResult
             {
