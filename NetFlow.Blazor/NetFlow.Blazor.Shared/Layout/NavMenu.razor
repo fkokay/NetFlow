@@ -45,7 +45,21 @@
                 <DxTreeViewNode Text="Servis Tanýmlarý" NavigateUrl="/service/settings" />
             </Nodes>
         </DxTreeViewNode>
-        <DxTreeViewNode Text="Satýþ Yönetimi" Visible="false" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+        <DxTreeViewNode Text="Talep Yönetimi"
+                        AllowSelection="false"
+                        Expanded="true"
+                        IconCssClass="planning-icon icon medium-icon">
+            <Nodes>
+                <DxTreeViewNode Text="Talep Havuzu" NavigateUrl="/request/list" />
+                <DxTreeViewNode Text="Açýk Talepler" NavigateUrl="/request/open" />
+                <DxTreeViewNode Text="Üzerimdeki Talepler" NavigateUrl="/request/my" />
+                <DxTreeViewNode Text="Bekleyen Talepler" NavigateUrl="/request/waiting" />
+                <DxTreeViewNode Text="Kapalý Talepler" NavigateUrl="/request/closed" />
+                <DxTreeViewNode Text="Talep Raporlarý" NavigateUrl="/request/reports" />
+                <DxTreeViewNode Text="Talep Tanýmlarý" NavigateUrl="/request/settings" />
+            </Nodes>
+        </DxTreeViewNode>
+        <DxTreeViewNode Text="Satýþ Yönetimi" Visible="true" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
             <Nodes>
                 <DxTreeViewNode Text="Satýþ Havuzu" NavigateUrl="/sales/dashboard" />
                 <DxTreeViewNode Text="Teklifler" NavigateUrl="/sales/offers" />
@@ -73,7 +87,7 @@
                 <DxTreeViewNode Text="Satýnalma Tanýmlarý" NavigateUrl="/purchase/settings" />
             </Nodes>
         </DxTreeViewNode>
-        <DxTreeViewNode Text="Sevkiyat Yönetimi" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+        <DxTreeViewNode Text="Sevkiyat Yönetimi" AllowSelection="true" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
             <Nodes>
                 <DxTreeViewNode Text="Sevkiyat Havuzu" NavigateUrl="/netsis/shipments/list" />
                 <DxTreeViewNode Text="Sevkiyat Emirleri" NavigateUrl="/netsis/shipments/shippable-orders" />
@@ -85,7 +99,7 @@
                 <DxTreeViewNode Text="Sevkiyat Tanýmlarý" NavigateUrl="/netsis/shipments/settings" />
             </Nodes>
         </DxTreeViewNode>
-        <DxTreeViewNode Text="Müþteri Yönetimi" Visible="false" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+        <DxTreeViewNode Text="Müþteri Yönetimi" Visible="true" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
             <Nodes>
                 <DxTreeViewNode Text="Müþteri Listesi" NavigateUrl="/customer/list" />
                 <DxTreeViewNode Text="Yeni Müþteri" NavigateUrl="/customer/create" />
@@ -99,7 +113,7 @@
                 <DxTreeViewNode Text="Müþteri Tanýmlarý" NavigateUrl="/customer/settings" />
             </Nodes>
         </DxTreeViewNode>
-        <DxTreeViewNode Text="Malzeme Yönetimi" Visible="false" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
+        <DxTreeViewNode Text="Malzeme Yönetimi" Visible="true" AllowSelection="false" Expanded="true" IconCssClass="analytics-icon icon medium-icon">
             <Nodes>
                 <DxTreeViewNode Text="Malzeme Listesi" NavigateUrl="/material/list" />
                 <DxTreeViewNode Text="Yeni Malzeme" NavigateUrl="/material/create" />
@@ -128,7 +142,7 @@
         <DxTreeViewNode Text="Üretim Yönetimi"
                         AllowSelection="false"
                         Expanded="true"
-                        IconCssClass="planning-icon icon medium-icon" Visible="false">
+                        IconCssClass="planning-icon icon medium-icon" Visible="true">
             <Nodes>
                 <DxTreeViewNode Text="Üretim Planlama" NavigateUrl="/production/planning" />
                 <DxTreeViewNode Text="Üretim Emirleri" NavigateUrl="/production/orders" />
