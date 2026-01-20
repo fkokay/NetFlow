@@ -27,8 +27,8 @@ namespace NetFlow.Domain.Entities
         public DateTime CreatedAt { get; set; }
         public FirmEntity Firm { get; set; }
         public GuaranteeCommissionPeriodEntity CommissionPeriod { get; set; }
-        public ICollection<Tender> FinalGuaranteeTenders { get; set; }
-        public ICollection<Tender> TemporaryGuaranteeTenders { get; set; }
+        public ICollection<TenderEntity> FinalGuaranteeTenders { get; set; }
+        public ICollection<TenderEntity> TemporaryGuaranteeTenders { get; set; }
     }
 }
 

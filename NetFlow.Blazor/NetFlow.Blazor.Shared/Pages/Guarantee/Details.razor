@@ -155,6 +155,12 @@
                                             ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
                                             EditStart="OnCommissionEditStart"
                                             DataItemDeleting="async (e) => await DeleteCommission(((GuaranteeCommissionModel)e.DataItem).Id)">
+                                        <ToolbarTemplate>
+                                            <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+                                                <DxToolbarItem Text="New" Click="GuaranteeCommissionAdd" IconCssClass="grid-toolbar-new" />
+                                                
+                                            </DxToolbar>
+                                        </ToolbarTemplate>
                                         <Columns>
                                             <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionStartDate)" Caption="Başlangıç" />
                                             <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionEndDate)" Caption="Bitiş" />
@@ -262,5 +268,10 @@
     private void NavigateBack()
     {
         NavigationManager.NavigateTo("/guarantee/list");
+    }
+
+    private void GuaranteeCommissionAdd()
+    {
+  
     }
 }

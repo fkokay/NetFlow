@@ -43,7 +43,7 @@ namespace NetFlow.Api.Auth
                     ErrorMessage: ex.Message
                 ));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return StatusCode(500, new LoginResponse(
                     Token: null,
