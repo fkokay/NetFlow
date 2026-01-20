@@ -1,260 +1,255 @@
-@page "/tender/details/{Id:int}"
+ï»¿@page "/tender/details/{Id:int}"
 @using System.Net.Http.Json
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
 
+<DxLayoutBreakpoint DeviceSize="DeviceSize.XSmall | DeviceSize.Small | DeviceSize.Medium" @bind-IsActive="@IsSmallScreen" />
 
-<div class="tender-detail-wrapper">
-    @if (Model == null)
-    {
-        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 400px; background: white; border-radius: 8px; border: 1px solid #e0e0e0;">
-            <DxLoadingPanel Visible="true"
-                            Text="Ýhale detaylarý yükleniyor..."
-                            IsContentBlocked="true" />
-        </div>
-    }
-    else
-    {
-        <div class="tender-header">
-            <div>
-                <h4 class="tender-title">
-                    <span>Ýhale Detayý /</span> #@Model.TenderCode
-                </h4>
-            </div>
-
-            <DxButton Text="Listeye Dön"
-                      RenderStyle="ButtonRenderStyle.Secondary"
-                      IconCssClass="ti ti-arrow-left"
-                      Click="@(() => NavigationManager.NavigateTo("/tender/list"))" />
-        </div>
-
-        <DxFormLayout>
-            <DxFormLayoutItem ColSpanMd="12">
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <DxToolbarItem IconCssClass="back-icon icon medium-icon" Tooltip="Go to Back" Click="@NavigateBack" />
+            <DxToolbarItem>
                 <Template>
-                    <div class="tender-row">
-
-                        <!-- SOL PANEL -->
-                        <div class="tender-left">
-                            <div class="tender-card tender-card-padding">
-
-                                <div class="authority-header">
-                                    <div class="authority-avatar">
-                                        @(!string.IsNullOrEmpty(Model.PublicAuthorityName)
-                                                                            ? Model.PublicAuthorityName[0].ToString().ToUpper()
-                                                                            : "?")
-                                    </div>
-
-                                    <h5 class="authority-title">
-                                        @Model.PublicAuthorityName
-                                    </h5>
-
-                                    <span class="authority-badge">
-                                        Müþteri No: #@Model.PublicAuthorityCode
-                                    </span>
-                                </div>
-
-                                <div class="tender-stats">
-                                    <div class="tender-stat">
-                                        <i class="ti ti-gavel tender-icon-primary"></i>
-                                        <div class="tender-stat-title">@Model.TenderCode</div>
-                                        <small>Ýhale No</small>
-                                    </div>
-
-                                    <div class="tender-stat">
-                                        <i class="ti ti-currency-dollar tender-icon-success"></i>
-                                        <div class="tender-stat-title">
-                                            @Model.TenderAmount.ToString("n2")
-                                        </div>
-                                        <small>@Model.Currency</small>
-                                    </div>
-                                </div>
-
-                                <h6 class="tender-section-title">
-                                    GENEL BÝLGÝLER
-                                </h6>
-
-                                <div class="tender-info">
-                                    <div class="tender-info-row">
-                                        <span>Ýhale:</span>
-                                        <span class="tender-info-strong">@Model.TenderName</span>
-                                    </div>
-                                    <div class="tender-info-row">
-                                        <span>Baþlangýç:</span>
-                                        <span>@Model.TenderStartDate.ToShortDateString()</span>
-                                    </div>
-                                    <div class="tender-info-row">
-                                        <span>Bitiþ:</span>
-                                        <span>@Model.TenderEndDate.ToShortDateString()</span>
-                                    </div>
-                                    <div class="tender-info-row">
-                                        <span>Tür:</span>
-                                        <span>@Model.TenderType</span>
-                                    </div>
-                                    <div class="tender-info-row">
-                                        <span>Metot:</span>
-                                        <span>@Model.TenderMethod</span>
-                                    </div>
-                                    <div class="tender-info-row">
-                                        <span>Sözleþme:</span>
-                                        <span>@(Model.ContractDate?.ToShortDateString() ?? "-")</span>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <!-- SAÐ PANEL -->
-                        <div class="tender-right">
-                            <div class="tender-card tender-card-tabs">
-
-                                <DxTabs ActiveTabIndex="@ActiveTabIndex"
-                                        ActiveTabIndexChanged="OnActiveTabIndexChanged"
-                                        class="tender-tabs">
-                                    <DxTabPage Text="Cihazlar" />
-                                    <DxTabPage Text="Opex" />
-                                    <DxTabPage Text="Capex" />
-                                    <DxTabPage Text="Reaktif" />
-                                    <DxTabPage Text="Belgeler" />
-                                </DxTabs>
-
-                                <div class="tender-content">
-
-                                    @switch (ActiveTabIndex)
-                                    {
-                                        case 0:
-                                            <DxGrid Data="DeviceDataSource" ShowSearchBox="true" Height="500px">
-                                                <Columns>
-                                                    <DxGridDataColumn FieldName="SupplyType" Caption="Tedarik Türü" />
-                                                    <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
-                                                    <DxGridDataColumn FieldName="Quantity" Caption="Miktar" />
-                                                    <DxGridDataColumn FieldName="CustomerCode" Caption="Müþteri Kodu" />
-                                                    <DxGridDataColumn FieldName="CustomerName" Caption="Müþteri Ünvaný" />
-                                                    <DxGridDataColumn FieldName="RentUnitPrice" Caption="Kira" DisplayFormat="n2" />
-                                                    <DxGridDataColumn FieldName="ServiceUnitPrice" Caption="Servis" DisplayFormat="n2" />
-                                                    <DxGridDataColumn FieldName="LinkUnitPrice" Caption="Link" DisplayFormat="n2" />
-                                                    <DxGridDataColumn FieldName="PurchasePrice" Caption="Satýnalma" DisplayFormat="n2" />
-                                                    <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
-                                                </Columns>
-                                            </DxGrid>
-                                            break;
-
-                                        case 1:
-                                            <DxGrid Data="OpexDataSource" ShowSearchBox="true" Height="500px">
-                                                <Columns>
-                                                    <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
-                                                    <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
-                                                    <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
-                                                    <DxGridDataColumn FieldName="StockName" Caption="Stok Adý" />
-                                                    <DxGridDataColumn FieldName="Quantity" Caption="Miktar" DisplayFormat="n2" />
-                                                    <DxGridDataColumn FieldName="UnitPrice" Caption="Tahmini Maliyet Fiyatý" DisplayFormat="n4" />
-                                                    <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
-                                                </Columns>
-                                            </DxGrid>
-                                            break;
-
-                                        case 2:
-                                            <DxGrid Data="CapexDataSource" ShowSearchBox="true" Height="500px">
-                                                <Columns>
-                                                    <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
-                                                    <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
-                                                    <DxGridDataColumn FieldName="AssetCode" Caption="Demirbaþ Kodu" />
-                                                    <DxGridDataColumn FieldName="Quantity" Caption="Miktar" />
-                                                    <DxGridDataColumn FieldName="Unit" Caption="Birim" />
-                                                </Columns>
-                                            </DxGrid>
-                                            break;
-
-                                        case 3:
-                                            <DxGrid Data="ReaktifDataSource" ShowSearchBox="true" Height="500px">
-                                                <Columns>
-                                                    <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
-                                                    <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
-                                                    <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
-                                                    <DxGridDataColumn FieldName="SutCode" Caption="SUT Kodu" />
-                                                    <DxGridDataColumn FieldName="TestName" Caption="Test Adý" />
-                                                    <DxGridDataColumn FieldName="TestCount" Caption="Test Sayýsý" />
-                                                    <DxGridDataColumn FieldName="UnitPrice" Caption="Birim Fiyat" DisplayFormat="n2" />
-                                                    <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
-                                                </Columns>
-                                            </DxGrid>
-                                            break;
-
-                                        case 4:
-                                            <DxGrid Data="RequiredDocumentDataSource" Height="500px">
-                                                <Columns>
-                                                    <DxGridDataColumn FieldName="DocumentName" Caption="Belge" />
-
-                                                    <DxGridDataColumn FieldName="IsMandatory" Caption="Zorunlu" Width="100px"
-                                                                      TextAlignment="GridTextAlignment.Center">
-                                                        <CellDisplayTemplate Context="ctx">
-                                                            @{
-                                                                var doc = (TenderRequiredDocument)ctx.DataItem;
-                                                                <DxCheckBox Checked="@doc.IsMandatory" Enabled="false" />
-                                                            }
-                                                        </CellDisplayTemplate>
-                                                    </DxGridDataColumn>
-
-                                                    <DxGridDataColumn FieldName="Submitted" Caption="Durum" Width="100px"
-                                                                      TextAlignment="GridTextAlignment.Center">
-                                                        <CellDisplayTemplate Context="ctx">
-                                                            @{
-                                                                var doc = (TenderRequiredDocument)ctx.DataItem;
-                                                                <DxCheckBox Checked="@doc.Submitted" Enabled="false" />
-                                                            }
-                                                        </CellDisplayTemplate>
-                                                    </DxGridDataColumn>
-
-                                                    <DxGridDataColumn FieldName="SubmissionDate" Caption="Yüklenme Tarihi"
-                                                                      TextAlignment="GridTextAlignment.Center">
-                                                        <CellDisplayTemplate Context="ctx">
-                                                            @{
-                                                                var doc = (TenderRequiredDocument)ctx.DataItem;
-                                                                <span>
-                                                                    @(doc.SubmissionDate.HasValue ? doc.SubmissionDate.Value.ToString("dd.MM.yyyy")
-                                                                                                                        : "-")
-                                                                </span>
-                                                            }
-                                                        </CellDisplayTemplate>
-                                                    </DxGridDataColumn>
-
-                                                    <DxGridDataColumn Caption="Ýncele" Width="100px"
-                                                                      TextAlignment="GridTextAlignment.Center">
-                                                        <CellDisplayTemplate Context="ctx">
-                                                            @{
-                                                                var doc3 = (TenderRequiredDocument)ctx.DataItem;
-                                                                if (doc3.TenderRequiredDocumentFileId.HasValue)
-                                                                {
-                                                                    <DxButton Text="Görüntüle" RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Outline" SizeMode="SizeMode.Small"
-                                                                              Click="@(() => HandleFileAction(doc3))"
-                                                                              IconCssClass="@(doc3.FileType == "application/pdf" ? "ti ti-file-text text-danger" : "ti ti-file-text text-primary")" />
-                                                                }
-                                                                else
-                                                                {
-                                                                    <span class="text-muted">-</span>
-                                                                }
-                                                            }
-                                                        </CellDisplayTemplate>
-                                                    </DxGridDataColumn>
-                                                </Columns>
-                                            </DxGrid>
-                                            break;
-                                    }
-
-                                </div>
-                            </div>
-                        </div>
-
+                    <div class="custom-item">
+                        <div class="title">Ä°hale DetayÄ±</div>
                     </div>
                 </Template>
-            </DxFormLayoutItem>
+            </DxToolbarItem>
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                <Template>
+                    <DxButton Text="Sil" Click="@OnDeleteClick" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
+                </Template>
+            </DxToolbarItem>
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right" Click="@LoadDataAsync" Tooltip="Yenile" IconCssClass="refresh-icon icon medium-icon" />
+        </DxToolbar>
+    </div>
 
-        </DxFormLayout>
-    }
+    <div class="tender-details">
+        <DxLoadingPanel Visible="@(!IsDataLoaded)" IsContentBlocked="true" IsContentVisible="false" IndicatorVisible="true" IndicatorAreaVisible="true" ZIndex="101" Text="YÃ¼kleniyor...">
+            <DxGridLayout ColumnSpacing="1rem" RowSpacing="1rem" CssClass="h-100" ">
+                <Columns>
+                    @if (!IsSmallScreen)
+                    {
+                        <DxGridLayoutColumn Width="1fr" />
+                        <DxGridLayoutColumn Width="3fr" />
+                    }
+                    else
+                    {
+                        <DxGridLayoutColumn Width="100%" />
+                    }
+                </Columns>
+                <Rows>
+                    @if (!IsSmallScreen)
+                    {
+                        <DxGridLayoutRow Areas="item1 item2" />
+                    }
+                    else
+                    {
+                        <DxGridLayoutRow Areas="item1" />
+                        <DxGridLayoutRow Areas="item2" />
+                    }
+                </Rows>
+                <Items>
+                    <DxGridLayoutItem Area="item1">
+                        <Template>
+                            @if (Model != null)
+                            {
+                                <div class="card h-100">
+                                    <div class="authority-header">
+                                        <div class="authority-avatar">
+                                            @(!string.IsNullOrEmpty(Model.PublicAuthorityName)
+                                                                                    ? Model.PublicAuthorityName[0].ToString().ToUpper()
+                                                                                    : "?")
+                                        </div>
+
+                                        <h5 class="authority-title">
+                                            @Model.PublicAuthorityName
+                                        </h5>
+
+                                        <span class="authority-badge">
+                                            MÃ¼ÅŸteri No: #@Model.PublicAuthorityCode
+                                        </span>
+                                    </div>
+
+                                    <div class="tender-stats">
+                                        <div class="tender-stat">
+                                            <i class="ti ti-gavel tender-icon-primary"></i>
+                                            <div class="tender-stat-title">@Model.TenderCode</div>
+                                            <small>Ä°hale No</small>
+                                        </div>
+
+                                        <div class="tender-stat">
+                                            <i class="ti ti-currency-dollar tender-icon-success"></i>
+                                            <div class="tender-stat-title">
+                                                @Model.TenderAmount.ToString("n2")
+                                            </div>
+                                            <small>@Model.Currency</small>
+                                        </div>
+                                    </div>
+
+                                    <h6 class="tender-section-title">
+                                        GENEL BÄ°LGÄ°LER
+                                    </h6>
+
+                                    <div class="tender-info">
+                                        <div class="tender-info-row">
+                                            <span>Ä°hale:</span>
+                                            <span class="tender-info-strong">@Model.TenderName</span>
+                                        </div>
+                                        <div class="tender-info-row">
+                                            <span>BaÅŸlangÄ±Ã§:</span>
+                                            <span>@Model.TenderStartDate.ToShortDateString()</span>
+                                        </div>
+                                        <div class="tender-info-row">
+                                            <span>BitiÅŸ:</span>
+                                            <span>@Model.TenderEndDate.ToShortDateString()</span>
+                                        </div>
+                                        <div class="tender-info-row">
+                                            <span>TÃ¼r:</span>
+                                            <span>@Model.TenderType</span>
+                                        </div>
+                                        <div class="tender-info-row">
+                                            <span>Metot:</span>
+                                            <span>@Model.TenderMethod</span>
+                                        </div>
+                                        <div class="tender-info-row">
+                                            <span>SÃ¶zleÅŸme:</span>
+                                            <span>@(Model.ContractDate?.ToShortDateString() ?? "-")</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </Template>
+                    </DxGridLayoutItem>
+                    <DxGridLayoutItem Area="item2">
+                        <Template>
+                            <DxTabs CssClass="card tabs">
+                                <DxTabPage Text="Cihazlar" CssClass="tab-page">
+                                    <DxGrid Data="DeviceDataSource" ShowSearchBox="true" SearchBoxNullText="Arama yapmak iÃ§in metin girinâ€¦" style="height:100%;">
+                                        <Columns>
+                                            <DxGridDataColumn FieldName="SupplyType" Caption="Tedarik TÃ¼rÃ¼" />
+                                            <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
+                                            <DxGridDataColumn FieldName="Quantity" Caption="Miktar" />
+                                            <DxGridDataColumn FieldName="CustomerCode" Caption="MÃ¼ÅŸteri Kodu" />
+                                            <DxGridDataColumn FieldName="CustomerName" Caption="MÃ¼ÅŸteri ÃœnvanÄ±" />
+                                            <DxGridDataColumn FieldName="RentUnitPrice" Caption="Kira" DisplayFormat="n2" />
+                                            <DxGridDataColumn FieldName="ServiceUnitPrice" Caption="Servis" DisplayFormat="n2" />
+                                            <DxGridDataColumn FieldName="LinkUnitPrice" Caption="Link" DisplayFormat="n2" />
+                                            <DxGridDataColumn FieldName="PurchasePrice" Caption="SatÄ±nalma" DisplayFormat="n2" />
+                                            <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
+                                        </Columns>
+                                    </DxGrid>
+                                </DxTabPage>
+                                <DxTabPage Text="Opex" CssClass="tab-page">
+                                    <DxGrid Data="OpexDataSource" ShowSearchBox="true" SearchBoxNullText="Arama yapmak iÃ§in metin girinâ€¦" style="height:100%;">
+                                        <Columns>
+                                            <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
+                                            <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum AdÄ±" />
+                                            <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
+                                            <DxGridDataColumn FieldName="StockName" Caption="Stok AdÄ±" />
+                                            <DxGridDataColumn FieldName="Quantity" Caption="Miktar" DisplayFormat="n2" />
+                                            <DxGridDataColumn FieldName="UnitPrice" Caption="Tahmini Maliyet FiyatÄ±" DisplayFormat="n4" />
+                                            <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
+                                        </Columns>
+                                    </DxGrid>
+                                </DxTabPage>
+                                <DxTabPage Text="Capex" CssClass="tab-page">
+                                    <DxGrid Data="CapexDataSource" ShowSearchBox="true" SearchBoxNullText="Arama yapmak iÃ§in metin girinâ€¦" style="height:100%;">
+                                        <Columns>
+                                            <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
+                                            <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum AdÄ±" />
+                                            <DxGridDataColumn FieldName="AssetCode" Caption="DemirbaÅŸ Kodu" />
+                                            <DxGridDataColumn FieldName="Quantity" Caption="Miktar" />
+                                            <DxGridDataColumn FieldName="Unit" Caption="Birim" />
+                                        </Columns>
+                                    </DxGrid>
+                                </DxTabPage>
+                                <DxTabPage Text="Reaktif" CssClass="tab-page">
+                                    <DxGrid Data="ReaktifDataSource" ShowSearchBox="true" SearchBoxNullText="Arama yapmak iÃ§in metin girinâ€¦" style="height:100%;">
+                                        <Columns>
+                                            <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
+                                            <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum AdÄ±" />
+                                            <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
+                                            <DxGridDataColumn FieldName="SutCode" Caption="SUT Kodu" />
+                                            <DxGridDataColumn FieldName="TestName" Caption="Test AdÄ±" />
+                                            <DxGridDataColumn FieldName="TestCount" Caption="Test SayÄ±sÄ±" />
+                                            <DxGridDataColumn FieldName="UnitPrice" Caption="Birim Fiyat" DisplayFormat="n2" />
+                                            <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
+                                        </Columns>
+                                    </DxGrid>
+                                </DxTabPage>
+                                <DxTabPage Text="Belgeler" CssClass="tab-page">
+                                    <DxGrid Data="RequiredDocumentDataSource" style="height:100%;">
+                                        <Columns>
+                                            <DxGridDataColumn FieldName="DocumentName" Caption="Belge" />
+
+                                            <DxGridDataColumn FieldName="IsMandatory" Caption="Zorunlu" Width="100px"
+                                                              TextAlignment="GridTextAlignment.Center">
+                                                <CellDisplayTemplate Context="ctx">
+                                                    @{
+                                                        var doc = (TenderRequiredDocument)ctx.DataItem;
+                                                        <DxCheckBox Checked="@doc.IsMandatory" Enabled="false" />
+                                                    }
+                                                </CellDisplayTemplate>
+                                            </DxGridDataColumn>
+
+                                            <DxGridDataColumn FieldName="Submitted" Caption="Durum" Width="100px"
+                                                              TextAlignment="GridTextAlignment.Center">
+                                                <CellDisplayTemplate Context="ctx">
+                                                    @{
+                                                        var doc = (TenderRequiredDocument)ctx.DataItem;
+                                                        <DxCheckBox Checked="@doc.Submitted" Enabled="false" />
+                                                    }
+                                                </CellDisplayTemplate>
+                                            </DxGridDataColumn>
+
+                                            <DxGridDataColumn FieldName="SubmissionDate" Caption="YÃ¼klenme Tarihi"
+                                                              TextAlignment="GridTextAlignment.Center">
+                                                <CellDisplayTemplate Context="ctx">
+                                                    @{
+                                                        var doc = (TenderRequiredDocument)ctx.DataItem;
+                                                        <span>
+                                                            @(doc.SubmissionDate.HasValue ? doc.SubmissionDate.Value.ToString("dd.MM.yyyy")
+                                                                                                                    : "-")
+                                                        </span>
+                                                    }
+                                                </CellDisplayTemplate>
+                                            </DxGridDataColumn>
+
+                                            <DxGridDataColumn Caption="Ä°ncele" Width="100px"
+                                                              TextAlignment="GridTextAlignment.Center">
+                                                <CellDisplayTemplate Context="ctx">
+                                                    @{
+                                                        var doc3 = (TenderRequiredDocument)ctx.DataItem;
+                                                        if (doc3.TenderRequiredDocumentFileId.HasValue)
+                                                        {
+                                                            <DxButton Text="GÃ¶rÃ¼ntÃ¼le" RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Outline" SizeMode="SizeMode.Small"
+                                                                      Click="@(() => HandleFileAction(doc3))"
+                                                                      IconCssClass="@(doc3.FileType == "application/pdf" ? "ti ti-file-text text-danger" : "ti ti-file-text text-primary")" />
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">-</span>
+                                                        }
+                                                    }
+                                                </CellDisplayTemplate>
+                                            </DxGridDataColumn>
+                                        </Columns>
+                                    </DxGrid>
+                                </DxTabPage>
+                            </DxTabs>
+                        </Template>
+                    </DxGridLayoutItem>
+                </Items>
+            </DxGridLayout>
+        </DxLoadingPanel>
+    </div>
 </div>
 
-<DxWindow Visible="@PdfModalVisible" VisibleChanged="@((value) => PdfModalVisible = value)" HeaderText="Belge Görüntüleme" Width="90vw" Height="85vh" AllowResize="true" ShowCloseButton="true" CloseOnEscape="true" HeaderCssClass="font-weight-bold">
+<DxWindow Visible="@PdfModalVisible" VisibleChanged="@((value) => PdfModalVisible = value)" HeaderText="Belge GÃ¶rÃ¼ntÃ¼leme" Width="90vw" Height="85vh" AllowResize="true" ShowCloseButton="true" CloseOnEscape="true" HeaderCssClass="font-weight-bold">
     <BodyTemplate>
         <iframe src="@PdfDataUrl" style="width:100%; height:100%; border:none;"></iframe>
     </BodyTemplate>
@@ -274,6 +269,8 @@
 @code {
     [Parameter] public int Id { get; set; }
     private TenderModel? Model { get; set; }
+    private bool IsSmallScreen { get; set; }
+    private bool IsDataLoaded { get; set; }
     private int ActiveTabIndex { get; set; } = 0;
     private bool PdfModalVisible { get; set; }
     private string PdfDataUrl { get; set; } = "";
@@ -286,10 +283,12 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadMainModel();
+        IsDataLoaded = false;
+        await LoadDataAsync();
+        IsDataLoaded = true;
     }
 
-    private async Task LoadMainModel()
+    private async Task LoadDataAsync()
     {
         try
         {
@@ -348,7 +347,7 @@
     {
         try
         {
-       
+
             if (doc.FileContent == null) return;
 
             string base64String = Convert.ToBase64String(doc.FileContent);
@@ -367,5 +366,14 @@
         {
             Console.WriteLine(ex.Message);
         }
+    }
+
+    private async Task OnDeleteClick()
+    {
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/tender/list");
     }
 }

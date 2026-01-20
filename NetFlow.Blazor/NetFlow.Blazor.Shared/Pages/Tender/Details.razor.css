@@ -4,23 +4,29 @@
     flex-direction: column;
 }
 
+    .content-root .contact-details {
+        flex-grow: 1;
+    }
+
 .toolbar {
     padding: 0.5rem 0.5rem;
     margin-bottom: 1rem;
 }
 
+    .toolbar .title {
+        font-size: var(--dxbl-toolbar-title-font-size);
+        line-height: var(--dxbl-toolbar-title-line-height);
+        font-weight: var(--dxbl-toolbar-title-font-weight);
+        margin: auto 0;
+    }
+
     .toolbar .custom-item {
         display: flex;
-        align-items: center;
+        height: 100%;
         margin: 0 0.5rem;
     }
 
-.contact-list-root {
-    flex-grow: 1;
-    height: 90%;
-}
-
-.card {
+::deep .card {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -32,236 +38,75 @@
     border-radius: 0.25rem;
 }
 
-::deep .w-100 {
-    width: 100%;
-}
-
-.h-100 {
-    height: 100%;
-}
-
-::deep .contact-list {
-    max-height: 100%;
-    border-radius: 0.25rem;
-}
-
-::deep .add-icon {
-    mask-image: url("images/icons/add.svg");
-}
-
-::deep .column-chooser-icon {
-    mask-image: url("images/icons/column-chooser.svg");
-}
-
-::deep .export-icon {
-    mask-image: url("images/icons/arrow-export-up.svg");
-}
-
-::deep .search-textbox-item {
-    max-width: 12.5rem;
-}
-
-::deep .pinned-icon {
-    mask-image: url("images/icons/lock-closed.svg");
-}
-
-::deep .unpinned-icon {
-    mask-image: url("images/icons/lock-open.svg");
-}
-
-::deep .close-icon {
-    mask-image: url("images/icons/dismiss.svg");
-}
-
-::deep .standalone-btn {
-    --dxbl-btn-padding-x: 0.5em;
-}
-
-::deep .contact-list-drawer {
-    --dxbl-drawer-panel-body-padding-x: 1.5rem;
-    --dxbl-drawer-panel-header-padding-x: 1.5rem;
-    --dxbl-drawer-separator-border-style: none;
-}
-
-.contact-details-header {
-    display: flex;
-    flex-shrink: 0;
-    justify-content: space-between;
-}
-
-.contact-details-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.small-size .contact-details {
-    width: 17.25rem;
-}
-
-.medium-size .contact-details {
-    width: 20.625rem;
-}
-
-.large-size .contact-details {
-    width: 24rem;
-}
-
-.sub-item {
-    font-size: 0.8em;
-}
-
-.tender-detail-wrapper {
-    padding: 1.5rem;
-    background-color: #f8f9fa;
-    min-height: 100vh;
-}
-
-.tender-content {
-    flex: 1;
-    overflow-x: auto;
-    overflow-y: auto;
-    max-width: 100%;
-}
-
-.tender-row {
-    display: grid;
-    grid-template-columns: 4fr 8fr;
-    gap: 16px;
-    align-items: stretch;
-}
-
-.tender-left,
-.tender-right {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.tender-card {
-    background: white;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-
-
-}
-
-.tender-right .tender-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1rem;
-}
-.tender-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    background: #ffffff;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-
-.tender-title {
-    margin: 0;
-    font-weight: 700;
-    color: #333;
-}
-
-    
-    .tender-title span {
-        color: #6c757d;
-        font-weight: 400;
+    ::deep .card:not(.toolbar) {
+        padding: 1.5rem;
     }
-/* layout */
-.tender-row {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
+
+::deep .tabs {
+    padding-top: 0.5rem !important;
+    height: 100%;
 }
 
-.tender-left {
-    flex: 1;
-    min-width: 300px;
-    max-width: 400px;
+::deep .tab-page {
+    margin-bottom: 0.625rem;
 }
 
-.tender-right {
-    flex: 3;
-    min-width: 600px;
+::deep .h-100 {
+    height: 100%;
 }
 
-/* card */
-.tender-card {
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
 
-.tender-card-padding {
-    padding: 1.5rem;
-}
+/*CUSTUM CSS*/
 
-.tender-card-tabs {
-    overflow: hidden;
-}
-
-/* authority section */
 .authority-header {
     text-align: center;
     margin-bottom: 2rem;
 }
 
-.authority-avatar {
-    width: 64px;
-    height: 64px;
-    background: #e7e7ff;
-    color: #696cff;
-    border-radius: 12px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-    font-size: 1.8rem;
-    font-weight: 700;
-}
+    .authority-header .authority-avatar {
+        width: 64px;
+        height: 64px;
+        background: #e7e7ff;
+        color: #696cff;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
 
-.authority-title {
-    font-weight: 700;
-}
+    .authority-header .authority-title {
+        font-weight: 700;
+    }
 
-.authority-badge {
-    background: #f1f2f4;
-    color: #8592a3;
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 0.85rem;
-}
+    .authority-header .authority-badge {
+        background: #f1f2f4;
+        color: #8592a3;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
 
-/* stats */
 .tender-stats {
     display: flex;
     gap: 10px;
     margin-bottom: 2rem;
 }
 
-.tender-stat {
-    flex: 1;
-    background: #f8f9fa;
-    padding: 10px;
-    border-radius: 6px;
-    text-align: center;
-}
+    .tender-stats .tender-stat {
+        flex: 1;
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        text-align: center;
+    }
 
-.tender-stat-title {
-    font-weight: 700;
-}
+        .tender-stats .tender-stat .tender-stat-title {
+            font-weight: 700;
+        }
 
-/* section title */
 .tender-section-title {
     font-weight: 700;
     border-bottom: 1px solid #eee;
@@ -269,7 +114,6 @@
     padding-bottom: 0.5rem;
 }
 
-/* info list */
 .tender-info {
     display: flex;
     flex-direction: column;
@@ -277,22 +121,12 @@
     font-size: 0.85rem;
 }
 
-.tender-info-row {
-    display: flex;
-    justify-content: space-between;
-}
+    .tender-info .tender-info-row {
+        display: flex;
+        justify-content: space-between;
+    }
 
-.tender-info-strong {
-    font-weight: 600;
-    text-align: right;
-}
-
-/* tabs + content */
-.tender-tabs {
-    padding: 0.5rem 1rem 0 1rem;
-}
-
-.tender-content {
-    padding: 1rem;
-    min-height: 500px;
-}
+        .tender-info .tender-info-row .tender-info-strong {
+            font-weight: 600;
+            text-align: right;
+        }
