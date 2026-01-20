@@ -3,6 +3,8 @@
 @inject NavigationManager NavigationManager
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
+@inject IJSRuntime JsRuntime
+
 
 <DxLayoutBreakpoint DeviceSize="DeviceSize.XSmall | DeviceSize.Small | DeviceSize.Medium"
                     @bind-IsActive="@IsSmallScreen" />
@@ -79,9 +81,7 @@
                                                                                     : "?")
                                         </div>
 
-                                        <h5 class="authority-title">
-                                            @Model.BankName
-                                        </h5>
+                                        <h5 class="authority-title">@Model.BankName</h5>
 
                                         <span class="authority-badge">
                                             Teminat No: #@Model.GuaranteeNumber
@@ -104,9 +104,7 @@
                                         </div>
                                     </div>
 
-                                    <h6 class="guarantee-section-title">
-                                        GENEL BİLGİLER
-                                    </h6>
+                                    <h6 class="guarantee-section-title">GENEL BİLGİLER</h6>
 
                                     <div class="guarantee-info">
                                         <div class="guarantee-info-row">
@@ -142,13 +140,6 @@
                                     ActiveTabIndexChanged="OnActiveTabIndexChanged">
 
                                 <DxTabPage Text="Komisyonlar">
-                                    <div class="grid-header-actions mb-3">
-                                        <DxButton Text="Yeni Komisyon Ekle"
-                                                  RenderStyle="ButtonRenderStyle.Primary"
-                                                  IconCssClass="ti ti-plus"
-                                                  Click="@(() => NavigationManager.NavigateTo($"/guarantee-commission/add/{Id}"))" />
-                                    </div>
-
                                     <DxGrid Data="CommissionDataSource"
                                             ShowFilterRow="true"
                                             ShowGroupPanel="true"
@@ -157,10 +148,12 @@
                                             DataItemDeleting="async (e) => await DeleteCommission(((GuaranteeCommissionModel)e.DataItem).Id)">
                                         <ToolbarTemplate>
                                             <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
-                                                <DxToolbarItem Text="New" Click="GuaranteeCommissionAdd" IconCssClass="grid-toolbar-new" />
-                                                
+                                                <DxToolbarItem Text="Yeni Komisyon Ekle"
+                                                               IconCssClass="grid-toolbar-new"
+                                                               Click="GuaranteeCommissionAdd" />
                                             </DxToolbar>
                                         </ToolbarTemplate>
+
                                         <Columns>
                                             <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionStartDate)" Caption="Başlangıç" />
                                             <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionEndDate)" Caption="Bitiş" />
@@ -176,7 +169,6 @@
                                         </Columns>
                                     </DxGrid>
                                 </DxTabPage>
-
                             </DxTabs>
                         </Template>
                     </DxGridLayoutItem>
@@ -186,6 +178,33 @@
     </div>
 </div>
 
+<DxPopup @bind-Visible="@AddPopupVisible"
+         ShowFooter="true"
+         HeaderText="Komisyon Ekle"
+         Width="800px"
+         MaxWidth="95vw">
+
+    <BodyContentTemplate>
+        <GuaranteeCommissionAddForm @ref="addFormRef"
+                                    GuaranteeId="Id"
+                                    OnSaved="OnCommissionSaved"
+                                    OnCancel="OnCommissionCanceled" />
+    </BodyContentTemplate>
+
+    <FooterContentTemplate>
+        <DxButton CssClass="popup-button my-1 ms-2"
+                  RenderStyle="ButtonRenderStyle.Primary"
+                  Text="Kaydet"
+                  Click="SaveCommissionFromPopup" />
+
+        <DxButton CssClass="popup-button my-1 ms-2"
+                  RenderStyle="ButtonRenderStyle.Secondary"
+                  Text="Vazgeç"
+                  Click="CancelCommissionFromPopup" />
+    </FooterContentTemplate>
+</DxPopup>
+
+
 @code {
     [Parameter] public int Id { get; set; }
 
@@ -193,7 +212,10 @@
     private bool IsSmallScreen { get; set; }
     private bool IsDataLoaded { get; set; }
     private int ActiveTabIndex { get; set; }
+    private bool AddPopupVisible { get; set; }
+
     private GridDevExtremeDataSource<GuaranteeCommissionModel>? CommissionDataSource { get; set; }
+    private GuaranteeCommissionAddForm? addFormRef;
 
     protected override async Task OnInitializedAsync()
     {
@@ -248,6 +270,34 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    private void GuaranteeCommissionAdd()
+    {
+        AddPopupVisible = true;
+    }
+
+    private async Task SaveCommissionFromPopup()
+    {
+        if (addFormRef != null)
+            await addFormRef.SaveAsync();
+    }
+
+    private async Task CancelCommissionFromPopup()
+    {
+        if (addFormRef != null)
+            await addFormRef.CancelAsync();
+    }
+
+    private async Task OnCommissionSaved()
+    {
+        AddPopupVisible = false;
+        await LoadTabData(ActiveTabIndex);
+    }
+
+    private void OnCommissionCanceled()
+    {
+        AddPopupVisible = false;
+    }
+
     private void OnCommissionEditStart(GridEditStartEventArgs e)
     {
         e.Cancel = true;
@@ -260,18 +310,11 @@
         var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
         var response = await client.DeleteAsync($"api/guarantee-commissions/{commissionId}");
         if (response.IsSuccessStatusCode)
-        {
             await LoadTabData(ActiveTabIndex);
-        }
     }
 
     private void NavigateBack()
     {
         NavigationManager.NavigateTo("/guarantee/list");
-    }
-
-    private void GuaranteeCommissionAdd()
-    {
-  
     }
 }
