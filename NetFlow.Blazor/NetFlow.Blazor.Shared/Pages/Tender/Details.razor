@@ -20,6 +20,11 @@
             </DxToolbarItem>
             <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
                 <Template>
+                    <DxButton Text="Düzenle" Click="@OnEditClick" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
+                </Template>
+            </DxToolbarItem>
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                <Template>
                     <DxButton Text="Sil" Click="@OnDeleteClick" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
                 </Template>
             </DxToolbarItem>
@@ -236,6 +241,19 @@
     </div>
 </div>
 
+<DxPopup @bind-Visible="@EditPopupVisible"
+    ShowFooter="true"
+    HeaderText="İhale Düzenleme">
+    <BodyContentTemplate>
+        <TenderEditForm />
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <DxButton CssClass="popup-button my-1 ms-2" RenderStyle="ButtonRenderStyle.Primary" Text="OK" Click="@(() => EditPopupVisible = false)" />
+        <DxButton CssClass="popup-button my-1 ms-2" RenderStyle="ButtonRenderStyle.Secondary" Text="Cancel" Click="@(() => EditPopupVisible = false)" />
+    </FooterContentTemplate>
+</DxPopup>
+
+
 <DxWindow Visible="@PdfModalVisible" VisibleChanged="@((value) => PdfModalVisible = value)" HeaderText="Belge Görüntüleme" Width="90vw" Height="85vh" AllowResize="true" ShowCloseButton="true" CloseOnEscape="true" HeaderCssClass="font-weight-bold">
     <BodyTemplate>
         <iframe src="@PdfDataUrl" style="width:100%; height:100%; border:none;"></iframe>
@@ -261,6 +279,7 @@
     private int ActiveTabIndex { get; set; } = 0;
     private bool PdfModalVisible { get; set; }
     private string PdfDataUrl { get; set; } = "";
+    private bool EditPopupVisible { get; set; }
 
     private GridDevExtremeDataSource<TenderOpexModel>? OpexDataSource { get; set; }
     private GridDevExtremeDataSource<TenderCapexModel>? CapexDataSource { get; set; }
@@ -352,6 +371,12 @@
         {
             Console.WriteLine(ex.Message);
         }
+    }
+
+
+    private async Task OnEditClick()
+    {
+        EditPopupVisible = true;
     }
 
     private async Task OnDeleteClick()
