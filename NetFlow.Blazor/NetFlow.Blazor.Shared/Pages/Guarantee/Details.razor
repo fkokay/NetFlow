@@ -1,169 +1,202 @@
 ﻿@page "/guarantee/details/{Id:int}"
+@using System.Net.Http.Json
 @inject NavigationManager NavigationManager
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
 
-<div class="guarantee-detail-wrapper">
-    @if (Model == null)
-    {
-        <div class="guarantee-loading-wrapper">
-            <DxLoadingPanel Visible="true" Text="Teminat detayları yükleniyor..." IsContentBlocked="true" />
-        </div>
-    }
-    else
-    {
-        <div class="card toolbar">
-            <DxToolbar Title="Teminat Mektubu Detayı" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
-            </DxToolbar>
-        </div>
+<DxLayoutBreakpoint DeviceSize="DeviceSize.XSmall | DeviceSize.Small | DeviceSize.Medium"
+                    @bind-IsActive="@IsSmallScreen" />
 
-        <DxFormLayout>
-            <DxFormLayoutItem ColSpanMd="12">
-                <Template Context="layoutContext">
-                    <div class="guarantee-row">
-                        <div class="guarantee-left">
-                            <div class="guarantee-card">
-                                <div class="guarantee-card-header">
-                                    <div class="guarantee-card-header-box">
-                                        <i class="ti ti-gavel" style="color:#696cff;"></i>
-                                        <div>@Model.GuaranteeNumber</div>
-                                        <small>Teminat No</small>
-                                    </div>
-                                    <div class="guarantee-card-header-box">
-                                        <i class="ti ti-currency-dollar" style="color:#71dd37;"></i>
-                                        <div>@Model.GuaranteeAmount.ToString("n2") @Model.Currency</div>
-                                        <small>Teminat Tutarı</small>
-                                    </div>
-                                </div>
-                                <div class="guarantee-card-header">
-                                    <div class="guarantee-card-header-box">
-                                        <i class="ti ti-gavel" style="color:#696cff;"></i>
-                                        <div>@Model.GuaranteeType</div>
-                                        <small>Teminat Türü</small>
-                                    </div>
-                                    <div class="guarantee-card-header-box">
-                                        <i class="ti ti-calendar" style="color:#71dd37;"></i>
-                                        <div>@Model.GuaranteeDate.ToShortDateString()</div>
-                                        <small>Teminat Tarihi</small>
-                                    </div>
-                                </div>
-                                <div class="guarantee-card-content">
-                                    <h6 class="guarantee-card-title">GENEL BİLGİLER</h6>
-                                    <div class="guarantee-card-details">
-                                        @if (Model.GuaranteeType == "Geçici")
-                                        {
-                                            <div class="guarantee-card-details-item">
-                                                <span>Muhasebe Hesap Plan Kodu :</span>
-                                                <span style="font-weight:600; text-align:right;"></span>
-                                            </div>
-                                            <div class="guarantee-card-details-item">
-                                                <span>Muhasebe Hesap Plan Adı :</span>
-                                                <span style="font-weight:600; text-align:right;"></span>
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <div class="guarantee-card-details-item">
-                                                <span>Müşteri Kodu :</span>
-                                                <span style="font-weight:600; text-align:right;">@Model.PublicAuthorityCode</span>
-                                            </div>
-                                            <div class="guarantee-card-details-item">
-                                                <span>Müşteri Adı :</span>
-                                                <span style="font-weight:600; text-align:right;">@Model.PublicAuthorityName</span>
-                                            </div>
-                                        }
-                                        <div class="guarantee-card-details-item">
-                                            <span>Başlangıç Tarihi :</span>
-                                            <span style="font-weight:600; text-align:right;">@Model.GuaranteeDate.ToShortDateString()</span>
-                                        </div>
-                                        <div class="guarantee-card-details-item">
-                                            <span>Bitiş Tarihi :</span>
-                                            <span style="font-weight:600; text-align:right;">@Model.ExpiryDate.ToShortDateString()</span>
-                                        </div>
-                                        <div class="guarantee-card-details-item">
-                                            <span>Komisyon Tutarı :</span>
-                                            <span style="font-weight:600; text-align:right;">@Model.CommissionAmount.ToString("n2") @Model.Currency</span>
-                                        </div>
-                                        <div class="guarantee-card-details-item">
-                                            <span>Komisyon Oranı :</span>
-                                            <span style="font-weight:600; text-align:right;">@Model.CommissionRate.ToString("n4")</span>
-                                        </div>
-                                        <div class="guarantee-card-details-item">
-                                            <span>Banka :</span>
-                                            <span style="font-weight:600; text-align:right;">@Model.BankName</span>
-                                        </div>
-                                        <div class="guarantee-card-details-item">
-                                            <span>Banka Şube :</span>
-                                            <span style="font-weight:600; text-align:right;">@Model.BankBranchName</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <DxToolbarItem IconCssClass="back-icon icon medium-icon"
+                           Tooltip="Geri"
+                           Click="@NavigateBack" />
 
-                        <div class="guarantee-right">
-                            <div class="guarantee-card">
-                                <DxTabs ActiveTabIndex="@ActiveTabIndex" ActiveTabIndexChanged="OnActiveTabIndexChanged" class="guarantee-tabs">
-                                    <DxTabPage Text="Teminat Komisyonları" />
-                                </DxTabs>
-                                <div class="guarantee-content">
-                                    @switch (ActiveTabIndex)
-                                    {
-                                        case 0:
-                                            <div>
-                                                <div class="grid-header-actions" style="margin-bottom: 1rem;">
-                                                    <DxButton Text="Yeni Komisyon Ekle"
-                                                              Click="@(() => NavigationManager.NavigateTo($"/guarantee-commission/add/{Id}"))"
-                                                              RenderStyle="ButtonRenderStyle.Primary"
-                                                              IconCssClass="ti ti-plus" />
-                                                </div>
-
-                                                <DxGrid Data="CommissionDataSource"
-                                                        ShowFilterRow="true"
-                                                        ShowGroupPanel="true"
-                                                        ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
-                                                        EditStart="OnCommissionEditStart"
-                                                        DataItemDeleting="async (e) => await DeleteCommission(((GuaranteeCommissionModel)e.DataItem).Id)">
-                                                    <Columns>
-                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionStartDate)" Caption="Başlangıç Tarihi" />
-                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionEndDate)" Caption="Bitiş Tarihi" />
-                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionAmount)" Caption="Tutar" DisplayFormat="N2" />
-                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.Currency)" Caption="Döviz" />
-                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.PaymentStatus)" Caption="Durum" />
-                                                        <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.Note)" Caption="Açıklama" />
-
-                                                        <DxGridCommandColumn Width="120px"
-                                                                             DeleteButtonVisible="true"
-                                                                             EditButtonVisible="true"
-                                                                             NewButtonVisible="false" />
-                                                    </Columns>
-                                                </DxGrid>
-                                            </div>
-                                            break;
-                                    }
-                                </div>
-                            </div>
-                        </div>
+            <DxToolbarItem>
+                <Template>
+                    <div class="custom-item">
+                        <div class="title">Teminat Mektubu Detayı</div>
                     </div>
                 </Template>
-            </DxFormLayoutItem>
-        </DxFormLayout>
-    }
+            </DxToolbarItem>
+
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
+                           Click="@LoadDataAsync"
+                           Tooltip="Yenile"
+                           IconCssClass="refresh-icon icon medium-icon" />
+        </DxToolbar>
+    </div>
+
+    <div class="guarantee-details">
+        <DxLoadingPanel Visible="@(!IsDataLoaded)"
+                        IsContentBlocked="true"
+                        IsContentVisible="false"
+                        IndicatorVisible="true"
+                        IndicatorAreaVisible="true"
+                        ZIndex="101"
+                        Text="Yükleniyor...">
+
+            <DxGridLayout ColumnSpacing="1rem"
+                          RowSpacing="1rem"
+                          CssClass="h-100">
+
+                <Columns>
+                    @if (!IsSmallScreen)
+                    {
+                        <DxGridLayoutColumn Width="1fr" />
+                        <DxGridLayoutColumn Width="3fr" />
+                    }
+                    else
+                    {
+                        <DxGridLayoutColumn Width="100%" />
+                    }
+                </Columns>
+
+                <Rows>
+                    @if (!IsSmallScreen)
+                    {
+                        <DxGridLayoutRow Areas="item1 item2" />
+                    }
+                    else
+                    {
+                        <DxGridLayoutRow Areas="item1" />
+                        <DxGridLayoutRow Areas="item2" />
+                    }
+                </Rows>
+
+                <Items>
+                    <DxGridLayoutItem Area="item1">
+                        <Template>
+                            @if (Model != null)
+                            {
+                                <div class="card h-100">
+                                    <div class="authority-header">
+                                        <div class="authority-avatar">
+                                            @(!string.IsNullOrEmpty(Model.BankName)
+                                                                                    ? Model.BankName[0].ToString().ToUpper()
+                                                                                    : "?")
+                                        </div>
+
+                                        <h5 class="authority-title">
+                                            @Model.BankName
+                                        </h5>
+
+                                        <span class="authority-badge">
+                                            Teminat No: #@Model.GuaranteeNumber
+                                        </span>
+                                    </div>
+
+                                    <div class="guarantee-stats">
+                                        <div class="guarantee-stat">
+                                            <i class="ti ti-gavel guarantee-icon-primary"></i>
+                                            <div class="guarantee-stat-title">@Model.GuaranteeType</div>
+                                            <small>Teminat Türü</small>
+                                        </div>
+
+                                        <div class="guarantee-stat">
+                                            <i class="ti ti-currency-dollar guarantee-icon-success"></i>
+                                            <div class="guarantee-stat-title">
+                                                @Model.GuaranteeAmount.ToString("n2")
+                                            </div>
+                                            <small>@Model.Currency</small>
+                                        </div>
+                                    </div>
+
+                                    <h6 class="guarantee-section-title">
+                                        GENEL BİLGİLER
+                                    </h6>
+
+                                    <div class="guarantee-info">
+                                        <div class="guarantee-info-row">
+                                            <span>Başlangıç:</span>
+                                            <span>@Model.GuaranteeDate.ToShortDateString()</span>
+                                        </div>
+                                        <div class="guarantee-info-row">
+                                            <span>Bitiş:</span>
+                                            <span>@Model.ExpiryDate.ToShortDateString()</span>
+                                        </div>
+                                        <div class="guarantee-info-row">
+                                            <span>Komisyon:</span>
+                                            <span>@Model.CommissionAmount.ToString("n2") @Model.Currency</span>
+                                        </div>
+                                        <div class="guarantee-info-row">
+                                            <span>Oran:</span>
+                                            <span>@Model.CommissionRate.ToString("n4")</span>
+                                        </div>
+                                        <div class="guarantee-info-row">
+                                            <span>Banka:</span>
+                                            <span>@Model.BankBranchName</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </Template>
+                    </DxGridLayoutItem>
+
+                    <DxGridLayoutItem Area="item2">
+                        <Template>
+                            <DxTabs CssClass="card tabs"
+                                    ActiveTabIndex="@ActiveTabIndex"
+                                    ActiveTabIndexChanged="OnActiveTabIndexChanged">
+
+                                <DxTabPage Text="Komisyonlar">
+                                    <div class="grid-header-actions mb-3">
+                                        <DxButton Text="Yeni Komisyon Ekle"
+                                                  RenderStyle="ButtonRenderStyle.Primary"
+                                                  IconCssClass="ti ti-plus"
+                                                  Click="@(() => NavigationManager.NavigateTo($"/guarantee-commission/add/{Id}"))" />
+                                    </div>
+
+                                    <DxGrid Data="CommissionDataSource"
+                                            ShowFilterRow="true"
+                                            ShowGroupPanel="true"
+                                            ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                                            EditStart="OnCommissionEditStart"
+                                            DataItemDeleting="async (e) => await DeleteCommission(((GuaranteeCommissionModel)e.DataItem).Id)">
+                                        <Columns>
+                                            <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionStartDate)" Caption="Başlangıç" />
+                                            <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionEndDate)" Caption="Bitiş" />
+                                            <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionAmount)" Caption="Tutar" DisplayFormat="N2" />
+                                            <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.Currency)" Caption="Döviz" />
+                                            <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.PaymentStatus)" Caption="Durum" />
+                                            <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.Note)" Caption="Açıklama" />
+
+                                            <DxGridCommandColumn Width="120px"
+                                                                 EditButtonVisible="true"
+                                                                 DeleteButtonVisible="true"
+                                                                 NewButtonVisible="false" />
+                                        </Columns>
+                                    </DxGrid>
+                                </DxTabPage>
+
+                            </DxTabs>
+                        </Template>
+                    </DxGridLayoutItem>
+                </Items>
+            </DxGridLayout>
+        </DxLoadingPanel>
+    </div>
 </div>
 
 @code {
     [Parameter] public int Id { get; set; }
 
     private GuaranteeModel? Model { get; set; }
-    private int ActiveTabIndex { get; set; } = 0;
+    private bool IsSmallScreen { get; set; }
+    private bool IsDataLoaded { get; set; }
+    private int ActiveTabIndex { get; set; }
     private GridDevExtremeDataSource<GuaranteeCommissionModel>? CommissionDataSource { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadData();
+        IsDataLoaded = false;
+        await LoadDataAsync();
+        IsDataLoaded = true;
     }
 
-    private async Task LoadData()
+    private async Task LoadDataAsync()
     {
         try
         {
@@ -180,9 +213,9 @@
                 NavigationManager.NavigateTo("/guarantee/list");
             }
         }
-        catch (Exception ex)
+        catch
         {
-            Console.WriteLine(ex.Message);
+            NavigationManager.NavigateTo("/guarantee/list");
         }
     }
 
@@ -197,42 +230,37 @@
         var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
         string baseUrl = "https://localhost:7071/api";
 
-        switch (index)
+        if (index == 0)
         {
-            case 0:
-                CommissionDataSource = new GridDevExtremeDataSource<GuaranteeCommissionModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/guarantee-commissions?guaranteeId={Id}"));
-                break;
+            CommissionDataSource =
+                new GridDevExtremeDataSource<GuaranteeCommissionModel>(
+                    client,
+                    NavigationManager.ToAbsoluteUri($"{baseUrl}/guarantee-commissions?guaranteeId={Id}")
+                );
         }
+
         await InvokeAsync(StateHasChanged);
     }
 
-    // Düzenle butonuna basıldığında tetiklenen metot
     private void OnCommissionEditStart(GridEditStartEventArgs e)
     {
-        // Grid'in kendi iç (inline) düzenleme modunu açmasını engelliyoruz
         e.Cancel = true;
-
-        // Tıklanan satırdaki veriyi alıyoruz
         var item = (GuaranteeCommissionModel)e.DataItem;
-
-        // Düzenleme sayfasına ID ile yönlendiriyoruz
         NavigationManager.NavigateTo($"/guarantee-commission/edit/{item.Id}");
     }
 
     private async Task DeleteCommission(int commissionId)
     {
-        try
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        var response = await client.DeleteAsync($"api/guarantee-commissions/{commissionId}");
+        if (response.IsSuccessStatusCode)
         {
-            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
-            var response = await client.DeleteAsync($"api/guarantee-commissions/{commissionId}");
-            if (response.IsSuccessStatusCode)
-            {
-                await LoadTabData(ActiveTabIndex);
-            }
+            await LoadTabData(ActiveTabIndex);
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/guarantee/list");
     }
 }

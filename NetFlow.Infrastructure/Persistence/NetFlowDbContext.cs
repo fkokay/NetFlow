@@ -33,6 +33,7 @@ namespace NetFlow.Infrastructure.Persistence
         public DbSet<GuaranteeEntity> Guarantees => Set<GuaranteeEntity>();
         public DbSet<GuaranteeCommissionEntity> GuaranteeCommissions => Set<GuaranteeCommissionEntity>();
         public DbSet<GuaranteeCommissionPeriodEntity> GuaranteeCommissionPeriods => Set<GuaranteeCommissionPeriodEntity>();
+        public DbSet<TenderEntity> Tenders => Set<TenderEntity>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

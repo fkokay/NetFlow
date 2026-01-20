@@ -4,23 +4,29 @@
     flex-direction: column;
 }
 
+    .content-root .contact-details {
+        flex-grow: 1;
+    }
+
 .toolbar {
     padding: 0.5rem 0.5rem;
     margin-bottom: 1rem;
 }
 
+    .toolbar .title {
+        font-size: var(--dxbl-toolbar-title-font-size);
+        line-height: var(--dxbl-toolbar-title-line-height);
+        font-weight: var(--dxbl-toolbar-title-font-weight);
+        margin: auto 0;
+    }
+
     .toolbar .custom-item {
         display: flex;
-        align-items: center;
+        height: 100%;
         margin: 0 0.5rem;
     }
 
-.contact-list-root {
-    flex-grow: 1;
-    height: 90%;
-}
-
-.card {
+::deep .card {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -32,202 +38,95 @@
     border-radius: 0.25rem;
 }
 
-::deep .w-100 {
-    width: 100%;
-}
-
-.h-100 {
-    height: 100%;
-}
-
-::deep .contact-list {
-    max-height: 100%;
-    border-radius: 0.25rem;
-}
-
-::deep .add-icon {
-    mask-image: url("images/icons/add.svg");
-}
-
-::deep .column-chooser-icon {
-    mask-image: url("images/icons/column-chooser.svg");
-}
-
-::deep .export-icon {
-    mask-image: url("images/icons/arrow-export-up.svg");
-}
-
-::deep .search-textbox-item {
-    max-width: 12.5rem;
-}
-
-::deep .pinned-icon {
-    mask-image: url("images/icons/lock-closed.svg");
-}
-
-::deep .unpinned-icon {
-    mask-image: url("images/icons/lock-open.svg");
-}
-
-::deep .close-icon {
-    mask-image: url("images/icons/dismiss.svg");
-}
-
-::deep .standalone-btn {
-    --dxbl-btn-padding-x: 0.5em;
-}
-
-::deep .contact-list-drawer {
-    --dxbl-drawer-panel-body-padding-x: 1.5rem;
-    --dxbl-drawer-panel-header-padding-x: 1.5rem;
-    --dxbl-drawer-separator-border-style: none;
-}
-
-.contact-details-header {
-    display: flex;
-    flex-shrink: 0;
-    justify-content: space-between;
-}
-
-.contact-details-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.small-size .contact-details {
-    width: 17.25rem;
-}
-
-.medium-size .contact-details {
-    width: 20.625rem;
-}
-
-.large-size .contact-details {
-    width: 24rem;
-}
-
-.sub-item {
-    font-size: 0.8em;
-}
-
-.guarantee-detail-wrapper {
-    padding: 1.5rem;
-    min-height: 100vh;
-}
-
-.guarantee-loading-wrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 400px;
-    background: white;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
-}
-
-.guarantee-content {
-    flex: 1;
-    overflow-x: auto;
-    overflow-y: auto;
-    max-width: 100%;
-    padding: 1rem;
-    min-height: 500px;
-}
-
-.guarantee-row {
-    display: grid;
-    grid-template-columns: 4fr 8fr;
-    gap: 16px;
-    align-items: stretch;
-}
-
-.guarantee-left,
-.guarantee-right {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.guarantee-card {
-    background: white;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding: 1.5rem;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-    .guarantee-card .guarantee-card-header {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 2rem;
+    ::deep .card:not(.toolbar) {
+        padding: 1.5rem;
     }
 
-        .guarantee-card .guarantee-card-header .guarantee-card-header-box {
-            flex: 1;
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
+::deep .tabs {
+    padding-top: 0.5rem !important;
+    height: 100%;
+}
+
+::deep .tab-page {
+    margin-bottom: 0.625rem;
+}
+
+::deep .h-100 {
+    height: 100%;
+}
+
+
+/*Sayfa Css*/
+
+.authority-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+    .authority-header .authority-avatar {
+        width: 64px;
+        height: 64px;
+        background: #e7e7ff;
+        color: #696cff;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .authority-header .authority-title {
+        font-weight: 700;
+    }
+
+    .authority-header .authority-badge {
+        background: #f1f2f4;
+        color: #8592a3;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+
+.guarantee-stats {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 2rem;
+}
+
+    .guarantee-stats .guarantee-stat {
+        flex: 1;
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        text-align: center;
+    }
+
+        .guarantee-stats .guarantee-stat .guarantee-stat-title {
+            font-weight: 700;
         }
 
-            .guarantee-card .guarantee-card-header .guarantee-card-header-box div {
-                font-weight: 700;
-            }
-
-            .guarantee-card .guarantee-card-header .guarantee-card-header-box small {
-            }
-
-.guarantee-card-title {
+.guarantee-section-title {
     font-weight: 700;
     border-bottom: 1px solid #eee;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    margin-top:0rem;
 }
 
-.guarantee-card-details {
+.guarantee-info {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    font-size: .85rem;
+    font-size: 0.85rem;
 }
 
-    .guarantee-card-details .guarantee-card-details-item {
+    .guarantee-info .guarantee-info-row {
         display: flex;
         justify-content: space-between;
     }
 
-
-    .guarantee-right .guarantee-content {
-        flex: 1;
-        overflow-y: auto;
-        padding: 1rem;
-    }
-
-.guarantee-tabs {
-    padding: .5rem 1rem 0 1rem;
-}
-/* Butonu sağa yaslar ve tabloyla arasını açar */
-.grid-header-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px; /* Tablo ile açılan mesafe */
-}
-
-/* Tablo içindeki butonların yan yana dizilimi */
-.grid-cell-buttons {
-    display: flex;
-    gap: 8px;
-}
-
-/* FormLayout içindeki çakışmaları önlemek için genel düzenleme */
-.guarantee-content {
-    padding-top: 10px;
-}
+        .guarantee-info .guarantee-info-row .guarantee-info-strong {
+            font-weight: 600;
+            text-align: right;
+        }

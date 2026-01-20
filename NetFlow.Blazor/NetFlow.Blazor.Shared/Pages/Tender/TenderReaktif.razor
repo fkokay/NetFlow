@@ -1,0 +1,31 @@
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+
+<DxGrid Data="ReaktifDataSource" ShowSearchBox="true" SearchBoxNullText="Arama yapmak için metin girin…" style="height:100%;">
+    <Columns>
+        <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
+        <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
+        <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
+        <DxGridDataColumn FieldName="SutCode" Caption="SUT Kodu" />
+        <DxGridDataColumn FieldName="TestName" Caption="Test Adý" />
+        <DxGridDataColumn FieldName="TestCount" Caption="Test Sayýsý" />
+        <DxGridDataColumn FieldName="UnitPrice" Caption="Birim Fiyat" DisplayFormat="n2" />
+        <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
+    </Columns>
+</DxGrid>
+
+
+@code {
+    private GridDevExtremeDataSource<TenderReaktifModel>? ReaktifDataSource { get; set; }
+
+    [Parameter]
+    public int TenderId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        string baseUrl = "https://localhost:7071/api";
+        ReaktifDataSource = new GridDevExtremeDataSource<TenderReaktifModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-reaktif?tenderId={TenderId}"));
+    }
+}

@@ -21,6 +21,8 @@ namespace NetFlow.Application.Common.Interfaces
         DbSet<GuaranteeEntity> Guarantees { get; }
         DbSet<GuaranteeCommissionPeriodEntity> GuaranteeCommissionPeriods { get; }
         DbSet<GuaranteeCommissionEntity> GuaranteeCommissions { get; }
+        DbSet<TenderEntity> Tenders { get; }
+        
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

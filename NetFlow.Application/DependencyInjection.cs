@@ -10,6 +10,7 @@ using NetFlow.Application.Netsis.Products;
 using NetFlow.Application.Netsis.Shipments;
 using NetFlow.Application.Netsis.Warehouses;
 using NetFlow.Application.Roles;
+using NetFlow.Application.Tenders;
 using NetFlow.Application.Users;
 using System;
 using System.Collections.Generic;
@@ -36,6 +37,7 @@ namespace NetFlow.Application
             services.AddScoped<UserWriteService>();
             services.AddScoped<GuaranteeWriteService>();
             services.AddScoped<GuaranteeCommissionWriteService>();
+            services.AddScoped<TenderWriteService>();
             return services;
         }
     }

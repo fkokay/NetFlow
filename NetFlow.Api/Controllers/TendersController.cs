@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NetFlow.Application.Roles;
+using NetFlow.Application.Tenders;
 using NetFlow.Domain.Common.Pagination;
 using NetFlow.Domain.Identity;
 using NetFlow.ReadModel.Tenders;
@@ -12,11 +14,13 @@ namespace NetFlow.Api.Controllers
     {
         protected readonly CurrentUser _current;
         private readonly TenderReadService _read;
+        private readonly TenderWriteService _write;
 
-        public TendersController(CurrentUser current,TenderReadService read)
+        public TendersController(CurrentUser current, TenderReadService read, TenderWriteService write)
         {
             _current = current;
             _read = read;
+            _write = write;
         }
 
         // GET api/tenders
@@ -37,6 +41,23 @@ namespace NetFlow.Api.Controllers
         {
             var row = await _read.GetAsync(id);
             return row is null ? NotFound() : Ok(row);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] EditTenderRequest request)
+        {
+            var id = await _write.EditAsync(request);
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _write.DeleteAsync(id);
+            return Ok();
         }
     }
 }

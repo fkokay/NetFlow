@@ -1,0 +1,119 @@
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject IJSRuntime JSRuntime
+
+<DxGrid Data="RequiredDocumentDataSource" style="height:100%;">
+    <Columns>
+        <DxGridDataColumn FieldName="DocumentName" Caption="Belge" />
+
+        <DxGridDataColumn FieldName="IsMandatory" Caption="Zorunlu" Width="100px"
+                          TextAlignment="GridTextAlignment.Center">
+            <CellDisplayTemplate Context="ctx">
+                @{
+                    var doc = (TenderRequiredDocument)ctx.DataItem;
+                    <DxCheckBox Checked="@doc.IsMandatory" Enabled="false" />
+                }
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+
+        <DxGridDataColumn FieldName="Submitted" Caption="Durum" Width="100px"
+                          TextAlignment="GridTextAlignment.Center">
+            <CellDisplayTemplate Context="ctx">
+                @{
+                    var doc = (TenderRequiredDocument)ctx.DataItem;
+                    <DxCheckBox Checked="@doc.Submitted" Enabled="false" />
+                }
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+
+        <DxGridDataColumn FieldName="SubmissionDate" Caption="Yüklenme Tarihi"
+                          TextAlignment="GridTextAlignment.Center">
+            <CellDisplayTemplate Context="ctx">
+                @{
+                    var doc = (TenderRequiredDocument)ctx.DataItem;
+                    <span>
+                        @(doc.SubmissionDate.HasValue ? doc.SubmissionDate.Value.ToString("dd.MM.yyyy")
+                                            : "-")
+                    </span>
+                }
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+
+        <DxGridDataColumn Caption="Ýncele" Width="100px"
+                          TextAlignment="GridTextAlignment.Center">
+            <CellDisplayTemplate Context="ctx">
+                @{
+                    var doc3 = (TenderRequiredDocument)ctx.DataItem;
+                    if (doc3.TenderRequiredDocumentFileId.HasValue)
+                    {
+                        <DxButton Text="Görüntüle" RenderStyle="ButtonRenderStyle.Primary" RenderStyleMode="ButtonRenderStyleMode.Outline" SizeMode="SizeMode.Small"
+                                  Click="@(() => HandleFileAction(doc3))"
+                                  IconCssClass="@(doc3.FileType == "application/pdf" ? "ti ti-file-text text-danger" : "ti ti-file-text text-primary")" />
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                }
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+    </Columns>
+</DxGrid>
+
+<DxWindow Visible="@PdfModalVisible" VisibleChanged="@((value) => PdfModalVisible = value)" HeaderText="Belge Görüntüleme" Width="90vw" Height="85vh" AllowResize="true" ShowCloseButton="true" CloseOnEscape="true" HeaderCssClass="font-weight-bold">
+    <BodyTemplate>
+        <iframe src="@PdfDataUrl" style="width:100%; height:100%; border:none;"></iframe>
+    </BodyTemplate>
+</DxWindow>
+
+<script>
+    window.downloadFileFromBase64 = (fileName, base64String, contentType) => {
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = `data:${contentType};base64,${base64String}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+</script>
+@code {
+    private GridDevExtremeDataSource<TenderRequiredDocument>? RequiredDocumentDataSource { get; set; }
+
+    [Parameter]
+    public int TenderId { get; set; }
+    private bool PdfModalVisible { get; set; }
+    private string PdfDataUrl { get; set; } = "";
+    protected override async Task OnInitializedAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        string baseUrl = "https://localhost:7071/api";
+        RequiredDocumentDataSource = new GridDevExtremeDataSource<TenderRequiredDocument>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-documents?tenderId={TenderId}"));
+    }
+
+    private async Task HandleFileAction(TenderRequiredDocument doc)
+    {
+        try
+        {
+
+            if (doc.FileContent == null) return;
+
+            string base64String = Convert.ToBase64String(doc.FileContent);
+
+            if (doc.FileType == "application/pdf")
+            {
+                PdfDataUrl = $"data:application/pdf;base64,{base64String}";
+                PdfModalVisible = true;
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("downloadFileFromBase64", doc.FileName, base64String, doc.FileType);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+}

@@ -1,0 +1,27 @@
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+
+<DxGrid Data="CapexDataSource" ShowSearchBox="true" SearchBoxNullText="Arama yapmak için metin girin…" style="height:100%;">
+    <Columns>
+        <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
+        <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
+        <DxGridDataColumn FieldName="AssetCode" Caption="Demirbaþ Kodu" />
+        <DxGridDataColumn FieldName="Quantity" Caption="Miktar" />
+        <DxGridDataColumn FieldName="Unit" Caption="Birim" />
+    </Columns>
+</DxGrid>
+
+@code {
+    private GridDevExtremeDataSource<TenderCapexModel>? CapexDataSource { get; set; }
+
+    [Parameter]
+    public int TenderId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        string baseUrl = "https://localhost:7071/api";
+        CapexDataSource = new GridDevExtremeDataSource<TenderCapexModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-capex?tenderId={TenderId}"));
+    }
+}
