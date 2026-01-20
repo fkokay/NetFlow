@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Sql\ExpenseAccountCount.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="DevExtreme.AspNet.Data" Version="5.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />

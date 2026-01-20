@@ -37,7 +37,7 @@ namespace NetFlow.Netsis.Repositories
 
             var sql = _sql.Get("ExpenseAccount.sql");
             var sqlCount = _sql.Get("ExpenseAccountCount.sql");
-            string whereSql = "WHERE 1=1";
+            string whereSql = string.Empty;
             var parameters = new DynamicParameters();
 
             if (!string.IsNullOrEmpty(request.filter))
@@ -84,8 +84,8 @@ namespace NetFlow.Netsis.Repositories
                 data = dto.Select(NetsisUtils.FixAllStrings).Select(x =>
                       ExpenseAccountCode.Create(
                           x.SUBE_KODU,
-                          x.HS_ADI,
-                          x.HESAP_KODU
+                          x.HESAP_KODU,
+                          x.HS_ADI
                       )).ToList()
             };
         }
