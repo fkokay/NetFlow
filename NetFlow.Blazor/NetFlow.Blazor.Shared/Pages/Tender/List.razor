@@ -27,7 +27,7 @@
             <DxToolbarItem Tooltip="Refresh" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
         </DxToolbar>
     </div>
-    <div class="tender-list-root">
+    <div class="tender-list-root h-100">
         <div class="h-100">
             <DxGrid @ref="Grid"
                     Data="@Data"
@@ -36,11 +36,12 @@
                     ShowFilterRow="true"
                     ShowSearchBox="false"
                     SearchText="@SearchText"
+                    style="height:100%;"
                     TextWrapEnabled="false">
                 <Columns>
                     <DxGridSelectionColumn Width="75px" />
                     <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
-                    <DxGridDataColumn Caption="Firma" FieldName="FirmName" />
+                    <DxGridDataColumn Caption="Firma" FieldName="FirmName" Visible="false" />
                     <DxGridDataColumn Caption="İhale Kodu" FieldName="TenderCode">
                         <CellDisplayTemplate>
                             <a href="javascript:void(0);"
@@ -62,7 +63,7 @@
                     <DxGridDataColumn Caption="İhale Miktarı" FieldName="TenderQuantity" />
                     <DxGridDataColumn Caption="İhale Tutarı" FieldName="TenderAmount" />
                     <DxGridDataColumn Caption="İhale Durumu" FieldName="TenderStatus" />
-                    <DxGridDataColumn Caption="Sözleşme Tarihi" FieldName="ContractDate" />
+                    <DxGridDataColumn Caption="Sözleşme Tarihi" FieldName="ContractDate" Visible="false" />
                 </Columns>
                 <GroupSummary>
                     <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />

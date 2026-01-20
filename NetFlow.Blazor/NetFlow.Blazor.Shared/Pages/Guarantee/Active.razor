@@ -88,10 +88,14 @@
                     <DxGridCommandColumn Width="6em" DeleteButtonVisible="false" />
                 </Columns>
                 <GroupSummary>
-                    <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
+                    <DxGridSummaryItem DisplayText="Kayıt Sayısı:{0}" FieldName="Id" SummaryType="GridSummaryItemType.Count" />
+                    <DxGridSummaryItem DisplayText="Toplam:{0}" FieldName="GuaranteeAmount" SummaryType="GridSummaryItemType.Sum" FooterColumnName="GuaranteeAmount" />
+                    <DxGridSummaryItem DisplayText="Toplam:{0}" FieldName="CommissionAmount" SummaryType="GridSummaryItemType.Sum" FooterColumnName="CommissionAmount" />
                 </GroupSummary>
                 <TotalSummary>
-                    <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" FooterColumnName="Id" />
+                    <DxGridSummaryItem DisplayText="Kayıt Sayısı:{0}" FieldName="Id" SummaryType="GridSummaryItemType.Count" />
+                    <DxGridSummaryItem DisplayText="Toplam:{0}" FieldName="GuaranteeAmount" SummaryType="GridSummaryItemType.Sum" FooterColumnName="GuaranteeAmount" />
+                    <DxGridSummaryItem DisplayText="Toplam:{0}" FieldName="CommissionAmount" SummaryType="GridSummaryItemType.Sum" FooterColumnName="CommissionAmount" />
                 </TotalSummary>
             </DxGrid>
         </div>

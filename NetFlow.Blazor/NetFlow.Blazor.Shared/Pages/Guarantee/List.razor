@@ -41,25 +41,22 @@
             <DxToolbarItem Tooltip="Refresh" Click="LoadGridDataAsync" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
         </DxToolbar>
     </div>
-    <div class="Guarantee-list-root">
+    <div class="Guarantee-list-root h-100">
         <div class="h-100">
             <DxGrid @ref="Grid"
                     Data="Data"
                     KeyFieldName="Id"
                     CssClass="Guarantee-list"
+                    style="height:100%;"
                     SearchText="@SearchText"
-                    EditMode="GridEditMode.PopupEditForm"
-                    PopupEditFormCssClass="pw-800"
                     SkeletonRowsEnabled="true"
-                    ColumnResizeMode="GridColumnResizeMode.NextColumn"
-                    FilterMenuButtonDisplayMode="GridFilterMenuButtonDisplayMode.Always"
+                    ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
                     TextWrapEnabled="false"
-                    FocusedRowEnabled="true"
+                    FocusedRowEnabled="false"
                     ShowAllRows="true"
                     VirtualScrollingEnabled="true"
                     RowClick="@OnRowClick"
-                    HighlightRowOnHover="true"
-                    CustomizeEditModel="Grid_CustomizeEditModel">
+                    HighlightRowOnHover="true">
                 <Columns>
                     <DxGridSelectionColumn Width="75px" />
                     <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
@@ -87,10 +84,11 @@
                     <DxGridDataColumn Caption="Düzenlenme Tarihi" FieldName="GuaranteeDate" />
                     <DxGridDataColumn Caption="Cari" FieldName="PublicAuthorityCode" />
                     <DxGridDataColumn Caption="Gider Hesap Kodu" FieldName="ExpenseAccountCode" />
-                    <DxGridCommandColumn Width="6em" DeleteButtonVisible="false" EditButtonVisible="true" />
                 </Columns>
                 <GroupSummary>
-                    <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
+                    <DxGridSummaryItem DisplayText="Kayıt Sayısı:{0}"  FieldName="Id" SummaryType="GridSummaryItemType.Count" />
+                    <DxGridSummaryItem DisplayText="Toplam:{0}" FieldName="GuaranteeAmount" SummaryType="GridSummaryItemType.Sum" FooterColumnName="GuaranteeAmount" />
+                    <DxGridSummaryItem DisplayText="Toplam:{0}" FieldName="CommissionAmount" SummaryType="GridSummaryItemType.Sum" FooterColumnName="CommissionAmount" />
                 </GroupSummary>
                 <TotalSummary>
                     <DxGridSummaryItem DisplayText="Kayıt Sayısı:{0}" FieldName="Id" SummaryType="GridSummaryItemType.Count" />
@@ -110,11 +108,6 @@
     private GridDevExtremeDataSource<GuaranteeModel> Data { get; set; } = null!;
     private IGrid? Grid { get; set; }
     private string? SearchText { get; set; }
-    bool IsGuaranteePanelOpen { get; set; }
-    bool IsGuaranteePanelPinned { get; set; }
-    bool IsActiveGuaranteeLoading { get; set; }
-    DrawerMode DrawerMode => IsGuaranteePanelPinned ? DrawerMode.Shrink : DrawerMode.Overlap;
-    GuaranteeModel? ActiveGuarantee { get; set; }
     string GuaranteeTypeFilterValue { get; set; } = "Tümü";
     string[] GuaranteeTypes { get; } = new[] { "Geçici", "Kati" };
 
