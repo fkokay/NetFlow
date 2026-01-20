@@ -5,6 +5,7 @@ using NetFlow.Application.Guarantees;
 using NetFlow.Application.Modules;
 using NetFlow.Application.Netsis.AccountingVouchers;
 using NetFlow.Application.Netsis.Customers;
+using NetFlow.Application.Netsis.ExpenseAccountCodes;
 using NetFlow.Application.Netsis.Orders;
 using NetFlow.Application.Netsis.Products;
 using NetFlow.Application.Netsis.Shipments;
@@ -29,6 +30,7 @@ namespace NetFlow.Application
             services.AddScoped<ShipmentService>();
             services.AddScoped<WarehouseService>();
             services.AddScoped<AccountingVoucherService>();
+            services.AddScoped<ExpenseAccountCodeService>();
 
             //NETFLOW
             services.AddScoped<FirmWriteService>();

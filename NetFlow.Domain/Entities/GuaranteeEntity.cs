@@ -23,6 +23,7 @@ namespace NetFlow.Domain.Entities
         public string BankCode { get; set; }
         public string BankBranchCode { get; set; }
         public string PublicAuthorityCode { get; set; }
+        public string ExpenseAccountCode { get; set; }
         public string TakasbankReferenceNo { get; set; }
         public DateTime CreatedAt { get; set; }
         public FirmEntity Firm { get; set; }

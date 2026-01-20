@@ -1,0 +1,93 @@
+﻿using Dapper;
+using NetFlow.Application.Common.Utils;
+using NetFlow.Application.Netsis.ExpenseAccountCodes;
+using NetFlow.Domain.Common.Pagination;
+using NetFlow.Domain.Netsis.ExpenseAccountCodes;
+using NetFlow.Domain.Netsis.Orders;
+using NetFlow.Infrastructure.Common;
+using NetFlow.Netsis.Connection;
+using NetFlow.Netsis.Dto;
+using NetFlow.Netsis.Utils;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace NetFlow.Netsis.Repositories
+{
+    public class NetsisExpenseAccountCodeRepository:IExpenseAccountCodeReadRepository
+    {
+        private readonly ISqlProvider _sql;
+        private readonly NetsisConnectionFactory _factory;
+        Dictionary<string, string> fieldMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["BranchCode"] = "SUBE_KODU",
+            ["Code"] = "HESAP_KODU",
+            ["Name"] = "HS_ADI",
+        };
+
+        public NetsisExpenseAccountCodeRepository(ISqlProvider sql, NetsisConnectionFactory factory)
+        {
+            _sql = sql;
+            _factory = factory;
+        }
+
+        public async Task<PagedResult> GetExpenseAccountCodes(PagedRequest request)
+        {
+            using var con = _factory.Create();
+
+            var sql = _sql.Get("ExpenseAccount.sql");
+            var sqlCount = _sql.Get("ExpenseAccountCount.sql");
+            string whereSql = "WHERE 1=1";
+            var parameters = new DynamicParameters();
+
+            if (!string.IsNullOrEmpty(request.filter))
+            {
+                var (filteSql, p) = DevExtremeSqlBuilder.Compile(request.filter, fieldMap);
+                whereSql += " AND " + filteSql;
+                parameters.AddDynamicParams(p);
+            }
+
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(request.sort, "ORDER BY HESAP_KODU DESC", fieldMap);
+            parameters.Add("@Skip", request.skip ?? 0);
+            parameters.Add("@Take", request.take ?? 10);
+
+            string dataSql = $@"
+                {sql}
+                {whereSql}
+                {orderBy}
+                OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
+            ";
+
+            string countSql = $@"
+                {sqlCount}
+                {whereSql}
+            ";
+
+            int totalCount = con.ExecuteScalar<int>(
+                countSql, parameters
+            );
+
+            if (request.isCountQuery != null && request.isCountQuery.HasValue)
+            {
+                return new PagedResult
+                {
+                    totalCount = totalCount,
+                    data = Array.Empty<ExpenseAccountCode>(),
+                };
+            }
+
+            var dto = con.Query<ExpenseAccountCodeDto>(dataSql, parameters).ToList();
+
+            return new PagedResult
+            {
+                totalCount = totalCount,
+                data = dto.Select(NetsisUtils.FixAllStrings).Select(x =>
+                      ExpenseAccountCode.Create(
+                          x.SUBE_KODU,
+                          x.HS_ADI,
+                          x.HESAP_KODU
+                      )).ToList()
+            };
+        }
+    }
+}
