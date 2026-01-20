@@ -14,7 +14,7 @@ using System.Text;
 
 namespace NetFlow.Netsis.Repositories
 {
-    public class NetsisExpenseAccountCodeRepository:IExpenseAccountCodeReadRepository
+    public class NetsisExpenseAccountCodeReadRepository:IExpenseAccountCodeReadRepository
     {
         private readonly ISqlProvider _sql;
         private readonly NetsisConnectionFactory _factory;
@@ -25,7 +25,7 @@ namespace NetFlow.Netsis.Repositories
             ["Name"] = "HS_ADI",
         };
 
-        public NetsisExpenseAccountCodeRepository(ISqlProvider sql, NetsisConnectionFactory factory)
+        public NetsisExpenseAccountCodeReadRepository(ISqlProvider sql, NetsisConnectionFactory factory)
         {
             _sql = sql;
             _factory = factory;

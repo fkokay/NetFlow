@@ -4,6 +4,8 @@ using NetFlow.Application.GuaranteeCommissions;
 using NetFlow.Application.Guarantees;
 using NetFlow.Application.Modules;
 using NetFlow.Application.Netsis.AccountingVouchers;
+using NetFlow.Application.Netsis.BankBranches;
+using NetFlow.Application.Netsis.Banks;
 using NetFlow.Application.Netsis.Customers;
 using NetFlow.Application.Netsis.ExpenseAccountCodes;
 using NetFlow.Application.Netsis.Orders;
@@ -31,6 +33,8 @@ namespace NetFlow.Application
             services.AddScoped<WarehouseService>();
             services.AddScoped<AccountingVoucherService>();
             services.AddScoped<ExpenseAccountCodeService>();
+            services.AddScoped<BankService>();
+            services.AddScoped<BankBranchService>();
 
             //NETFLOW
             services.AddScoped<FirmWriteService>();

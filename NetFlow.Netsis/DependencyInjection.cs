@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NetFlow.Application.Netsis.AccountingVouchers;
+using NetFlow.Application.Netsis.BankBranches;
+using NetFlow.Application.Netsis.Banks;
 using NetFlow.Application.Netsis.Customers;
 using NetFlow.Application.Netsis.ExpenseAccountCodes;
 using NetFlow.Application.Netsis.Orders;
@@ -25,7 +27,9 @@ namespace NetFlow.Netsis
             services.AddScoped<IWarehouseReadRepository, NetsisWarehouseReadRepository>();
             services.AddScoped<IOrderReadRepository, NetsisOrderReadRepository>();
             services.AddScoped<IAccountingVoucherReadRepository, NetsisAccountingVoucherReadRepository>();
-            services.AddScoped<IExpenseAccountCodeReadRepository,NetsisExpenseAccountCodeRepository>();
+            services.AddScoped<IExpenseAccountCodeReadRepository,NetsisExpenseAccountCodeReadRepository>();
+            services.AddScoped<IBankReadRepository,NetsisBankReadRepository>();
+            services.AddScoped<IBankBranchReadRepository,NetsisBankBranchReadRepository>();
             return services;
         }
     }

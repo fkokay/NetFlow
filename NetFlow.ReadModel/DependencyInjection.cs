@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using NetFlow.ReadModel.Assets;
 using NetFlow.ReadModel.Firms;
+using NetFlow.ReadModel.GuaranteeCommissionPeriods;
 using NetFlow.ReadModel.GuaranteeCommissions;
 using NetFlow.ReadModel.Guarantees;
 using NetFlow.ReadModel.Modules;
@@ -44,6 +45,7 @@ namespace NetFlow.ReadModel
             services.AddScoped<AssetReadService>();
             services.AddScoped<ModuleReadService>();
             services.AddScoped<UserReadService>();
+            services.AddScoped<GuaranteeCommissionPeriodReadService>();
 
             return services;
         }
