@@ -62,7 +62,7 @@ namespace NetFlow.ReadModel.TenderDocuments
                 SELECT *
                 FROM dbo.VW_TenderRequiredDocument WITH (NOLOCK)
                 {whereSql}
-                ORDER BY {orderBy}
+                {orderBy}
                 OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
             ";
 

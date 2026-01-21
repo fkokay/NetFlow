@@ -5,7 +5,10 @@ using NetFlow.ReadModel.Firms;
 using NetFlow.ReadModel.GuaranteeCommissionPeriods;
 using NetFlow.ReadModel.GuaranteeCommissions;
 using NetFlow.ReadModel.Guarantees;
+using NetFlow.ReadModel.MaterialRequestHistories;
+using NetFlow.ReadModel.MaterialRequestItems;
 using NetFlow.ReadModel.Modules;
+using NetFlow.ReadModel.Requests;
 using NetFlow.ReadModel.Roles;
 using NetFlow.ReadModel.TenderDevices;
 using NetFlow.ReadModel.TenderDocuments;
@@ -46,6 +49,9 @@ namespace NetFlow.ReadModel
             services.AddScoped<ModuleReadService>();
             services.AddScoped<UserReadService>();
             services.AddScoped<GuaranteeCommissionPeriodReadService>();
+            services.AddScoped<MaterialRequestReadService>();
+            services.AddScoped<MaterialRequestItemReadService>();
+            services.AddScoped<MaterialRequestHistoryReadService>();
 
             return services;
         }

@@ -60,7 +60,7 @@ public sealed class TenderAuthorityReadService
         SELECT *
         FROM dbo.VW_TenderAuthority WITH (NOLOCK)
         {whereSql}
-        ORDER BY {orderBy}
+        {orderBy}
         OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
     ";
 
