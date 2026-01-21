@@ -16,25 +16,19 @@ namespace NetFlow.Infrastructure.Persistence
             : base(options) { }
 
         public DbSet<UserEntity> Users => Set<UserEntity>();
-
         public DbSet<RoleEntity> Roles => Set<RoleEntity>();
-
         public DbSet<PermissionEntity> Permissions => Set<PermissionEntity>();
-
         public DbSet<UserInFirmEntity> UserInFirms => Set<UserInFirmEntity>();
-
         public DbSet<UserInRoleEntity> UserInRoles => Set<UserInRoleEntity>();
-
         public DbSet<RolePermissionEntity> RolePermissions => Set<RolePermissionEntity>();
-
         public DbSet<FirmEntity> Firms => Set<FirmEntity>();
-
         public DbSet<ModuleEntity> Modules => Set<ModuleEntity>();
         public DbSet<GuaranteeEntity> Guarantees => Set<GuaranteeEntity>();
         public DbSet<GuaranteeCommissionEntity> GuaranteeCommissions => Set<GuaranteeCommissionEntity>();
         public DbSet<GuaranteeCommissionPeriodEntity> GuaranteeCommissionPeriods => Set<GuaranteeCommissionPeriodEntity>();
         public DbSet<TenderEntity> Tenders => Set<TenderEntity>();
         public DbSet<RequestEntity> Requests => Set<RequestEntity>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
