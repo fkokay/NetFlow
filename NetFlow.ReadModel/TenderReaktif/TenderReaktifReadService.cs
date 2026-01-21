@@ -63,7 +63,7 @@ namespace NetFlow.ReadModel.TenderReaktif
                 SELECT *
                 FROM dbo.VW_TenderReaktif WITH (NOLOCK)
                 {whereSql}
-                ORDER BY {orderBy}
+                {orderBy}
                 OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
             ";
 

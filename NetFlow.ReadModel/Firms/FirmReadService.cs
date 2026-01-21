@@ -59,7 +59,7 @@ namespace NetFlow.ReadModel.Firms
                 SELECT *
                 FROM dbo.VW_Firm WITH (NOLOCK)
                 {whereSql}
-                ORDER BY {orderBy}
+                {orderBy}
                 OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
             ";
 

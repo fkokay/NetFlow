@@ -32,7 +32,7 @@ namespace NetFlow.ReadModel.Modules
 
             string dataSql = $@"
                 SELECT * FROM Module WITH (NOLOCK)
-                ORDER BY {orderBy}
+                {orderBy}
                 OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
             ";
 

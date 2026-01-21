@@ -2,42 +2,40 @@
 using Microsoft.Data.SqlClient;
 using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Domain.Common.Pagination;
+using NetFlow.ReadModel.MaterialRequestItems;
+using NetFlow.ReadModel.Requests;
 using System;
 using System.Collections.Generic;
-using System.IO.Pipelines;
 using System.Text;
-using System.Xml.Linq;
 
-
-namespace NetFlow.ReadModel.Tenders
+namespace NetFlow.ReadModel.MaterialRequestHistories
 {
-    public sealed class TenderReadService
+    public class MaterialRequestHistoryReadService
     {
         private readonly ReadModelOptions _opt;
 
-        public TenderReadService(ReadModelOptions opt) => _opt = opt;
-
-        public async Task<PagedResult> ListAsync(int firmId, PagedRequest pagedRequest)
+        public MaterialRequestHistoryReadService(ReadModelOptions opt) => _opt = opt;
+        public async Task<PagedResult> ListAsync(int materialRequestId, PagedRequest pagedRequest)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
             var parameters = new DynamicParameters();
-            parameters.Add("FirmId", firmId);
+            parameters.Add("MaterialRequestId", materialRequestId);
 
-            string whereSql = "WHERE FirmId = @FirmId";
+            string whereSql = "WHERE MaterialRequestId = @MaterialRequestId";
             if (!string.IsNullOrEmpty(pagedRequest.Filter))
             {
                 var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);
                 whereSql += " AND " + sql;
                 parameters.AddDynamicParams(p);
             }
-            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "Id DESC");
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "ORDER BY Id DESC");
             string countSql = $@"
-                SELECT COUNT(1) FROM dbo.VW_Tender WITH (NOLOCK)
+                SELECT COUNT(1) FROM dbo.VW_MaterialRequestHistory WITH (NOLOCK)
                 {whereSql}
             ";
 
             string dataSql = $@"
-                SELECT * FROM dbo.VW_Tender WITH (NOLOCK)
+                SELECT * FROM dbo.VW_MaterialRequestHistory WITH (NOLOCK)
                 {whereSql}
                 {orderBy}
                 OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
@@ -52,7 +50,7 @@ namespace NetFlow.ReadModel.Tenders
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<TenderDto>(),
+                    data = Array.Empty<MaterialRequestHistoryDto>(),
                     totalCount = totalCount
                 };
             }
@@ -64,7 +62,7 @@ namespace NetFlow.ReadModel.Tenders
 
                 string sql = $@"
                     SELECT {summarySqlPart}
-                    FROM dbo.VW_Tender WITH (NOLOCK)
+                    FROM dbo.VW_MaterialRequestHistory WITH (NOLOCK)
                     {whereSql};
                 ";
 
@@ -85,7 +83,7 @@ namespace NetFlow.ReadModel.Tenders
             parameters.Add("@Skip", pagedRequest.Skip ?? 0);
             parameters.Add("@Take", pagedRequest.Take ?? 10);
 
-            var data = cn.Query<TenderDto>(dataSql, parameters).ToList();
+            var data = cn.Query<MaterialRequestHistoryDto>(dataSql, parameters).ToList();
 
             return new PagedResult
             {
@@ -94,14 +92,12 @@ namespace NetFlow.ReadModel.Tenders
             };
         }
 
-        public async Task<TenderDto?> GetAsync(int id)
+        public async Task<MaterialRequestHistoryDto?> GetAsync(int id)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
 
-            var sql = "SELECT TOP 1 * FROM dbo.VW_Tender WITH (NOLOCK) WHERE Id=@Id";
-            return await cn.QueryFirstOrDefaultAsync<TenderDto>(sql, new { Id = id });
+            var sql = "SELECT TOP 1 * FROM dbo.VW_MaterialRequestHistory WITH (NOLOCK) WHERE Id=@Id";
+            return await cn.QueryFirstOrDefaultAsync<MaterialRequestHistoryDto>(sql, new { Id = id });
         }
     }
-
-
 }

@@ -63,7 +63,7 @@ namespace NetFlow.ReadModel.TenderExternalQuality
         SELECT *
         FROM dbo.VW_TenderExternalQuality WITH (NOLOCK)
         {whereSql}
-        ORDER BY {orderBy}
+        {orderBy}
         OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
     ";
 

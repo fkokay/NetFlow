@@ -9,7 +9,7 @@
   <ItemGroup>
     <Folder Include="Assets\" />
     <Folder Include="Documents\" />
-    <Folder Include="Requests\" />
+    <Folder Include="MaterialRequests\" />
   </ItemGroup>
 
   <ItemGroup>

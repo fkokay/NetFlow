@@ -61,7 +61,7 @@ namespace NetFlow.ReadModel.Assets
             SELECT *
             FROM dbo.VW_Asset WITH (NOLOCK)
             {whereSql}
-            ORDER BY {orderBy}
+            {orderBy}
             OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
             ";
 

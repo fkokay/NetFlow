@@ -86,7 +86,7 @@ namespace NetFlow.ReadModel.Users
 
                  FROM [User] usr WITH (NOLOCK)
                  {whereSql}
-                 ORDER BY {orderBy}
+                 {orderBy}
                  OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
              ";
 

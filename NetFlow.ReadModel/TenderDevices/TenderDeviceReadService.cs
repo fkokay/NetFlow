@@ -62,7 +62,7 @@ namespace NetFlow.ReadModel.TenderDevices
                 SELECT *
                 FROM dbo.VW_TenderDevice WITH (NOLOCK)
                 {whereSql}
-                ORDER BY {orderBy}
+                {orderBy}
                 OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
             ";
 

@@ -62,7 +62,7 @@ public sealed class TenderCapexReadService
         SELECT *
         FROM dbo.VW_TenderCapex WITH (NOLOCK)
         {whereSql}
-        ORDER BY {orderBy}
+        {orderBy}
         OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
     ";
 

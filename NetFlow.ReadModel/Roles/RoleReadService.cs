@@ -33,7 +33,7 @@ namespace NetFlow.ReadModel.Roles
 
             string dataSql = $@"
                 SELECT * FROM Role WITH (NOLOCK)
-                ORDER BY {orderBy}
+                {orderBy}
                 OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
             ";
 
