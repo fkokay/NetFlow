@@ -23,7 +23,16 @@
                     </div>
                 </Template>
             </DxToolbarItem>
-
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                <Template>
+                    <DxButton Text="Düzenle" Click="@OnEditClick" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
+                </Template>
+            </DxToolbarItem>
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                <Template>
+                    <DxButton Text="Sil" Click="@OnDeleteClick" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
+                </Template>
+            </DxToolbarItem>
             <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
                            Click="@LoadDataAsync"
                            Tooltip="Yenile"
@@ -76,8 +85,7 @@
                                 <div class="card h-100">
                                     <div class="authority-header">
                                         <div class="authority-avatar">
-                                            @(!string.IsNullOrEmpty(Model.BankName)
-                                                                                    ? Model.BankName[0].ToString().ToUpper()
+                                            @(!string.IsNullOrEmpty(Model.BankName)? Model.BankName[0].ToString().ToUpper()
                                                                                     : "?")
                                         </div>
 
@@ -312,7 +320,14 @@
         if (response.IsSuccessStatusCode)
             await LoadTabData(ActiveTabIndex);
     }
+    private async Task OnEditClick()
+    {
+        NavigationManager.NavigateTo($"/guarantee/edit/{Id}");
+    }
 
+    private async Task OnDeleteClick()
+    {
+    }
     private void NavigateBack()
     {
         NavigationManager.NavigateTo("/guarantee/list");

@@ -7,8 +7,8 @@ namespace NetFlow.Domain.Netsis.ExpenseAccountCodes
 {
     public sealed class ExpenseAccountCode
     {
-        public short BranchCode { get; set; }
-        public string Code { get; set; }
+        public short BranchCode { get; }
+        public string Code { get; }
         public string Name { get; }
 
 
@@ -22,15 +22,9 @@ namespace NetFlow.Domain.Netsis.ExpenseAccountCodes
             Name = name;
         }
 
-        public static ExpenseAccountCode Create(
-            short branchCode,
-           string code,
-           string name)
+        public static ExpenseAccountCode Create(short branchCode, string code, string name)
         {
-            return new ExpenseAccountCode(
-                branchCode,
-                code,
-                name);
+            return new ExpenseAccountCode(branchCode, code, name);
         }
     }
 }

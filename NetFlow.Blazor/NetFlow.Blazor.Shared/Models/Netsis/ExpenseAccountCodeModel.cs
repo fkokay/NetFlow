@@ -4,6 +4,6 @@
     {
         public short BranchCode { get; set; }
         public string Code { get; set; }
-        public string Name { get; }
+        public string Name { get; set; }
     }
 }

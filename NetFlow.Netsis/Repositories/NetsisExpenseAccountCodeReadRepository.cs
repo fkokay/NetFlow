@@ -37,7 +37,7 @@ namespace NetFlow.Netsis.Repositories
 
             var sql = _sql.Get("ExpenseAccount.sql");
             var sqlCount = _sql.Get("ExpenseAccountCount.sql");
-            string whereSql = string.Empty;
+            string whereSql = "WHERE HESAP_KODU LIKE '%780%' AND AGM='M'";
             var parameters = new DynamicParameters();
 
             if (!string.IsNullOrEmpty(request.Filter))

@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Net.Http.Json
+@using DevExpress.Blazor
 
 <div class="content-root">
     <div class="card toolbar">
@@ -23,7 +24,7 @@
                     <Template>
                         <DxButton Text="Kaydet"
                                   Click="SaveFromOutside"
-                                  Enabled="!isSaving"
+                                  Enabled="!IsSaving"
                                   RenderStyleMode="ButtonRenderStyleMode.Outline"
                                   RenderStyle="ButtonRenderStyle.Success" />
                     </Template>
@@ -39,67 +40,93 @@
                 <DataAnnotationsValidator />
 
                 <DxFormLayout ColSpanMd="6">
-                    @* TEMEL BİLGİLER *@
-                    <DxFormLayoutItem Caption="Konu" ColSpanMd="12">
+                   
+                    <DxFormLayoutItem Caption="Teminat Türü">
+                        <DxComboBox Data="@(new List<string> { "Geçici", "Kati" })" @bind-Value="model.GuaranteeType" />
+                    </DxFormLayoutItem>
+                   
+                    <DxFormLayoutItem Caption="Teminat Şekli">
+                        <DxComboBox Data="@(new List<string> { "Banka Mektubu", "Nakit" })" @bind-Value="model.GuaranteeForm" />
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Firma">
+                        <DxComboBox Data="@Firms"
+                                    @bind-Value="model.FirmId"
+                                    TextFieldName="FirmName"
+                                    ValueFieldName="Id"
+                                    FilteringMode="DataGridFilteringMode.Contains"
+                                    SearchMode="ListSearchMode.AutoSearch" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Konu">
                         <DxTextBox @bind-Text="model.Subject" ValidationEnabled="true" ShowValidationIcon="true" />
                     </DxFormLayoutItem>
 
-                    <DxFormLayoutItem Caption="Teminat Belge No">
-                        <DxTextBox @bind-Text="model.GuaranteeNumber" ValidationEnabled="true" ShowValidationIcon="true" />
+                    <DxFormLayoutItem Caption="Düzenleyen Banka">
+                        <DxComboBox Data="@Banks"
+                                    TData="BankModel"
+                                    TValue="string"
+                                    TextFieldName="Name"
+                                    ValueFieldName="Code"
+                                    Value="@model.BankCode"
+                                    ValueChanged="@(async (string code) => await OnBankChanged(code))"
+                                    ValueExpression="@(() => model.BankCode)" />
                     </DxFormLayoutItem>
 
-                    <DxFormLayoutItem Caption="Firma">
-                        <DxTextBox @bind-Text="model.FirmName" ReadOnly="true" />
+                    <DxFormLayoutItem Caption="Düzenleyen Şube">
+                        <DxComboBox Data="@BankBranches"
+                                    TData="BankBranchModel"
+                                    TValue="string"
+                                    TextFieldName="Name"
+                                    ValueFieldName="Name"
+                                    @bind-Value="model.BankBranchName"
+                                    Enabled="@(BankBranches != null && BankBranches.Any())" />
                     </DxFormLayoutItem>
-
-                    
-                    <DxFormLayoutItem Caption="Teminat Türü">
-                        <DxComboBox Data="@(new List<string> { "Geçici", "Kati", "Avans" })" @bind-Value="model.GuaranteeType" />
-                    </DxFormLayoutItem>
-
-                    <DxFormLayoutItem Caption="Teminat Şekli">
-                        <DxComboBox Data="@(new List<string> { "Banka Mektubu", "Nakit", "Çek-Senet" })" @bind-Value="model.GuaranteeForm" />
-                    </DxFormLayoutItem>
-
-                    
                     <DxFormLayoutItem Caption="Teminat Tutarı">
                         <DxSpinEdit @bind-Value="model.GuaranteeAmount" DisplayFormat="N2" />
                     </DxFormLayoutItem>
 
-                    <DxFormLayoutItem Caption="Para Birimi">
-                        <DxTextBox @bind-Text="model.Currency" MaxLength="3" />
+                    <DxFormLayoutItem Caption="Döviz Tipi">
+                        <DxComboBox Data="@(new List<string> { "TRY", "USD", "EUR" })"
+                                    @bind-Value="model.Currency" />
                     </DxFormLayoutItem>
-
-
-                    <DxFormLayoutItem Caption="Banka Adı">
-                        <DxTextBox @bind-Text="model.BankName" />
-                    </DxFormLayoutItem>
-
-                    <DxFormLayoutItem Caption="Banka Şube">
-                        <DxTextBox @bind-Text="model.BankBranchName" />
-                    </DxFormLayoutItem>
-
 
                     <DxFormLayoutItem Caption="Komisyon Oranı">
                         <DxSpinEdit @bind-Value="model.CommissionRate" DisplayFormat="N4" />
                     </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Kamu İdare Unvanı" ColSpanMd="6">
+                        <DxTextBox @bind-Text="model.PublicAuthorityName">
+                            <Buttons>
+                                <DxEditorButton IconCssClass="search-icon icon"
+                                                Tooltip="Hesap Kodu Seç"
+                                                Click="@(() => CustomerPopupVisible = true)" />
+                            </Buttons>
+                        </DxTextBox>
+                    </DxFormLayoutItem>
+                    <DxFormLayoutItem Caption="Gider Hesap Kodu" ColSpanMd="6">
+                        <DxTextBox @bind-Text="model.ExpenseAccountName">
+                            <Buttons>
+                                <DxEditorButton IconCssClass="search-icon icon"
+                                                Tooltip="Hesap Kodu Seç"
+                                                Click="@(() => ExpensePopupVisible = true)" />
+                            </Buttons>
+                        </DxTextBox>
+                    </DxFormLayoutItem>
+
+                   
 
                     <DxFormLayoutItem Caption="Komisyon Tutarı">
                         <DxSpinEdit @bind-Value="model.CommissionAmount" DisplayFormat="N2" ReadOnly="true" />
                     </DxFormLayoutItem>
 
-
                     <DxFormLayoutItem Caption="Düzenlenme Tarihi">
                         <DxDateEdit @bind-Date="model.GuaranteeDate" />
                     </DxFormLayoutItem>
 
-                    <DxFormLayoutItem Caption="Vade Tarihi">
+                    <DxFormLayoutItem Caption="Geçerlilik Tarihi">
                         <DxDateEdit @bind-Date="model.ExpiryDate" />
                     </DxFormLayoutItem>
-
-
-                    <DxFormLayoutItem Caption="Muhatap Kurum" ColSpanMd="12">
-                        <DxTextBox @bind-Text="model.PublicAuthorityName" />
+                    <DxFormLayoutItem Caption="Belge Numarası">
+                        <DxTextBox @bind-Text="model.GuaranteeNumber" ValidationEnabled="true" ShowValidationIcon="true" />
                     </DxFormLayoutItem>
 
                     <DxFormLayoutItem Caption="Takasbank Ref No" ColSpanMd="12">
@@ -109,7 +136,6 @@
                     <DxFormLayoutItem ColSpanMd="12">
                         <ValidationSummary />
                     </DxFormLayoutItem>
-
                 </DxFormLayout>
             </EditForm>
         }
@@ -123,141 +149,243 @@
     </div>
 </div>
 
-<DxPopup @bind-Visible="popupVisible"
-         Width="460px"
-         ShowFooter="true"
-         CloseOnOutsideClick="false">
+
+<DxPopup @bind-Visible="PopupVisible" Width="460px" ShowFooter="true" CloseOnOutsideClick="false">
     <HeaderTemplate>
-        <div class="popup-adv-header @(isSuccess ? "success" : "danger")">
-            <div class="popup-adv-header-icon">
-                @(isSuccess ? "✓" : "!")
-            </div>
+        <div class="popup-adv-header @(IsSuccess ? "success" : "danger")">
+            <div class="popup-adv-header-icon">@(IsSuccess ? "✓" : "!")</div>
             <div>
-                <div class="popup-adv-header-title">
-                    @(isSuccess ? "İşlem Başarılı" : "İşlem Hatası")
-                </div>
-                <div class="popup-adv-header-subtitle">
-                    @popupTitle
-                </div>
+                <div class="popup-adv-header-title">@(IsSuccess ? "İşlem Başarılı" : "İşlem Hatası")</div>
+                <div class="popup-adv-header-subtitle">@PopupTitle</div>
             </div>
         </div>
     </HeaderTemplate>
     <BodyTemplate>
         <div class="popup-adv-body">
-            <div class="popup-adv-body-icon @(isSuccess ? "success" : "danger")">
-                @(isSuccess ? "✓" : "!")
-            </div>
+            <div class="popup-adv-body-icon @(IsSuccess ? "success" : "danger")">@(IsSuccess ? "✓" : "!")</div>
             <div class="popup-adv-body-content">
-                <h5 class="popup-adv-body-title">
-                    @(isSuccess ? "Bilgiler Güncellendi" : "Hata Oluştu")
-                </h5>
-                <p class="popup-adv-body-message">
-                    @popupMessage
-                </p>
+                <h5 class="popup-adv-body-title">@(IsSuccess ? "Bilgiler Güncellendi" : "Hata Oluştu")</h5>
+                <p class="popup-adv-body-message">@PopupMessage</p>
             </div>
         </div>
     </BodyTemplate>
     <FooterTemplate>
         <div class="popup-adv-footer">
-            <DxButton Text="Kapat"
-                      Width="130px"
-                      RenderStyle="@(isSuccess ? ButtonRenderStyle.Success : ButtonRenderStyle.Danger)"
-                      Click="OnPopupOk" />
+            <DxButton Text="Kapat" Width="130px" RenderStyle="@(IsSuccess? ButtonRenderStyle.Success: ButtonRenderStyle.Danger)" Click="OnPopupOk" />
         </div>
     </FooterTemplate>
 </DxPopup>
 
+<DxPopup @bind-Visible="ExpensePopupVisible"
+         HeaderText="Gider Hesap Kodu Seçimi"
+         Width="800px"
+         Height="600px"
+         Scrollable="true">
+    <BodyTemplate>
+        <DxGrid Data="@ExpenseDataSource"
+                ShowFilterRow="true"
+                PageSize="12"
+                SelectionMode="GridSelectionMode.Single"
+                SelectedDataItemChanged="@OnExpenseSelected"
+                KeyFieldName="Code"
+                FilteringMode="GridFilteringMode.FilterRow">
+            <Columns>
+                <DxGridSelectionColumn  Width="100px"/>
+                <DxGridDataColumn FieldName="Code" Caption="Hesap Kodu" Width="150px" />
+                <DxGridDataColumn FieldName="Name" Caption="Hesap Adı" />
+            </Columns>
+        </DxGrid>
+    </BodyTemplate>
+</DxPopup>
+<DxPopup @bind-Visible="CustomerPopupVisible"
+         HeaderText="Kamu İdare Unvanı Seçimi"
+         Width="800px"
+         Height="600px"
+         Scrollable="true">
+    <BodyTemplate>
+        <DxGrid Data="@CustomerDataSource"
+                ShowFilterRow="true"
+                PageSize="12"
+                SelectionMode="GridSelectionMode.Single"
+                SelectedDataItemChanged="@OnCustomerSelected"
+                VirtualScrollingEnabled="true"
+                KeyFieldName="Code"
+                FilteringMode="GridFilteringMode.FilterRow">
+            <Columns>
+                <DxGridSelectionColumn Width="100px" />
+                <DxGridDataColumn FieldName="Code" Caption="Hesap Kodu" Width="150px" />
+                <DxGridDataColumn FieldName="Name" Caption="Hesap Adı" />
+            </Columns>
+        </DxGrid>
+    </BodyTemplate>
+</DxPopup>
 @code {
     [Parameter] public int Id { get; set; }
 
     private GuaranteeModel model = new();
     private EditContext? editContext;
-    private bool isSaving, popupVisible, isSuccess;
-    private string popupTitle = "", popupMessage = "";
+    private bool IsSaving, PopupVisible, IsSuccess;
+    private string PopupTitle = "", PopupMessage = "";
+    private IEnumerable<FirmSelectModel>? Firms { get; set; }
+    private IEnumerable<BankModel>? Banks { get; set; }
+    private IEnumerable<BankBranchModel>? BankBranches { get; set; }
+    private bool ExpensePopupVisible { get; set; }
+    private bool CustomerPopupVisible { get; set; }
+    private GridDevExtremeDataSource<ExpenseAccountCodeModel>? ExpenseDataSource;
+    private GridDevExtremeDataSource<CustomerModel>? CustomerDataSource;
 
     protected override async Task OnInitializedAsync()
     {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        string baseUrl = "https://localhost:7071/api";
+        ExpenseDataSource = new GridDevExtremeDataSource<ExpenseAccountCodeModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/netsis/expense-account-codes/list"));
+        CustomerDataSource = new GridDevExtremeDataSource<CustomerModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/netsis/customers/pagedList"));
         if (Id > 0)
         {
             try
             {
-                var httpClient = HttpClientFactory.CreateClient("ApiClient");
-                var client = await ApiClientFactory.CreateAsync(httpClient);
+                editContext = new EditContext(model);
 
-                var result = await client.GetFromJsonAsync<GuaranteeModel>($"api/guarantees/{Id}");
+                await LoadBanksAsync();
+                await LoadFirmsAsync();
+
+                var httpClient = HttpClientFactory.CreateClient("ApiClient");
+                var api_client = await ApiClientFactory.CreateAsync(httpClient);
+                var result = await api_client.GetFromJsonAsync<GuaranteeModel>($"api/guarantees/{Id}");
+
 
                 if (result != null)
                 {
                     model = result;
-                    editContext = new EditContext(model);
-                }
-                else
-                {
-                    NavigationManager.NavigateTo("/guarantee/list");
+
+                   
                 }
             }
             catch (Exception ex)
             {
-                popupTitle = "Yükleme Hatası";
-                popupMessage = "Veriler getirilirken bir hata oluştu: " + ex.Message;
-                isSuccess = false;
-                popupVisible = true;
+                PopupTitle = "Yükleme Hatası";
+                PopupMessage = "Veriler getirilirken bir hata oluştu: " + ex.Message;
+                IsSuccess = false;
+                PopupVisible = true;
             }
+        }
+    }
+
+    private void OnExpenseSelected(object selectedItem)
+    {
+        if (selectedItem is ExpenseAccountCodeModel selectedAccount)
+        {
+            model.ExpenseAccountName = selectedAccount.Name;
+            model.ExpenseAccountCode = selectedAccount.Code;
+            ExpensePopupVisible = false;
+            StateHasChanged();
+        }
+    }
+    private void OnCustomerSelected(object selectedItem)
+    {
+        if (selectedItem is CustomerModel selectedCustomer)
+        {
+            model.PublicAuthorityCode = selectedCustomer.Code;
+            model.PublicAuthorityName = selectedCustomer.Name;
+            CustomerPopupVisible = false;
+            StateHasChanged();
+        }
+    }
+    private async Task LoadFirmsAsync()
+    {
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        Firms = await client.GetFromJsonAsync<List<FirmSelectModel>>("api/firms/list");
+    }
+
+    private async Task LoadBanksAsync()
+    {
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        Banks = await client.GetFromJsonAsync<List<BankModel>>("api/netsis/banks/list");
+    }
+
+    private async Task OnBankChanged(string newBankCode)
+    {
+        model.BankCode = newBankCode;
+        model.BankName = Banks?.FirstOrDefault(x => x.Code == newBankCode)?.Name;
+        model.BankBranchName = null;
+
+        if (!string.IsNullOrEmpty(newBankCode))
+        {
+            await LoadBranchesAsync(newBankCode);
+        }
+        else
+        {
+            BankBranches = null;
+        }
+    }
+
+    private async Task LoadBranchesAsync(string bankCode)
+    {
+        if (string.IsNullOrEmpty(bankCode)) return;
+
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        BankBranches = await client.GetFromJsonAsync<List<BankBranchModel>>($"api/netsis/bankbranches/list?bankCode={bankCode}");
+
+        if (BankBranches != null && BankBranches.Count() == 1)
+        {
+            model.BankBranchName = BankBranches.First().Name;
         }
     }
 
     private async Task SaveFromOutside()
     {
-        if (isSaving || editContext == null) return;
+        if (IsSaving || editContext == null) return;
         if (!editContext.Validate()) return;
         await HandleValidSubmit();
     }
 
     private async Task HandleValidSubmit()
     {
-        if (isSaving) return;
-        isSaving = true;
+        if (IsSaving) return;
+        IsSaving = true;
 
         try
         {
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
-
             var response = await client.PutAsJsonAsync("api/guarantees", model);
 
             if (response.IsSuccessStatusCode)
             {
-                isSuccess = true;
-                popupTitle = "Başarılı";
-                popupMessage = "Teminat bilgileri başarıyla güncellendi.";
+                IsSuccess = true;
+                PopupTitle = "Başarılı";
+                PopupMessage = "Teminat bilgileri başarıyla güncellendi.";
             }
             else
             {
                 var errorMsg = await response.Content.ReadAsStringAsync();
-                isSuccess = false;
-                popupTitle = "Sunucu Hatası";
-                popupMessage = string.IsNullOrEmpty(errorMsg) ? "Güncelleme sırasında bir hata oluştu." : errorMsg;
+                IsSuccess = false;
+                PopupTitle = "Sunucu Hatası";
+                PopupMessage = string.IsNullOrEmpty(errorMsg) ? "Güncelleme sırasında bir hata oluştu." : errorMsg;
             }
         }
         catch (Exception ex)
         {
-            isSuccess = false;
-            popupTitle = "Bağlantı Hatası";
-            popupMessage = "Sunucuyla iletişim kurulamadı: " + ex.Message;
+            IsSuccess = false;
+            PopupTitle = "Bağlantı Hatası";
+            PopupMessage = "Sunucuyla iletişim kurulamadı: " + ex.Message;
         }
         finally
         {
-            popupVisible = true;
-            isSaving = false;
+            PopupVisible = true;
+            IsSaving = false;
         }
     }
 
     private void OnPopupOk()
     {
-        popupVisible = false;
-        if (isSuccess)
-            NavigationManager.NavigateTo("/guarantee/list");
+        PopupVisible = false;
+        if (IsSuccess) NavigationManager.NavigateTo("/guarantee/list");
     }
 
     private void NavigateBack() => NavigationManager.NavigateTo("/guarantee/list");
+
 }

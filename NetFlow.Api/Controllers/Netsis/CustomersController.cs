@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NetFlow.Application.Netsis.Customers;
 using NetFlow.Application.Netsis.Warehouses;
+using NetFlow.Domain.Common.Pagination;
 using NetFlow.Domain.Identity;
 
 namespace NetFlow.Api.Controllers.Netsis
@@ -22,6 +23,13 @@ namespace NetFlow.Api.Controllers.Netsis
         public async Task<IActionResult> List()
         {
             var data = await _service.GetCustomers();
+            return Ok(data);
+        }
+
+        [HttpGet("pagedList")]
+        public async Task<IActionResult> List([FromQuery] PagedRequest request)
+        {
+            var data = await _service.GetPagedAsync(request);
             return Ok(data);
         }
     }

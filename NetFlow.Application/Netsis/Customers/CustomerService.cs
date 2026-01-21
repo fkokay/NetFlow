@@ -1,4 +1,5 @@
 ﻿using NetFlow.Application.Netsis.Warehouses;
+using NetFlow.Domain.Common.Pagination;
 using NetFlow.Domain.Netsis.Customers;
 using NetFlow.Domain.Netsis.Warehouses;
 using System;
@@ -19,6 +20,11 @@ namespace NetFlow.Application.Netsis.Customers
         public async Task<List<Customer>> GetCustomers()
         {
             return await _readRepo.GetCustomers();
+        }
+
+        public async Task<PagedResult> GetPagedAsync(PagedRequest request)
+        {
+            return await _readRepo.GetCustomers(request);
         }
     }
 }
