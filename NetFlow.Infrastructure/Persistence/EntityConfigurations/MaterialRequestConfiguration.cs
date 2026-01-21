@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using NetFlow.Domain.Entities;
+using NetFlow.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -34,12 +35,10 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
                    .IsRequired();
 
             builder.Property(x => x.Priority)
-                   .HasMaxLength(20)
-                   .HasDefaultValue("Normal");
+                   .HasDefaultValue(MaterialRequestPriority.Normal);
 
             builder.Property(x => x.Status)
-                   .HasMaxLength(30)
-                   .HasDefaultValue("Open");
+                .HasDefaultValue(MaterialRequestStatus.Open);
 
             // Optional fields
             builder.Property(x => x.RequestedDepartment)

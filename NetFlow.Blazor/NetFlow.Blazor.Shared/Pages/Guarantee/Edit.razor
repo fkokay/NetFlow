@@ -34,118 +34,131 @@
     </div>
 
     <div class="guarantee-edit">
-        @if (editContext != null)
-        {
-            <EditForm EditContext="@editContext" Context="formContext">
-                <DataAnnotationsValidator />
+        <DxLoadingPanel Visible="@(EditContext == null)"
+                        IsContentBlocked="true"
+                        IsContentVisible="false"
+                        IndicatorVisible="true"
+                        IndicatorAreaVisible="true"
+                        ZIndex="101"
+                        Text="Yükleniyor...">
+            <DxGridLayout ColumnSpacing="1rem" RowSpacing="1rem" CssClass="h-100">
+                <Columns>
+                    <DxGridLayoutColumn Width="100%" />
+                </Columns>
+                <Rows>
+                    <DxGridLayoutRow Areas="Item1" />
+                </Rows>
+                <Items>
+                    <DxGridLayoutItem Area="item1">
+                        <Template>
+                            <EditForm EditContext="@EditContext" Context="formContext">
 
-                <DxFormLayout ColSpanMd="6">
-                   
-                    <DxFormLayoutItem Caption="Teminat Türü">
-                        <DxComboBox Data="@(new List<string> { "Geçici", "Kati" })" @bind-Value="model.GuaranteeType" />
-                    </DxFormLayoutItem>
-                   
-                    <DxFormLayoutItem Caption="Teminat Şekli">
-                        <DxComboBox Data="@(new List<string> { "Banka Mektubu", "Nakit" })" @bind-Value="model.GuaranteeForm" />
-                    </DxFormLayoutItem>
-                    <DxFormLayoutItem Caption="Firma">
-                        <DxComboBox Data="@Firms"
-                                    @bind-Value="model.FirmId"
-                                    TextFieldName="FirmName"
-                                    ValueFieldName="Id"
-                                    FilteringMode="DataGridFilteringMode.Contains"
-                                    SearchMode="ListSearchMode.AutoSearch" />
-                    </DxFormLayoutItem>
+                                <DataAnnotationsValidator />
 
-                    <DxFormLayoutItem Caption="Konu">
-                        <DxTextBox @bind-Text="model.Subject" ValidationEnabled="true" ShowValidationIcon="true" />
-                    </DxFormLayoutItem>
+                                <DxFormLayout ColSpanMd="6">
 
-                    <DxFormLayoutItem Caption="Düzenleyen Banka">
-                        <DxComboBox Data="@Banks"
-                                    TData="BankModel"
-                                    TValue="string"
-                                    TextFieldName="Name"
-                                    ValueFieldName="Code"
-                                    Value="@model.BankCode"
-                                    ValueChanged="@(async (string code) => await OnBankChanged(code))"
-                                    ValueExpression="@(() => model.BankCode)" />
-                    </DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Teminat Türü">
+                                        <DxComboBox Data="@(new List<string> { "Geçici", "Kati" })" @bind-Value="Model.GuaranteeType" />
+                                    </DxFormLayoutItem>
 
-                    <DxFormLayoutItem Caption="Düzenleyen Şube">
-                        <DxComboBox Data="@BankBranches"
-                                    TData="BankBranchModel"
-                                    TValue="string"
-                                    TextFieldName="Name"
-                                    ValueFieldName="Name"
-                                    @bind-Value="model.BankBranchName"
-                                    Enabled="@(BankBranches != null && BankBranches.Any())" />
-                    </DxFormLayoutItem>
-                    <DxFormLayoutItem Caption="Teminat Tutarı">
-                        <DxSpinEdit @bind-Value="model.GuaranteeAmount" DisplayFormat="N2" />
-                    </DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Teminat Şekli">
+                                        <DxComboBox Data="@(new List<string> { "Banka Mektubu", "Nakit" })" @bind-Value="Model.GuaranteeForm" />
+                                    </DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Firma">
+                                        <DxComboBox Data="@Firms"
+                                                    @bind-Value="Model.FirmId"
+                                                    TextFieldName="FirmName"
+                                                    ValueFieldName="Id"
+                                                    FilteringMode="DataGridFilteringMode.Contains"
+                                                    SearchMode="ListSearchMode.AutoSearch" />
+                                    </DxFormLayoutItem>
 
-                    <DxFormLayoutItem Caption="Döviz Tipi">
-                        <DxComboBox Data="@(new List<string> { "TRY", "USD", "EUR" })"
-                                    @bind-Value="model.Currency" />
-                    </DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Konu">
+                                        <DxTextBox @bind-Text="Model.Subject" ValidationEnabled="true" ShowValidationIcon="true" />
+                                    </DxFormLayoutItem>
 
-                    <DxFormLayoutItem Caption="Komisyon Oranı">
-                        <DxSpinEdit @bind-Value="model.CommissionRate" DisplayFormat="N4" />
-                    </DxFormLayoutItem>
-                    <DxFormLayoutItem Caption="Kamu İdare Unvanı" ColSpanMd="6">
-                        <DxTextBox @bind-Text="model.PublicAuthorityName">
-                            <Buttons>
-                                <DxEditorButton IconCssClass="search-icon icon"
-                                                Tooltip="Hesap Kodu Seç"
-                                                Click="@(() => CustomerPopupVisible = true)" />
-                            </Buttons>
-                        </DxTextBox>
-                    </DxFormLayoutItem>
-                    <DxFormLayoutItem Caption="Gider Hesap Kodu" ColSpanMd="6">
-                        <DxTextBox @bind-Text="model.ExpenseAccountName">
-                            <Buttons>
-                                <DxEditorButton IconCssClass="search-icon icon"
-                                                Tooltip="Hesap Kodu Seç"
-                                                Click="@(() => ExpensePopupVisible = true)" />
-                            </Buttons>
-                        </DxTextBox>
-                    </DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Düzenleyen Banka">
+                                        <DxComboBox Data="@Banks"
+                                                    TData="BankModel"
+                                                    TValue="string"
+                                                    TextFieldName="Name"
+                                                    ValueFieldName="Code"
+                                                    Value="@Model.BankCode"
+                                                    ValueChanged="@(async (string code) => await OnBankChanged(code))"
+                                                    ValueExpression="@(() => Model.BankCode)" />
+                                    </DxFormLayoutItem>
 
-                   
+                                    <DxFormLayoutItem Caption="Düzenleyen Şube">
+                                        <DxComboBox Data="@BankBranches"
+                                                    TData="BankBranchModel"
+                                                    TValue="string"
+                                                    TextFieldName="Name"
+                                                    ValueFieldName="Name"
+                                                    @bind-Value="Model.BankBranchName"
+                                                    Enabled="@(BankBranches != null && BankBranches.Any())" />
+                                    </DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Teminat Tutarı">
+                                        <DxSpinEdit @bind-Value="Model.GuaranteeAmount" DisplayFormat="N2" />
+                                    </DxFormLayoutItem>
 
-                    <DxFormLayoutItem Caption="Komisyon Tutarı">
-                        <DxSpinEdit @bind-Value="model.CommissionAmount" DisplayFormat="N2" ReadOnly="true" />
-                    </DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Döviz Tipi">
+                                        <DxComboBox Data="@(new List<string> { "TRY", "USD", "EUR" })"
+                                                    @bind-Value="Model.Currency" />
+                                    </DxFormLayoutItem>
 
-                    <DxFormLayoutItem Caption="Düzenlenme Tarihi">
-                        <DxDateEdit @bind-Date="model.GuaranteeDate" />
-                    </DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Komisyon Oranı">
+                                        <DxSpinEdit @bind-Value="Model.CommissionRate" DisplayFormat="N4" />
+                                    </DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Kamu İdare Unvanı" ColSpanMd="6">
+                                        <DxTextBox @bind-Text="Model.PublicAuthorityName">
+                                            <Buttons>
+                                                <DxEditorButton IconCssClass="search-icon icon"
+                                                                Tooltip="Hesap Kodu Seç"
+                                                                Click="@(() => CustomerPopupVisible = true)" />
+                                            </Buttons>
+                                        </DxTextBox>
+                                    </DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Gider Hesap Kodu" ColSpanMd="6">
+                                        <DxTextBox @bind-Text="Model.ExpenseAccountName">
+                                            <Buttons>
+                                                <DxEditorButton IconCssClass="search-icon icon"
+                                                                Tooltip="Hesap Kodu Seç"
+                                                                Click="@(() => ExpensePopupVisible = true)" />
+                                            </Buttons>
+                                        </DxTextBox>
+                                    </DxFormLayoutItem>
 
-                    <DxFormLayoutItem Caption="Geçerlilik Tarihi">
-                        <DxDateEdit @bind-Date="model.ExpiryDate" />
-                    </DxFormLayoutItem>
-                    <DxFormLayoutItem Caption="Belge Numarası">
-                        <DxTextBox @bind-Text="model.GuaranteeNumber" ValidationEnabled="true" ShowValidationIcon="true" />
-                    </DxFormLayoutItem>
 
-                    <DxFormLayoutItem Caption="Takasbank Ref No" ColSpanMd="12">
-                        <DxTextBox @bind-Text="model.TakasbankReferenceNo" />
-                    </DxFormLayoutItem>
 
-                    <DxFormLayoutItem ColSpanMd="12">
-                        <ValidationSummary />
-                    </DxFormLayoutItem>
-                </DxFormLayout>
-            </EditForm>
-        }
-        else
-        {
-            <div class="p-4 text-center">
-                <DxWaitIndicator Visible="true" />
-                <p>Veriler yükleniyor...</p>
-            </div>
-        }
+                                    <DxFormLayoutItem Caption="Komisyon Tutarı">
+                                        <DxSpinEdit @bind-Value="Model.CommissionAmount" DisplayFormat="N2" ReadOnly="true" />
+                                    </DxFormLayoutItem>
+
+                                    <DxFormLayoutItem Caption="Düzenlenme Tarihi">
+                                        <DxDateEdit @bind-Date="Model.GuaranteeDate" />
+                                    </DxFormLayoutItem>
+
+                                    <DxFormLayoutItem Caption="Geçerlilik Tarihi">
+                                        <DxDateEdit @bind-Date="Model.ExpiryDate" />
+                                    </DxFormLayoutItem>
+                                    <DxFormLayoutItem Caption="Belge Numarası">
+                                        <DxTextBox @bind-Text="Model.GuaranteeNumber" ValidationEnabled="true" ShowValidationIcon="true" />
+                                    </DxFormLayoutItem>
+
+                                    <DxFormLayoutItem Caption="Takasbank Ref No" ColSpanMd="12">
+                                        <DxTextBox @bind-Text="Model.TakasbankReferenceNo" />
+                                    </DxFormLayoutItem>
+
+                                    <DxFormLayoutItem ColSpanMd="12">
+                                        <ValidationSummary />
+                                    </DxFormLayoutItem>
+                                </DxFormLayout>
+                            </EditForm>
+                        </Template>
+                    </DxGridLayoutItem>
+                </Items>
+            </DxGridLayout>
+        </DxLoadingPanel>
     </div>
 </div>
 
@@ -175,7 +188,6 @@
         </div>
     </FooterTemplate>
 </DxPopup>
-
 <DxPopup @bind-Visible="ExpensePopupVisible"
          HeaderText="Gider Hesap Kodu Seçimi"
          Width="800px"
@@ -190,7 +202,7 @@
                 KeyFieldName="Code"
                 FilteringMode="GridFilteringMode.FilterRow">
             <Columns>
-                <DxGridSelectionColumn  Width="100px"/>
+                <DxGridSelectionColumn Width="100px" />
                 <DxGridDataColumn FieldName="Code" Caption="Hesap Kodu" Width="150px" />
                 <DxGridDataColumn FieldName="Name" Caption="Hesap Adı" />
             </Columns>
@@ -219,11 +231,12 @@
         </DxGrid>
     </BodyTemplate>
 </DxPopup>
+
 @code {
     [Parameter] public int Id { get; set; }
 
-    private GuaranteeModel model = new();
-    private EditContext? editContext;
+    private GuaranteeModel Model = new();
+    private EditContext? EditContext;
     private bool IsSaving, PopupVisible, IsSuccess;
     private string PopupTitle = "", PopupMessage = "";
     private IEnumerable<FirmSelectModel>? Firms { get; set; }
@@ -258,7 +271,7 @@
                 {
                     model = result;
 
-                   
+
                 }
             }
             catch (Exception ex)
