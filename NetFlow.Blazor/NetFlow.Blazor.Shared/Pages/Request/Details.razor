@@ -1,0 +1,228 @@
+@page "/request/details/{Id:int}"
+@using System.Net.Http.Json
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+
+<DxLayoutBreakpoint DeviceSize="DeviceSize.XSmall | DeviceSize.Small | DeviceSize.Medium"
+                    @bind-IsActive="@IsSmallScreen" />
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+
+            <DxToolbarItem IconCssClass="back-icon icon medium-icon"
+                           Tooltip="Geri"
+                           Click="NavigateBack" />
+
+            <DxToolbarItem>
+                <Template>
+                    <div class="custom-item">
+                        <div class="title">Malzeme Talebi Detayý</div>
+                    </div>
+                </Template>
+            </DxToolbarItem>
+
+           
+
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
+                           Click="LoadDataAsync"
+                           Tooltip="Yenile"
+                           IconCssClass="refresh-icon icon medium-icon" />
+        </DxToolbar>
+    </div>
+
+    <DxLoadingPanel Visible="@(!IsDataLoaded)"
+                    IsContentBlocked="true"
+                    IsContentVisible="false"
+                    Text="Yükleniyor...">
+
+        <DxGridLayout ColumnSpacing="1rem" RowSpacing="1rem">
+
+            <Columns>
+                @if (!IsSmallScreen)
+                {
+                    <DxGridLayoutColumn Width="1fr" />
+                    <DxGridLayoutColumn Width="3fr" />
+                }
+                else
+                {
+                    <DxGridLayoutColumn Width="100%" />
+                }
+            </Columns>
+
+            <Rows>
+                @if (!IsSmallScreen)
+                {
+                    <DxGridLayoutRow Areas="item1 item2" />
+                }
+                else
+                {
+                    <DxGridLayoutRow Areas="item1" />
+                    <DxGridLayoutRow Areas="item2" />
+                }
+            </Rows>
+
+            <Items>
+
+                <DxGridLayoutItem Area="item1">
+                    <Template>
+                        @if (Model != null)
+                        {
+                            <div class="card h-100">
+                                <div class="authority-header">
+                                    <div class="authority-avatar">
+                                        @Model.RequestNo[0]
+                                    </div>
+
+                                    <h5 class="authority-title">
+                                        Talep No: @Model.RequestNo
+                                    </h5>
+
+                                    <span class="authority-badge">
+                                        @Model.Status
+                                    </span>
+                                </div>
+
+                                <div class="request-stats">
+                                    <div class="request-stat">
+                                        <div class="request-stat-title">
+                                            @Model.RequestType
+                                        </div>
+                                        <small>Talep Türü</small>
+                                    </div>
+
+                                    <div class="request-stat">
+                                        <div class="request-stat-title">
+                                            @Model.Priority
+                                        </div>
+                                        <small>Öncelik</small>
+                                    </div>
+                                </div>
+
+                                <h6 class="request-section-title">GENEL BÝLGÝLER</h6>
+
+                                <div class="request-info">
+                                    <div class="request-info-row">
+                                        <span>Talep Tarihi:</span>
+                                        <span>@Model.RequestDate.ToShortDateString()</span>
+                                    </div>
+                                    <div class="request-info-row">
+                                        <span>Gerekli Tarih:</span>
+                                        <span>@Model.RequiredDate?.ToShortDateString()</span>
+                                    </div>
+                                    <div class="request-info-row">
+                                        <span>Departman:</span>
+                                        <span>@Model.RequestedDepartment</span>
+                                    </div>
+                                    <div class="request-info-row">
+                                        <span>Açýklama:</span>
+                                        <span>@Model.Description</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </Template>
+                </DxGridLayoutItem>
+
+
+                <DxGridLayoutItem Area="item2">
+                    <Template>
+                        <DxTabs CssClass="card tabs"
+                                ActiveTabIndex="@ActiveTabIndex"
+                                ActiveTabIndexChanged="OnActiveTabIndexChanged">
+
+                            <DxTabPage Text="Talep Kalemleri">
+                                <DxGrid Data="ItemDataSource"
+                                        ShowFilterRow="true"
+                                        ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
+
+                                    <Columns>
+                                        <DxGridDataColumn FieldName="ItemCode" Caption="Kod" />
+                                        <DxGridDataColumn FieldName="ItemName" Caption="Adý" />
+                                        <DxGridDataColumn FieldName="RequestedQuantity" Caption="Talep" />
+                                        <DxGridDataColumn FieldName="FulfilledQuantity" Caption="Karþýlanan" />
+                                        <DxGridDataColumn FieldName="Unit" Caption="Birim" />
+                                        <DxGridDataColumn FieldName="WarehouseCode" Caption="Depo" />
+                                        <DxGridDataColumn FieldName="Status" Caption="Durum" />
+                                    </Columns>
+
+                                </DxGrid>
+                            </DxTabPage>
+
+                        </DxTabs>
+                    </Template>
+                </DxGridLayoutItem>
+
+            </Items>
+        </DxGridLayout>
+    </DxLoadingPanel>
+</div>
+
+@code {
+
+    [Parameter] public int Id { get; set; }
+
+    private MaterialRequestModel? Model;
+    private GridDevExtremeDataSource<MaterialRequestItemModel>? ItemDataSource;
+
+    private bool IsSmallScreen;
+    private bool IsDataLoaded;
+    private int ActiveTabIndex;
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsDataLoaded = false;
+        await LoadDataAsync();
+        IsDataLoaded = true;
+    }
+
+    private async Task LoadDataAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        var response = await client.GetAsync($"api/material-requests/{Id}");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/material-request/list");
+            return;
+        }
+
+        Model = await response.Content.ReadFromJsonAsync<MaterialRequestModel>();
+        await LoadTabData(ActiveTabIndex);
+    }
+
+    private async Task OnActiveTabIndexChanged(int index)
+    {
+        ActiveTabIndex = index;
+        await LoadTabData(index);
+    }
+
+    private async Task LoadTabData(int index)
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        var baseUrl = "https://localhost:7071/api";
+
+        if (index == 0)
+        {
+            ItemDataSource =
+                new GridDevExtremeDataSource<MaterialRequestItemModel>(
+                    client,
+                    NavigationManager.ToAbsoluteUri(
+                        $"{baseUrl}/material-request-items?materialRequestId={Id}")
+                );
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void OnEditClick()
+    {
+        NavigationManager.NavigateTo($"/request/edit/{Id}");
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/request/list");
+    }
+}

@@ -1,0 +1,132 @@
+﻿.content-root {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+    .content-root .contact-details {
+        flex-grow: 1;
+    }
+
+.toolbar {
+    padding: 0.5rem 0.5rem;
+    margin-bottom: 1rem;
+}
+
+    .toolbar .title {
+        font-size: var(--dxbl-toolbar-title-font-size);
+        line-height: var(--dxbl-toolbar-title-line-height);
+        font-weight: var(--dxbl-toolbar-title-font-weight);
+        margin: auto 0;
+    }
+
+    .toolbar .custom-item {
+        display: flex;
+        height: 100%;
+        margin: 0 0.5rem;
+    }
+
+::deep .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow-wrap: break-word;
+    background-color: var(--dxds-color-surface-neutral-default-rest);
+    background-clip: border-box;
+    border: var(--dxds-border-radius-10) solid var(--dxds-color-border-neutral-default-rest);
+    border-radius: 0.25rem;
+}
+
+    ::deep .card:not(.toolbar) {
+        padding: 1.5rem;
+    }
+
+::deep .tabs {
+    padding-top: 0.5rem !important;
+    height: 100%;
+}
+
+::deep .tab-page {
+    margin-bottom: 0.625rem;
+}
+
+::deep .h-100 {
+    height: 100%;
+}
+
+
+/*Sayfa Css*/
+
+.authority-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+    .authority-header .authority-avatar {
+        width: 64px;
+        height: 64px;
+        background: #e7e7ff;
+        color: #696cff;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .authority-header .authority-title {
+        font-weight: 700;
+    }
+
+    .authority-header .authority-badge {
+        background: #f1f2f4;
+        color: #8592a3;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+
+.request-stats {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 2rem;
+}
+
+    .request-stats .request-stat {
+        flex: 1;
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        text-align: center;
+    }
+
+        .request-stats .request-stat .request-stat-title {
+            font-weight: 700;
+        }
+
+.request-section-title {
+    font-weight: 700;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+}
+
+.request-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+    .request-info .request-info-row {
+        display: flex;
+        justify-content: space-between;
+    }
+
+        .request-info .request-info-row .request-info-strong {
+            font-weight: 600;
+            text-align: right;
+        }
