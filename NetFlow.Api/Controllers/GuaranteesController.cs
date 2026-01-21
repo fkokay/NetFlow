@@ -73,7 +73,16 @@ namespace NetFlow.Api.Controllers
             return row is null ? NotFound() : Ok(row);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateGuaranteeRequest request)
+        {
+            var id = await _write.CreateAsync(request);
 
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] EditGuaranteeRequest request)
         {

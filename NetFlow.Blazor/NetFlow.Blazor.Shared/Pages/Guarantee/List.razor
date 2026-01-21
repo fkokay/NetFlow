@@ -16,6 +16,14 @@
                     }
                 </Items>
             </DxToolbarItem>
+
+            <DxToolbarItem Text="Teminat Oluştur"
+                           Tooltip="Yeni Teminat Ekle"
+                           Alignment="ToolbarItemAlignment.Right"
+                           Click="OnAddClick"
+                           IconCssClass="add-icon icon medium-icon"
+                           RenderStyleMode="ToolbarItemRenderStyleMode.Plain" />
+
             <DxToolbarItem Tooltip="Column Chooser" Alignment="ToolbarItemAlignment.Right" Click="OnColumnChooserItemClick" IconCssClass="column-chooser-icon icon medium-icon" />
 
 
@@ -166,12 +174,12 @@
     {
         if (e.IsNew)
         {
-            NavigationManager.NavigateTo("/guarantee/create");
+            NavigationManager.NavigateTo("/guarantee/createorupdate/0");
         }
         else
         {
             var guarantee = (GuaranteeModel)e.DataItem;
-            NavigationManager.NavigateTo($"/guarantee/edit/{guarantee.Id}");
+            NavigationManager.NavigateTo($"/guarantee/createorupdate/{guarantee.Id}");
         }
     }
 
@@ -182,7 +190,7 @@
             NavigationManager.NavigateTo($"/guarantee/details/{guarantee.Id}");
         }
     }
-
+    void OnAddClick(ToolbarItemClickEventArgs e) => NavigationManager.NavigateTo("/guarantee/createorupdate/");
     void IDisposable.Dispose()
     {
         disposalTokenSource.Cancel();
