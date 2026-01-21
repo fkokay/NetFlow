@@ -29,6 +29,12 @@ namespace NetFlow.Infrastructure.Persistence
         public DbSet<TenderEntity> Tenders => Set<TenderEntity>();
         public DbSet<MaterialRequestEntity> Requests => Set<MaterialRequestEntity>();
 
+        public DbSet<MaterialRequestEntity> MaterialRequests => Set<MaterialRequestEntity>();
+
+        public DbSet<MaterialRequestItemEntity> MaterialRequestItems => Set<MaterialRequestItemEntity>();
+
+        public DbSet<MaterialRequestHistoryEntity> MaterialRequestsHistory => Set<MaterialRequestHistoryEntity>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
