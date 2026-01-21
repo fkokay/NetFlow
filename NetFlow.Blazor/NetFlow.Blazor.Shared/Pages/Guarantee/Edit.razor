@@ -257,7 +257,7 @@
         {
             try
             {
-                editContext = new EditContext(model);
+                EditContext = new EditContext(Model);
 
                 await LoadBanksAsync();
                 await LoadFirmsAsync();
@@ -265,14 +265,7 @@
                 var httpClient = HttpClientFactory.CreateClient("ApiClient");
                 var api_client = await ApiClientFactory.CreateAsync(httpClient);
                 var result = await api_client.GetFromJsonAsync<GuaranteeModel>($"api/guarantees/{Id}");
-
-
-                if (result != null)
-                {
-                    model = result;
-
-
-                }
+                Model = result;
             }
             catch (Exception ex)
             {
@@ -288,8 +281,8 @@
     {
         if (selectedItem is ExpenseAccountCodeModel selectedAccount)
         {
-            model.ExpenseAccountName = selectedAccount.Name;
-            model.ExpenseAccountCode = selectedAccount.Code;
+            Model.ExpenseAccountName = selectedAccount.Name;
+            Model.ExpenseAccountCode = selectedAccount.Code;
             ExpensePopupVisible = false;
             StateHasChanged();
         }
@@ -298,8 +291,8 @@
     {
         if (selectedItem is CustomerModel selectedCustomer)
         {
-            model.PublicAuthorityCode = selectedCustomer.Code;
-            model.PublicAuthorityName = selectedCustomer.Name;
+            Model.PublicAuthorityCode = selectedCustomer.Code;
+            Model.PublicAuthorityName = selectedCustomer.Name;
             CustomerPopupVisible = false;
             StateHasChanged();
         }
@@ -320,9 +313,9 @@
 
     private async Task OnBankChanged(string newBankCode)
     {
-        model.BankCode = newBankCode;
-        model.BankName = Banks?.FirstOrDefault(x => x.Code == newBankCode)?.Name;
-        model.BankBranchName = null;
+        Model.BankCode = newBankCode;
+        Model.BankName = Banks?.FirstOrDefault(x => x.Code == newBankCode)?.Name;
+        Model.BankBranchName = null;
 
         if (!string.IsNullOrEmpty(newBankCode))
         {
@@ -344,14 +337,14 @@
 
         if (BankBranches != null && BankBranches.Count() == 1)
         {
-            model.BankBranchName = BankBranches.First().Name;
+            Model.BankBranchName = BankBranches.First().Name;
         }
     }
 
     private async Task SaveFromOutside()
     {
-        if (IsSaving || editContext == null) return;
-        if (!editContext.Validate()) return;
+        if (IsSaving || EditContext == null) return;
+        if (!EditContext.Validate()) return;
         await HandleValidSubmit();
     }
 
@@ -364,7 +357,7 @@
         {
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
-            var response = await client.PutAsJsonAsync("api/guarantees", model);
+            var response = await client.PutAsJsonAsync("api/guarantees", Model);
 
             if (response.IsSuccessStatusCode)
             {
