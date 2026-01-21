@@ -17,6 +17,8 @@
                 </Items>
             </DxToolbarItem>
             <DxToolbarItem Tooltip="Column Chooser" Alignment="ToolbarItemAlignment.Right" Click="OnColumnChooserItemClick" IconCssClass="column-chooser-icon icon medium-icon" />
+
+
             <DxToolbarItem Text="Dışarı Aktar" Alignment="ToolbarItemAlignment.Right" IconCssClass="export-icon icon medium-icon">
                 <Items>
                     <DxToolbarItem Text="Export all data to Excel" Click="ExportAllDataToExcel" />
@@ -27,6 +29,7 @@
                     <DxToolbarItem Text="Export selected rows to PDF" Click="ExportSelectedRowsDataToPdf" />
                 </Items>
             </DxToolbarItem>
+
             <DxToolbarItem Alignment="ToolbarItemAlignment.Right" CssClass="search-textbox-item" Tooltip="Search">
                 <Template Context="SearchContext">
                     <div class="custom-item">
@@ -38,6 +41,7 @@
                     </div>
                 </Template>
             </DxToolbarItem>
+
             <DxToolbarItem Tooltip="Refresh" Click="LoadGridDataAsync" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
         </DxToolbar>
     </div>
@@ -86,7 +90,7 @@
                     <DxGridDataColumn Caption="Gider Hesap Kodu" FieldName="ExpenseAccountCode" />
                 </Columns>
                 <GroupSummary>
-                    <DxGridSummaryItem DisplayText="Kayıt Sayısı:{0}"  FieldName="Id" SummaryType="GridSummaryItemType.Count" />
+                    <DxGridSummaryItem DisplayText="Kayıt Sayısı:{0}" FieldName="Id" SummaryType="GridSummaryItemType.Count" />
                     <DxGridSummaryItem DisplayText="Toplam:{0}" FieldName="GuaranteeAmount" SummaryType="GridSummaryItemType.Sum" FooterColumnName="GuaranteeAmount" />
                     <DxGridSummaryItem DisplayText="Toplam:{0}" FieldName="CommissionAmount" SummaryType="GridSummaryItemType.Sum" FooterColumnName="CommissionAmount" />
                 </GroupSummary>
@@ -96,6 +100,8 @@
                     <DxGridSummaryItem DisplayText="Toplam:{0}" FieldName="CommissionAmount" SummaryType="GridSummaryItemType.Sum" FooterColumnName="CommissionAmount" />
                 </TotalSummary>
             </DxGrid>
+
+
         </div>
     </div>
 </div>
