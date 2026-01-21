@@ -1,4 +1,4 @@
-﻿@page "/request/list"
+﻿@page "/material-request/list"
 @implements IDisposable
 @inject NavigationManager NavigationManager
 @inject IApiClientFactory ApiClientFactory
@@ -17,7 +17,12 @@
                     }
                 </Items>
             </DxToolbarItem>
-
+            <DxToolbarItem Text="Talep Oluştur"
+                           Tooltip="Yeni Talep Ekle"
+                           Alignment="ToolbarItemAlignment.Right"
+                           Click="OnAddClick"
+                           IconCssClass="add-icon icon medium-icon"
+                           RenderStyleMode="ToolbarItemRenderStyleMode.Plain" />
             <DxToolbarItem Tooltip="Column Chooser"
                            Alignment="ToolbarItemAlignment.Right"
                            Click="OnColumnChooserItemClick"
@@ -48,7 +53,7 @@
                 </Template>
             </DxToolbarItem>
 
-
+            
 
             <DxToolbarItem Tooltip="Refresh"
                            Click="LoadGridDataAsync"
@@ -174,11 +179,14 @@
     void OnRowClick(GridRowClickEventArgs args)
     {
         var item = (MaterialRequestModel)Grid!.GetDataItem(args.VisibleIndex);
-        NavigationManager.NavigateTo($"/request/details/{item.Id}");
+        NavigationManager.NavigateTo($"/material-request/details/{item.Id}");
     }
 
     void OpenDetails(MaterialRequestModel item)
-        => NavigationManager.NavigateTo($"/request/details/{item.Id}");
+        => NavigationManager.NavigateTo($"/material-request/details/{item.Id}");
+
+    void OnAddClick(ToolbarItemClickEventArgs e)
+    => NavigationManager.NavigateTo("/material-request/create");
 
     void IDisposable.Dispose()
     {

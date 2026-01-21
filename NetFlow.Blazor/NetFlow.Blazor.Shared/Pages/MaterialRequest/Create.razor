@@ -1,0 +1,205 @@
+﻿@page "/material-request/create"
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <Items>
+                <DxToolbarItem IconCssClass="back-icon icon medium-icon"
+                               Tooltip="Geri"
+                               Click="NavigateBack" />
+                <DxToolbarItem>
+                    <Template>
+                        <div class="custom-item">
+                            <div class="title">Malzeme Talebi Oluştur</div>
+                        </div>
+                    </Template>
+                </DxToolbarItem>
+                <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                    <Template>
+                        <DxButton Text="Kaydet"
+                                  Click="SaveFromOutside"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  RenderStyle="ButtonRenderStyle.Success" />
+                    </Template>
+                </DxToolbarItem>
+            </Items>
+        </DxToolbar>
+    </div>
+
+    <div class="material-request-create">
+        <div class="card">
+            <EditForm EditContext="@editContext" Context="formContext">
+                <DataAnnotationsValidator />
+
+                <DxFormLayout ColSpanMd="6">
+                    <DxFormLayoutItem Caption="Talep Türü">
+                        <DxComboBox Data="RequestTypes"
+                                    @bind-Value="model.RequestType"
+                                    ValueFieldName="this"
+                                    TextFieldName="this"
+                                    ValidationEnabled="true"
+                                    ShowValidationIcon="true" />
+                    </DxFormLayoutItem>
+
+                   
+                    <DxFormLayoutItem Caption="Öncelik">
+                        <DxComboBox Data="Priorities"
+                                    @bind-Value="model.Priority"
+                                    ValueFieldName="this"
+                                    TextFieldName="this"
+                                    ValidationEnabled="true"
+                                    ShowValidationIcon="true" />
+                    </DxFormLayoutItem>
+
+
+                    <DxFormLayoutItem Caption="Gerekli Tarih">
+                        <DxDateEdit @bind-Date="model.RequiredDate"
+                                    DisplayFormat="dd.MM.yyyy"
+                                    ValidationEnabled="true"
+                                    ShowValidationIcon="true" />
+                    </DxFormLayoutItem>
+
+
+                    <DxFormLayoutItem Caption="Talep Eden Departman">
+                        <DxTextBox @bind-Text="model.RequestedDepartment" />
+                    </DxFormLayoutItem>
+
+
+                    <DxFormLayoutItem Caption="Kaynak Referans">
+                        <DxComboBox Data="SourceReferences"
+                                    @bind-Value="model.SourceReference"
+                                    ValueFieldName="this"
+                                    TextFieldName="this" />
+                    </DxFormLayoutItem>
+
+
+                    <DxFormLayoutItem Caption="Açıklama" ColSpanMd="12">
+                        <DxMemo @bind-Text="model.Description"
+                                Rows="4" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <ValidationSummary />
+                    </DxFormLayoutItem>
+
+                </DxFormLayout>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+<DxPopup @bind-Visible="popupVisible"
+         HeaderText="@popupTitle"
+         Width="420px"
+         ShowFooter="true"
+         CloseOnOutsideClick="false"
+         HeaderCssClass="@(isSuccess ? "dx-bg-success" : "dx-bg-danger")"
+         AnimationType="PopupAnimationType.Fade">
+
+    <HeaderTemplate>
+        <div class="popup-basic-header @(isSuccess ? "success" : "danger")">
+            <span class="popup-basic-header-title">@popupTitle</span>
+        </div>
+    </HeaderTemplate>
+
+    <BodyTemplate>
+        <div class="popup-basic-body">
+            <div class="popup-basic-icon-wrapper">
+                <div class="popup-basic-icon @(isSuccess ? "success" : "danger")">
+                    @(isSuccess ? "✓" : "!")
+                </div>
+            </div>
+
+            <div class="popup-basic-content">
+                <h5>@(isSuccess ? "İşlem Tamamlandı" : "Bir Hata Oluştu")</h5>
+                <p>@popupMessage</p>
+            </div>
+        </div>
+    </BodyTemplate>
+
+    <FooterTemplate>
+        <DxButton Text="Kapat"
+                  Width="110px"
+                  RenderStyle="@(isSuccess ? ButtonRenderStyle.Success : ButtonRenderStyle.Danger)"
+                  Click="OnPopupOk" />
+    </FooterTemplate>
+</DxPopup>
+
+@code {
+
+    private MaterialRequestModel model = new();
+    private EditContext editContext = default!;
+    private bool isSaving, popupVisible, isSuccess;
+    private string popupTitle = "", popupMessage = "";
+
+    string[] RequestTypes = { "Open", "PendingApproval", "Approved", "Rejected", "Fulfilled", "Closed" };
+    string[] Priorities = { "Low", "Normal", "Urgent" };
+    string[] SourceReferences = { "WorkOrder", "Project", "Tender" };
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(model);
+    }
+
+    private async Task SaveFromOutside()
+    {
+        if (isSaving) return;
+        if (!editContext.Validate()) return;
+        await HandleValidSubmit();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (isSaving) return;
+        isSaving = true;
+
+        try
+        {
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+
+            var response = await client.PostAsJsonAsync("api/material-requests", model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                isSuccess = true;
+                popupTitle = "Başarılı";
+                popupMessage = "Malzeme talebi başarıyla oluşturuldu.";
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                isSuccess = false;
+                popupTitle = "Hata";
+                popupMessage = string.IsNullOrEmpty(error)
+                    ? "Malzeme talebi oluşturulurken hata oluştu."
+                    : error;
+            }
+        }
+        catch (Exception ex)
+        {
+            isSuccess = false;
+            popupTitle = "Bağlantı Hatası";
+            popupMessage = ex.Message;
+        }
+        finally
+        {
+            popupVisible = true;
+            isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    private void OnPopupOk()
+    {
+        popupVisible = false;
+        if (isSuccess)
+            NavigationManager.NavigateTo("/material-request/list");
+    }
+
+    private void NavigateBack()
+        => NavigationManager.NavigateTo("/material-request/list");
+}

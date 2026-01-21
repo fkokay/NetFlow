@@ -1,4 +1,4 @@
-@page "/request/details/{Id:int}"
+ï»¿@page "/material-request/details/{Id:int}"
 @using System.Net.Http.Json
 @inject NavigationManager NavigationManager
 @inject IApiClientFactory ApiClientFactory
@@ -18,7 +18,7 @@
             <DxToolbarItem>
                 <Template>
                     <div class="custom-item">
-                        <div class="title">Malzeme Talebi Detayý</div>
+                        <div class="title">Malzeme Talebi DetayÄ±</div>
                     </div>
                 </Template>
             </DxToolbarItem>
@@ -35,7 +35,7 @@
     <DxLoadingPanel Visible="@(!IsDataLoaded)"
                     IsContentBlocked="true"
                     IsContentVisible="false"
-                    Text="Yükleniyor...">
+                    Text="YÃ¼kleniyor...">
 
         <DxGridLayout ColumnSpacing="1rem" RowSpacing="1rem">
 
@@ -89,18 +89,18 @@
                                         <div class="request-stat-title">
                                             @Model.RequestType
                                         </div>
-                                        <small>Talep Türü</small>
+                                        <small>Talep TÃ¼rÃ¼</small>
                                     </div>
 
                                     <div class="request-stat">
                                         <div class="request-stat-title">
                                             @Model.Priority
                                         </div>
-                                        <small>Öncelik</small>
+                                        <small>Ã–ncelik</small>
                                     </div>
                                 </div>
 
-                                <h6 class="request-section-title">GENEL BÝLGÝLER</h6>
+                                <h6 class="request-section-title">GENEL BÄ°LGÄ°LER</h6>
 
                                 <div class="request-info">
                                     <div class="request-info-row">
@@ -116,7 +116,7 @@
                                         <span>@Model.RequestedDepartment</span>
                                     </div>
                                     <div class="request-info-row">
-                                        <span>Açýklama:</span>
+                                        <span>AÃ§Ä±klama:</span>
                                         <span>@Model.Description</span>
                                     </div>
                                 </div>
@@ -139,9 +139,9 @@
 
                                     <Columns>
                                         <DxGridDataColumn FieldName="ItemCode" Caption="Kod" />
-                                        <DxGridDataColumn FieldName="ItemName" Caption="Adý" />
+                                        <DxGridDataColumn FieldName="ItemName" Caption="AdÄ±" />
                                         <DxGridDataColumn FieldName="RequestedQuantity" Caption="Talep" />
-                                        <DxGridDataColumn FieldName="FulfilledQuantity" Caption="Karþýlanan" />
+                                        <DxGridDataColumn FieldName="FulfilledQuantity" Caption="KarÅŸÄ±lanan" />
                                         <DxGridDataColumn FieldName="Unit" Caption="Birim" />
                                         <DxGridDataColumn FieldName="WarehouseCode" Caption="Depo" />
                                         <DxGridDataColumn FieldName="Status" Caption="Durum" />
@@ -218,11 +218,11 @@
 
     private void OnEditClick()
     {
-        NavigationManager.NavigateTo($"/request/edit/{Id}");
+        NavigationManager.NavigateTo($"/material-request/edit/{Id}");
     }
 
     private void NavigateBack()
     {
-        NavigationManager.NavigateTo("/request/list");
+        NavigationManager.NavigateTo("/material-request/list");
     }
 }

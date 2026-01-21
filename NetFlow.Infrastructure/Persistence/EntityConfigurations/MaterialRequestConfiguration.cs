@@ -27,7 +27,7 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
                    .IsUnique();
 
             // Core fields
-            builder.Property(x => x.CompanyId)
+            builder.Property(x => x.FirmId)
                    .IsRequired();
 
             builder.Property(x => x.RequestType)
@@ -60,7 +60,7 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
             builder.Property(x => x.RequestDate)
                    .HasDefaultValueSql("GETDATE()");
 
-            builder.Property(x => x.CreatedAt)
+            builder.Property(x => x.CreateAt)
                    .HasDefaultValueSql("GETDATE()");
 
             // Relationships

@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NetFlow.Application.MaterialRequests;
+using NetFlow.Application.Modules;
 using NetFlow.Application.Users;
 using NetFlow.Domain.Common.Pagination;
 using NetFlow.Domain.Identity;
@@ -13,11 +15,13 @@ namespace NetFlow.Api.Controllers
     {
         private readonly CurrentUser _current;
         private readonly MaterialRequestReadService _read;
+        private readonly MaterialRequestWriteService _write;
 
-        public MaterialRequestsController(CurrentUser current, MaterialRequestReadService read)
+        public MaterialRequestsController(CurrentUser current, MaterialRequestReadService read, MaterialRequestWriteService write)
         {
             _current = current;
             _read = read;
+            _write = write;
         }
 
         [HttpGet]
@@ -29,6 +33,15 @@ namespace NetFlow.Api.Controllers
             var row = await _read.GetAsync(id);
             return row is null ? NotFound() : Ok(row);
         }
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateMaterialRequestRequest request)
+        {
+            var id = await _write.CreateAsync(request);
 
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
     }
 }
