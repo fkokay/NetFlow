@@ -33,6 +33,7 @@ namespace NetFlow.Application.Guarantees
             guarantee.Subject = request.Subject;
             guarantee.BankBranchCode = request.BankBranchCode;
             guarantee.PublicAuthorityCode = request.PublicAuthorityCode;
+            guarantee.ExpenseAccountCode = request.ExpenseAccountCode;  
             guarantee.TakasbankReferenceNo = request.TakasbankReferenceNo;
             guarantee.CreatedAt = request.CreatedAt;
             _db.Guarantees.Update(guarantee);
