@@ -4,7 +4,7 @@
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
 @inject IJSRuntime JsRuntime
-
+@inject IToastNotificationService ToastService
 
 <DxLayoutBreakpoint DeviceSize="DeviceSize.XSmall | DeviceSize.Small | DeviceSize.Medium"
                     @bind-IsActive="@IsSmallScreen" />
@@ -221,9 +221,10 @@
     private bool IsDataLoaded { get; set; }
     private int ActiveTabIndex { get; set; }
     private bool AddPopupVisible { get; set; }
-
     private GridDevExtremeDataSource<GuaranteeCommissionModel>? CommissionDataSource { get; set; }
     private GuaranteeCommissionAddForm? addFormRef;
+    private bool IsSaving, IsSuccess;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -327,7 +328,83 @@
 
     private async Task OnDeleteClick()
     {
+        try
+        {
+            var client = await ApiClientFactory.CreateAsync(
+                HttpClientFactory.CreateClient("ApiClient")
+            );
+
+            var response = await client.DeleteAsync($"api/guarantees/{Id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/guarantee/list");
+                return;
+            }
+
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                var message = await response.Content.ReadAsStringAsync();
+
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Id="toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Warning,
+                    Title = "Silme Engellendi",
+                    Text = string.IsNullOrWhiteSpace(message)
+                        ? "Bu teminat aktif ihalelerde kullanıldığı için silinemez."
+                        : message
+                }, RenderToastButton(true));
+            }
+            else
+            {
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Danger,
+                    Title = "Silme Hatası",
+                    Text = "Silme işlemi sırasında beklenmeyen bir hata oluştu."
+                }, RenderToastButton(true));
+            }
+
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast(new ToastOptions()
+            {
+                Id = "toast",
+                ProviderName = "Overview",
+                ThemeMode = ToastThemeMode.Light,
+                RenderStyle = ToastRenderStyle.Warning,
+                Title = "Hata",
+                Text = ex.Message
+            }, RenderToastButton(true));
+
+            await InvokeAsync(StateHasChanged);
+        }
     }
+
+    private RenderFragment RenderToastButton(bool isError)
+    {
+        return @<div class="d-flex gap-2">
+            <DxButton Click="@(isError? OnPopupError:OnPopupOk)" RenderStyle="@(isError? ButtonRenderStyle.Danger: ButtonRenderStyle.Success)">Kapat</DxButton>
+        </div>;
+    }
+    private void OnPopupOk()
+    {
+        if (IsSuccess) NavigationManager.NavigateTo("/guarantee/list");
+    }
+
+    private void OnPopupError()
+    {
+    }
+
     private void NavigateBack()
     {
         NavigationManager.NavigateTo("/guarantee/list");

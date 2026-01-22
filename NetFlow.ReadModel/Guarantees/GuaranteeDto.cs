@@ -29,6 +29,7 @@ namespace NetFlow.ReadModel.Guarantees
         public string ExpenseAccountCode { get; set; }
 
         public string PublicAuthorityName { get; set; }
+        public string ExpenseAccountName { get; set; }
         public string TakasbankReferenceNo { get; set; }
         public bool IsRefunded { get; set; }
         public DateTime CreatedAt { get; set; }

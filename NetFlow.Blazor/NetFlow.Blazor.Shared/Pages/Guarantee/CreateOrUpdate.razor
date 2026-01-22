@@ -233,13 +233,13 @@
             var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
             string baseUrl = "https://localhost:7071/api";
 
-            // Temel listeleri her durumda yükle
+
             await LoadBanksAsync();
             await LoadFirmsAsync();
 
             if (Id.HasValue && Id.Value > 0)
             {
-                // Düzenleme Modu
+
                 var httpClient = HttpClientFactory.CreateClient("ApiClient");
                 var api_client = await ApiClientFactory.CreateAsync(httpClient);
                 Model = await api_client.GetFromJsonAsync<GuaranteeModel>($"api/guarantees/{Id.Value}");
@@ -251,7 +251,6 @@
             }
             else
             {
-                // Yeni Kayıt Modu
                 Model = new GuaranteeModel { GuaranteeDate = DateTime.Now };
             }
 
@@ -386,6 +385,7 @@
 
                 ToastService.ShowToast(new ToastOptions()
                 {
+                    Id = "toast",
                     ProviderName = "Overview",
                     ThemeMode = ToastThemeMode.Light,
                     RenderStyle = ToastRenderStyle.Success,
@@ -401,6 +401,7 @@
 
                 ToastService.ShowToast(new ToastOptions()
                 {
+                    Id = "toast",
                     ProviderName = "Overview",
                     ThemeMode = ToastThemeMode.Light,
                     RenderStyle = ToastRenderStyle.Danger,
