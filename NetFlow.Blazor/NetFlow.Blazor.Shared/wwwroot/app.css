@@ -129,6 +129,10 @@ body {
     mask-image: url("images/icons/settings.svg");
 }
 
+.three-point-icon {
+    mask-image: url("images/icons/three-point.svg");
+}
+
 .notification {
     position: relative;
 }

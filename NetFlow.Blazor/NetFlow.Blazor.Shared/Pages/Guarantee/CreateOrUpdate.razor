@@ -108,21 +108,23 @@
                                         <DxFormLayoutItem Caption="Kamu İdare Unvanı" ColSpanMd="6">
                                             <DxTextBox @bind-Text="Model.PublicAuthorityName">
                                                 <Buttons>
-                                                    <DxEditorButton IconCssClass="search-icon icon"
+                                                    <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
                                                                     Tooltip="Hesap Kodu Seç"
-                                                                    Click="@(() => CustomerPopupVisible = true)" />
+                                                                    Click="OpenCustomerPopup" />
                                                 </Buttons>
                                             </DxTextBox>
                                         </DxFormLayoutItem>
+
                                         <DxFormLayoutItem Caption="Gider Hesap Kodu" ColSpanMd="6">
                                             <DxTextBox @bind-Text="Model.ExpenseAccountName">
                                                 <Buttons>
-                                                    <DxEditorButton IconCssClass="search-icon icon"
+                                                    <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
                                                                     Tooltip="Hesap Kodu Seç"
-                                                                    Click="@(() => ExpensePopupVisible = true)" />
+                                                                    Click="OpenExpensePopup" />
                                                 </Buttons>
                                             </DxTextBox>
                                         </DxFormLayoutItem>
+
 
                                         <DxFormLayoutItem Caption="Komisyon Tutarı">
                                             <DxSpinEdit @bind-Value="Model.CommissionAmount" DisplayFormat="N2" ReadOnly="true" />
@@ -158,31 +160,6 @@
 </div>
 
 
-<DxPopup @bind-Visible="PopupVisible" Width="460px" ShowFooter="true" CloseOnOutsideClick="false">
-    <HeaderTemplate>
-        <div class="popup-adv-header @(IsSuccess ? "success" : "danger")">
-            <div class="popup-adv-header-icon">@(IsSuccess ? "✓" : "!")</div>
-            <div>
-                <div class="popup-adv-header-title">@(IsSuccess ? "İşlem Başarılı" : "İşlem Hatası")</div>
-                <div class="popup-adv-header-subtitle">@PopupTitle</div>
-            </div>
-        </div>
-    </HeaderTemplate>
-    <BodyTemplate>
-        <div class="popup-adv-body">
-            <div class="popup-adv-body-icon @(IsSuccess ? "success" : "danger")">@(IsSuccess ? "✓" : "!")</div>
-            <div class="popup-adv-body-content">
-                <h5 class="popup-adv-body-title">@(IsSuccess ? (Id > 0 ? "Bilgiler Güncellendi" : "Kayıt Oluşturuldu") : "Hata Oluştu")</h5>
-                <p class="popup-adv-body-message">@PopupMessage</p>
-            </div>
-        </div>
-    </BodyTemplate>
-    <FooterTemplate>
-        <div class="popup-adv-footer">
-            <DxButton Text="Kapat" Width="130px" RenderStyle="@(IsSuccess? ButtonRenderStyle.Success: ButtonRenderStyle.Danger)" Click="OnPopupOk" />
-        </div>
-    </FooterTemplate>
-</DxPopup>
 
 <DxPopup @bind-Visible="ExpensePopupVisible" HeaderText="Gider Hesap Kodu Seçimi" Width="800px" Height="600px" Scrollable="true">
     <BodyTemplate>
@@ -213,9 +190,7 @@
 
     private GuaranteeModel Model = new();
     private EditContext? EditContext;
-    private bool IsSaving, PopupVisible, IsSuccess;
-    private string PopupTitle = "", PopupMessage = "";
-
+    private bool IsSaving, IsSuccess;
     private IEnumerable<FirmSelectModel>? Firms { get; set; }
     private IEnumerable<BankModel>? Banks { get; set; }
     private IEnumerable<BankBranchModel>? BankBranches { get; set; }
@@ -334,7 +309,10 @@
 
         if (BankBranches != null && BankBranches.Count() == 1)
         {
-            Model.BankBranchName = BankBranches.First().Name;
+            var branch = BankBranches.First();
+            Model.BankBranchCode = branch.Code;
+            Model.BankBranchName = branch.Name;
+            StateHasChanged();
         }
     }
     private void OnBranchChanged(string branchCode)
@@ -380,8 +358,7 @@
             if (response.IsSuccessStatusCode)
             {
                 IsSuccess = true;
-                PopupTitle = "Başarılı";
-                PopupMessage = "Teminat bilgileri başarılı bir şekilde kaydedildi.";
+              
 
                 ToastService.ShowToast(new ToastOptions()
                 {
@@ -390,14 +367,12 @@
                     ThemeMode = ToastThemeMode.Light,
                     RenderStyle = ToastRenderStyle.Success,
                     Title = "Başarılı",
-                    Text = PopupMessage
+                    Text = "Teminat bilgileri başarılı bir şekilde kaydedildi."
                 }, RenderToastButton(false));
             }
             else
             {
                 var errorMsg = await response.Content.ReadAsStringAsync();
-                PopupTitle = "Sunucu Hatası";
-                PopupMessage = errorMsg;
 
                 ToastService.ShowToast(new ToastOptions()
                 {
@@ -412,26 +387,32 @@
         }
         catch (Exception ex)
         {
-            PopupTitle = "Hata";
-            PopupMessage = ex.Message;
+
             IsSuccess = false;
         }
         finally
         {
-            PopupVisible = true;
+       
             IsSaving = false;
         }
     }
 
     private void OnPopupOk()
     {
-        PopupVisible = false;
         if (IsSuccess) NavigationManager.NavigateTo("/guarantee/list");
     }
 
     private void OnPopupError()
     {
-        PopupVisible = false;
+    }
+    private void OpenCustomerPopup()
+    {
+        CustomerPopupVisible = true;
+    }
+
+    private void OpenExpensePopup()
+    {
+        ExpensePopupVisible = true;
     }
 
     private void NavigateBack() => NavigationManager.NavigateTo("/guarantee/list");

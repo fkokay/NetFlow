@@ -22,7 +22,7 @@ namespace NetFlow.Application.GuaranteeCommissions
             var commission = new GuaranteeCommissionEntity
             {
                 Note = request.Note,
-                BankReferenceNo = request.BankReferanceNo,
+                BankReferenceNo = request.BankReferenceNo,
                 CommissionAmount = request.CommissionAmount,
                 CommissionEndDate = request.CommissionEndDate,
                 CommissionRate = request.CommissionRate,
@@ -45,7 +45,7 @@ namespace NetFlow.Application.GuaranteeCommissions
             var commission = await _db.GuaranteeCommissions.FirstOrDefaultAsync(x => x.Id == request.Id);
             commission.Id = request.Id;
             commission.Note = request.Note;
-            commission.BankReferenceNo = request.BankReferanceNo;
+            commission.BankReferenceNo = request.BankReferenceNo;
             commission.CommissionAmount = request.CommissionAmount;
             commission.CommissionEndDate = request.CommissionEndDate;
             commission.CommissionRate = request.CommissionRate;

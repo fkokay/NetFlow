@@ -85,7 +85,7 @@
                                 <div class="card h-100">
                                     <div class="authority-header">
                                         <div class="authority-avatar">
-                                            @(!string.IsNullOrEmpty(Model.BankName)? Model.BankName[0].ToString().ToUpper()
+                                            @(!string.IsNullOrEmpty(Model.BankName) ? Model.BankName[0].ToString().ToUpper()
                                                                                     : "?")
                                         </div>
 
@@ -148,19 +148,21 @@
                                     ActiveTabIndexChanged="OnActiveTabIndexChanged">
 
                                 <DxTabPage Text="Komisyonlar">
+                                    <div class="card toolbar">
+                                        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+                                            <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                                                <Template>
+                                                    <DxButton Text="Yeni Komisyon Ekle" Click="@GuaranteeCommissionAdd" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
+                                                </Template>
+                                            </DxToolbarItem>
+                                        </DxToolbar>
+                                    </div>
                                     <DxGrid Data="CommissionDataSource"
                                             ShowFilterRow="true"
                                             ShowGroupPanel="true"
                                             ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
                                             EditStart="OnCommissionEditStart"
                                             DataItemDeleting="async (e) => await DeleteCommission(((GuaranteeCommissionModel)e.DataItem).Id)">
-                                        <ToolbarTemplate>
-                                            <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
-                                                <DxToolbarItem Text="Yeni Komisyon Ekle"
-                                                               IconCssClass="grid-toolbar-new"
-                                                               Click="GuaranteeCommissionAdd" />
-                                            </DxToolbar>
-                                        </ToolbarTemplate>
 
                                         <Columns>
                                             <DxGridDataColumn FieldName="@nameof(GuaranteeCommissionModel.CommissionStartDate)" Caption="Başlangıç" />
@@ -188,15 +190,19 @@
 
 <DxPopup @bind-Visible="@AddPopupVisible"
          ShowFooter="true"
-         HeaderText="Komisyon Ekle"
+         HeaderText="@(SelectedCommissionId.HasValue ? "Komisyon Düzenle" : "Komisyon Ekle")"
          Width="800px"
          MaxWidth="95vw">
 
     <BodyContentTemplate>
-        <GuaranteeCommissionAddForm @ref="addFormRef"
-                                    GuaranteeId="Id"
-                                    OnSaved="OnCommissionSaved"
-                                    OnCancel="OnCommissionCanceled" />
+        @if (AddPopupVisible)
+        {
+            <GuaranteeCommissionAddForm @ref="addFormRef"
+                                        GuaranteeId="Id"
+                                        CommissionId="SelectedCommissionId"
+                                        OnSaved="OnCommissionSaved"
+                                        OnCancel="OnCommissionCanceled" />
+        }
     </BodyContentTemplate>
 
     <FooterContentTemplate>
@@ -221,6 +227,7 @@
     private bool IsDataLoaded { get; set; }
     private int ActiveTabIndex { get; set; }
     private bool AddPopupVisible { get; set; }
+    private int? SelectedCommissionId { get; set; } // Düzenlenecek ID'yi tutar
     private GridDevExtremeDataSource<GuaranteeCommissionModel>? CommissionDataSource { get; set; }
     private GuaranteeCommissionAddForm? addFormRef;
     private bool IsSaving, IsSuccess;
@@ -281,6 +288,7 @@
 
     private void GuaranteeCommissionAdd()
     {
+        SelectedCommissionId = null; 
         AddPopupVisible = true;
     }
 
@@ -299,19 +307,22 @@
     private async Task OnCommissionSaved()
     {
         AddPopupVisible = false;
+        SelectedCommissionId = null;
         await LoadTabData(ActiveTabIndex);
     }
 
     private void OnCommissionCanceled()
     {
         AddPopupVisible = false;
+        SelectedCommissionId = null;
     }
 
     private void OnCommissionEditStart(GridEditStartEventArgs e)
     {
-        e.Cancel = true;
+        e.Cancel = true; 
         var item = (GuaranteeCommissionModel)e.DataItem;
-        NavigationManager.NavigateTo($"/guarantee-commission/edit/{item.Id}");
+        SelectedCommissionId = item.Id; 
+        AddPopupVisible = true; 
     }
 
     private async Task DeleteCommission(int commissionId)
@@ -349,7 +360,7 @@
 
                 ToastService.ShowToast(new ToastOptions()
                 {
-                    Id="toast",
+                    Id = "toast",
                     ProviderName = "Overview",
                     ThemeMode = ToastThemeMode.Light,
                     RenderStyle = ToastRenderStyle.Warning,
