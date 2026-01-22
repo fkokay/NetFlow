@@ -150,6 +150,7 @@
 }
 
 .guarantee-edit {
+    height:100%;
     background-color: var(--dxds-color-surface-neutral-default-rest);
     background-clip: border-box;
     border: var(--dxds-border-radius-10) solid var(--dxds-color-border-neutral-default-rest);

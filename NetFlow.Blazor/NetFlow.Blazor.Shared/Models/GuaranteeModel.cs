@@ -23,11 +23,11 @@ namespace NetFlow.Blazor.Shared.Models
         public string BankName { get; set; } = string.Empty;
         public string BankBranchCode { get; set; } = string.Empty;
         public string BankBranchName { get; set; } = string.Empty;
-        public string PublicAuthorityCode { get; set; } = string.Empty;
-        public string PublicAuthorityName { get; set; } = string.Empty;
-        public string ExpenseAccountCode { get; set; } = string.Empty;
-        public string ExpenseAccountName { get; set; } = string.Empty;
-        public string TakasbankReferenceNo { get; set; } = string.Empty;
+        public string? PublicAuthorityCode { get; set; }
+        public string? PublicAuthorityName { get; set; }
+        public string? ExpenseAccountCode { get; set; }
+        public string? ExpenseAccountName { get; set; }
+        public string TakasbankReferenceNo { get; set; }
         public DateTime CreatedAt { get; set; }
 
         [NotMapped]
