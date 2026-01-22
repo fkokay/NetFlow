@@ -11,7 +11,7 @@ namespace NetFlow.Domain.Entities
 
         public string RequestNo { get; set; } = null!;
 
-        public int CompanyId { get; set; }
+        public int FirmId { get; set; }
 
         public int RequestedByUserId { get; set; }
         public string? RequestedDepartment { get; set; }
@@ -33,8 +33,8 @@ namespace NetFlow.Domain.Entities
         public FulfillmentType? FulfillmentType { get; set; }          // FromStock / Purchase / Transfer
         public string? SourceReference { get; set; }          // WorkOrder / Project / Tender
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public int CreatedBy { get; set; }
+        public DateTime CreateAt { get; set; } = DateTime.UtcNow;
+        public int CreateBy { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
         public int? UpdatedBy { get; set; }

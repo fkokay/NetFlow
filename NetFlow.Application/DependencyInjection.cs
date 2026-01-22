@@ -2,6 +2,7 @@
 using NetFlow.Application.Firms;
 using NetFlow.Application.GuaranteeCommissions;
 using NetFlow.Application.Guarantees;
+using NetFlow.Application.MaterialRequests;
 using NetFlow.Application.Modules;
 using NetFlow.Application.Netsis.AccountingVouchers;
 using NetFlow.Application.Netsis.BankBranches;
@@ -44,6 +45,7 @@ namespace NetFlow.Application
             services.AddScoped<GuaranteeWriteService>();
             services.AddScoped<GuaranteeCommissionWriteService>();
             services.AddScoped<TenderWriteService>();
+            services.AddScoped<MaterialRequestWriteService>();
             return services;
         }
     }

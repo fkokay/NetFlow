@@ -27,11 +27,10 @@ namespace NetFlow.Application.Guarantees
         public string BankName { get; set; }
         public string BankBranchCode { get; set; }
         public string BankBranchName { get; set; }
-        public string? PublicAuthorityCode { get; set; }
-        public string? PublicAuthorityName { get; set; }
-        public string TakasbankReferenceNo { get; set; }
+        public string PublicAuthorityCode { get; set; }
+        public string PublicAuthorityName { get; set; }
         public string? ExpenseAccountCode { get; set; }
-        public string? ExpenseAccountName { get; set; }
+        public string TakasbankReferenceNo { get; set; }
         public bool IsRefunded { get; set; }
         public DateTime CreatedAt { get; set; }
     }

@@ -1,4 +1,5 @@
-﻿@page "/guarantee/edit/{Id:int}"
+﻿@page "/guarantee/createorupdate/{Id:int?}"
+
 
 @inject NavigationManager NavigationManager
 @inject IApiClientFactory ApiClientFactory
@@ -13,7 +14,7 @@
                 <DxToolbarItem>
                     <Template>
                         <div class="custom-item">
-                            <div class="title">Teminat Düzenleme</div>
+                            <div class="title">@(Id > 0 ? "Teminat Düzenleme" : "Yeni Teminat Tanımlama")</div>
                         </div>
                     </Template>
                 </DxToolbarItem>
@@ -86,8 +87,10 @@
                                                         TData="BankBranchModel"
                                                         TValue="string"
                                                         TextFieldName="Name"
-                                                        ValueFieldName="Name"
-                                                        @bind-Value="Model.BankBranchName"
+                                                        ValueFieldName="Code" 
+                                                        Value="@Model.BankBranchCode" 
+                                                        ValueChanged="@((string code) => OnBranchChanged(code))" 
+                                                        ValueExpression="@(() => Model.BankBranchCode)"
                                                         Enabled="@(BankBranches != null && BankBranches.Any())" />
                                         </DxFormLayoutItem>
                                         <DxFormLayoutItem Caption="Teminat Tutarı">
@@ -105,7 +108,7 @@
                                         <DxFormLayoutItem Caption="Kamu İdare Unvanı" ColSpanMd="6">
                                             <DxTextBox @bind-Text="Model.PublicAuthorityName">
                                                 <Buttons>
-                                                    <DxEditorButton Text="Seç" IconCssClass="search-icon icon"
+                                                    <DxEditorButton IconCssClass="search-icon icon"
                                                                     Tooltip="Hesap Kodu Seç"
                                                                     Click="@(() => CustomerPopupVisible = true)" />
                                                 </Buttons>
@@ -114,14 +117,12 @@
                                         <DxFormLayoutItem Caption="Gider Hesap Kodu" ColSpanMd="6">
                                             <DxTextBox @bind-Text="Model.ExpenseAccountName">
                                                 <Buttons>
-                                                    <DxEditorButton Text="Seç" IconCssClass="search-icon icon"
+                                                    <DxEditorButton IconCssClass="search-icon icon"
                                                                     Tooltip="Hesap Kodu Seç"
                                                                     Click="@(() => ExpensePopupVisible = true)" />
                                                 </Buttons>
                                             </DxTextBox>
                                         </DxFormLayoutItem>
-
-
 
                                         <DxFormLayoutItem Caption="Komisyon Tutarı">
                                             <DxSpinEdit @bind-Value="Model.CommissionAmount" DisplayFormat="N2" ReadOnly="true" />
@@ -156,19 +157,36 @@
     </div>
 </div>
 
-<DxPopup @bind-Visible="ExpensePopupVisible"
-         HeaderText="Gider Hesap Kodu Seçimi"
-         Width="800px"
-         Height="600px"
-         Scrollable="true">
+
+<DxPopup @bind-Visible="PopupVisible" Width="460px" ShowFooter="true" CloseOnOutsideClick="false">
+    <HeaderTemplate>
+        <div class="popup-adv-header @(IsSuccess ? "success" : "danger")">
+            <div class="popup-adv-header-icon">@(IsSuccess ? "✓" : "!")</div>
+            <div>
+                <div class="popup-adv-header-title">@(IsSuccess ? "İşlem Başarılı" : "İşlem Hatası")</div>
+                <div class="popup-adv-header-subtitle">@PopupTitle</div>
+            </div>
+        </div>
+    </HeaderTemplate>
     <BodyTemplate>
-        <DxGrid Data="@ExpenseDataSource"
-                ShowFilterRow="true"
-                PageSize="12"
-                SelectionMode="GridSelectionMode.Single"
-                SelectedDataItemChanged="@OnExpenseSelected"
-                KeyFieldName="Code"
-                FilteringMode="GridFilteringMode.FilterRow">
+        <div class="popup-adv-body">
+            <div class="popup-adv-body-icon @(IsSuccess ? "success" : "danger")">@(IsSuccess ? "✓" : "!")</div>
+            <div class="popup-adv-body-content">
+                <h5 class="popup-adv-body-title">@(IsSuccess ? (Id > 0 ? "Bilgiler Güncellendi" : "Kayıt Oluşturuldu") : "Hata Oluştu")</h5>
+                <p class="popup-adv-body-message">@PopupMessage</p>
+            </div>
+        </div>
+    </BodyTemplate>
+    <FooterTemplate>
+        <div class="popup-adv-footer">
+            <DxButton Text="Kapat" Width="130px" RenderStyle="@(IsSuccess? ButtonRenderStyle.Success: ButtonRenderStyle.Danger)" Click="OnPopupOk" />
+        </div>
+    </FooterTemplate>
+</DxPopup>
+
+<DxPopup @bind-Visible="ExpensePopupVisible" HeaderText="Gider Hesap Kodu Seçimi" Width="800px" Height="600px" Scrollable="true">
+    <BodyTemplate>
+        <DxGrid Data="@ExpenseDataSource" ShowFilterRow="true" PageSize="12" SelectionMode="GridSelectionMode.Single" SelectedDataItemChanged="@OnExpenseSelected" KeyFieldName="Code" FilteringMode="GridFilteringMode.FilterRow">
             <Columns>
                 <DxGridSelectionColumn Width="100px" />
                 <DxGridDataColumn FieldName="Code" Caption="Hesap Kodu" Width="150px" />
@@ -177,20 +195,10 @@
         </DxGrid>
     </BodyTemplate>
 </DxPopup>
-<DxPopup @bind-Visible="CustomerPopupVisible"
-         HeaderText="Kamu İdare Unvanı Seçimi"
-         Width="800px"
-         Height="600px"
-         Scrollable="true">
+
+<DxPopup @bind-Visible="CustomerPopupVisible" HeaderText="Kamu İdare Unvanı Seçimi" Width="800px" Height="600px" Scrollable="true">
     <BodyTemplate>
-        <DxGrid Data="@CustomerDataSource"
-                ShowFilterRow="true"
-                PageSize="12"
-                SelectionMode="GridSelectionMode.Single"
-                SelectedDataItemChanged="@OnCustomerSelected"
-                VirtualScrollingEnabled="true"
-                KeyFieldName="Code"
-                FilteringMode="GridFilteringMode.FilterRow">
+        <DxGrid Data="@CustomerDataSource" ShowFilterRow="true" PageSize="12" SelectionMode="GridSelectionMode.Single" SelectedDataItemChanged="@OnCustomerSelected" VirtualScrollingEnabled="true" KeyFieldName="Code" FilteringMode="GridFilteringMode.FilterRow">
             <Columns>
                 <DxGridSelectionColumn Width="100px" />
                 <DxGridDataColumn FieldName="Code" Caption="Hesap Kodu" Width="150px" />
@@ -201,11 +209,12 @@
 </DxPopup>
 
 @code {
-    [Parameter] public int Id { get; set; }
+    [Parameter] public int? Id { get; set; }
 
     private GuaranteeModel Model = new();
     private EditContext? EditContext;
-    private bool IsSaving;
+    private bool IsSaving, PopupVisible, IsSuccess;
+    private string PopupTitle = "", PopupMessage = "";
 
     private IEnumerable<FirmSelectModel>? Firms { get; set; }
     private IEnumerable<BankModel>? Banks { get; set; }
@@ -224,21 +233,29 @@
             var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
             string baseUrl = "https://localhost:7071/api";
 
+            // Temel listeleri her durumda yükle
             await LoadBanksAsync();
             await LoadFirmsAsync();
 
-            var httpClient = HttpClientFactory.CreateClient("ApiClient");
-            var api_client = await ApiClientFactory.CreateAsync(httpClient);
-            var result = await api_client.GetFromJsonAsync<GuaranteeModel>($"api/guarantees/{Id}");
-            if (result == null)
+            if (Id.HasValue && Id.Value > 0)
             {
-                throw new Exception("Bilinmeyen bir hata oluştu");
+                // Düzenleme Modu
+                var httpClient = HttpClientFactory.CreateClient("ApiClient");
+                var api_client = await ApiClientFactory.CreateAsync(httpClient);
+                Model = await api_client.GetFromJsonAsync<GuaranteeModel>($"api/guarantees/{Id.Value}");
+
+                if (!string.IsNullOrEmpty(Model.BankCode))
+                {
+                    await LoadBranchesAsync(Model.BankCode);
+                }
+            }
+            else
+            {
+                // Yeni Kayıt Modu
+                Model = new GuaranteeModel { GuaranteeDate = DateTime.Now };
             }
 
-            Model = result;
             EditContext = new EditContext(Model);
-            await LoadBanksAsync();
-            await LoadBranchesAsync(Model.BankCode);
             ExpenseDataSource = new GridDevExtremeDataSource<ExpenseAccountCodeModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/netsis/expense-account-codes/list"));
             CustomerDataSource = new GridDevExtremeDataSource<CustomerModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/netsis/customers/pagedList"));
         }
@@ -250,10 +267,7 @@
                 ThemeMode = ToastThemeMode.Light,
                 RenderStyle = ToastRenderStyle.Warning,
                 Title = "Veriler Yüklenirken bir hata oluştu",
-                Text = $"{ex.Message}",
-                ShowCloseButton = true,
-                DisplayTime = TimeSpan.Zero,
-                FreezeOnClick = true
+                Text = $"{ex.Message}"
             }, RenderToastButton(true));
         }
     }
@@ -301,19 +315,11 @@
 
     private async Task OnBankChanged(string bankCode)
     {
-        if (string.IsNullOrWhiteSpace(bankCode))
-        {
-            return;
-        }
-
-        if (Banks == null)
-        {
-            return;
-        }
+        if (string.IsNullOrWhiteSpace(bankCode)) return;
+        if (Banks == null) return;
 
         Model.BankCode = bankCode;
-        Model.BankName = Banks.Where(x => x.Code == bankCode).Select(m => m.Name).First();
-
+        Model.BankName = Banks.Where(x => x.Code == bankCode).Select(m => m.Name).FirstOrDefault();
         Model.BankBranchCode = "";
         Model.BankBranchName = "";
 
@@ -323,7 +329,6 @@
     private async Task LoadBranchesAsync(string bankCode)
     {
         if (string.IsNullOrEmpty(bankCode)) return;
-
         var httpClient = HttpClientFactory.CreateClient("ApiClient");
         var client = await ApiClientFactory.CreateAsync(httpClient);
         BankBranches = await client.GetFromJsonAsync<List<BankBranchModel>>($"api/netsis/bankbranches/list?bankCode={bankCode}");
@@ -331,6 +336,17 @@
         if (BankBranches != null && BankBranches.Count() == 1)
         {
             Model.BankBranchName = BankBranches.First().Name;
+        }
+    }
+    private void OnBranchChanged(string branchCode)
+    {
+        if (string.IsNullOrEmpty(branchCode) || BankBranches == null) return;
+
+        var selectedBranch = BankBranches.FirstOrDefault(x => x.Code == branchCode);
+        if (selectedBranch != null)
+        {
+            Model.BankBranchCode = selectedBranch.Code;
+            Model.BankBranchName = selectedBranch.Name; 
         }
     }
 
@@ -345,67 +361,77 @@
     {
         if (IsSaving) return;
         IsSaving = true;
+        IsSuccess = false;
 
         try
         {
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
-            var response = await client.PutAsJsonAsync("api/guarantees", Model);
+            HttpResponseMessage response;
+
+            if (Model.Id > 0)
+            {
+                response = await client.PutAsJsonAsync("api/guarantees", Model);
+            }
+            else
+            {
+                response = await client.PostAsJsonAsync("api/guarantees", Model);
+            }
 
             if (response.IsSuccessStatusCode)
             {
+                IsSuccess = true;
+                PopupTitle = "Başarılı";
+                PopupMessage = "Teminat bilgileri başarılı bir şekilde kaydedildi.";
+
                 ToastService.ShowToast(new ToastOptions()
                 {
-                    Id = "toast",
                     ProviderName = "Overview",
                     ThemeMode = ToastThemeMode.Light,
-                    RenderStyle = ToastRenderStyle.Warning,
+                    RenderStyle = ToastRenderStyle.Success,
                     Title = "Başarılı",
-                    Text = $"Teminat bilgileri başarılı bir şekilde güncellendi."
+                    Text = PopupMessage
                 }, RenderToastButton(false));
             }
             else
             {
                 var errorMsg = await response.Content.ReadAsStringAsync();
+                PopupTitle = "Sunucu Hatası";
+                PopupMessage = errorMsg;
 
                 ToastService.ShowToast(new ToastOptions()
                 {
                     ProviderName = "Overview",
                     ThemeMode = ToastThemeMode.Light,
-                    RenderStyle = ToastRenderStyle.Warning,
-                    Title = "Sunucu hatası",
-                    Text = $"{errorMsg}"
+                    RenderStyle = ToastRenderStyle.Danger,
+                    Title = "Hata",
+                    Text = errorMsg
                 }, RenderToastButton(true));
             }
         }
         catch (Exception ex)
         {
-            ToastService.ShowToast(new ToastOptions()
-            {
-                Id = "toast",
-                ProviderName = "Overview",
-                ThemeMode = ToastThemeMode.Light,
-                RenderStyle = ToastRenderStyle.Warning,
-                Title = "Veriler Yüklenirken bir hata oluştu",
-                Text = $"{ex.Message}"
-            }, RenderToastButton(true));
+            PopupTitle = "Hata";
+            PopupMessage = ex.Message;
+            IsSuccess = false;
         }
         finally
         {
+            PopupVisible = true;
             IsSaving = false;
         }
     }
 
     private void OnPopupOk()
     {
-        NavigationManager.NavigateTo("/guarantee/list");
+        PopupVisible = false;
+        if (IsSuccess) NavigationManager.NavigateTo("/guarantee/list");
     }
 
     private void OnPopupError()
     {
-        ToastService.CloseToast("toast");
+        PopupVisible = false;
     }
 
     private void NavigateBack() => NavigationManager.NavigateTo("/guarantee/list");
-
 }

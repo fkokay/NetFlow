@@ -1,13 +1,12 @@
-﻿using NetFlow.Domain.Tenders;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace NetFlow.Domain.Entities
+namespace NetFlow.Application.Guarantees
 {
-    [Table("Guarantee")]
-    public class GuaranteeEntity
+    public class CreateGuaranteeRequest
     {
         public int Id { get; set; }
         public int FirmId { get; set; }
+        public string FirmName { get; set; }
         public string Subject { get; set; }
         public string GuaranteeType { get; set; }
         public string GuaranteeForm { get; set; }
@@ -16,20 +15,20 @@ namespace NetFlow.Domain.Entities
         public string Currency { get; set; }
         public decimal CommissionRate { get; set; }
         [NotMapped]
-        public decimal? CommissionAmount { get; set; }
+        public decimal CommissionAmount { get; set; }
         public int CommissionPeriodId { get; set; }
+        public string GuaranteeCommissionPeriodName { get; set; }
         public DateTime GuaranteeDate { get; set; }
         public DateTime ExpiryDate { get; set; }
         public string BankCode { get; set; }
+        public string BankName { get; set; }
         public string BankBranchCode { get; set; }
+        public string BankBranchName { get; set; }
         public string? PublicAuthorityCode { get; set; }
+        public string PublicAuthorityName { get; set; }
         public string? ExpenseAccountCode { get; set; }
         public string TakasbankReferenceNo { get; set; }
+        public bool IsRefunded { get; set; }
         public DateTime CreatedAt { get; set; }
-        public FirmEntity Firm { get; set; }
-        public GuaranteeCommissionPeriodEntity CommissionPeriod { get; set; }
-        public ICollection<TenderEntity> FinalGuaranteeTenders { get; set; }
-        public ICollection<TenderEntity> TemporaryGuaranteeTenders { get; set; }
     }
 }
-
