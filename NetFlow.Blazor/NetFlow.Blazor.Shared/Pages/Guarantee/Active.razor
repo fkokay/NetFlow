@@ -41,11 +41,12 @@
             <DxToolbarItem Tooltip="Refresh" BeginGroup="true"  Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
         </DxToolbar>
     </div>
-    <div class="Guarantee-list-root">
+    <div class="Guarantee-list-root h-100">
         <div class="h-100">
 
             <DxGrid @ref="Grid"
                     Data="Data"
+                    style="height:100%;"
                     KeyFieldName="Id"
                     CssClass="Guarantee-list"
                     SearchText="@SearchText"

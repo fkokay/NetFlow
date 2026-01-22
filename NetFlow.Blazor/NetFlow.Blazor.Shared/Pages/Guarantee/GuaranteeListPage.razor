@@ -9,13 +9,11 @@
          HeaderText="Teminat Süresini Uzat"
          Width="600px"
          MaxWidth="95vw">
-
     <BodyContentTemplate Context="popupContext">
         @if (IsExtensionPopupVisible)
         {
             <div class="extension-popup-container">
                 <DxFormLayout CaptionPosition="CaptionPosition.Horizontal">
-
                     <DxFormLayoutItem Caption="Teminat No" ColSpanMd="12">
                         <DxTextBox Text="@SelectedGuaranteeNumber" ReadOnly="true" />
                     </DxFormLayoutItem>
@@ -54,7 +52,6 @@
                             </div>
                         </Template>
                     </DxFormLayoutItem>
-
                 </DxFormLayout>
             </div>
         }
@@ -121,6 +118,7 @@
             <DxToolbarItem Tooltip="Refresh" Click="LoadGridDataAsync" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
         </DxToolbar>
     </div>
+
     <div class="Guarantee-list-root h-100">
         <div class="h-100">
             <DxGrid @ref="Grid"
@@ -165,7 +163,6 @@
                     <DxGridDataColumn Caption="Cari" FieldName="PublicAuthorityCode" />
                     <DxGridDataColumn Caption="Gider Hesap Kodu" FieldName="ExpenseAccountCode" />
 
-
                     <DxGridDataColumn Caption="Ýþlemler" Width="100px" MinWidth="100" Visible="@ShowExtensionButton">
                         <CellDisplayTemplate>
                             <div @onclick:stopPropagation="true">
@@ -194,10 +191,16 @@
 </div>
 
 @code {
+  
     [Parameter] public string Title { get; set; } = "Teminat Havuzu";
     [Parameter] public string ApiEndpoint { get; set; } = "https://localhost:7071/api/guarantees";
     [Parameter] public bool ShowExtensionButton { get; set; } = false;
     [Parameter] public string ReturnUrl { get; set; } = "/guarantee/list";
+
+    [CascadingParameter(Name = "ParentSizeMode")]
+    SizeMode SizeMode { get; set; }
+
+
     bool IsExtensionPopupVisible { get; set; } = false;
     int SelectedGuaranteeId { get; set; }
     string? SelectedGuaranteeNumber { get; set; }
@@ -205,9 +208,7 @@
     DateTime SelectedGuaranteeDate { get; set; }
     DateTime CurrentExpiryDate { get; set; }
     DateTime NewExpiryDate { get; set; }
-    CancellationTokenSource disposalTokenSource = new CancellationTokenSource();
-    [CascadingParameter(Name = "ParentSizeMode")]
-    SizeMode SizeMode { get; set; }
+
     private GridDevExtremeDataSource<GuaranteeModel> Data { get; set; } = null!;
     private IGrid? Grid { get; set; }
     private string? SearchText { get; set; }
@@ -215,6 +216,9 @@
     string[] GuaranteeTypes { get; } = new[] { "Geçici", "Kati" };
     private bool IsSaving, IsSuccess;
 
+    private CancellationTokenSource disposalTokenSource = new CancellationTokenSource();
+
+  
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -223,59 +227,29 @@
 
     async Task LoadGridDataAsync()
     {
-        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
         Data = new GridDevExtremeDataSource<GuaranteeModel>(client, NavigationManager.ToAbsoluteUri(ApiEndpoint));
-        if (Grid != null) Grid.Reload();
+
+        if (Grid != null)
+            Grid.Reload();
+
         await InvokeAsync(StateHasChanged);
     }
 
+  
     void OpenExtensionPopup(GuaranteeModel item)
     {
         SelectedGuaranteeId = item.Id;
         SelectedGuaranteeNumber = item.GuaranteeNumber;
-        SelectedSubject = item.Subject; 
-        SelectedGuaranteeDate = item.GuaranteeDate; 
+        SelectedSubject = item.Subject;
+        SelectedGuaranteeDate = item.GuaranteeDate;
         CurrentExpiryDate = item.ExpiryDate;
         NewExpiryDate = item.ExpiryDate;
         IsExtensionPopupVisible = true;
     }
 
-    void OnColumnChooserItemClick(ToolbarItemClickEventArgs e) => Grid!.ShowColumnChooser();
-    Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Teminatlar");
-    Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Seçili Teminatlar", new GridXlExportOptions { ExportSelectedRowsOnly = true });
-    Task ExportAllDataToCsv() => Grid!.ExportToCsvAsync("Teminatlar");
-    Task ExportSelectedRowsDataToCsv() => Grid!.ExportToCsvAsync("Seçili Teminatlar", new GridCsvExportOptions { ExportSelectedRowsOnly = true });
-    Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Teminatlar");
-    Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Seçili Teminatlar", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
-
-    void FilterByGuaranteeType(ToolbarItemClickEventArgs item)
-    {
-        GuaranteeTypeFilterValue = item.Info.Text;
-        Grid!.FilterBy("GuaranteeType", GridFilterRowOperatorType.Equal, GuaranteeTypeFilterValue != "Tümü" ? GuaranteeTypeFilterValue : null);
-    }
-
-    async Task OnRowClick(GridRowClickEventArgs args)
-    {
-        var guarantee = (GuaranteeModel)Grid!.GetDataItem(args.VisibleIndex);
-        if (guarantee != null)
-        {
-            NavigationManager.NavigateTo($"/guarantee/details/{guarantee.Id}");
-        }
-    }
-
-    void OnGuaranteeDetailsClick(GuaranteeModel guarantee)
-    {
-        if (guarantee != null)
-        {
-            NavigationManager.NavigateTo($"/guarantee/details/{guarantee.Id}");
-        }
-    }
-
-    void OnAddClick(ToolbarItemClickEventArgs e) => NavigationManager.NavigateTo("/guarantee/createorupdate/");
-    void OnCancelExtension()
-    {
-        IsExtensionPopupVisible = false;
-    }
+    void OnCancelExtension() => IsExtensionPopupVisible = false;
 
     async Task OnConfirmExtension()
     {
@@ -283,11 +257,8 @@
         {
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
-            var model = new
-            {
-                Id = SelectedGuaranteeId,
-                ExpiryDate = NewExpiryDate
-            };
+
+            var model = new { Id = SelectedGuaranteeId, ExpiryDate = NewExpiryDate };
             var response = await client.PutAsJsonAsync($"{ApiEndpoint}/extension", model);
 
             if (response.IsSuccessStatusCode)
@@ -309,7 +280,6 @@
             else
             {
                 var errorMsg = await response.Content.ReadAsStringAsync();
-
                 ToastService.ShowToast(new ToastOptions()
                 {
                     Id = "toast",
@@ -317,16 +287,12 @@
                     ThemeMode = ToastThemeMode.Light,
                     RenderStyle = ToastRenderStyle.Warning,
                     Title = "Uzatýlma Engellendi",
-                    Text = string.IsNullOrWhiteSpace(errorMsg)
-                      ? "Teminat süresi uzatýlýrken hata."
-                      : errorMsg
+                    Text = string.IsNullOrWhiteSpace(errorMsg) ? "Teminat süresi uzatýlýrken hata." : errorMsg
                 }, RenderToastButton(true));
-
             }
         }
         catch (Exception ex)
         {
-
             ToastService.ShowToast(new ToastOptions()
             {
                 Id = "toast",
@@ -334,29 +300,55 @@
                 ThemeMode = ToastThemeMode.Light,
                 RenderStyle = ToastRenderStyle.Warning,
                 Title = "Hata",
-                Text = string.IsNullOrWhiteSpace(ex.Message)
-                     ? "Hata."
-                     : ex.Message
+                Text = string.IsNullOrWhiteSpace(ex.Message) ? "Beklenmedik bir hata oluþtu." : ex.Message
             }, RenderToastButton(true));
-
             Console.WriteLine(ex.Message);
         }
     }
 
-    private RenderFragment RenderToastButton(bool isError)
+    
+    void OnColumnChooserItemClick(ToolbarItemClickEventArgs e) => Grid!.ShowColumnChooser();
+
+    void FilterByGuaranteeType(ToolbarItemClickEventArgs item)
     {
-        return @<div class="d-flex gap-2">
-            <DxButton Click="@(isError? OnPopupError:OnPopupOk)" RenderStyle="@(isError? ButtonRenderStyle.Danger: ButtonRenderStyle.Success)">Kapat</DxButton>
-        </div>;
+        GuaranteeTypeFilterValue = item.Info.Text;
+        Grid!.FilterBy("GuaranteeType", GridFilterRowOperatorType.Equal, GuaranteeTypeFilterValue != "Tümü" ? GuaranteeTypeFilterValue : null);
     }
+
+    async Task OnRowClick(GridRowClickEventArgs args)
+    {
+        var guarantee = (GuaranteeModel)Grid!.GetDataItem(args.VisibleIndex);
+        if (guarantee != null) NavigationManager.NavigateTo($"/guarantee/details/{guarantee.Id}");
+    }
+
+    void OnGuaranteeDetailsClick(GuaranteeModel guarantee)
+    {
+        if (guarantee != null) NavigationManager.NavigateTo($"/guarantee/details/{guarantee.Id}");
+    }
+
+    void OnAddClick(ToolbarItemClickEventArgs e) => NavigationManager.NavigateTo("/guarantee/createorupdate/");
+
+    
+    Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Teminatlar");
+    Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Seçili Teminatlar", new GridXlExportOptions { ExportSelectedRowsOnly = true });
+    Task ExportAllDataToCsv() => Grid!.ExportToCsvAsync("Teminatlar");
+    Task ExportSelectedRowsDataToCsv() => Grid!.ExportToCsvAsync("Seçili Teminatlar", new GridCsvExportOptions { ExportSelectedRowsOnly = true });
+    Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Teminatlar");
+    Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Seçili Teminatlar", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
+
+  
+    private RenderFragment RenderToastButton(bool isError) =>
+        @<div class="d-flex gap-2">
+        <DxButton Click="@(isError? OnPopupError : OnPopupOk)"
+                  RenderStyle="@(isError ? ButtonRenderStyle.Danger : ButtonRenderStyle.Success)">Kapat</DxButton>
+    </div>;
+
     private void OnPopupOk()
     {
         if (IsSuccess) NavigationManager.NavigateTo(ReturnUrl);
     }
 
-    private void OnPopupError()
-    {
-    }
+    private void OnPopupError() { }
 
 
     public void Dispose()

@@ -1,0 +1,121 @@
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
+
+<DxPopup @bind-Visible="@Visible"
+         ShowFooter="true"
+         HeaderText="Teminat Süresini Uzat"
+         Width="600px"
+         MaxWidth="95vw">
+    <BodyContentTemplate Context="popupContext">
+        @if (Visible && Model != null)
+        {
+            <div class="extension-popup-container">
+                <DxFormLayout CaptionPosition="CaptionPosition.Horizontal">
+                    <DxFormLayoutItem Caption="Teminat No" ColSpanMd="12">
+                        <DxTextBox Text="@Model.GuaranteeNumber" ReadOnly="true" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Konu" ColSpanMd="12">
+                        <DxTextBox Text="@Model.Subject" ReadOnly="true" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <Template>
+                            <div class="form-separator"></div>
+                        </Template>
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Baþlangýç Tarihi" ColSpanMd="12">
+                        <DxDateEdit Date="@Model.GuaranteeDate" ReadOnly="true" Mask="@DateTimeMask.ShortDate" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Mevcut Vade" ColSpanMd="12">
+                        <DxDateEdit Date="@Model.ExpiryDate" ReadOnly="true" Mask="@DateTimeMask.ShortDate" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Yeni Vade Tarihi" ColSpanMd="12" CssClass="highlight-item">
+                        <ChildContent>
+                            <DxDateEdit @bind-Date="@NewExpiryDate"
+                                        PickerDisplayMode="DatePickerDisplayMode.Calendar"
+                                        Mask="@DateTimeMask.ShortDate" />
+                        </ChildContent>
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <Template>
+                            <div class="extension-info-alert">
+                                <span class="dx-icon-info"></span>
+                                Lütfen teminatýn uzatýlacaðý yeni tarihi seçiniz.
+                            </div>
+                        </Template>
+                    </DxFormLayoutItem>
+                </DxFormLayout>
+            </div>
+        }
+    </BodyContentTemplate>
+
+    <FooterContentTemplate Context="footerContext">
+        <DxButton RenderStyle="ButtonRenderStyle.Primary" Text="Güncelle ve Onayla" IconCssClass="dx-icon-save" Click="OnConfirm" />
+        <DxButton RenderStyle="ButtonRenderStyle.Secondary" Text="Vazgeç" IconCssClass="dx-icon-close" Click="Close" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [Parameter] public GuaranteeModel? Model { get; set; }
+    [Parameter] public string ApiEndpoint { get; set; } = "";
+    [Parameter] public EventCallback OnSuccess { get; set; }
+
+    private DateTime NewExpiryDate { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (Model != null && Visible)
+        {
+            NewExpiryDate = Model.ExpiryDate;
+        }
+    }
+
+    async Task Close() => await VisibleChanged.InvokeAsync(false);
+
+    async Task OnConfirm()
+    {
+        try
+        {
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+            var updateModel = new { Id = Model!.Id, ExpiryDate = NewExpiryDate };
+
+            var response = await client.PutAsJsonAsync($"{ApiEndpoint}/extension", updateModel);
+
+            if (response.IsSuccessStatusCode)
+            {
+                ShowToast("Baþarýlý", "Teminat süresi baþarýlý bir þekilde uzatýldý.", ToastRenderStyle.Success, false);
+                await OnSuccess.InvokeAsync();
+                await Close();
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                ShowToast("Uzatýlma Engellendi", string.IsNullOrWhiteSpace(errorMsg) ? "Hata oluþtu." : errorMsg, ToastRenderStyle.Warning, true);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowToast("Hata", ex.Message, ToastRenderStyle.Warning, true);
+        }
+    }
+
+    void ShowToast(string title, string text, ToastRenderStyle style, bool isError)
+    {
+        ToastService.ShowToast(new ToastOptions()
+        {
+            ProviderName = "Overview",
+            RenderStyle = style,
+            Title = title,
+            Text = text
+        }, @<div class="d-flex gap-2"><DxButton Click="() => { }" RenderStyle="@(isError? ButtonRenderStyle.Danger: ButtonRenderStyle.Success)">Kapat</DxButton></div>);
+    }
+}
