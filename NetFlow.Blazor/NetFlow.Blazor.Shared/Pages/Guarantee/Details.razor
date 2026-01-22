@@ -227,7 +227,7 @@
     private bool IsDataLoaded { get; set; }
     private int ActiveTabIndex { get; set; }
     private bool AddPopupVisible { get; set; }
-    private int? SelectedCommissionId { get; set; } // Düzenlenecek ID'yi tutar
+    private int? SelectedCommissionId { get; set; } 
     private GridDevExtremeDataSource<GuaranteeCommissionModel>? CommissionDataSource { get; set; }
     private GuaranteeCommissionAddForm? addFormRef;
     private bool IsSaving, IsSuccess;
@@ -349,6 +349,7 @@
 
             if (response.IsSuccessStatusCode)
             {
+
                 NavigationManager.NavigateTo("/guarantee/list");
                 return;
             }

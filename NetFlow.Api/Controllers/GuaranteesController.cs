@@ -92,6 +92,15 @@ namespace NetFlow.Api.Controllers
                 new { id },
                 null);
         }
+        [HttpPut("extension")]
+        public async Task<IActionResult> Update([FromBody] EditGuaranteeExtensionRequest request)
+        {
+            var id = await _write.EditGuaranteeExtensionAsync(request);
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)

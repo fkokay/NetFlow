@@ -14,8 +14,6 @@ namespace NetFlow.Application.Guarantees
             _db = db;
         }
 
-
-
         public async Task<int> CreateAsync(CreateGuaranteeRequest request)
         {
             var guarantee = new GuaranteeEntity
@@ -90,10 +88,79 @@ namespace NetFlow.Application.Guarantees
             await _db.SaveChangesAsync();
 
             if (commissionChanged)
-                await SyncGuaranteeCommissionsAsync(guarantee);
+            {
+                var oldCommissions = await _db.GuaranteeCommissions
+                    .Where(x => x.GuaranteeId == guarantee.Id)
+                    .ToListAsync();
+
+                if (oldCommissions.Any())
+                    _db.GuaranteeCommissions.RemoveRange(oldCommissions);
+
+                await _db.SaveChangesAsync();
+
+                await CreateGuaranteeCommissionsAsync(guarantee);
+            }
 
             return guarantee.Id;
         }
+        public async Task<int> EditGuaranteeExtensionAsync(EditGuaranteeExtensionRequest request)
+        {
+            var guarantee = await _db.Guarantees
+                .FirstOrDefaultAsync(x => x.Id == request.Id);
+
+            if (guarantee == null)
+                throw new Exception("Teminat bulunamadı");
+
+          
+            var oldExpiryDate = guarantee.ExpiryDate;
+
+            bool commissionChanged = oldExpiryDate != request.ExpiryDate;
+
+            guarantee.ExpiryDate = request.ExpiryDate;
+
+            guarantee.CommissionPeriod = await _db.GuaranteeCommissionPeriods
+                .FirstOrDefaultAsync(x => x.Id == guarantee.CommissionPeriodId);
+
+            await _db.SaveChangesAsync();
+
+        
+            if (commissionChanged && request.ExpiryDate > oldExpiryDate)
+            {
+                var extraMonthCount = DateUtils.GetMonthDifference(
+                    oldExpiryDate,
+                    request.ExpiryDate);
+
+                int loopCount = extraMonthCount / guarantee.CommissionPeriod.Period;
+
+                for (int i = 0; i < loopCount; i++)
+                {
+                    var commission = new GuaranteeCommissionEntity
+                    {
+                        GuaranteeId = guarantee.Id,
+                        CommissionStartDate = oldExpiryDate.AddMonths(i * guarantee.CommissionPeriod.Period),
+                        CommissionEndDate = oldExpiryDate.AddMonths((i + 1) * guarantee.CommissionPeriod.Period),
+                        CommissionRate = guarantee.CommissionRate,
+                        CommissionAmount = Math.Round(
+                            guarantee.GuaranteeAmount *
+                            guarantee.CommissionRate *
+                            (guarantee.CommissionPeriod.Period / 12m),
+                            2,
+                            MidpointRounding.AwayFromZero),
+                        Currency = guarantee.Currency,
+                        PaymentStatus = "Beklemede",
+                        CreatedAt = DateTime.Now,
+                        CreatedBy = "System"
+                    };
+
+                    _db.GuaranteeCommissions.Add(commission);
+                }
+
+                await _db.SaveChangesAsync();
+            }
+
+            return guarantee.Id;
+        }
+
 
         public async Task DeleteAsync(int id)
         {
@@ -121,23 +188,7 @@ namespace NetFlow.Application.Guarantees
             _db.Guarantees.Remove(guarantee);
             await _db.SaveChangesAsync();
         }
-
-
-
-        private async Task SyncGuaranteeCommissionsAsync(GuaranteeEntity guarantee)
-        {
-            var oldCommissions = await _db.GuaranteeCommissions
-                .Where(x => x.GuaranteeId == guarantee.Id)
-                .ToListAsync();
-
-            if (oldCommissions.Any())
-            {
-                _db.GuaranteeCommissions.RemoveRange(oldCommissions);
-                await _db.SaveChangesAsync();
-            }
-
-            await CreateGuaranteeCommissionsAsync(guarantee);
-        }
+        
         private async Task CreateGuaranteeCommissionsAsync(GuaranteeEntity guarantee)
         {
             if (guarantee == null)
