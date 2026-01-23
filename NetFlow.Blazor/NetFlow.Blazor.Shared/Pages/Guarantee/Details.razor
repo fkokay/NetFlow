@@ -30,7 +30,7 @@
             </DxToolbarItem>
             <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
                 <Template>
-                    <DxButton Text="Sil" Click="@OnDeleteClick" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
+                    <DxButton Text="Sil" Click="@OnDeleteClick" class="action-button-delete" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
                 </Template>
             </DxToolbarItem>
             <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
@@ -227,7 +227,7 @@
     private bool IsDataLoaded { get; set; }
     private int ActiveTabIndex { get; set; }
     private bool AddPopupVisible { get; set; }
-    private int? SelectedCommissionId { get; set; } 
+    private int? SelectedCommissionId { get; set; }
     private GridDevExtremeDataSource<GuaranteeCommissionModel>? CommissionDataSource { get; set; }
     private GuaranteeCommissionAddForm? addFormRef;
     private bool IsSaving, IsSuccess;
@@ -288,7 +288,7 @@
 
     private void GuaranteeCommissionAdd()
     {
-        SelectedCommissionId = null; 
+        SelectedCommissionId = null;
         AddPopupVisible = true;
     }
 
@@ -319,10 +319,10 @@
 
     private void OnCommissionEditStart(GridEditStartEventArgs e)
     {
-        e.Cancel = true; 
+        e.Cancel = true;
         var item = (GuaranteeCommissionModel)e.DataItem;
-        SelectedCommissionId = item.Id; 
-        AddPopupVisible = true; 
+        SelectedCommissionId = item.Id;
+        AddPopupVisible = true;
     }
 
     private async Task DeleteCommission(int commissionId)

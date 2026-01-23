@@ -130,3 +130,6 @@
             font-weight: 600;
             text-align: right;
         }
+::deep .action-button-delete {
+    margin-left: 5px;
+}
