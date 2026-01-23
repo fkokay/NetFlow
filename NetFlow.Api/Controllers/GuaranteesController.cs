@@ -22,7 +22,7 @@ namespace NetFlow.Api.Controllers
             _write = write;
         }
 
-        [HttpGet]
+        [HttpGet("list")]
         public async Task<IActionResult> List([FromQuery] PagedRequest pagedRequest)
         {
             if (_current.User == null)

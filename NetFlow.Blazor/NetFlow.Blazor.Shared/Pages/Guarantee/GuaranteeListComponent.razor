@@ -4,72 +4,6 @@
 @inject IHttpClientFactory HttpClientFactory
 @inject IToastNotificationService ToastService
 
-<DxPopup @bind-Visible="@IsExtensionPopupVisible"
-         ShowFooter="true"
-         HeaderText="Teminat Süresini Uzat"
-         Width="600px"
-         MaxWidth="95vw">
-    <BodyContentTemplate Context="popupContext">
-        @if (IsExtensionPopupVisible)
-        {
-            <div class="extension-popup-container">
-                <DxFormLayout CaptionPosition="CaptionPosition.Horizontal">
-                    <DxFormLayoutItem Caption="Teminat No" ColSpanMd="12">
-                        <DxTextBox Text="@SelectedGuaranteeNumber" ReadOnly="true" />
-                    </DxFormLayoutItem>
-
-                    <DxFormLayoutItem Caption="Konu" ColSpanMd="12">
-                        <DxTextBox Text="@SelectedSubject" ReadOnly="true" />
-                    </DxFormLayoutItem>
-
-                    <DxFormLayoutItem ColSpanMd="12">
-                        <Template Context="sepContext">
-                            <div class="form-separator"></div>
-                        </Template>
-                    </DxFormLayoutItem>
-
-                    <DxFormLayoutItem Caption="Baþlangýç Tarihi" ColSpanMd="12">
-                        <DxDateEdit Date="@SelectedGuaranteeDate" ReadOnly="true" Mask="@DateTimeMask.ShortDate" />
-                    </DxFormLayoutItem>
-
-                    <DxFormLayoutItem Caption="Mevcut Vade" ColSpanMd="12">
-                        <DxDateEdit Date="@CurrentExpiryDate" ReadOnly="true" Mask="@DateTimeMask.ShortDate" />
-                    </DxFormLayoutItem>
-
-                    <DxFormLayoutItem Caption="Yeni Vade Tarihi" ColSpanMd="12" CssClass="highlight-item">
-                        <ChildContent Context="itemContext">
-                            <DxDateEdit @bind-Date="@NewExpiryDate"
-                                        PickerDisplayMode="DatePickerDisplayMode.Calendar"
-                                        Mask="@DateTimeMask.ShortDate" />
-                        </ChildContent>
-                    </DxFormLayoutItem>
-
-                    <DxFormLayoutItem ColSpanMd="12">
-                        <Template Context="infoContext">
-                            <div class="extension-info-alert">
-                                <span class="dx-icon-info"></span>
-                                Lütfen teminatýn uzatýlacaðý yeni tarihi seçiniz.
-                            </div>
-                        </Template>
-                    </DxFormLayoutItem>
-                </DxFormLayout>
-            </div>
-        }
-    </BodyContentTemplate>
-
-    <FooterContentTemplate Context="footerContext">
-        <DxButton RenderStyle="ButtonRenderStyle.Primary"
-                  Text="Güncelle ve Onayla"
-                  IconCssClass="dx-icon-save"
-                  Click="OnConfirmExtension" />
-
-        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
-                  Text="Vazgeç"
-                  IconCssClass="dx-icon-close"
-                  Click="OnCancelExtension" />
-    </FooterContentTemplate>
-</DxPopup>
-
 <div class="content-root">
     <div class="card toolbar">
         <DxToolbar Title="@Title" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
@@ -190,35 +124,32 @@
     </div>
 </div>
 
+@if (ExtensionPopupVisible && SelectedGuarantee != null)
+{
+    <GuaranteeExtensionComponent Guarantee="SelectedGuarantee" IsExtensionPopupVisible="true" OnCanceled="GuaranteeExtensionOnCanceled" OnSaved="GuaranteeExtensionOnSaved" />
+}
+
 @code {
-  
-    [Parameter] public string Title { get; set; } = "Teminat Havuzu";
-    [Parameter] public string ApiEndpoint { get; set; } = "https://localhost:7071/api/guarantees";
+
+    [Parameter] public required string Title { get; set; } = "Teminat Havuzu";
+    [Parameter] public required string Page { get; set; }
     [Parameter] public bool ShowExtensionButton { get; set; } = false;
-    [Parameter] public string ReturnUrl { get; set; } = "/guarantee/list";
 
     [CascadingParameter(Name = "ParentSizeMode")]
-    SizeMode SizeMode { get; set; }
-
-
-    bool IsExtensionPopupVisible { get; set; } = false;
-    int SelectedGuaranteeId { get; set; }
-    string? SelectedGuaranteeNumber { get; set; }
-    string? SelectedSubject { get; set; }
-    DateTime SelectedGuaranteeDate { get; set; }
-    DateTime CurrentExpiryDate { get; set; }
-    DateTime NewExpiryDate { get; set; }
+    public SizeMode SizeMode { get; set; }
 
     private GridDevExtremeDataSource<GuaranteeModel> Data { get; set; } = null!;
     private IGrid? Grid { get; set; }
     private string? SearchText { get; set; }
-    string GuaranteeTypeFilterValue { get; set; } = "Tümü";
-    string[] GuaranteeTypes { get; } = new[] { "Geçici", "Kati" };
-    private bool IsSaving, IsSuccess;
+    private string GuaranteeTypeFilterValue { get; set; } = "Tümü";
+    private string[] GuaranteeTypes { get; } = new[] { "Geçici", "Kati" };
+
+    private bool ExtensionPopupVisible = false;
+    private GuaranteeModel? SelectedGuarantee;
 
     private CancellationTokenSource disposalTokenSource = new CancellationTokenSource();
 
-  
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -229,7 +160,7 @@
     {
         var httpClient = HttpClientFactory.CreateClient("ApiClient");
         var client = await ApiClientFactory.CreateAsync(httpClient);
-        Data = new GridDevExtremeDataSource<GuaranteeModel>(client, NavigationManager.ToAbsoluteUri(ApiEndpoint));
+        Data = new GridDevExtremeDataSource<GuaranteeModel>(client, NavigationManager.ToAbsoluteUri($"https://localhost:7071/api/guarantees/{Page}"));
 
         if (Grid != null)
             Grid.Reload();
@@ -237,76 +168,14 @@
         await InvokeAsync(StateHasChanged);
     }
 
-  
+
     void OpenExtensionPopup(GuaranteeModel item)
     {
-        SelectedGuaranteeId = item.Id;
-        SelectedGuaranteeNumber = item.GuaranteeNumber;
-        SelectedSubject = item.Subject;
-        SelectedGuaranteeDate = item.GuaranteeDate;
-        CurrentExpiryDate = item.ExpiryDate;
-        NewExpiryDate = item.ExpiryDate;
-        IsExtensionPopupVisible = true;
+        SelectedGuarantee = item;
+        ExtensionPopupVisible = true;
     }
 
-    void OnCancelExtension() => IsExtensionPopupVisible = false;
 
-    async Task OnConfirmExtension()
-    {
-        try
-        {
-            var httpClient = HttpClientFactory.CreateClient("ApiClient");
-            var client = await ApiClientFactory.CreateAsync(httpClient);
-
-            var model = new { Id = SelectedGuaranteeId, ExpiryDate = NewExpiryDate };
-            var response = await client.PutAsJsonAsync($"{ApiEndpoint}/extension", model);
-
-            if (response.IsSuccessStatusCode)
-            {
-                IsExtensionPopupVisible = false;
-                IsSuccess = true;
-                ToastService.ShowToast(new ToastOptions()
-                {
-                    Id = "toast",
-                    ProviderName = "Overview",
-                    ThemeMode = ToastThemeMode.Light,
-                    RenderStyle = ToastRenderStyle.Success,
-                    Title = "Baþarýlý",
-                    Text = "Teminat süresi baþarýlý bir þekilde uzatýldý."
-                }, RenderToastButton(false));
-
-                await LoadGridDataAsync();
-            }
-            else
-            {
-                var errorMsg = await response.Content.ReadAsStringAsync();
-                ToastService.ShowToast(new ToastOptions()
-                {
-                    Id = "toast",
-                    ProviderName = "Overview",
-                    ThemeMode = ToastThemeMode.Light,
-                    RenderStyle = ToastRenderStyle.Warning,
-                    Title = "Uzatýlma Engellendi",
-                    Text = string.IsNullOrWhiteSpace(errorMsg) ? "Teminat süresi uzatýlýrken hata." : errorMsg
-                }, RenderToastButton(true));
-            }
-        }
-        catch (Exception ex)
-        {
-            ToastService.ShowToast(new ToastOptions()
-            {
-                Id = "toast",
-                ProviderName = "Overview",
-                ThemeMode = ToastThemeMode.Light,
-                RenderStyle = ToastRenderStyle.Warning,
-                Title = "Hata",
-                Text = string.IsNullOrWhiteSpace(ex.Message) ? "Beklenmedik bir hata oluþtu." : ex.Message
-            }, RenderToastButton(true));
-            Console.WriteLine(ex.Message);
-        }
-    }
-
-    
     void OnColumnChooserItemClick(ToolbarItemClickEventArgs e) => Grid!.ShowColumnChooser();
 
     void FilterByGuaranteeType(ToolbarItemClickEventArgs item)
@@ -328,7 +197,7 @@
 
     void OnAddClick(ToolbarItemClickEventArgs e) => NavigationManager.NavigateTo("/guarantee/createorupdate/");
 
-    
+
     Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Teminatlar");
     Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Seçili Teminatlar", new GridXlExportOptions { ExportSelectedRowsOnly = true });
     Task ExportAllDataToCsv() => Grid!.ExportToCsvAsync("Teminatlar");
@@ -336,24 +205,22 @@
     Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Teminatlar");
     Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Seçili Teminatlar", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
 
-  
-    private RenderFragment RenderToastButton(bool isError) =>
-        @<div class="d-flex gap-2">
-        <DxButton Click="@(isError? OnPopupError : OnPopupOk)"
-                  RenderStyle="@(isError ? ButtonRenderStyle.Danger : ButtonRenderStyle.Success)">Kapat</DxButton>
-    </div>;
-
-    private void OnPopupOk()
-    {
-        if (IsSuccess) NavigationManager.NavigateTo(ReturnUrl);
-    }
-
-    private void OnPopupError() { }
-
 
     public void Dispose()
     {
         disposalTokenSource.Cancel();
         disposalTokenSource.Dispose();
+    }
+
+
+    private async Task GuaranteeExtensionOnSaved()
+    {
+        ExtensionPopupVisible = false;
+        await LoadGridDataAsync();
+    }
+
+    private void GuaranteeExtensionOnCanceled()
+    {
+        ExtensionPopupVisible = false;
     }
 }
