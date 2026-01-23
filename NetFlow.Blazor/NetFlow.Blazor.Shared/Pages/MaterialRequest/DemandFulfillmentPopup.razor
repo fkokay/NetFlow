@@ -1,0 +1,52 @@
+<DxPopup Visible="@Visible"
+         VisibleChanged="@OnVisibleChanged"
+         ShowFooter="true"
+         HeaderText="Talep Karþýlama"
+         Width="600px"
+         MaxWidth="95vw">
+    <BodyContentTemplate Context="popupContext">
+        @if (Visible)
+        {
+            <div class="demandfullfillment-popup-container">
+                <DxFormLayout CaptionPosition="CaptionPosition.Vertical">
+                    <DxFormLayoutItem Caption="Buraya Gelecek Olanlar Var" ColSpanMd="12">
+                    </DxFormLayoutItem>
+                </DxFormLayout>
+            </div>
+        }
+    </BodyContentTemplate>
+
+    <FooterContentTemplate Context="footerContext">
+        <DxButton RenderStyle="ButtonRenderStyle.Primary"
+                  Text="Onayla"
+                  IconCssClass="dx-icon-check"
+                  Click="OnConfirm" />
+
+        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                  Text="Vazgeç"
+                  IconCssClass="dx-icon-close"
+                  Click="OnCancel" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [Parameter] public EventCallback OnConfirmClick { get; set; }
+
+    private async Task OnVisibleChanged(bool value)
+    {
+        await VisibleChanged.InvokeAsync(value);
+    }
+
+    private async Task OnCancel()
+    {
+        await VisibleChanged.InvokeAsync(false);
+    }
+
+    private async Task OnConfirm()
+    {
+        await OnConfirmClick.InvokeAsync();
+        await VisibleChanged.InvokeAsync(false);
+    }
+}

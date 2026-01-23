@@ -7,10 +7,9 @@ namespace NetFlow.Domain.Enums
     public enum MaterialRequestStatus
     {
         Open,
-        PendingApproval,
         Approved,
         Rejected,
-        Fulfilled,
+        Waiting,
         Closed
     }
 

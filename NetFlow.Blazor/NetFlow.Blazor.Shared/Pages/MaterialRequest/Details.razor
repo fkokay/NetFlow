@@ -3,9 +3,57 @@
 @inject NavigationManager NavigationManager
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
+
 
 <DxLayoutBreakpoint DeviceSize="DeviceSize.XSmall | DeviceSize.Small | DeviceSize.Medium"
                     @bind-IsActive="@IsSmallScreen" />
+
+
+<DxPopup @bind-Visible="@IsRejectionPopupVisible"
+         ShowFooter="true"
+         HeaderText="Talebi Reddet"
+         Width="600px"
+         MaxWidth="95vw">
+    <BodyContentTemplate Context="popupContext">
+        @if (IsRejectionPopupVisible)
+        {
+            <div class="rejection-popup-container">
+                <DxFormLayout CaptionPosition="CaptionPosition.Vertical">
+                    <DxFormLayoutItem Caption="Reddetme Nedeni" ColSpanMd="12">
+                        <DxMemo @bind-Text="@RejectionReason"
+                                Rows="5"
+                                BindValueMode="BindValueMode.OnInput"
+                                NullText="Reddetme nedenini detaylıca giriniz..."
+                                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+
+                        @if (string.IsNullOrWhiteSpace(RejectionReason))
+                        {
+                            <small class="text-danger mt-1">Bu alanın doldurulması zorunludur.</small>
+                        }
+                    </DxFormLayoutItem>
+                </DxFormLayout>
+            </div>
+        }
+    </BodyContentTemplate>
+
+    <FooterContentTemplate Context="footerContext">
+        <DxButton RenderStyle="ButtonRenderStyle.Danger"
+                  Text="Reddi Onayla"
+                  IconCssClass="dx-icon-check"
+                  Enabled="@(!string.IsNullOrWhiteSpace(RejectionReason))"
+                  Click="OnConfirmRejection" />
+
+        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                  Text="Vazgeç"
+                  IconCssClass="dx-icon-close"
+                  Click="OnCancelRejection" />
+    </FooterContentTemplate>
+</DxPopup>
+
+<DemandFulfillmentPopup @bind-Visible="@IsDemandFulfillmentPopupVisible"
+                        OnConfirmClick="HandleFulfillmentConfirm" />
+
 
 <div class="content-root">
     <div class="card toolbar">
@@ -23,12 +71,51 @@
                 </Template>
             </DxToolbarItem>
 
-           
+            @if (Model != null)
+            {
+                var status = Model.Status?.ToLower();
 
-            <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
-                           Click="LoadDataAsync"
-                           Tooltip="Yenile"
-                           IconCssClass="refresh-icon icon medium-icon" />
+                @if (status == "waiting")
+                {
+                    <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                        <Template>
+                            <DxButton Text="Onayla"
+                                      Click="@OnApproveClick"
+                                      RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                      RenderStyle="ButtonRenderStyle.Success" />
+                        </Template>
+                    </DxToolbarItem>
+
+                    <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                        <Template>
+                            <DxButton Text="Reddet"
+                                      class="action-button-rejected"
+                                      Click="@OnRejectClick"
+                                      RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                      RenderStyle="ButtonRenderStyle.Danger" />
+                        </Template>
+                    </DxToolbarItem>
+                }
+                else if (status == "open")
+                {
+                    <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                        <Template>
+                            <DxButton Text="Talep Karşıla"
+                                      class="action-button-rejected"
+                                      Click="@OnDemandFulfillmentClick"
+                                      RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                      RenderStyle="ButtonRenderStyle.Primary" />
+                        </Template>
+                    </DxToolbarItem>
+                }
+
+
+                <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
+                               Click="LoadDataAsync"
+                               Tooltip="Yenile"
+                               IconCssClass="refresh-icon icon medium-icon" />
+            }
+
         </DxToolbar>
     </div>
 
@@ -160,15 +247,19 @@
 </div>
 
 @code {
-
     [Parameter] public int Id { get; set; }
 
     private MaterialRequestModel? Model;
     private GridDevExtremeDataSource<MaterialRequestItemModel>? ItemDataSource;
-
+    private bool IsSaving, IsSuccess;
     private bool IsSmallScreen;
     private bool IsDataLoaded;
     private int ActiveTabIndex;
+
+    bool IsRejectionPopupVisible { get; set; } = false;
+    bool IsDemandFulfillmentPopupVisible { get; set; } = false;
+    int SelectedMaterialId { get; set; }
+    string? RejectionReason { get; set; } = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -205,24 +296,173 @@
 
         if (index == 0)
         {
-            ItemDataSource =
-                new GridDevExtremeDataSource<MaterialRequestItemModel>(
-                    client,
-                    NavigationManager.ToAbsoluteUri(
-                        $"{baseUrl}/material-request-items?materialRequestId={Id}")
-                );
+            ItemDataSource = new GridDevExtremeDataSource<MaterialRequestItemModel>(
+                client,
+                NavigationManager.ToAbsoluteUri($"{baseUrl}/material-request-items?materialRequestId={Id}")
+            );
         }
-
         await InvokeAsync(StateHasChanged);
     }
 
-    private void OnEditClick()
+    private async Task OnApproveClick()
     {
-        NavigationManager.NavigateTo($"/material-request/edit/{Id}");
+        try
+        {
+            IsDataLoaded = false;
+            await InvokeAsync(StateHasChanged);
+
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+
+            var response = await client.PutAsync(
+                $"https://localhost:7071/api/material-requests/approved/{Id}",
+                null
+            );
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadDataAsync();
+
+                IsSuccess = true;
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Success,
+                    Title = "Başarılı",
+                    Text = "Talep başarıyla onaylandı."
+                }, RenderToastButton(false));
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Title = "Hata",
+                    Text = errorMsg,
+                    RenderStyle = ToastRenderStyle.Warning
+                }, RenderToastButton(true));
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast(new ToastOptions()
+            {
+                Title = "Hata",
+                Text = ex.Message,
+                RenderStyle = ToastRenderStyle.Danger
+            }, RenderToastButton(true));
+        }
+        finally
+        {
+            IsDataLoaded = true;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
-    private void NavigateBack()
+
+    private async Task OnDemandFulfillmentClick()
     {
-        NavigationManager.NavigateTo("/material-request/list");
+        IsDemandFulfillmentPopupVisible = true;
+        await Task.CompletedTask;
     }
+
+    private async Task HandleFulfillmentConfirm()
+    {
+        IsSuccess = true;
+        IsDemandFulfillmentPopupVisible = false;
+        await Task.CompletedTask;
+    }
+
+    private RenderFragment RenderToastButton(bool isError) =>
+        @<div class="d-flex gap-2">
+        <DxButton Click="@(isError? OnPopupError : OnPopupOk)"
+                  RenderStyle="@(isError ? ButtonRenderStyle.Danger : ButtonRenderStyle.Success)">Kapat</DxButton>
+    </div>;
+
+    private void OnPopupOk() { if (IsSuccess) NavigationManager.NavigateTo("/material-request/list"); }
+    private void OnPopupError() { }
+
+    private Task OnRejectClick()
+    {
+        if (Model != null)
+        {
+            SelectedMaterialId = Model.Id;
+            RejectionReason = string.Empty;
+            IsRejectionPopupVisible = true;
+        }
+        return Task.CompletedTask;
+    }
+
+    void OnCancelRejection() => IsRejectionPopupVisible = false;
+
+    async Task OnConfirmRejection()
+    {
+        try
+        {
+            IsDataLoaded = false;
+            IsRejectionPopupVisible = false;
+            await InvokeAsync(StateHasChanged);
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+
+            var model = new
+            {
+                Id = SelectedMaterialId,
+                RejectionReason = RejectionReason
+            };
+
+            var response = await client.PutAsJsonAsync(
+                $"https://localhost:7071/api/material-requests/rejection",
+                model
+            );
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadDataAsync();
+                IsSuccess = true;
+
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Success,
+                    Title = "Başarılı",
+                    Text = "Talep reddedildi."
+                }, RenderToastButton(false));
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Danger,
+                    Title = "Hata",
+                    Text = errorMsg
+                }, RenderToastButton(true));
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast(new ToastOptions()
+            {
+                Title = "Hata",
+                Text = ex.Message,
+                RenderStyle = ToastRenderStyle.Danger
+            }, RenderToastButton(true));
+        }
+        finally
+        {
+            IsDataLoaded = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+
+    private void NavigateBack() => NavigationManager.NavigateTo("/material-request/list");
 }

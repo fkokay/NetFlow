@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Domain.Common.Pagination;
+using NetFlow.Domain.Identity;
 using NetFlow.ReadModel.Tenders;
 using System;
 using System.Collections.Generic;
@@ -14,13 +15,28 @@ namespace NetFlow.ReadModel.Requests
         private readonly ReadModelOptions _opt;
 
         public MaterialRequestReadService(ReadModelOptions opt) => _opt = opt;
-        public async Task<PagedResult> ListAsync(int firmId, PagedRequest pagedRequest)
+        public async Task<PagedResult> ListAsync(int userId,int firmId, PagedRequest pagedRequest,bool open=false,bool closed=false,bool my=false)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
             var parameters = new DynamicParameters();
             parameters.Add("FirmId", firmId);
 
             string whereSql = "WHERE FirmId = @FirmId";
+            if (open)
+            {
+                whereSql += " AND Status = @Status";
+                parameters.Add("Status", "Open");
+            }
+            if (closed)
+            {
+                whereSql += " AND Status = @Status";
+                parameters.Add("Status", "Closed");
+            }
+            if (my)
+            {
+                whereSql += " AND ApprovedByUserId = @ApprovedByUserId";
+                parameters.Add("ApprovedByUserId", userId);
+            }
             if (!string.IsNullOrEmpty(pagedRequest.Filter))
             {
                 var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);
