@@ -201,7 +201,7 @@
     <BodyContentTemplate>
         @if (AddPopupVisible)
         {
-            <GuaranteeCommissionAddForm @ref="addFormRef"
+            <GuaranteeCommissionAddComponent @ref="addFormRef"
                                         GuaranteeId="Id"
                                         CommissionId="SelectedCommissionId"
                                         OnSaved="OnCommissionSaved"
@@ -233,8 +233,7 @@
     private bool AddPopupVisible { get; set; }
     private int? SelectedCommissionId { get; set; }
     private GridDevExtremeDataSource<GuaranteeCommissionModel>? CommissionDataSource { get; set; }
-    private GuaranteeCommissionAddForm? addFormRef;
-    private bool IsSaving, IsSuccess;
+    private GuaranteeCommissionAddComponent? addFormRef;
 
 
     protected override async Task OnInitializedAsync()
@@ -414,7 +413,7 @@
     }
     private void OnPopupOk()
     {
-        if (IsSuccess) NavigationManager.NavigateTo("/guarantee/list");
+        NavigationManager.NavigateTo("/guarantee/list");
     }
 
     private void OnPopupError()
