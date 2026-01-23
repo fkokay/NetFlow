@@ -1,4 +1,5 @@
-﻿using NetFlow.Application.Common.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using NetFlow.Application.Common.Interfaces;
 using NetFlow.Application.GuaranteeCommissions;
 using NetFlow.Application.Guarantees;
 using NetFlow.Domain.Entities;
@@ -19,7 +20,7 @@ namespace NetFlow.Application.MaterialRequests
             _db = db;
         }
 
-        public async Task<int> CreateAsync(CreateMaterialRequestRequest request)
+        public async Task<int> CreateAsync(CreateMaterialRequest request)
         {
 
             var materialRequest = new MaterialRequestEntity();
@@ -31,13 +32,43 @@ namespace NetFlow.Application.MaterialRequests
             materialRequest.RequestNo = "MR-" + DateTime.UtcNow.Ticks;
             materialRequest.RequestType = request.RequestType;
             materialRequest.RequiredDate = request.RequiredDate;
-            materialRequest.Priority = Domain.Enums.MaterialRequestPriority.Normal;
+            materialRequest.Priority = "Normal";
             materialRequest.RequestedDepartment = request.RequestedDepartment;
             materialRequest.Description = request.Description;
             materialRequest.SourceReference = request.SourceReference;
-            materialRequest.Status = Domain.Enums.MaterialRequestStatus.Open;
+            materialRequest.Status = "Waiting";
 
             _db.MaterialRequests.Add(materialRequest);
+            await _db.SaveChangesAsync();
+            return materialRequest.Id;
+        }
+
+        public async Task<int> RejectionAsync(RejectionMaterialRequest request)
+        {
+            var materialRequest = await _db.MaterialRequests
+                .FirstOrDefaultAsync(x => x.Id == request.Id);
+
+            if (materialRequest == null)
+                throw new Exception("Talep bulunamadı");
+
+            materialRequest.Status = "Rejected";
+            materialRequest.RejectionReason = request.RejectionReason;
+
+            await _db.SaveChangesAsync();
+            return materialRequest.Id;
+        }
+        public async Task<int> ApprovedAsync(int currentUserId, int materialId)
+        {
+            var materialRequest = await _db.MaterialRequests
+                .FirstOrDefaultAsync(x => x.Id == materialId);
+
+            if (materialRequest == null)
+                throw new Exception("Talep bulunamadı");
+
+            materialRequest.Status = "Open";
+            materialRequest.ApprovalDate= DateTime.UtcNow;
+            materialRequest.ApprovedByUserId = currentUserId;
+
             await _db.SaveChangesAsync();
             return materialRequest.Id;
         }

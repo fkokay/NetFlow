@@ -25,7 +25,7 @@ namespace NetFlow.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> List([FromQuery] PagedRequest pagedRequest) => Ok(await _read.ListAsync(_current.User.Firm.Id, pagedRequest));
+        public async Task<IActionResult> List([FromQuery] PagedRequest pagedRequest) => Ok(await _read.ListAsync(_current.User.Id.Value,_current.User.Firm.Id, pagedRequest));
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(int id)
@@ -33,10 +33,69 @@ namespace NetFlow.Api.Controllers
             var row = await _read.GetAsync(id);
             return row is null ? NotFound() : Ok(row);
         }
+
+        [HttpGet("open")]
+        public async Task<IActionResult> Open([FromQuery] PagedRequest pagedRequest)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(await _read.ListAsync(_current.User.Id.Value,_current.User.Firm.Id, pagedRequest, open: true));
+        }
+        [HttpGet("closed")]
+        public async Task<IActionResult> Closed([FromQuery] PagedRequest pagedRequest)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(await _read.ListAsync(_current.User.Id.Value,_current.User.Firm.Id, pagedRequest, closed: true));
+        }
+        [HttpGet("My")]
+        public async Task<IActionResult> My([FromQuery] PagedRequest pagedRequest)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(await _read.ListAsync(_current.User.Id.Value,_current.User.Firm.Id, pagedRequest, my: true));
+        }
+
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateMaterialRequestRequest request)
+        public async Task<IActionResult> Create([FromBody] CreateMaterialRequest request)
         {
             var id = await _write.CreateAsync(request);
+
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
+
+        [HttpPut("rejection")]
+        public async Task<IActionResult> Rejection([FromBody] RejectionMaterialRequest request)
+        {
+            var id = await _write.RejectionAsync(request);
+
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
+
+        [HttpPut("approved/{materialId:int}")]
+        public async Task<IActionResult> Approved(int materialId)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            var id = await _write.ApprovedAsync(_current.User.Id.Value, materialId);
 
             return CreatedAtAction(
                 nameof(Get),

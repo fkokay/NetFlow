@@ -4,7 +4,7 @@ using System.Text;
 
 namespace NetFlow.Application.MaterialRequests
 {
-    public class CreateMaterialRequestRequest
+    public class CreateMaterialRequest
     {
         public string RequestType { get; set; } = null!;
         public DateTime? RequiredDate { get; set; }

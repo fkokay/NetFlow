@@ -20,9 +20,9 @@ namespace NetFlow.Domain.Entities
         public DateTime? RequiredDate { get; set; }
 
         public string RequestType { get; set; } = null!;     // Production / Maintenance / Office
-        public MaterialRequestPriority Priority { get; set; } = MaterialRequestPriority.Normal;     // Low / Normal / Urgent
+        public string Priority { get; set; } = "Normal";     // Low / Normal / Urgent
 
-        public MaterialRequestStatus Status { get; set; } = MaterialRequestStatus.Open;          // Open / PendingApproval / Approved / Rejected / Fulfilled / Closed
+        public string Status { get; set; } = "Open";          // Open / PendingApproval / Approved / Rejected / Fulfilled / Closed
 
         public string? Description { get; set; }
 
@@ -30,7 +30,7 @@ namespace NetFlow.Domain.Entities
         public DateTime? ApprovalDate { get; set; }
         public string? RejectionReason { get; set; }
 
-        public FulfillmentType? FulfillmentType { get; set; }          // FromStock / Purchase / Transfer
+        public string? FulfillmentType { get; set; } = "FromStock";      // Stok / Depo olacak item içine taşıyacaksın
         public string? SourceReference { get; set; }          // WorkOrder / Project / Tender
 
         public DateTime CreateAt { get; set; } = DateTime.UtcNow;
