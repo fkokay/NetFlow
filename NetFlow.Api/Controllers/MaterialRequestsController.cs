@@ -64,6 +64,16 @@ namespace NetFlow.Api.Controllers
 
             return Ok(await _read.ListAsync(_current.User.Id.Value,_current.User.Firm.Id, pagedRequest, my: true));
         }
+        [HttpGet("Waiting")]
+        public async Task<IActionResult> Waiting([FromQuery] PagedRequest pagedRequest)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(await _read.ListAsync(_current.User.Id.Value,_current.User.Firm.Id, pagedRequest, waiting: true));
+        }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateMaterialRequest request)

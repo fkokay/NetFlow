@@ -50,8 +50,7 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
             builder.Property(x => x.RejectionReason)
                    .HasMaxLength(300);
 
-            builder.Property(x => x.FulfillmentType)
-                   .HasMaxLength(30);
+
 
             builder.Property(x => x.SourceReference)
                    .HasMaxLength(50);

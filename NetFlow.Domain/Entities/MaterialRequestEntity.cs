@@ -29,8 +29,6 @@ namespace NetFlow.Domain.Entities
         public int? ApprovedByUserId { get; set; }
         public DateTime? ApprovalDate { get; set; }
         public string? RejectionReason { get; set; }
-
-        public string? FulfillmentType { get; set; } = "FromStock";      // Stok / Depo olacak item içine taşıyacaksın
         public string? SourceReference { get; set; }          // WorkOrder / Project / Tender
 
         public DateTime CreateAt { get; set; } = DateTime.UtcNow;

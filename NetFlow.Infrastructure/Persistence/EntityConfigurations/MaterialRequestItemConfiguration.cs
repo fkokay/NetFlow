@@ -31,7 +31,8 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
             builder.Property(x => x.Unit)
                    .HasMaxLength(20)
                    .IsRequired();
-
+            builder.Property(x => x.FulfillmentType)
+       .HasMaxLength(30);
             builder.Property(x => x.RequestedQuantity)
                    .HasPrecision(18, 4)
                    .IsRequired();

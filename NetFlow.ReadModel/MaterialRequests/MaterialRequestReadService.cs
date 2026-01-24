@@ -15,7 +15,7 @@ namespace NetFlow.ReadModel.Requests
         private readonly ReadModelOptions _opt;
 
         public MaterialRequestReadService(ReadModelOptions opt) => _opt = opt;
-        public async Task<PagedResult> ListAsync(int userId,int firmId, PagedRequest pagedRequest,bool open=false,bool closed=false,bool my=false)
+        public async Task<PagedResult> ListAsync(int userId,int firmId, PagedRequest pagedRequest,bool open=false,bool closed=false,bool my=false,bool waiting=false)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
             var parameters = new DynamicParameters();
@@ -31,6 +31,11 @@ namespace NetFlow.ReadModel.Requests
             {
                 whereSql += " AND Status = @Status";
                 parameters.Add("Status", "Closed");
+            }
+            if (waiting)
+            {
+                whereSql += " AND Status = @Status";
+                parameters.Add("Status", "Waiting");
             }
             if (my)
             {

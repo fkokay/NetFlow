@@ -20,7 +20,6 @@ namespace NetFlow.ReadModel.Requests
         public int? ApprovedByUserId { get; set; }
         public DateTime? ApprovalDate { get; set; }
         public string? RejectionReason { get; set; }
-        public string? FulfillmentType { get; set; }          // FromStock / Purchase / Transfer
         public string? SourceReference { get; set; }          // WorkOrder / Project / Tender
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public int CreatedBy { get; set; }

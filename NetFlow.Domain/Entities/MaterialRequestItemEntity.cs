@@ -17,6 +17,7 @@ namespace NetFlow.Domain.Entities
         public string? AlternateItemCode { get; set; }
         public string Status { get; set; } = "Pending";        // Pending / Fulfilled / Partial / Cancelled
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public string? FulfillmentType { get; set; } = "FromStock";      // Stok / Depo olacak 
 
         // Navigation
         public MaterialRequestEntity MaterialRequest { get; set; } = null!;
