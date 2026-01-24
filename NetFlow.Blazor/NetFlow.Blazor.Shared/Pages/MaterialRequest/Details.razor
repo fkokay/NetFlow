@@ -51,8 +51,7 @@
     </FooterContentTemplate>
 </DxPopup>
 
-<DemandFulfillmentPopup @bind-Visible="@IsDemandFulfillmentPopupVisible"
-                        OnConfirmClick="HandleFulfillmentConfirm" />
+
 
 
 <div class="content-root">
@@ -102,7 +101,6 @@
                         <Template>
                             <DxButton Text="Talep Karşıla"
                                       class="action-button-rejected"
-                                      Click="@OnDemandFulfillmentClick"
                                       RenderStyleMode="ButtonRenderStyleMode.Outline"
                                       RenderStyle="ButtonRenderStyle.Primary" />
                         </Template>
@@ -257,7 +255,6 @@
     private int ActiveTabIndex;
 
     bool IsRejectionPopupVisible { get; set; } = false;
-    bool IsDemandFulfillmentPopupVisible { get; set; } = false;
     int SelectedMaterialId { get; set; }
     string? RejectionReason { get; set; } = "";
 
@@ -362,18 +359,7 @@
     }
 
 
-    private async Task OnDemandFulfillmentClick()
-    {
-        IsDemandFulfillmentPopupVisible = true;
-        await Task.CompletedTask;
-    }
-
-    private async Task HandleFulfillmentConfirm()
-    {
-        IsSuccess = true;
-        IsDemandFulfillmentPopupVisible = false;
-        await Task.CompletedTask;
-    }
+    
 
     private RenderFragment RenderToastButton(bool isError) =>
         @<div class="d-flex gap-2">

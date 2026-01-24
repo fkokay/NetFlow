@@ -15,6 +15,7 @@ namespace NetFlow.Blazor.Shared.Models
         public string Unit { get; set; } = null!;              // pcs / kg / meter
         public string? WarehouseCode { get; set; }
         public string? AlternateItemCode { get; set; }
+        public string? FulfillmentType { get; set; }          // FromStock / Purchase / Transfer
         public string Status { get; set; } = "Pending";        // Pending / Fulfilled / Partial / Cancelled
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
