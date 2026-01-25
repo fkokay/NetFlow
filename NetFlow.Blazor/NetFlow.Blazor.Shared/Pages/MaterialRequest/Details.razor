@@ -53,6 +53,50 @@
 
 
 
+<DxPopup @bind-Visible="@IsFulfillmentPopupVisible"
+         HeaderText="Talep Karşıla"
+         Width="900px"
+         ShowFooter="true">
+    <BodyContentTemplate Context="fulfillmentContext">
+        <DxGrid Data="FulfillmentItems" PageSize="10">
+            <Columns>
+                <DxGridDataColumn FieldName="ItemCode" Caption="Kod" Width="120px" />
+                <DxGridDataColumn FieldName="ItemName" Caption="Adı" />
+
+
+                <DxGridDataColumn Caption="Karşılama Yöntemi" Width="200px">
+                    <CellDisplayTemplate>
+                        @{
+                            var item = (MaterialRequestItemModel)context.DataItem;
+                            if (!SelectedFulfillmentTypes.ContainsKey(item.Id))
+                            {
+                                SelectedFulfillmentTypes[item.Id] = !string.IsNullOrEmpty(item.FulfillmentType)
+                                ? item.FulfillmentType
+                                : "Depo";
+                            }
+                        }
+                        <DxComboBox Data="@FulfillmentOptions"
+                                    Value="@SelectedFulfillmentTypes[item.Id]"
+                                    ValueChanged="@((string newVal) => SelectedFulfillmentTypes[item.Id] = newVal)"
+                                    Enabled="@(Model?.Status?.ToLower() == "open")" />
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+            </Columns>
+        </DxGrid>
+    </BodyContentTemplate>
+
+    <FooterContentTemplate Context="fFooter">
+        <DxButton RenderStyle="ButtonRenderStyle.Primary"
+                  Text="Seçimleri Gönder"
+                  IconCssClass="dx-icon-check"
+                  Click="OnConfirmFulfillment" />
+
+        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                  Text="Vazgeç"
+                  IconCssClass="dx-icon-close"
+                  Click="@(() => IsFulfillmentPopupVisible = false)" />
+    </FooterContentTemplate>
+</DxPopup>
 
 <div class="content-root">
     <div class="card toolbar">
@@ -101,19 +145,18 @@
                         <Template>
                             <DxButton Text="Talep Karşıla"
                                       class="action-button-rejected"
+                                      Click="@OnDemandFulfillmentClick"
                                       RenderStyleMode="ButtonRenderStyleMode.Outline"
                                       RenderStyle="ButtonRenderStyle.Primary" />
                         </Template>
                     </DxToolbarItem>
                 }
 
-
                 <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
                                Click="LoadDataAsync"
                                Tooltip="Yenile"
                                IconCssClass="refresh-icon icon medium-icon" />
             }
-
         </DxToolbar>
     </div>
 
@@ -123,7 +166,6 @@
                     Text="Yükleniyor...">
 
         <DxGridLayout ColumnSpacing="1rem" RowSpacing="1rem">
-
             <Columns>
                 @if (!IsSmallScreen)
                 {
@@ -149,12 +191,12 @@
             </Rows>
 
             <Items>
-
                 <DxGridLayoutItem Area="item1">
                     <Template>
                         @if (Model != null)
                         {
                             <div class="card h-100">
+                                <!-- HEADER -->
                                 <div class="authority-header">
                                     <div class="authority-avatar">
                                         @Model.RequestNo[0]
@@ -164,27 +206,41 @@
                                         Talep No: @Model.RequestNo
                                     </h5>
 
-                                    <span class="authority-badge">
-                                        @Model.Status
+                                    @{
+                                        var status = Model.Status?.ToLower();
+                                        var (cssClass, displayName) = status switch
+                                        {
+                                            "open" => ("status-open", "Onaylandı"),
+                                            "waiting" => ("status-waiting", "Bekliyor"),
+                                            "rejected" => ("status-rejected", "Reddedildi"),
+                                            "closed" => ("status-closed", "Kapalı"),
+                                            _ => ("status-closed", Model.Status ?? "-")
+                                        };
+                                    }
+
+                                    <span class="authority-badge @cssClass">
+                                        @displayName
                                     </span>
                                 </div>
 
                                 <div class="request-stats">
                                     <div class="request-stat">
-                                        <div class="request-stat-title">
-                                            @Model.RequestType
-                                        </div>
+                                        <div class="request-stat-title">@Model.RequestType</div>
                                         <small>Talep Türü</small>
                                     </div>
 
                                     <div class="request-stat">
-                                        <div class="request-stat-title">
-                                            @Model.Priority
-                                        </div>
+                                        <div class="request-stat-title">@Model.Priority</div>
                                         <small>Öncelik</small>
+                                    </div>
+
+                                    <div class="request-stat">
+                                        <div class="request-stat-title">@Model.RequestedDepartment</div>
+                                        <small>Departman</small>
                                     </div>
                                 </div>
 
+                                <!-- GENERAL INFO -->
                                 <h6 class="request-section-title">GENEL BİLGİLER</h6>
 
                                 <div class="request-info">
@@ -192,24 +248,73 @@
                                         <span>Talep Tarihi:</span>
                                         <span>@Model.RequestDate.ToShortDateString()</span>
                                     </div>
+
                                     <div class="request-info-row">
                                         <span>Gerekli Tarih:</span>
-                                        <span>@Model.RequiredDate?.ToShortDateString()</span>
+                                        <span>
+                                            @if (Model.RequiredDate.HasValue)
+                                            {
+                                                <span class="@(Model.RequiredDate < DateTime.Today ? "text-danger" : "")">
+                                                    @Model.RequiredDate.Value.ToShortDateString()
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span>-</span>
+                                            }
+                                        </span>
                                     </div>
+
                                     <div class="request-info-row">
-                                        <span>Departman:</span>
-                                        <span>@Model.RequestedDepartment</span>
+                                        <span>Talep Eden:</span>
+                                        <span>@Model.RequestedByUserId</span>
                                     </div>
-                                    <div class="request-info-row">
-                                        <span>Açıklama:</span>
-                                        <span>@Model.Description</span>
-                                    </div>
+
+                                    @if (!string.IsNullOrWhiteSpace(Model.SourceReference))
+                                    {
+                                        <div class="request-info-row">
+                                            <span>Kaynak:</span>
+                                            <span>@Model.SourceReference</span>
+                                        </div>
+                                    }
+
+                                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                                    {
+                                        <div class="request-info-row">
+                                            <span>Açıklama:</span>
+                                            <span>@Model.Description</span>
+                                        </div>
+                                    }
                                 </div>
+
+                                @if (Model.Status == "Approved")
+                                {
+                                    <h6 class="request-section-title">ONAY BİLGİSİ</h6>
+                                    <div class="request-info">
+                                        <div class="request-info-row">
+                                            <span>Onaylayan:</span>
+                                            <span>@Model.ApprovedByUserId</span>
+                                        </div>
+                                        <div class="request-info-row">
+                                            <span>Onay Tarihi:</span>
+                                            <span>@Model.ApprovalDate?.ToShortDateString()</span>
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (Model.Status == "Rejected")
+                                {
+                                    <h6 class="request-section-title text-danger">RED NEDENİ</h6>
+                                    <div class="request-info">
+                                        <div class="request-info-row">
+                                            <span>@Model.RejectionReason</span>
+                                        </div>
+                                    </div>
+                                }
                             </div>
                         }
                     </Template>
                 </DxGridLayoutItem>
-
 
                 <DxGridLayoutItem Area="item2">
                     <Template>
@@ -221,7 +326,6 @@
                                 <DxGrid Data="ItemDataSource"
                                         ShowFilterRow="true"
                                         ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
-
                                     <Columns>
                                         <DxGridDataColumn FieldName="ItemCode" Caption="Kod" />
                                         <DxGridDataColumn FieldName="ItemName" Caption="Adı" />
@@ -230,15 +334,13 @@
                                         <DxGridDataColumn FieldName="Unit" Caption="Birim" />
                                         <DxGridDataColumn FieldName="WarehouseCode" Caption="Depo" />
                                         <DxGridDataColumn FieldName="Status" Caption="Durum" />
+                                        <DxGridDataColumn FieldName="FulfillmentType" Caption="Karşılama Türü" />
                                     </Columns>
-
                                 </DxGrid>
                             </DxTabPage>
-
                         </DxTabs>
                     </Template>
                 </DxGridLayoutItem>
-
             </Items>
         </DxGridLayout>
     </DxLoadingPanel>
@@ -254,9 +356,22 @@
     private bool IsDataLoaded;
     private int ActiveTabIndex;
 
+
     bool IsRejectionPopupVisible { get; set; } = false;
     int SelectedMaterialId { get; set; }
     string? RejectionReason { get; set; } = "";
+
+
+    private GridDevExtremeDataSource<MaterialRequestItemModel>? FulfillmentItems;
+    bool IsFulfillmentPopupVisible { get; set; } = false;
+    List<string> FulfillmentOptions = new() { "Depo", "Stok" };
+    Dictionary<int, string> SelectedFulfillmentTypes = new();
+
+    public class FulfillmentPostModel
+    {
+        public int ItemId { get; set; }
+        public string FulfillmentType { get; set; }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -319,7 +434,6 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadDataAsync();
-
                 IsSuccess = true;
                 ToastService.ShowToast(new ToastOptions()
                 {
@@ -328,7 +442,7 @@
                     ThemeMode = ToastThemeMode.Light,
                     RenderStyle = ToastRenderStyle.Success,
                     Title = "Başarılı",
-                    Text = "Talep başarıyla onaylandı."
+                    Text = "Talep başarıyla onaylandı.",
                 }, RenderToastButton(false));
             }
             else
@@ -336,9 +450,12 @@
                 var errorMsg = await response.Content.ReadAsStringAsync();
                 ToastService.ShowToast(new ToastOptions()
                 {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Danger,
                     Title = "Hata",
-                    Text = errorMsg,
-                    RenderStyle = ToastRenderStyle.Warning
+                    Text = errorMsg
                 }, RenderToastButton(true));
             }
         }
@@ -346,9 +463,12 @@
         {
             ToastService.ShowToast(new ToastOptions()
             {
+                Id = "toast",
+                ProviderName = "Overview",
+                ThemeMode = ToastThemeMode.Light,
+                RenderStyle = ToastRenderStyle.Danger,
                 Title = "Hata",
-                Text = ex.Message,
-                RenderStyle = ToastRenderStyle.Danger
+                Text = ex.Message
             }, RenderToastButton(true));
         }
         finally
@@ -358,8 +478,93 @@
         }
     }
 
+    private async Task OnDemandFulfillmentClick()
+    {
+        if (Model == null) return;
 
-    
+        try
+        {
+            IsDataLoaded = false;
+            await InvokeAsync(StateHasChanged);
+
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+            var baseUrl = "https://localhost:7071/api";
+
+            FulfillmentItems = new GridDevExtremeDataSource<MaterialRequestItemModel>(
+                client,
+                NavigationManager.ToAbsoluteUri($"{baseUrl}/material-request-items?materialRequestId={Id}")
+            );
+
+            IsFulfillmentPopupVisible = true;
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast(new ToastOptions
+            {
+                Id = "toast",
+                ProviderName = "Overview",
+                ThemeMode = ToastThemeMode.Light,
+                RenderStyle = ToastRenderStyle.Danger,
+                Title = "Hata",
+                Text = ex.Message
+            });
+        }
+        finally
+        {
+            IsDataLoaded = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnConfirmFulfillment()
+    {
+        try
+        {
+            IsDataLoaded = false;
+            IsFulfillmentPopupVisible = false;
+            var postData = SelectedFulfillmentTypes.Select(x => new
+            {
+                ItemId = x.Key,
+                FulfillmentType = x.Value
+            }).ToList();
+
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+
+            var response = await client.PutAsJsonAsync($"api/material-requests/fulfill-items", postData);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadDataAsync();
+                ToastService.ShowToast(new ToastOptions
+                {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Success,
+                    Title = "Başarılı",
+                    Text = "Talep başarıyla onaylandı.",
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast(new ToastOptions
+            {
+                Id = "toast",
+                ProviderName = "Overview",
+                ThemeMode = ToastThemeMode.Light,
+                RenderStyle = ToastRenderStyle.Danger,
+                Title = "Hata",
+                Text = ex.Message
+            });
+        }
+        finally
+        {
+            IsDataLoaded = true;
+        }
+    }
 
     private RenderFragment RenderToastButton(bool isError) =>
         @<div class="d-flex gap-2">
@@ -393,22 +598,14 @@
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
 
-            var model = new
-            {
-                Id = SelectedMaterialId,
-                RejectionReason = RejectionReason
-            };
+            var model = new { Id = SelectedMaterialId, RejectionReason = RejectionReason };
 
-            var response = await client.PutAsJsonAsync(
-                $"https://localhost:7071/api/material-requests/rejection",
-                model
-            );
+            var response = await client.PutAsJsonAsync($"https://localhost:7071/api/material-requests/rejection", model);
 
             if (response.IsSuccessStatusCode)
             {
                 await LoadDataAsync();
                 IsSuccess = true;
-
                 ToastService.ShowToast(new ToastOptions()
                 {
                     Id = "toast",
@@ -416,7 +613,7 @@
                     ThemeMode = ToastThemeMode.Light,
                     RenderStyle = ToastRenderStyle.Success,
                     Title = "Başarılı",
-                    Text = "Talep reddedildi."
+                    Text = "Talep reddedildi.",
                 }, RenderToastButton(false));
             }
             else
@@ -437,9 +634,12 @@
         {
             ToastService.ShowToast(new ToastOptions()
             {
+                Id = "toast",
+                ProviderName = "Overview",
+                ThemeMode = ToastThemeMode.Light,
+                RenderStyle = ToastRenderStyle.Danger,
                 Title = "Hata",
-                Text = ex.Message,
-                RenderStyle = ToastRenderStyle.Danger
+                Text = ex.Message
             }, RenderToastButton(true));
         }
         finally
@@ -448,7 +648,6 @@
             await InvokeAsync(StateHasChanged);
         }
     }
-
 
     private void NavigateBack() => NavigationManager.NavigateTo("/material-request/list");
 }

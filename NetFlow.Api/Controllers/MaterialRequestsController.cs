@@ -112,5 +112,17 @@ namespace NetFlow.Api.Controllers
                 new { id },
                 null);
         }
+
+
+        [HttpPut("fulfill-items")]
+        public async Task<IActionResult> FulfillItems([FromBody] List<FulfillmentRequest> requests)
+        {
+            var ids = await _write.FulFillmentAsync(requests);
+            return Ok(new
+            {
+                Count = ids.Count,
+                Ids = ids
+            });
+        }
     }
 }

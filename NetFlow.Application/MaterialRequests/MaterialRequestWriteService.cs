@@ -66,11 +66,32 @@ namespace NetFlow.Application.MaterialRequests
                 throw new Exception("Talep bulunamadı");
 
             materialRequest.Status = "Open";
-            materialRequest.ApprovalDate= DateTime.UtcNow;
+            materialRequest.ApprovalDate = DateTime.UtcNow;
             materialRequest.ApprovedByUserId = currentUserId;
 
             await _db.SaveChangesAsync();
             return materialRequest.Id;
+        }
+
+
+        public async Task<List<int>> FulFillmentAsync(List<FulfillmentRequest> requests)
+        {
+            var updatedIds = new List<int>();
+
+            foreach (var request in requests)
+            {
+                var item = await _db.MaterialRequestItems
+                    .FirstOrDefaultAsync(x => x.Id == request.ItemId);
+
+                if (item == null)
+                    throw new Exception($"Talep Satırı bulunamadı (ItemId: {request.ItemId})");
+
+                item.FulfillmentType = request.FulfillmentType;
+                updatedIds.Add(item.Id);
+            }
+
+            await _db.SaveChangesAsync();
+            return updatedIds;
         }
     }
 }
