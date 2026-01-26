@@ -30,7 +30,7 @@ namespace NetFlow.ReadModel.TenderDevices
                 parameters.AddDynamicParams(p);
             }
 
-            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(
+            string orderBy = "ORDER BY " + DevExtremeSqlBuilder.BuildOrderBy(
                 pagedRequest.Sort,
                 "Id DESC"
             );

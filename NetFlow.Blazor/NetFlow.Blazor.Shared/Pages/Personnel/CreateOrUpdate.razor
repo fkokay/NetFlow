@@ -94,6 +94,13 @@
                                             <DxTextBox @bind-Text="Model.Title" />
                                         </DxFormLayoutItem>
 
+                                        <DxFormLayoutItem Caption="Maaþ" ColSpanMd="6">
+                                            <DxSpinEdit @bind-Value="Model.Salary"
+                                                        ShowSpinButtons="true"
+                                                        Min="0"
+                                                        Format="n2" />
+                                        </DxFormLayoutItem>
+
                                         <DxFormLayoutItem Caption="Departman" ColSpanMd="6">
                                             <DxComboBox Data="@Departments"
                                                         @bind-Value="Model.Department"

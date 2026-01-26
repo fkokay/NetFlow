@@ -30,6 +30,7 @@ namespace NetFlow.Application.Personnels
                 DeletedAt = request.DeletedAt,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
+                Salary = request.Salary,
                 PersonnelCode = request.PersonnelCode,
                 Title = request.Title,
                 Phone = request.Phone,
@@ -51,6 +52,7 @@ namespace NetFlow.Application.Personnels
             personnel.DeletedAt = request.DeletedAt;
             personnel.FirstName = request.FirstName;
             personnel.LastName = request.LastName;
+            personnel.Salary = request.Salary;
             personnel.PersonnelCode = request.PersonnelCode;
             personnel.Title = request.Title;
             personnel.Phone = request.Phone;

@@ -25,6 +25,7 @@ namespace NetFlow.Blazor.Shared.Models
         public string? Department { get; set; }
         public string? Title { get; set; }
         public byte AuthorityLevel { get; set; }=1;
+        public decimal? Salary { get; set; }
         public bool IsActive { get; set; } = true;
         public int? UserId { get; set; }
         public DateTime CreatedAt { get; set; }=DateTime.UtcNow;

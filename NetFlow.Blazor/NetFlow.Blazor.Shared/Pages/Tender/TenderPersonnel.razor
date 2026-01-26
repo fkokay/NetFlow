@@ -1,0 +1,143 @@
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+
+<DxGrid Data="TenderPersonnelDataSource"
+        ShowSearchBox="true"
+        SearchBoxNullText="Arama yapmak için metin girin…"
+        style="height:100%;">
+    <ToolbarTemplate>
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <DxToolbarItem Text="Personel Ata"
+                           Click="() => { ValidationMessage = null; PopupVisible = true; }"
+                           IconCssClass="dx-icon-add"
+                           Alignment="ToolbarItemAlignment.Right" />
+        </DxToolbar>
+    </ToolbarTemplate>
+    <Columns>
+        <DxGridDataColumn FieldName="PersonnelCode" Caption="Personel Kodu" />
+        <DxGridDataColumn FieldName="FullName" Caption="Ad Soyad" />
+        <DxGridDataColumn FieldName="Salary" Caption="Maaþ" />
+        <DxGridDataColumn FieldName="TenderCode" Caption="Ýhale Kodu" />
+        <DxGridDataColumn FieldName="TenderName" Caption="Ýhale Adý" />
+        <DxGridDataColumn FieldName="FirmName" Caption="Firma" />
+        <DxGridDataColumn FieldName="CreatedAt"
+                          Caption="Oluþturma Tarihi"
+                          DisplayFormat="dd.MM.yyyy" />
+    </Columns>
+</DxGrid>
+
+<DxPopup @bind-Visible="@PopupVisible"
+         ShowFooter="true"
+         HeaderText="Personel Seçimi ve Atama"
+         Width="700px"
+         CloseOnOutsideClick="false">
+    <BodyContentTemplate Context="PopupContext">
+        <DxFormLayout CaptionPosition="CaptionPosition.Horizontal">
+
+            @if (!string.IsNullOrEmpty(ValidationMessage))
+            {
+                <DxFormLayoutItem ColSpanMd="12">
+                    <div style="color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                        <i class="dx-icon-warning" style="margin-right: 8px;"></i> @ValidationMessage
+                    </div>
+                </DxFormLayoutItem>
+            }
+
+            <DxFormLayoutItem ColSpanMd="12">
+                <Template>
+                    <div style="border-bottom: 1px solid #dee2e6; margin: 10px 0; font-weight: bold; padding-bottom: 5px;">
+                        Atanacak Personelleri Seçin
+                    </div>
+                </Template>
+            </DxFormLayoutItem>
+
+            <DxFormLayoutItem ColSpanMd="12">
+                <Template>
+                    <DxGrid Data="PersonnelDataSource"
+                            @bind-SelectedDataItems="@SelectedPersonnel"
+                            SelectionMode="GridSelectionMode.Multiple"
+                            KeyFieldName="Id"
+                            PageSize="10">
+                        <Columns>
+                            <DxGridSelectionColumn Width="60px" />
+                            <DxGridDataColumn FieldName="PersonnelCode" Caption="Kod" />
+                            <DxGridDataColumn FieldName="FullName" Caption="Ad Soyad" />
+                        </Columns>
+                    </DxGrid>
+                </Template>
+            </DxFormLayoutItem>
+        </DxFormLayout>
+    </BodyContentTemplate>
+
+    <FooterContentTemplate>
+        <DxButton RenderStyle="ButtonRenderStyle.Primary"
+                  Text="Kaydet"
+                  IconCssClass="dx-icon-save"
+                  Click="HandleSave" />
+
+        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                  Text="Vazgeç"
+                  IconCssClass="dx-icon-close"
+                  Click="() => { PopupVisible = false; ValidationMessage = null; }" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    private GridDevExtremeDataSource<TenderPersonnelModel>? TenderPersonnelDataSource { get; set; }
+    private GridDevExtremeDataSource<PersonnelModel>? PersonnelDataSource { get; set; }
+
+    private bool PopupVisible { get; set; } = false;
+    private IReadOnlyList<object>? SelectedPersonnel { get; set; } = new List<object>();
+
+    private string? ValidationMessage { get; set; }
+
+    [Parameter]
+    public int TenderId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        string baseUrl = "https://localhost:7071/api";
+
+        TenderPersonnelDataSource = new GridDevExtremeDataSource<TenderPersonnelModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-personnel?tenderId={TenderId}"));
+        PersonnelDataSource = new GridDevExtremeDataSource<PersonnelModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/personnels/list"));
+    }
+
+    private async Task HandleSave()
+    {
+      
+        if (SelectedPersonnel == null || !SelectedPersonnel.Any())
+        {
+            ValidationMessage = "Lütfen kaydetmeden önce en az bir personel seçiniz.";
+            return;
+        }
+
+     
+        ValidationMessage = null;
+
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+
+        var selectedIds = SelectedPersonnel.Cast<PersonnelModel>().Select(x => x.Id).ToList();
+
+        var updateModel = new
+        {
+            TenderId = TenderId,
+            PersonnelIds = selectedIds
+        };
+
+        var response = await client.PutAsJsonAsync($"https://localhost:7071/api/tender-personnel/{TenderId}", updateModel);
+
+        if (response.IsSuccessStatusCode)
+        {
+            PopupVisible = false;
+            SelectedPersonnel = new List<object>();
+            await LoadDataAsync();
+        }
+    }
+}

@@ -2,19 +2,18 @@
 using Microsoft.Data.SqlClient;
 using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Domain.Common.Pagination;
-using NetFlow.ReadModel.TenderExternalQuality;
+using NetFlow.ReadModel.TenderOpex;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace NetFlow.ReadModel.TenderOpex
+namespace NetFlow.ReadModel.TenderPersonnel
 {
-    public sealed class TenderOpexReadService
+    public class TenderPersonnelReadService
     {
         private readonly ReadModelOptions _opt;
-        public TenderOpexReadService(ReadModelOptions opt) => _opt = opt;
+        public TenderPersonnelReadService(ReadModelOptions opt) => _opt = opt;
 
-      
         public async Task<PagedResult> ListAsync(int tenderId, PagedRequest pagedRequest)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
@@ -38,7 +37,7 @@ namespace NetFlow.ReadModel.TenderOpex
 
             string countSql = $@"
                 SELECT COUNT(1)
-                FROM dbo.VW_TenderOpex WITH (NOLOCK)
+                FROM dbo.vw_TenderPersonnel WITH (NOLOCK)
                 {whereSql}
             ";
 
@@ -51,7 +50,7 @@ namespace NetFlow.ReadModel.TenderOpex
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<TenderOpexDto>(),
+                    data = Array.Empty<TenderPersonnelDto>(),
                     totalCount = totalCount
                 };
             }
@@ -61,13 +60,13 @@ namespace NetFlow.ReadModel.TenderOpex
 
             string dataSql = $@"
                 SELECT *
-                FROM dbo.VW_TenderOpex WITH (NOLOCK)
+                FROM dbo.vw_TenderPersonnel WITH (NOLOCK)
                 {whereSql}
                 {orderBy}
                 OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
             ";
 
-            var data = cn.Query<TenderOpexDto>(
+            var data = cn.Query<TenderPersonnelDto>(
                 dataSql,
                 parameters
             ).ToList();
@@ -79,11 +78,11 @@ namespace NetFlow.ReadModel.TenderOpex
             };
         }
 
-        public async Task<TenderOpexDto?> GetAsync(int id)
+        public async Task<TenderPersonnelDto?> GetAsync(int id)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
-            var sql = "SELECT TOP 1 * FROM dbo.VW_TenderOpex WITH (NOLOCK) WHERE Id=@Id";
-            return await cn.QueryFirstOrDefaultAsync<TenderOpexDto>(sql, new { Id = id });
+            var sql = "SELECT TOP 1 * FROM dbo.vw_TenderPersonnel WITH (NOLOCK) WHERE Id=@Id";
+            return await cn.QueryFirstOrDefaultAsync<TenderPersonnelDto>(sql, new { Id = id });
         }
     }
 }
