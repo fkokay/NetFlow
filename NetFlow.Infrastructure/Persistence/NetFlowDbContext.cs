@@ -28,7 +28,8 @@ namespace NetFlow.Infrastructure.Persistence
         public DbSet<GuaranteeCommissionPeriodEntity> GuaranteeCommissionPeriods => Set<GuaranteeCommissionPeriodEntity>();
         public DbSet<TenderEntity> Tenders => Set<TenderEntity>();
         public DbSet<MaterialRequestEntity> Requests => Set<MaterialRequestEntity>();
-
+        public DbSet<PersonnelEntity> Personnels => Set<PersonnelEntity>();
+        public DbSet<DepartmentEntity> Departments => Set<DepartmentEntity>();
         public DbSet<MaterialRequestEntity> MaterialRequests => Set<MaterialRequestEntity>();
 
         public DbSet<MaterialRequestItemEntity> MaterialRequestItems => Set<MaterialRequestItemEntity>();

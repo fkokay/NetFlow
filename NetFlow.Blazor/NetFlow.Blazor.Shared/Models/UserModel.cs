@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace NetFlow.Blazor.Shared.Models
@@ -23,5 +24,7 @@ namespace NetFlow.Blazor.Shared.Models
         public string Firms { get; set; } = string.Empty;
         public List<int>? RoleIds { get; set; } = new List<int>();
         public List<int>? FirmIds { get; set; } = new List<int>();
+        [NotMapped]
+        public string FullName => $"{FirstName} {LastName}";
     }
 }

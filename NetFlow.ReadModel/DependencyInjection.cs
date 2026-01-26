@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NetFlow.ReadModel.Assets;
+using NetFlow.ReadModel.Departments;
 using NetFlow.ReadModel.Firms;
 using NetFlow.ReadModel.GuaranteeCommissionPeriods;
 using NetFlow.ReadModel.GuaranteeCommissions;
@@ -8,6 +9,7 @@ using NetFlow.ReadModel.Guarantees;
 using NetFlow.ReadModel.MaterialRequestHistories;
 using NetFlow.ReadModel.MaterialRequestItems;
 using NetFlow.ReadModel.Modules;
+using NetFlow.ReadModel.Personnel;
 using NetFlow.ReadModel.Requests;
 using NetFlow.ReadModel.Roles;
 using NetFlow.ReadModel.TenderDevices;
@@ -46,6 +48,8 @@ namespace NetFlow.ReadModel
             services.AddScoped<GuaranteeCommissionReadService>();
             services.AddScoped<RoleReadService>();
             services.AddScoped<AssetReadService>();
+            services.AddScoped<PersonnelReadService>();
+            services.AddScoped<DepartmentReadService>();
             services.AddScoped<ModuleReadService>();
             services.AddScoped<UserReadService>();
             services.AddScoped<GuaranteeCommissionPeriodReadService>();

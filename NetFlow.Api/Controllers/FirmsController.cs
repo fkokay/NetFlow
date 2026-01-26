@@ -23,7 +23,6 @@ namespace NetFlow.Api.Controllers
 
         // GET api/firms
         [HttpGet]
-
         public async Task<IActionResult> PadegList([FromQuery] PagedRequest pagedRequest) => Ok(await _read.ListAsync(pagedRequest));
 
 

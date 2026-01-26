@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Domain.Common.Pagination;
+using NetFlow.ReadModel.Departments;
 using NetFlow.ReadModel.Roles;
 using System;
 using System.Collections.Generic;
@@ -99,7 +100,17 @@ namespace NetFlow.ReadModel.Users
             };
         }
 
+        public async Task<List<UserDto>> GetUserListAsync()
+        {
+            using var cn = new SqlConnection(_opt.ConnectionString);
 
+            const string sql = @"
+                SELECT * FROM [User] WITH (NOLOCK) ORDER BY Id   
+            ";
+
+            var data = await cn.QueryAsync<UserDto>(sql);
+            return data.ToList();
+        }
         public async Task<UserDto?> GetAsync(int id)
         {
             const string sql = @"

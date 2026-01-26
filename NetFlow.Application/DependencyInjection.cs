@@ -13,6 +13,7 @@ using NetFlow.Application.Netsis.Orders;
 using NetFlow.Application.Netsis.Products;
 using NetFlow.Application.Netsis.Shipments;
 using NetFlow.Application.Netsis.Warehouses;
+using NetFlow.Application.Personnels;
 using NetFlow.Application.Roles;
 using NetFlow.Application.Tenders;
 using NetFlow.Application.Users;
@@ -40,6 +41,7 @@ namespace NetFlow.Application
             //NETFLOW
             services.AddScoped<FirmWriteService>();
             services.AddScoped<RoleWriteService>();
+            services.AddScoped<PersonnelWriteService>();
             services.AddScoped<ModuleWriteService>();
             services.AddScoped<UserWriteService>();
             services.AddScoped<GuaranteeWriteService>();

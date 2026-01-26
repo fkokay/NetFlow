@@ -1,0 +1,320 @@
+@page "/personnel/createorupdate/{Id:int?}"
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <Items>
+                <DxToolbarItem IconCssClass="back-icon icon medium-icon" Tooltip="Geri Dön" Click="@NavigateBack" />
+                <DxToolbarItem>
+                    <Template>
+                        <div class="custom-item">
+                            <div class="title">@(Id > 0 ? "Personel Düzenleme" : "Yeni Personel Tanýmlama")</div>
+                        </div>
+                    </Template>
+                </DxToolbarItem>
+                <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                    <Template>
+                        <DxButton Text="Kaydet"
+                                  Click="SaveFromOutside"
+                                  Enabled="@(!IsSaving)"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  RenderStyle="ButtonRenderStyle.Success" />
+                    </Template>
+                </DxToolbarItem>
+            </Items>
+        </DxToolbar>
+    </div>
+
+    <div class="personnel-edit">
+        <DxLoadingPanel Visible="@(EditContext == null)" IsContentBlocked="true" IsContentVisible="false" IndicatorVisible="true" IndicatorAreaVisible="true" ZIndex="101" Text="Yükleniyor...">
+            @if (EditContext != null)
+            {
+                <DxGridLayout ColumnSpacing="1rem" RowSpacing="1rem" CssClass="h-100">
+                    <Columns>
+                        <DxGridLayoutColumn Width="100%" />
+                    </Columns>
+                    <Rows>
+                        <DxGridLayoutRow Areas="Item1" />
+                    </Rows>
+                    <Items>
+                        <DxGridLayoutItem Area="item1">
+                            <Template>
+                                <EditForm EditContext="@EditContext" Context="formContext">
+                                    <DataAnnotationsValidator />
+
+                                    <DxFormLayout ColSpanMd="6">
+                                        <DxFormLayoutItem Caption="Personel Kodu" ColSpanMd="6">
+                                            <DxTextBox @bind-Text="Model.PersonnelCode" />
+                                        </DxFormLayoutItem>
+
+                                        <DxFormLayoutItem Caption="Cari Kodu" ColSpanMd="6">
+                                            <DxComboBox Data="@Customers"
+                                                        @bind-Value="Model.CustomerCode"
+                                                        TextFieldName="Name"
+                                                        ValueFieldName="Code"
+                                                        FilteringMode="DataGridFilteringMode.Contains"
+                                                        SearchMode="ListSearchMode.AutoSearch" />
+
+                                        </DxFormLayoutItem>
+
+                                        <DxFormLayoutItem Caption="Adý" ColSpanMd="6">
+                                            <DxTextBox @bind-Text="Model.FirstName" />
+                                        </DxFormLayoutItem>
+
+
+                                        <DxFormLayoutItem Caption="Soyadý" ColSpanMd="6">
+                                            <DxTextBox @bind-Text="Model.LastName" />
+                                        </DxFormLayoutItem>
+
+
+                                        <DxFormLayoutItem Caption="E-Posta" ColSpanMd="6">
+                                            <DxTextBox @bind-Text="Model.Email"
+                                                       BindValueMode="BindValueMode.OnInput"
+                                                       ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+
+                                            @if (ShowValidationMessages && !string.IsNullOrWhiteSpace(Model.Email))
+                                            {
+                                                @if (!new EmailAddressAttribute().IsValid(Model.Email))
+                                                {
+                                                    <small class="text-danger mt-1">Lütfen geçerli bir e-posta formatý giriniz.</small>
+                                                }
+                                            }
+                                        </DxFormLayoutItem>
+
+
+                                        <DxFormLayoutItem Caption="Telefon Numarasý" ColSpanMd="6">
+                                            <DxTextBox @bind-Text="Model.Phone" />
+                                        </DxFormLayoutItem>
+
+                                        <DxFormLayoutItem Caption="Ünvan" ColSpanMd="6">
+                                            <DxTextBox @bind-Text="Model.Title" />
+                                        </DxFormLayoutItem>
+
+                                        <DxFormLayoutItem Caption="Departman" ColSpanMd="6">
+                                            <DxComboBox Data="@Departments"
+                                                        @bind-Value="Model.Department"
+                                                        TextFieldName="DepartmentName"
+                                                        ValueFieldName="DepartmentName"
+                                                        FilteringMode="DataGridFilteringMode.Contains"
+                                                        SearchMode="ListSearchMode.AutoSearch" />
+
+                                        </DxFormLayoutItem>
+
+                                        <DxFormLayoutItem Caption="Kullanýcý" ColSpanMd="6">
+                                            <DxComboBox Data="@Users"
+                                                        @bind-Value="Model.UserId"
+                                                        TextFieldName="FullName"
+                                                        ValueFieldName="Id"
+                                                        FilteringMode="DataGridFilteringMode.Contains"
+                                                        SearchMode="ListSearchMode.AutoSearch" />
+
+                                        </DxFormLayoutItem>
+
+
+                                        <DxFormLayoutItem ColSpanMd="12">
+                                            <ValidationSummary />
+                                        </DxFormLayoutItem>
+                                    </DxFormLayout>
+                                </EditForm>
+                            </Template>
+                        </DxGridLayoutItem>
+                    </Items>
+                </DxGridLayout>
+            }
+        </DxLoadingPanel>
+    </div>
+</div>
+
+
+
+
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private PersonnelModel Model = new();
+    private EditContext? EditContext;
+    private bool IsSaving, IsSuccess;
+    private IEnumerable<UserModel>? Users { get; set; }
+    private IEnumerable<CustomerModel>? Customers { get; set; }
+    private IEnumerable<DepartmentModel>? Departments { get; set; }
+    private bool ShowValidationMessages { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+            string baseUrl = "https://localhost:7071/api";
+
+
+            await LoadDepartmentsAsync();
+            await LoadUsersAsync();
+            await LoadCustomersAsync();
+
+            if (Id.HasValue && Id.Value > 0)
+            {
+
+                var httpClient = HttpClientFactory.CreateClient("ApiClient");
+                var api_client = await ApiClientFactory.CreateAsync(httpClient);
+                Model = await api_client.GetFromJsonAsync<PersonnelModel>($"api/personnels/{Id.Value}");
+            }
+            else
+            {
+                Model = new PersonnelModel { };
+            }
+            EditContext = new EditContext(Model);
+
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast(new ToastOptions()
+            {
+                ProviderName = "Overview",
+                ThemeMode = ToastThemeMode.Light,
+                RenderStyle = ToastRenderStyle.Warning,
+                Title = "Veriler Yüklenirken bir hata oluþtu",
+                Text = $"{ex.Message}"
+            }, RenderToastButton(true));
+        }
+    }
+
+    private RenderFragment RenderToastButton(bool isError)
+    {
+        return @<div class="d-flex gap-2">
+            <DxButton Click="@(isError? OnPopupError:OnPopupOk)" RenderStyle="@(isError? ButtonRenderStyle.Danger: ButtonRenderStyle.Success)">Kapat</DxButton>
+        </div>
+        ;
+    }
+
+
+    private async Task LoadDepartmentsAsync()
+    {
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        Departments = await client.GetFromJsonAsync<List<DepartmentModel>>("api/departments/list");
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        Users = await client.GetFromJsonAsync<List<UserModel>>("api/users/list");
+    }
+    private async Task LoadCustomersAsync()
+    {
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        Customers = await client.GetFromJsonAsync<List<CustomerModel>>("api/netsis/customers/list");
+    }
+
+
+
+
+    private async Task SaveFromOutside()
+    {
+        if (IsSaving || EditContext == null) return;
+        ShowValidationMessages = true;
+        var isDataAnnotationValid = EditContext.Validate();
+        var isBusinessLogicValid = IsSaveButtonEnabledForValidation();
+        if (isDataAnnotationValid && isBusinessLogicValid)
+        {
+            await HandleValidSubmit();
+        }
+        else
+        {
+            StateHasChanged();
+        }
+    }
+
+
+    private bool IsSaveButtonEnabledForValidation()
+    {
+        bool isBaseValid =
+                            !string.IsNullOrWhiteSpace(Model.FirstName) &&
+                            !string.IsNullOrWhiteSpace(Model.LastName) &&
+                            !string.IsNullOrWhiteSpace(Model.CustomerCode) &&
+                            !string.IsNullOrWhiteSpace(Model.PersonnelCode);
+
+        bool isEmailValid = string.IsNullOrWhiteSpace(Model.Email) ||
+                        new EmailAddressAttribute().IsValid(Model.Email);
+        return isBaseValid && isEmailValid;
+    }
+    private async Task HandleValidSubmit()
+    {
+        if (IsSaving) return;
+        IsSaving = true;
+        IsSuccess = false;
+
+        try
+        {
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+            HttpResponseMessage response;
+
+            if (Model.Id > 0)
+            {
+                response = await client.PutAsJsonAsync("api/personnels", Model);
+            }
+            else
+            {
+                response = await client.PostAsJsonAsync("api/personnels", Model);
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                IsSuccess = true;
+
+
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Success,
+                    Title = "Baþarýlý",
+                    Text = "Personel bilgileri baþarýlý bir þekilde kaydedildi."
+                }, RenderToastButton(false));
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Danger,
+                    Title = "Hata",
+                    Text = errorMsg
+                }, RenderToastButton(true));
+            }
+        }
+        catch (Exception)
+        {
+
+            IsSuccess = false;
+        }
+        finally
+        {
+
+            IsSaving = false;
+        }
+    }
+
+    private void OnPopupOk()
+    {
+        if (IsSuccess) NavigationManager.NavigateTo("/personnel/list");
+    }
+
+    private void OnPopupError()
+    {
+    }
+
+    private void NavigateBack() => NavigationManager.NavigateTo("/personnel/list");
+}

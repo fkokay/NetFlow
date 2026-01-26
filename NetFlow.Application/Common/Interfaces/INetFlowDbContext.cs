@@ -13,6 +13,7 @@ namespace NetFlow.Application.Common.Interfaces
         DbSet<UserEntity> Users { get; }
         DbSet<FirmEntity> Firms { get; }
         DbSet<RoleEntity> Roles { get; }
+        DbSet<PersonnelEntity> Personnels { get; }
         DbSet<PermissionEntity> Permissions { get; }
         DbSet<UserInFirmEntity> UserInFirms { get; }
         DbSet<UserInRoleEntity> UserInRoles { get; }
