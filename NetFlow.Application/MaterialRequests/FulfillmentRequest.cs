@@ -8,6 +8,7 @@ namespace NetFlow.Application.MaterialRequests
     {
         public int ItemId { get; set; }
         public string FulfillmentType { get; set; }
+        public decimal RequestedQuantity { get; set; }
 
     }
 }

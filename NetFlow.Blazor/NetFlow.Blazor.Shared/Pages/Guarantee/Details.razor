@@ -87,16 +87,30 @@
                             {
                                 <div class="card h-100">
                                     <div class="authority-header">
-                                        <div class="authority-avatar">
-                                            @(!string.IsNullOrEmpty(Model.BankName) ? Model.BankName[0].ToString().ToUpper()
-                                                                                    : "?")
-                                        </div>
 
-                                        <h5 class="authority-title">@Model.BankName</h5>
+                                        @{
+                                            if (@Model.GuaranteeType == "Kati")
+                                            {
+                                                <div class="authority-avatar">
+                                                    @GetAuthorityInitials(Model.PublicAuthorityName)
+                                                </div>
 
-                                        <span class="authority-badge">
-                                            Teminat No: #@Model.GuaranteeNumber
-                                        </span>
+                                                <h6 class="authority-title">@Model.PublicAuthorityName</h6>
+                                                <span class="authority-badge">
+                                                    #@Model.PublicAuthorityCode
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <div class="authority-avatar">
+                                                    @GetAuthorityInitials(Model.ExpenseAccountName)
+                                                </div>
+                                                <h6 class="authority-title">@Model.ExpenseAccountName</h6>
+                                                <span class="authority-badge">
+                                                   #@Model.ExpenseAccountCode
+                                                </span>
+                                            }
+                                        }
                                     </div>
 
                                     <div class="guarantee-stats">
@@ -118,26 +132,102 @@
                                     <h6 class="guarantee-section-title">GENEL BİLGİLER</h6>
 
                                     <div class="guarantee-info">
+
                                         <div class="guarantee-info-row">
-                                            <span>Başlangıç:</span>
-                                            <span>@Model.GuaranteeDate.ToShortDateString()</span>
+                                            <span>Teminat No</span>
+                                            <span class="guarantee-info-strong">#@Model.GuaranteeNumber</span>
                                         </div>
+
                                         <div class="guarantee-info-row">
-                                            <span>Bitiş:</span>
-                                            <span>@Model.ExpiryDate.ToShortDateString()</span>
+                                            <span>Konu</span>
+                                            <span class="guarantee-info-strong">@Model.Subject</span>
                                         </div>
+
                                         <div class="guarantee-info-row">
-                                            <span>Komisyon:</span>
-                                            <span>@Model.CommissionAmount.ToString("n2") @Model.Currency</span>
+                                            <span>Firma</span>
+                                            <span class="guarantee-info-strong">@Model.FirmName</span>
                                         </div>
+
                                         <div class="guarantee-info-row">
-                                            <span>Oran:</span>
-                                            <span>@Model.CommissionRate.ToString("n4")</span>
+                                            <span>Teminat Türü</span>
+                                            <span class="guarantee-info-strong">@Model.GuaranteeType</span>
                                         </div>
+
                                         <div class="guarantee-info-row">
-                                            <span>Banka:</span>
-                                            <span>@Model.BankBranchName</span>
+                                            <span>Teminat Şekli</span>
+                                            <span class="guarantee-info-strong">@Model.GuaranteeForm</span>
                                         </div>
+
+                                        <div class="guarantee-info-row">
+                                            <span>Başlangıç Tarihi</span>
+                                            <span class="guarantee-info-strong">@Model.GuaranteeDate.ToShortDateString()</span>
+                                        </div>
+
+                                        <div class="guarantee-info-row">
+                                            <span>Bitiş Tarihi</span>
+                                            <span class="guarantee-info-strong @(Model.ExpiryDate < DateTime.Today ? "text-danger" : "")">
+                                                @Model.ExpiryDate.ToShortDateString()
+                                            </span>
+                                        </div>
+
+                                        <div class="guarantee-info-row">
+                                            <span>Kalan Gün</span>
+                                            @{
+                                                var remainingDays = (Model.ExpiryDate - DateTime.Today).Days;
+                                            }
+                                            <span class="guarantee-info-strong @(remainingDays < 30 ? "text-danger" : "")">
+                                                @remainingDays gün
+                                            </span>
+                                        </div>
+
+                                        <div class="guarantee-info-row">
+                                            <span>Teminat Tutarı</span>
+                                            <span class="guarantee-info-strong">
+                                                @Model.GuaranteeAmount.ToString("n2") @Model.Currency
+                                            </span>
+                                        </div>
+
+                                        <div class="guarantee-info-row">
+                                            <span>Komisyon</span>
+                                            <span class="guarantee-info-strong">
+                                                @Model.CommissionAmount.ToString("n2") @Model.Currency
+                                            </span>
+                                        </div>
+
+                                        <div class="guarantee-info-row">
+                                            <span>Komisyon Oranı</span>
+                                            <span class="guarantee-info-strong">@Model.CommissionRate.ToString("n4")</span>
+                                        </div>
+
+                                        <div class="guarantee-info-row">
+                                            <span>Komisyon Dönemi</span>
+                                            <span class="guarantee-info-strong">@Model.GuaranteeCommissionPeriodName</span>
+                                        </div>
+
+                                        <div class="guarantee-info-row">
+                                            <span>Banka / Şube</span>
+                                            <span class="guarantee-info-strong">
+                                                @Model.BankName - @Model.BankBranchName
+                                            </span>
+                                        </div>
+
+                                        <div class="guarantee-info-row">
+                                            <span>Takasbank Ref.</span>
+                                            <span class="guarantee-info-strong">@Model.TakasbankReferenceNo</span>
+                                        </div>
+
+                                        <div class="guarantee-info-row">
+                                            <span>Oluşturma Tarihi</span>
+                                            <span class="guarantee-info-strong">@Model.CreatedAt.ToShortDateString()</span>
+                                        </div>
+
+                                        <div class="guarantee-info-row">
+                                            <span>Komisyon Sayısı</span>
+                                            <span class="guarantee-info-strong">
+                                                @Model.GuaranteeCommissions.Count
+                                            </span>
+                                        </div>
+
                                     </div>
                                 </div>
                             }
@@ -201,10 +291,10 @@
         @if (AddPopupVisible)
         {
             <GuaranteeCommissionAddComponent @ref="addFormRef"
-                                        GuaranteeId="Id"
-                                        CommissionId="SelectedCommissionId"
-                                        OnSaved="OnCommissionSaved"
-                                        OnCancel="OnCommissionCanceled" />
+                                             GuaranteeId="Id"
+                                             CommissionId="SelectedCommissionId"
+                                             OnSaved="OnCommissionSaved"
+                                             OnCancel="OnCommissionCanceled" />
         }
     </BodyContentTemplate>
 
@@ -417,6 +507,29 @@
 
     private void OnPopupError()
     {
+    }
+
+    private string GetAuthorityInitials(string? authorityName)
+    {
+        if (string.IsNullOrWhiteSpace(authorityName))
+            return "";
+
+
+        var words = authorityName
+        .Trim()
+        .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+
+        if (words.Length == 1)
+        {
+            return words[0].Substring(0, 1).ToUpper();
+        }
+
+
+        return (
+        words[0].Substring(0, 1) +
+        words[1].Substring(0, 1)
+        ).ToUpper();
     }
 
     private void NavigateBack()

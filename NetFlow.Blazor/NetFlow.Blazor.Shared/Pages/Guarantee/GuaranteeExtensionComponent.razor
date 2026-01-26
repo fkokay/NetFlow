@@ -25,11 +25,11 @@
                 <DxDateEdit Date="@Guarantee.GuaranteeDate" ReadOnly="true" Mask="@DateTimeMask.ShortDate" />
             </DxFormLayoutItem>
 
-            <DxFormLayoutItem Caption="Mevcut Vade" ColSpanMd="12">
+            <DxFormLayoutItem Caption="Bitiş(Vade) Tarihi" ColSpanMd="12">
                 <DxDateEdit Date="@Guarantee.ExpiryDate" ReadOnly="true" Mask="@DateTimeMask.ShortDate" />
             </DxFormLayoutItem>
 
-            <DxFormLayoutItem Caption="Yeni Vade Tarihi" ColSpanMd="12" CssClass="highlight-item">
+            <DxFormLayoutItem Caption="Yeni Bitiş(Vade) Tarihi" ColSpanMd="12" CssClass="highlight-item">
                 <ChildContent Context="itemContext">
                     <DxDateEdit @bind-Date="@NewExpiryDate" PickerDisplayMode="DatePickerDisplayMode.Calendar" Mask="@DateTimeMask.ShortDate" />
                 </ChildContent>
@@ -43,6 +43,8 @@
         <DxButton RenderStyle="ButtonRenderStyle.Secondary" Text="Vazgeç" IconCssClass="dx-icon-close" Click="OnCancel" />
     </FooterContentTemplate>
 </DxPopup>
+
+
 @code {
     [Parameter] public required GuaranteeModel Guarantee { get; set; }
     [Parameter] public required bool IsExtensionPopupVisible { get; set; } = false;

@@ -62,17 +62,41 @@
             <Columns>
                 <DxGridDataColumn FieldName="ItemCode" Caption="Kod" Width="120px" />
                 <DxGridDataColumn FieldName="ItemName" Caption="Adı" />
-
+                
+                
+                <DxGridDataColumn Caption="Talep Miktarı" Width="150px">
+                    <CellDisplayTemplate>
+                        @{
+                            var item = (MaterialRequestItemModel)context.DataItem;
+                            if (!SelectedFulfillmentQuantities.ContainsKey(item.Id))
+                            {
+                                SelectedFulfillmentQuantities[item.Id] = item.RequestedQuantity;
+                            }
+                        }
+                        <DxSpinEdit Value="@SelectedFulfillmentQuantities[item.Id]"
+                                    T="decimal"
+                                    ValueChanged="@((decimal newVal) => { SelectedFulfillmentQuantities[item.Id] = newVal; })"
+                                    Mask="@NumericMask.RealNumber"
+                                    Enabled="@(Model?.Status?.ToLower() == "open")"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+                <DxGridDataColumn FieldName="Unit" Caption="Birim" Width="80px" />
 
                 <DxGridDataColumn Caption="Karşılama Yöntemi" Width="200px">
                     <CellDisplayTemplate>
                         @{
                             var item = (MaterialRequestItemModel)context.DataItem;
+                            // Karşılama tipi takibi
                             if (!SelectedFulfillmentTypes.ContainsKey(item.Id))
                             {
                                 SelectedFulfillmentTypes[item.Id] = !string.IsNullOrEmpty(item.FulfillmentType)
-                                ? item.FulfillmentType
-                                : "Depo";
+                                ? item.FulfillmentType : "Stok";
+                            }
+                            // Miktar değerini sayısal olarak sözlükte tutalım
+                            if (!SelectedFulfillmentQuantities.ContainsKey(item.Id))
+                            {
+                                SelectedFulfillmentQuantities[item.Id] = item.RequestedQuantity;
                             }
                         }
                         <DxComboBox Data="@FulfillmentOptions"
@@ -196,7 +220,6 @@
                         @if (Model != null)
                         {
                             <div class="card h-100">
-                                <!-- HEADER -->
                                 <div class="authority-header">
                                     <div class="authority-avatar">
                                         @Model.RequestNo[0]
@@ -240,7 +263,7 @@
                                     </div>
                                 </div>
 
-                                <!-- GENERAL INFO -->
+
                                 <h6 class="request-section-title">GENEL BİLGİLER</h6>
 
                                 <div class="request-info">
@@ -364,13 +387,15 @@
 
     private GridDevExtremeDataSource<MaterialRequestItemModel>? FulfillmentItems;
     bool IsFulfillmentPopupVisible { get; set; } = false;
-    List<string> FulfillmentOptions = new() { "Depo", "Stok" };
+    List<string> FulfillmentOptions = new() { "Satın Alma", "Stok","Demirbaş" };
     Dictionary<int, string> SelectedFulfillmentTypes = new();
+    Dictionary<int, decimal> SelectedFulfillmentQuantities = new();
 
     public class FulfillmentPostModel
     {
         public int ItemId { get; set; }
         public string FulfillmentType { get; set; }
+        public decimal RequestedQuantity { get; set; }
     }
 
     protected override async Task OnInitializedAsync()
@@ -523,10 +548,15 @@
         {
             IsDataLoaded = false;
             IsFulfillmentPopupVisible = false;
+
+
             var postData = SelectedFulfillmentTypes.Select(x => new
             {
                 ItemId = x.Key,
-                FulfillmentType = x.Value
+                FulfillmentType = x.Value,
+                RequestedQuantity = SelectedFulfillmentQuantities.ContainsKey(x.Key)
+                                    ? SelectedFulfillmentQuantities[x.Key]
+                                    : 0
             }).ToList();
 
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
@@ -544,7 +574,7 @@
                     ThemeMode = ToastThemeMode.Light,
                     RenderStyle = ToastRenderStyle.Success,
                     Title = "Başarılı",
-                    Text = "Talep başarıyla onaylandı.",
+                    Text = "Talep başarıyla karşılandı.",
                 });
             }
         }

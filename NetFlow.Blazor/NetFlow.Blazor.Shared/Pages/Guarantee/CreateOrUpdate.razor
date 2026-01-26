@@ -1,6 +1,4 @@
 ﻿@page "/guarantee/createorupdate/{Id:int?}"
-
-
 @inject NavigationManager NavigationManager
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
@@ -22,7 +20,7 @@
                     <Template>
                         <DxButton Text="Kaydet"
                                   Click="SaveFromOutside"
-                                  Enabled="!IsSaving"
+                                  Enabled="@(!IsSaving)"
                                   RenderStyleMode="ButtonRenderStyleMode.Outline"
                                   RenderStyle="ButtonRenderStyle.Success" />
                     </Template>
@@ -46,32 +44,55 @@
                         <DxGridLayoutItem Area="item1">
                             <Template>
                                 <EditForm EditContext="@EditContext" Context="formContext">
-
                                     <DataAnnotationsValidator />
 
                                     <DxFormLayout ColSpanMd="6">
 
-                                        <DxFormLayoutItem Caption="Teminat Türü">
+                                        <DxFormLayoutItem Caption="Teminat Türü" ColSpanMd="6">
                                             <DxComboBox Data="@(new List<string> { "Geçici", "Kati" })" @bind-Value="Model.GuaranteeType" />
+                                            @if (ShowValidationMessages && string.IsNullOrWhiteSpace(Model.GuaranteeType))
+                                            {
+                                                <small class="text-danger mt-1">Teminat türü seçilmelidir.</small>
+                                            }
                                         </DxFormLayoutItem>
 
-                                        <DxFormLayoutItem Caption="Teminat Şekli">
+
+                                        <DxFormLayoutItem Caption="Teminat Şekli" ColSpanMd="6">
                                             <DxComboBox Data="@(new List<string> { "Banka Mektubu", "Nakit" })" @bind-Value="Model.GuaranteeForm" />
+                                            @if (ShowValidationMessages && string.IsNullOrWhiteSpace(Model.GuaranteeForm))
+                                            {
+                                                <small class="text-danger mt-1">Teminat şekli seçilmelidir.</small>
+                                            }
                                         </DxFormLayoutItem>
-                                        <DxFormLayoutItem Caption="Firma">
+
+
+                                        <DxFormLayoutItem Caption="Firma" ColSpanMd="6">
                                             <DxComboBox Data="@Firms"
                                                         @bind-Value="Model.FirmId"
                                                         TextFieldName="FirmName"
                                                         ValueFieldName="Id"
                                                         FilteringMode="DataGridFilteringMode.Contains"
                                                         SearchMode="ListSearchMode.AutoSearch" />
+                                            @if (ShowValidationMessages && Model.FirmId <= 0)
+                                            {
+                                                <small class="text-danger mt-1">Lütfen bir firma seçiniz.</small>
+                                            }
                                         </DxFormLayoutItem>
 
-                                        <DxFormLayoutItem Caption="Konu">
-                                            <DxTextBox @bind-Text="Model.Subject" ValidationEnabled="true" ShowValidationIcon="true" />
+
+                                        <DxFormLayoutItem Caption="Konu" ColSpanMd="6">
+                                            <DxTextBox @bind-Text="Model.Subject"
+                                                       ValidationEnabled="true"
+                                                       ShowValidationIcon="true"
+                                                       BindValueMode="BindValueMode.OnInput" />
+                                            @if (ShowValidationMessages && string.IsNullOrWhiteSpace(Model.Subject))
+                                            {
+                                                <small class="text-danger mt-1">Konu alanı boş bırakılamaz.</small>
+                                            }
                                         </DxFormLayoutItem>
 
-                                        <DxFormLayoutItem Caption="Düzenleyen Banka">
+
+                                        <DxFormLayoutItem Caption="Düzenleyen Banka" ColSpanMd="6">
                                             <DxComboBox Data="@Banks"
                                                         TData="BankModel"
                                                         TValue="string"
@@ -80,68 +101,104 @@
                                                         Value="@Model.BankCode"
                                                         ValueChanged="@(async (string code) => await OnBankChanged(code))"
                                                         ValueExpression="@(() => Model.BankCode)" />
+                                            @if (ShowValidationMessages && string.IsNullOrWhiteSpace(Model.BankCode))
+                                            {
+                                                <small class="text-danger mt-1">Banka seçimi zorunludur.</small>
+                                            }
                                         </DxFormLayoutItem>
 
-                                        <DxFormLayoutItem Caption="Düzenleyen Şube">
+
+                                        <DxFormLayoutItem Caption="Düzenleyen Şube" ColSpanMd="6">
                                             <DxComboBox Data="@BankBranches"
                                                         TData="BankBranchModel"
                                                         TValue="string"
                                                         TextFieldName="Name"
-                                                        ValueFieldName="Code" 
-                                                        Value="@Model.BankBranchCode" 
-                                                        ValueChanged="@((string code) => OnBranchChanged(code))" 
+                                                        ValueFieldName="Code"
+                                                        Value="@Model.BankBranchCode"
+                                                        ValueChanged="@((string code) => OnBranchChanged(code))"
                                                         ValueExpression="@(() => Model.BankBranchCode)"
                                                         Enabled="@(BankBranches != null && BankBranches.Any())" />
                                         </DxFormLayoutItem>
-                                        <DxFormLayoutItem Caption="Teminat Tutarı">
+
+                                        
+                                        <DxFormLayoutItem Caption="Teminat Tutarı" ColSpanMd="6">
                                             <DxSpinEdit @bind-Value="Model.GuaranteeAmount" DisplayFormat="N2" />
                                         </DxFormLayoutItem>
 
-                                        <DxFormLayoutItem Caption="Döviz Tipi">
+
+                                        <DxFormLayoutItem Caption="Döviz Tipi" ColSpanMd="6">
                                             <DxComboBox Data="@(new List<string> { "TRY", "USD", "EUR" })"
                                                         @bind-Value="Model.Currency" />
+                                            @if (ShowValidationMessages && string.IsNullOrWhiteSpace(Model.Currency))
+                                            {
+                                                <small class="text-danger mt-1">Döviz tipi seçilmelidir.</small>
+                                            }
                                         </DxFormLayoutItem>
 
-                                        <DxFormLayoutItem Caption="Komisyon Oranı">
+                                        <DxFormLayoutItem Caption="Komisyon Oranı" ColSpanMd="6">
                                             <DxSpinEdit @bind-Value="Model.CommissionRate" DisplayFormat="N4" />
                                         </DxFormLayoutItem>
-                                        <DxFormLayoutItem Caption="Kamu İdare Unvanı" ColSpanMd="6">
-                                            <DxTextBox @bind-Text="Model.PublicAuthorityName">
-                                                <Buttons>
-                                                    <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
-                                                                    Tooltip="Hesap Kodu Seç"
-                                                                    Click="OpenCustomerPopup" />
-                                                </Buttons>
-                                            </DxTextBox>
-                                        </DxFormLayoutItem>
-
-                                        <DxFormLayoutItem Caption="Gider Hesap Kodu" ColSpanMd="6">
-                                            <DxTextBox @bind-Text="Model.ExpenseAccountName">
-                                                <Buttons>
-                                                    <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
-                                                                    Tooltip="Hesap Kodu Seç"
-                                                                    Click="OpenExpensePopup" />
-                                                </Buttons>
-                                            </DxTextBox>
-                                        </DxFormLayoutItem>
 
 
-                                        <DxFormLayoutItem Caption="Komisyon Tutarı">
+                                        @if (Model.GuaranteeType == "Kati")
+                                        {
+                                            <DxFormLayoutItem Caption="Kamu İdare Unvanı" ColSpanMd="6">
+                                                <DxTextBox @bind-Text="Model.PublicAuthorityName" BindValueMode="BindValueMode.OnInput">
+                                                    <Buttons>
+                                                        <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
+                                                                        Tooltip="Hesap Kodu Seç"
+                                                                        Click="OpenCustomerPopup" />
+                                                    </Buttons>
+                                                </DxTextBox>
+                                                @if (ShowValidationMessages && string.IsNullOrWhiteSpace(Model.PublicAuthorityName))
+                                                {
+                                                    <small class="text-danger mt-1">Kati teminatlar için Kamu İdare Unvanı zorunludur.</small>
+                                                }
+                                            </DxFormLayoutItem>
+                                        }
+
+                                        @if (Model.GuaranteeType == "Geçici")
+                                        {
+                                            <DxFormLayoutItem Caption="Gider Hesap Kodu" ColSpanMd="6">
+                                                <DxTextBox @bind-Text="Model.ExpenseAccountName" BindValueMode="BindValueMode.OnInput">
+                                                    <Buttons>
+                                                        <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
+                                                                        Tooltip="Hesap Kodu Seç"
+                                                                        Click="OpenExpensePopup" />
+                                                    </Buttons>
+                                                </DxTextBox>
+                                                @if (ShowValidationMessages && string.IsNullOrWhiteSpace(Model.ExpenseAccountName))
+                                                {
+                                                    <small class="text-danger mt-1">Geçici teminatlar için Gider Hesap Kodu zorunludur.</small>
+                                                }
+                                            </DxFormLayoutItem>
+                                        }
+
+                                        <DxFormLayoutItem Caption="Komisyon Tutarı" ColSpanMd="6">
                                             <DxSpinEdit @bind-Value="Model.CommissionAmount" DisplayFormat="N2" ReadOnly="true" />
                                         </DxFormLayoutItem>
 
-                                        <DxFormLayoutItem Caption="Düzenlenme Tarihi">
+                                        <DxFormLayoutItem Caption="Düzenlenme Tarihi" ColSpanMd="6">
                                             <DxDateEdit @bind-Date="Model.GuaranteeDate" />
                                         </DxFormLayoutItem>
 
-                                        <DxFormLayoutItem Caption="Geçerlilik Tarihi">
+                                        <DxFormLayoutItem Caption="Geçerlilik Tarihi" ColSpanMd="6">
                                             <DxDateEdit @bind-Date="Model.ExpiryDate" />
                                         </DxFormLayoutItem>
-                                        <DxFormLayoutItem Caption="Belge Numarası">
-                                            <DxTextBox @bind-Text="Model.GuaranteeNumber" ValidationEnabled="true" ShowValidationIcon="true" />
+
+
+                                        <DxFormLayoutItem Caption="Belge Numarası" ColSpanMd="6">
+                                            <DxTextBox @bind-Text="Model.GuaranteeNumber"
+                                                       ValidationEnabled="true"
+                                                       ShowValidationIcon="true"
+                                                       BindValueMode="BindValueMode.OnInput" />
+                                            @if (ShowValidationMessages && string.IsNullOrWhiteSpace(Model.GuaranteeNumber))
+                                            {
+                                                <small class="text-danger mt-1">Belge numarası zorunludur.</small>
+                                            }
                                         </DxFormLayoutItem>
 
-                                        <DxFormLayoutItem Caption="Takasbank Ref No" ColSpanMd="12">
+                                        <DxFormLayoutItem Caption="Takasbank Ref No" ColSpanMd="6">
                                             <DxTextBox @bind-Text="Model.TakasbankReferenceNo" />
                                         </DxFormLayoutItem>
 
@@ -200,6 +257,7 @@
 
     private bool CustomerPopupVisible { get; set; }
     private GridDevExtremeDataSource<CustomerModel>? CustomerDataSource;
+    private bool ShowValidationMessages { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -327,13 +385,53 @@
         }
     }
 
+    
+
     private async Task SaveFromOutside()
     {
         if (IsSaving || EditContext == null) return;
-        if (!EditContext.Validate()) return;
-        await HandleValidSubmit();
+
+       
+        ShowValidationMessages = true;
+        var isDataAnnotationValid = EditContext.Validate();
+
+      
+        var isBusinessLogicValid = IsSaveButtonEnabledForValidation();
+
+        if (isDataAnnotationValid && isBusinessLogicValid)
+        {
+            await HandleValidSubmit();
+        }
+        else
+        {
+            StateHasChanged();
+        }
     }
 
+
+    private bool IsSaveButtonEnabledForValidation()
+    {
+        
+        bool isBaseValid = Model.FirmId > 0 &&
+                           !string.IsNullOrWhiteSpace(Model.GuaranteeType) &&
+                           !string.IsNullOrWhiteSpace(Model.GuaranteeForm) &&
+                           !string.IsNullOrWhiteSpace(Model.Subject) &&
+                           !string.IsNullOrWhiteSpace(Model.BankCode) &&
+                           !string.IsNullOrWhiteSpace(Model.Currency) &&
+                           !string.IsNullOrWhiteSpace(Model.GuaranteeNumber);
+
+        bool isConditionalValid = false;
+        if (Model.GuaranteeType == "Geçici")
+        {
+            isConditionalValid = !string.IsNullOrWhiteSpace(Model.ExpenseAccountName);
+        }
+        else if (Model.GuaranteeType == "Kati")
+        {
+            isConditionalValid = !string.IsNullOrWhiteSpace(Model.PublicAuthorityName);
+        }
+
+        return isBaseValid && isConditionalValid;
+    }
     private async Task HandleValidSubmit()
     {
         if (IsSaving) return;
@@ -396,7 +494,13 @@
             IsSaving = false;
         }
     }
+    private void OnCalculateCommission()
+    {
 
+        Model.CommissionAmount = Model.GuaranteeAmount * Model.CommissionRate;
+
+        StateHasChanged();
+    }
     private void OnPopupOk()
     {
         if (IsSuccess) NavigationManager.NavigateTo("/guarantee/list");
@@ -414,6 +518,6 @@
     {
         ExpensePopupVisible = true;
     }
-
+   
     private void NavigateBack() => NavigationManager.NavigateTo("/guarantee/list");
 }

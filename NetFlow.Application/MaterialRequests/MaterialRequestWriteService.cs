@@ -87,6 +87,7 @@ namespace NetFlow.Application.MaterialRequests
                     throw new Exception($"Talep Satırı bulunamadı (ItemId: {request.ItemId})");
 
                 item.FulfillmentType = request.FulfillmentType;
+                item.RequestedQuantity = request.RequestedQuantity;
                 updatedIds.Add(item.Id);
             }
 

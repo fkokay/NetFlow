@@ -133,3 +133,79 @@
 ::deep .action-button-delete {
     margin-left: 5px;
 }
+
+
+/* Status Badge */
+.guarantee-info .status-badge {
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #f1f2f4;
+    color: #8592a3;
+    text-transform: uppercase;
+}
+
+
+    .guarantee-info .status-badge.aktif {
+        background: #e6f4ea;
+        color: #2e7d32;
+    }
+
+    .guarantee-info .status-badge.pasif,
+    .guarantee-info .status-badge.suresi-doldu {
+        background: #fdecea;
+        color: #c62828;
+    }
+
+
+.guarantee-info .remaining-days {
+    font-weight: 600;
+}
+
+    .guarantee-info .remaining-days.safe {
+        color: #2e7d32;
+    }
+
+    .guarantee-info .remaining-days.warning {
+        color: #f9a825;
+    }
+
+    .guarantee-info .remaining-days.danger {
+        color: #c62828;
+    }
+
+
+.guarantee-info .payment-status {
+    font-weight: 600;
+}
+
+    .guarantee-info .payment-status.odendi {
+        color: #2e7d32;
+    }
+
+    .guarantee-info .payment-status.beklemede {
+        color: #f57c00;
+    }
+
+    .guarantee-info .payment-status.gecikti {
+        color: #c62828;
+    }
+
+
+.guarantee-info .guarantee-info-row.note {
+    align-items: flex-start;
+}
+
+    .guarantee-info .guarantee-info-row.note span:last-child {
+        max-width: 65%;
+        text-align: right;
+        font-weight: 400;
+        color: #444;
+    }
+
+
+.guarantee-info .text-danger {
+    color: #c62828;
+    font-weight: 600;
+}
