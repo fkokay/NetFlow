@@ -31,7 +31,7 @@
 
     <div class="personnel-edit">
         <DxLoadingPanel Visible="@(EditContext == null)" IsContentBlocked="true" IsContentVisible="false" IndicatorVisible="true" IndicatorAreaVisible="true" ZIndex="101" Text="Yükleniyor...">
-            @if (EditContext != null)
+            @if (EditContext != null && Model != null)
             {
                 <DxGridLayout ColumnSpacing="1rem" RowSpacing="1rem" CssClass="h-100">
                     <Columns>
@@ -56,7 +56,6 @@
                                                         @bind-Value="Model.CustomerCode"
                                                         TextFieldName="Name"
                                                         ValueFieldName="Code"
-                                                        FilteringMode="DataGridFilteringMode.Contains"
                                                         SearchMode="ListSearchMode.AutoSearch" />
 
                                         </DxFormLayoutItem>
@@ -106,7 +105,6 @@
                                                         @bind-Value="Model.Department"
                                                         TextFieldName="DepartmentName"
                                                         ValueFieldName="DepartmentName"
-                                                        FilteringMode="DataGridFilteringMode.Contains"
                                                         SearchMode="ListSearchMode.AutoSearch" />
 
                                         </DxFormLayoutItem>
@@ -116,7 +114,6 @@
                                                         @bind-Value="Model.UserId"
                                                         TextFieldName="FullName"
                                                         ValueFieldName="Id"
-                                                        FilteringMode="DataGridFilteringMode.Contains"
                                                         SearchMode="ListSearchMode.AutoSearch" />
 
                                         </DxFormLayoutItem>
@@ -143,7 +140,7 @@
 @code {
     [Parameter] public int? Id { get; set; }
 
-    private PersonnelModel Model = new();
+    private PersonnelModel? Model = new();
     private EditContext? EditContext;
     private bool IsSaving, IsSuccess;
     private IEnumerable<UserModel>? Users { get; set; }
@@ -156,8 +153,6 @@
         try
         {
             var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
-            string baseUrl = "https://localhost:7071/api";
-
 
             await LoadDepartmentsAsync();
             await LoadUsersAsync();
@@ -170,10 +165,13 @@
                 var api_client = await ApiClientFactory.CreateAsync(httpClient);
                 Model = await api_client.GetFromJsonAsync<PersonnelModel>($"api/personnels/{Id.Value}");
             }
-            else
+
+            if (Model == null)
             {
-                Model = new PersonnelModel { };
+                throw new Exception("Personel verisi yüklenemedi.");
             }
+
+
             EditContext = new EditContext(Model);
 
         }
@@ -242,12 +240,12 @@
     private bool IsSaveButtonEnabledForValidation()
     {
         bool isBaseValid =
-                            !string.IsNullOrWhiteSpace(Model.FirstName) &&
-                            !string.IsNullOrWhiteSpace(Model.LastName) &&
-                            !string.IsNullOrWhiteSpace(Model.CustomerCode) &&
-                            !string.IsNullOrWhiteSpace(Model.PersonnelCode);
+                            !string.IsNullOrWhiteSpace(Model?.FirstName) &&
+                            !string.IsNullOrWhiteSpace(Model?.LastName) &&
+                            !string.IsNullOrWhiteSpace(Model?.CustomerCode) &&
+                            !string.IsNullOrWhiteSpace(Model?.PersonnelCode);
 
-        bool isEmailValid = string.IsNullOrWhiteSpace(Model.Email) ||
+        bool isEmailValid = string.IsNullOrWhiteSpace(Model?.Email) ||
                         new EmailAddressAttribute().IsValid(Model.Email);
         return isBaseValid && isEmailValid;
     }
@@ -263,7 +261,7 @@
             var client = await ApiClientFactory.CreateAsync(httpClient);
             HttpResponseMessage response;
 
-            if (Model.Id > 0)
+            if (Model?.Id > 0)
             {
                 response = await client.PutAsJsonAsync("api/personnels", Model);
             }

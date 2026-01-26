@@ -49,8 +49,8 @@ namespace NetFlow.ReadModel.Assets
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<AssetDto>(),
-                    totalCount = totalCount
+                    Data = Array.Empty<AssetDto>(),
+                    TotalCount = totalCount
                 };
             }
 
@@ -72,8 +72,8 @@ namespace NetFlow.ReadModel.Assets
 
             return new PagedResult
             {
-                data = data,
-                totalCount = totalCount
+                Data = data,
+                TotalCount = totalCount
             };
         }
 

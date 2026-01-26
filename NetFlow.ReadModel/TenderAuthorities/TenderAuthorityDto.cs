@@ -9,11 +9,11 @@ namespace NetFlow.ReadModel.TenderAuthorities
         public int Id { get; set; }
         public int TenderId { get; set; }
 
-        public string ParentAuthorityCode { get; set; }
-        public string ParentAuthorityName { get; set; }
+        public string ParentAuthorityCode { get; set; } = string.Empty;
+        public string ParentAuthorityName { get; set; } = string.Empty;
 
-        public string UnitCode { get; set; }
-        public string UnitName { get; set; }
+        public string UnitCode { get; set; } = string.Empty;
+        public string UnitName { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; }
     }

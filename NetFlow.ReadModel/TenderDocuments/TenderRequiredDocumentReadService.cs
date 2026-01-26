@@ -50,8 +50,8 @@ namespace NetFlow.ReadModel.TenderDocuments
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<TenderRequiredDocumentDto>(),
-                    totalCount = totalCount
+                    Data = Array.Empty<TenderRequiredDocumentDto>(),
+                    TotalCount = totalCount
                 };
             }
 
@@ -73,8 +73,8 @@ namespace NetFlow.ReadModel.TenderDocuments
 
             return new PagedResult
             {
-                data = data,
-                totalCount = totalCount
+                Data = data,
+                TotalCount = totalCount
             };
         }
 

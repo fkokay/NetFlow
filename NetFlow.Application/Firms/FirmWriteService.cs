@@ -48,7 +48,7 @@ namespace NetFlow.Application.Firms
         }
         public async Task<int> EditAsync(EditFirmRequest request)
         {
-            var firm = await _db.Firms.FirstOrDefaultAsync(x => x.Id == request.Id);
+            var firm = await _db.Firms.FirstAsync(x => x.Id == request.Id);
             firm.FirmCode = request.FirmCode;
             firm.FirmName = request.FirmName;
             firm.TaxNumber = request.TaxNumber;

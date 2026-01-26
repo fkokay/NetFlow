@@ -8,7 +8,7 @@ namespace NetFlow.Netsis.Dto
     {
         public short SUBE_KODU { get; set; }
         public short ISLETME_KODU { get; set; }
-        public string STOK_KODU { get; set; }
-        public string STOK_ADI { get; set; }
+        public string STOK_KODU { get; set; } = string.Empty;
+        public string STOK_ADI { get; set; } = string.Empty;
     }
 }

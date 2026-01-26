@@ -3,6 +3,6 @@
     public class GuaranteeCommissionPeriodModel
     {
         public int Id { get; set; }
-        public string PeriodName { get; set; }
+        public string PeriodName { get; set; } = string.Empty;
     }
 }

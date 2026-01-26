@@ -42,7 +42,7 @@ namespace NetFlow.Application.GuaranteeCommissions
         }
         public async Task<int> EditAsync(EditGuaranteeCommissionRequest request)
         {
-            var commission = await _db.GuaranteeCommissions.FirstOrDefaultAsync(x => x.Id == request.Id);
+            var commission = await _db.GuaranteeCommissions.FirstAsync(x => x.Id == request.Id);
             commission.Id = request.Id;
             commission.Note = request.Note;
             commission.BankReferenceNo = request.BankReferenceNo;

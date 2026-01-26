@@ -31,7 +31,7 @@
 
     <div class="guarantee-edit">
         <DxLoadingPanel Visible="@(EditContext == null)" IsContentBlocked="true" IsContentVisible="false" IndicatorVisible="true" IndicatorAreaVisible="true" ZIndex="101" Text="Yükleniyor...">
-            @if (EditContext != null)
+            @if (EditContext != null && Model != null)
             {
                 <DxGridLayout ColumnSpacing="1rem" RowSpacing="1rem" CssClass="h-100">
                     <Columns>
@@ -71,7 +71,6 @@
                                                         @bind-Value="Model.FirmId"
                                                         TextFieldName="FirmName"
                                                         ValueFieldName="Id"
-                                                        FilteringMode="DataGridFilteringMode.Contains"
                                                         SearchMode="ListSearchMode.AutoSearch" />
                                             @if (ShowValidationMessages && Model.FirmId <= 0)
                                             {
@@ -220,7 +219,7 @@
 
 <DxPopup @bind-Visible="ExpensePopupVisible" HeaderText="Gider Hesap Kodu Seçimi" Width="800px" Height="600px" Scrollable="true">
     <BodyTemplate>
-        <DxGrid Data="@ExpenseDataSource" ShowFilterRow="true" PageSize="12" SelectionMode="GridSelectionMode.Single" SelectedDataItemChanged="@OnExpenseSelected" KeyFieldName="Code" FilteringMode="GridFilteringMode.FilterRow">
+        <DxGrid Data="@ExpenseDataSource" ShowFilterRow="true" PageSize="12" SelectionMode="GridSelectionMode.Single" SelectedDataItemChanged="@OnExpenseSelected" KeyFieldName="Code">
             <Columns>
                 <DxGridSelectionColumn Width="100px" />
                 <DxGridDataColumn FieldName="Code" Caption="Hesap Kodu" Width="150px" />
@@ -232,7 +231,7 @@
 
 <DxPopup @bind-Visible="CustomerPopupVisible" HeaderText="Kamu İdare Unvanı Seçimi" Width="800px" Height="600px" Scrollable="true">
     <BodyTemplate>
-        <DxGrid Data="@CustomerDataSource" ShowFilterRow="true" PageSize="12" SelectionMode="GridSelectionMode.Single" SelectedDataItemChanged="@OnCustomerSelected" VirtualScrollingEnabled="true" KeyFieldName="Code" FilteringMode="GridFilteringMode.FilterRow">
+        <DxGrid Data="@CustomerDataSource" ShowFilterRow="true" PageSize="12" SelectionMode="GridSelectionMode.Single" SelectedDataItemChanged="@OnCustomerSelected" VirtualScrollingEnabled="true" KeyFieldName="Code">
             <Columns>
                 <DxGridSelectionColumn Width="100px" />
                 <DxGridDataColumn FieldName="Code" Caption="Hesap Kodu" Width="150px" />
@@ -245,7 +244,7 @@
 @code {
     [Parameter] public int? Id { get; set; }
 
-    private GuaranteeModel Model = new();
+    private GuaranteeModel? Model = new();
     private EditContext? EditContext;
     private bool IsSaving, IsSuccess;
     private IEnumerable<FirmSelectModel>? Firms { get; set; }
@@ -276,6 +275,10 @@
                 var httpClient = HttpClientFactory.CreateClient("ApiClient");
                 var api_client = await ApiClientFactory.CreateAsync(httpClient);
                 Model = await api_client.GetFromJsonAsync<GuaranteeModel>($"api/guarantees/{Id.Value}");
+                if (Model == null)
+                {
+                    throw new Exception("Teminat bulunamadı");
+                }
 
                 if (!string.IsNullOrEmpty(Model.BankCode))
                 {
@@ -315,8 +318,8 @@
     {
         if (selectedItem is ExpenseAccountCodeModel selectedAccount)
         {
-            Model.ExpenseAccountName = selectedAccount.Name;
-            Model.ExpenseAccountCode = selectedAccount.Code;
+            Model?.ExpenseAccountName = selectedAccount.Name;
+            Model?.ExpenseAccountCode = selectedAccount.Code;
             ExpensePopupVisible = false;
             StateHasChanged();
         }
@@ -325,8 +328,8 @@
     {
         if (selectedItem is CustomerModel selectedCustomer)
         {
-            Model.PublicAuthorityCode = selectedCustomer.Code;
-            Model.PublicAuthorityName = selectedCustomer.Name;
+            Model?.PublicAuthorityCode = selectedCustomer.Code;
+            Model?.PublicAuthorityName = selectedCustomer.Name;
             CustomerPopupVisible = false;
             StateHasChanged();
         }
@@ -350,10 +353,10 @@
         if (string.IsNullOrWhiteSpace(bankCode)) return;
         if (Banks == null) return;
 
-        Model.BankCode = bankCode;
-        Model.BankName = Banks.Where(x => x.Code == bankCode).Select(m => m.Name).FirstOrDefault();
-        Model.BankBranchCode = "";
-        Model.BankBranchName = "";
+        Model?.BankCode = bankCode;
+        Model?.BankName = Banks.Where(x => x.Code == bankCode).Select(m => m.Name).First();
+        Model?.BankBranchCode = "";
+        Model?.BankBranchName = "";
 
         await LoadBranchesAsync(bankCode);
     }
@@ -368,8 +371,8 @@
         if (BankBranches != null && BankBranches.Count() == 1)
         {
             var branch = BankBranches.First();
-            Model.BankBranchCode = branch.Code;
-            Model.BankBranchName = branch.Name;
+            Model?.BankBranchCode = branch.Code;
+            Model?.BankBranchName = branch.Name;
             StateHasChanged();
         }
     }
@@ -380,8 +383,8 @@
         var selectedBranch = BankBranches.FirstOrDefault(x => x.Code == branchCode);
         if (selectedBranch != null)
         {
-            Model.BankBranchCode = selectedBranch.Code;
-            Model.BankBranchName = selectedBranch.Name; 
+            Model?.BankBranchCode = selectedBranch.Code;
+            Model?.BankBranchName = selectedBranch.Name; 
         }
     }
 
@@ -412,7 +415,7 @@
     private bool IsSaveButtonEnabledForValidation()
     {
         
-        bool isBaseValid = Model.FirmId > 0 &&
+        bool isBaseValid = Model?.FirmId > 0 &&
                            !string.IsNullOrWhiteSpace(Model.GuaranteeType) &&
                            !string.IsNullOrWhiteSpace(Model.GuaranteeForm) &&
                            !string.IsNullOrWhiteSpace(Model.Subject) &&
@@ -421,11 +424,11 @@
                            !string.IsNullOrWhiteSpace(Model.GuaranteeNumber);
 
         bool isConditionalValid = false;
-        if (Model.GuaranteeType == "Geçici")
+        if (Model?.GuaranteeType == "Geçici")
         {
             isConditionalValid = !string.IsNullOrWhiteSpace(Model.ExpenseAccountName);
         }
-        else if (Model.GuaranteeType == "Kati")
+        else if (Model?.GuaranteeType == "Kati")
         {
             isConditionalValid = !string.IsNullOrWhiteSpace(Model.PublicAuthorityName);
         }
@@ -444,7 +447,7 @@
             var client = await ApiClientFactory.CreateAsync(httpClient);
             HttpResponseMessage response;
 
-            if (Model.Id > 0)
+            if (Model?.Id > 0)
             {
                 response = await client.PutAsJsonAsync("api/guarantees", Model);
             }
@@ -496,9 +499,7 @@
     }
     private void OnCalculateCommission()
     {
-
-        Model.CommissionAmount = Model.GuaranteeAmount * Model.CommissionRate;
-
+        Model?.CommissionAmount = Model.GuaranteeAmount * Model.CommissionRate;
         StateHasChanged();
     }
     private void OnPopupOk()

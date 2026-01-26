@@ -45,8 +45,8 @@ namespace NetFlow.ReadModel.Modules
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<ModuleDto>(),
-                    totalCount = totalCount
+                    Data = Array.Empty<ModuleDto>(),
+                    TotalCount = totalCount
                 };
             }
 
@@ -57,8 +57,8 @@ namespace NetFlow.ReadModel.Modules
 
             return new PagedResult
             {
-                data = data,
-                totalCount = totalCount
+                Data = data,
+                TotalCount = totalCount
             };
         }
 

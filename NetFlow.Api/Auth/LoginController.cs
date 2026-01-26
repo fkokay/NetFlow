@@ -11,19 +11,10 @@ namespace NetFlow.Api.Auth
     [ApiController]
     [Route("api/auth")]
 
-    public sealed class AuthController : ControllerBase
+    public sealed class AuthController(IUserService users, ITokenService tokens) : ControllerBase
     {
-        private readonly IUserService _users;
-        private readonly ITokenService _tokens;
-
-        public AuthController(IUserService users, ITokenService tokens)
-        {
-            _users = users;
-            _tokens = tokens;
-        }
-
-        public sealed record LoginRequest(string Email, string Password,string FirmCode);
-        public sealed record LoginResponse(string Token,string? ErrorMessage=null);
+        public sealed record LoginRequest(string Email, string Password, string FirmCode);
+        public sealed record LoginResponse(string Token, string? ErrorMessage = null, string? ExceptionMessage = null);
 
         [HttpPost("login")]
         [AllowAnonymous]
@@ -31,23 +22,24 @@ namespace NetFlow.Api.Auth
         {
             try
             {
-                var user = await _users.Authenticate(req.Email, req.Password, req.FirmCode);
-                var token = _tokens.CreateToken(user);
+                var user = await users.Authenticate(req.Email, req.Password, req.FirmCode);
+                var token = tokens.CreateToken(user);
 
                 return Ok(new LoginResponse(token));
             }
             catch (InvalidLoginException ex)
             {
                 return Unauthorized(new LoginResponse(
-                    Token: null,
+                    Token: "",
                     ErrorMessage: ex.Message
                 ));
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new LoginResponse(
-                    Token: null,
-                    ErrorMessage: "Beklenmeyen bir hata oluştu"
+                    Token: "",
+                    ErrorMessage: "Beklenmeyen bir hata oluştu",
+                    ExceptionMessage: ex.Message
                 ));
             }
         }

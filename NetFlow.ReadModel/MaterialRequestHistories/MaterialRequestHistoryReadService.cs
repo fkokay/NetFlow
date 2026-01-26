@@ -50,8 +50,8 @@ namespace NetFlow.ReadModel.MaterialRequestHistories
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<MaterialRequestHistoryDto>(),
-                    totalCount = totalCount
+                    Data = Array.Empty<MaterialRequestHistoryDto>(),
+                    TotalCount = totalCount
                 };
             }
 
@@ -74,9 +74,9 @@ namespace NetFlow.ReadModel.MaterialRequestHistories
 
                 return new PagedResult
                 {
-                    data = Array.Empty<object>(),
-                    totalCount = totalCount,
-                    summary = values
+                    Data = Array.Empty<object>(),
+                    TotalCount = totalCount,
+                    Summary = values
                 };
             }
 
@@ -87,8 +87,8 @@ namespace NetFlow.ReadModel.MaterialRequestHistories
 
             return new PagedResult
             {
-                data = data,
-                totalCount = totalCount
+                Data = data,
+                TotalCount = totalCount
             };
         }
 

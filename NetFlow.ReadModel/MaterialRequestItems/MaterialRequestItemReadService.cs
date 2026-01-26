@@ -49,8 +49,8 @@ namespace NetFlow.ReadModel.MaterialRequestItems
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<MaterialRequestDto>(),
-                    totalCount = totalCount
+                    Data = Array.Empty<MaterialRequestDto>(),
+                    TotalCount = totalCount
                 };
             }
 
@@ -73,9 +73,9 @@ namespace NetFlow.ReadModel.MaterialRequestItems
 
                 return new PagedResult
                 {
-                    data = Array.Empty<object>(),
-                    totalCount = totalCount,
-                    summary = values
+                    Data = Array.Empty<object>(),
+                    TotalCount = totalCount,
+                    Summary = values
                 };
             }
 
@@ -86,8 +86,8 @@ namespace NetFlow.ReadModel.MaterialRequestItems
 
             return new PagedResult
             {
-                data = data,
-                totalCount = totalCount
+                Data = data,
+                TotalCount = totalCount
             };
         }
 

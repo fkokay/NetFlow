@@ -12,12 +12,12 @@ namespace NetFlow.ReadModel.GuaranteeCommissions
         public DateTime CommissionEndDate { get; set; }
         public decimal CommissionRate { get; set; }
         public decimal CommissionAmount { get; set; }
-        public string Currency { get; set; }
-        public string PaymentStatus { get; set; }
+        public string Currency { get; set; } = string.Empty;
+        public string PaymentStatus { get; set; } = string.Empty;
         public DateTime? PaymentDate { get; set; }
         public string? BankReferenceNo { get; set; }
         public DateTime CreatedAt { get; set; }
-        public string CreatedBy { get; set; }
+        public string CreatedBy { get; set; } = string.Empty;
         public string? Note { get; set; }
     }
 }

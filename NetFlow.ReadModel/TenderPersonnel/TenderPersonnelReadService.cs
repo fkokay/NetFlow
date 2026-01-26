@@ -50,8 +50,8 @@ namespace NetFlow.ReadModel.TenderPersonnel
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<TenderPersonnelDto>(),
-                    totalCount = totalCount
+                    Data = Array.Empty<TenderPersonnelDto>(),
+                    TotalCount = totalCount
                 };
             }
 
@@ -73,8 +73,8 @@ namespace NetFlow.ReadModel.TenderPersonnel
 
             return new PagedResult
             {
-                data = data,
-                totalCount = totalCount
+                Data = data,
+                TotalCount = totalCount
             };
         }
 

@@ -25,7 +25,15 @@ namespace NetFlow.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> List([FromQuery] PagedRequest pagedRequest) => Ok(await _read.ListAsync(_current.User.Id.Value,_current.User.Firm.Id, pagedRequest));
+        public async Task<IActionResult> List([FromQuery] PagedRequest pagedRequest)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(await _read.ListAsync(_current.User.Id.Value, _current.User.Firm.Id, pagedRequest));
+        }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(int id)
@@ -42,7 +50,7 @@ namespace NetFlow.Api.Controllers
                 return NotFound();
             }
 
-            return Ok(await _read.ListAsync(_current.User.Id.Value,_current.User.Firm.Id, pagedRequest, open: true));
+            return Ok(await _read.ListAsync(_current.User.Id.Value, _current.User.Firm.Id, pagedRequest, open: true));
         }
         [HttpGet("closed")]
         public async Task<IActionResult> Closed([FromQuery] PagedRequest pagedRequest)
@@ -52,7 +60,7 @@ namespace NetFlow.Api.Controllers
                 return NotFound();
             }
 
-            return Ok(await _read.ListAsync(_current.User.Id.Value,_current.User.Firm.Id, pagedRequest, closed: true));
+            return Ok(await _read.ListAsync(_current.User.Id.Value, _current.User.Firm.Id, pagedRequest, closed: true));
         }
         [HttpGet("My")]
         public async Task<IActionResult> My([FromQuery] PagedRequest pagedRequest)
@@ -62,7 +70,7 @@ namespace NetFlow.Api.Controllers
                 return NotFound();
             }
 
-            return Ok(await _read.ListAsync(_current.User.Id.Value,_current.User.Firm.Id, pagedRequest, my: true));
+            return Ok(await _read.ListAsync(_current.User.Id.Value, _current.User.Firm.Id, pagedRequest, my: true));
         }
         [HttpGet("Waiting")]
         public async Task<IActionResult> Waiting([FromQuery] PagedRequest pagedRequest)
@@ -72,7 +80,7 @@ namespace NetFlow.Api.Controllers
                 return NotFound();
             }
 
-            return Ok(await _read.ListAsync(_current.User.Id.Value,_current.User.Firm.Id, pagedRequest, waiting: true));
+            return Ok(await _read.ListAsync(_current.User.Id.Value, _current.User.Firm.Id, pagedRequest, waiting: true));
         }
 
         [HttpPost]
@@ -120,7 +128,7 @@ namespace NetFlow.Api.Controllers
             var ids = await _write.FulFillmentAsync(requests);
             return Ok(new
             {
-                Count = ids.Count,
+                ids.Count,
                 Ids = ids
             });
         }

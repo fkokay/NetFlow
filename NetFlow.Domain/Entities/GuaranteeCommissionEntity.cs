@@ -18,7 +18,7 @@ namespace NetFlow.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public string? CreatedBy { get; set; }
         public string? Note { get; set; }
-        public virtual GuaranteeEntity Guarantee { get; set; }
+        public virtual GuaranteeEntity? Guarantee { get; set; }
     }
 }
 

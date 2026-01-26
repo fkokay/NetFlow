@@ -91,9 +91,6 @@
     private GridDevExtremeDataSource<PersonnelModel> Data { get; set; } = null!;
     private IGrid? Grid { get; set; }
     private string? SearchText { get; set; }
-  
-
-    private bool ExtensionPopupVisible = false;
     private PersonnelModel? SelectedPersonnel;
 
     private CancellationTokenSource disposalTokenSource = new CancellationTokenSource();
@@ -121,7 +118,6 @@
     void OpenExtensionPopup(PersonnelModel item)
     {
         SelectedPersonnel = item;
-        ExtensionPopupVisible = true;
     }
 
 

@@ -9,14 +9,14 @@ namespace NetFlow.ReadModel.TenderDevices
         public int Id { get; set; }
         public int TenderId { get; set; }
 
-        public string SupplyType { get; set; }
-        public string StockCode { get; set; }
+        public string SupplyType { get; set; } = string.Empty;
+        public string StockCode { get; set; } = string.Empty;
         public int Quantity { get; set; }
 
-        public string CustomerCode { get; set; }
-        public string CustomerName { get; set; }
+        public string CustomerCode { get; set; } = string.Empty;
+        public string CustomerName { get; set; } = string.Empty;
 
-        public string Currency { get; set; }
+        public string Currency { get; set; } = string.Empty;
 
         public decimal RentUnitPrice { get; set; }
         public decimal ServiceUnitPrice { get; set; }

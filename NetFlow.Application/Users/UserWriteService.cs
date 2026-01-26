@@ -31,7 +31,7 @@ namespace NetFlow.Application.Users
 
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
-            var role = _db.Roles.FirstOrDefault(x => x.Name == "Kullanıcı");
+            var role = _db.Roles.FirstOrDefault(x => x.Name == "Kullanıcı") ?? throw new Exception("'Kullanıcı' isimli rol bulunamadı");
             _db.UserInRoles.Add(new UserInRoleEntity
             {
                 UserId = user.Id,
@@ -45,7 +45,7 @@ namespace NetFlow.Application.Users
                     {
                         UserId = user.Id,
                         FirmId = firmId,
-                        RoleId = role?.Id ?? 0 
+                        RoleId = role?.Id ?? 0
                     }).ToList();
 
                 _db.UserInFirms.AddRange(userFirms);
@@ -56,9 +56,7 @@ namespace NetFlow.Application.Users
         }
         public async Task<int> EditAsync(EditUserRequest request)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == request.Id);
-            if (user == null)
-                throw new Exception("User not found");
+            var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == request.Id) ?? throw new Exception("User not found");
 
             // Kullanıcı bilgileri
             user.FirstName = request.FirstName;
@@ -70,17 +68,17 @@ namespace NetFlow.Application.Users
             if (!string.IsNullOrWhiteSpace(request.Password))
                 user.Password = request.Password;
 
-            
+
             var oldFirmRoles = _db.UserInFirms.Where(x => x.UserId == user.Id);
             _db.UserInFirms.RemoveRange(oldFirmRoles);
 
-       
+
             var firmIds = request.FirmIds?
                 .Where(x => x > 0)
                 .Distinct()
                 .ToList();
 
-           
+
             var selectedRoleId = request.RoleIds?
                 .Where(x => x > 0)
                 .Distinct()
@@ -105,10 +103,7 @@ namespace NetFlow.Application.Users
 
         public async Task DeleteAsync(int id)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == id);
-            if (user == null)
-                throw new Exception("User not found");
-
+            var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == id) ?? throw new Exception("User not found");
             var userRoles = await _db.UserInRoles
                 .Where(x => x.UserId == id)
                 .ToListAsync();

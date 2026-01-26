@@ -6,10 +6,10 @@ namespace NetFlow.Domain.Entities
     public class GuaranteeCommissionPeriodEntity
     {
         public int Id { get; set; }
-        public string PeriodName { get; set; }
+        public string PeriodName { get; set; } = string.Empty;
         public int Period { get; set; }
 
-        public ICollection<GuaranteeEntity> Guarantees { get; set; }
+        public ICollection<GuaranteeEntity> Guarantees { get; set; } = [];
     }
 
 }

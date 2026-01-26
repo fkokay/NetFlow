@@ -10,20 +10,20 @@ namespace NetFlow.ReadModel.TenderReaktif
         public int TenderId { get; set; }
         public int TenderAuthorityId { get; set; }
 
-        public string ParentAuthorityCode { get; set; }
+        public string ParentAuthorityCode { get; set; } = string.Empty;
 
-        public string UnitCode { get; set; }
-        public string UnitName { get; set; }
+        public string UnitCode { get; set; } = string.Empty;
+        public string UnitName { get; set; } = string.Empty;
 
-        public string StockCode { get; set; }
-        public string SutCode { get; set; }
-        public string TestName { get; set; }
+        public string StockCode { get; set; } = string.Empty;
+        public string SutCode { get; set; } = string.Empty;
+        public string TestName { get; set; } = string.Empty;
 
         public decimal TestCount { get; set; }
         public decimal SutPoint { get; set; }
         public decimal TotalSutPoint { get; set; }
 
-        public string Currency { get; set; }
+        public string Currency { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
     }
 }

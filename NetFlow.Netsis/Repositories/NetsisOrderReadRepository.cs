@@ -81,8 +81,8 @@ namespace NetFlow.Netsis.Repositories
             {
                 return new PagedResult
                 {
-                    totalCount = totalCount,
-                    data = Array.Empty<Order>(),
+                    TotalCount = totalCount,
+                    Data = Array.Empty<Order>(),
                 };
             }
 
@@ -90,8 +90,8 @@ namespace NetFlow.Netsis.Repositories
 
             return new PagedResult
             {
-                totalCount = totalCount,
-                data = dto.Select(NetsisUtils.FixAllStrings).Select(x =>
+                TotalCount = totalCount,
+                Data = dto.Select(NetsisUtils.FixAllStrings).Select(x =>
                       Order.Create(
                           x.SUBE_KODU,
                           x.FTIRSIP,
