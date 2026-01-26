@@ -30,7 +30,7 @@ namespace NetFlow.ReadModel.Tenders
                 whereSql += " AND " + sql;
                 parameters.AddDynamicParams(p);
             }
-            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "Id DESC");
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "ORDER BY Id DESC");
             string countSql = $@"
                 SELECT COUNT(1) FROM dbo.VW_Tender WITH (NOLOCK)
                 {whereSql}
