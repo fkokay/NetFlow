@@ -13,10 +13,10 @@ namespace NetFlow.ReadModel.Requests
         public int RequestedByUserId { get; set; }
         public string? RequestedDepartment { get; set; }
         public DateTime RequestDate { get; set; } = DateTime.UtcNow;
-        public DateTime? RequiredDate { get; set; }
-        public string RequestType { get; set; } = null!;     // Production / Maintenance / Office
-        public string Priority { get; set; } = "Normal";     // Low / Normal / Urgent
-        public string Status { get; set; } = "Open";          // Open / PendingApproval / Approved / Rejected / Fulfilled / Closed
+        public DateTime RequiredDate { get; set; } = DateTime.UtcNow;
+        public int RequestType { get; set; } 
+        public int Priority { get; set; }
+        public int Status { get; set; }
         public string? Description { get; set; }
         public int? ApprovedByUserId { get; set; }
         public int? AssignedToUserId { get; set; }
@@ -29,9 +29,9 @@ namespace NetFlow.ReadModel.Requests
         public string? AssignedDepartment { get; set; }
         public DateTime? ApprovalDate { get; set; }
         public string? RejectionReason { get; set; }
-        public string? SourceReference { get; set; }          // WorkOrder / Project / Tender
-        public DateTime CreateAt { get; set; } = DateTime.UtcNow;
-        public int CreateBy { get; set; }
+        public int SourceType { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public int CreatedBy { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public int? UpdatedBy { get; set; }
     }

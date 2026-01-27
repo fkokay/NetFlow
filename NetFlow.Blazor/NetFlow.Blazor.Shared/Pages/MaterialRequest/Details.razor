@@ -51,75 +51,6 @@
     </FooterContentTemplate>
 </DxPopup>
 
-
-
-<DxPopup @bind-Visible="@IsFulfillmentPopupVisible"
-         HeaderText="Talep Karşıla"
-         Width="900px"
-         ShowFooter="true">
-    <BodyContentTemplate Context="fulfillmentContext">
-        <DxGrid Data="FulfillmentItems" PageSize="10">
-            <Columns>
-                <DxGridDataColumn FieldName="ItemCode" Caption="Kod" Width="120px" />
-                <DxGridDataColumn FieldName="ItemName" Caption="Adı" />
-                
-                
-                <DxGridDataColumn Caption="Talep Miktarı" Width="150px">
-                    <CellDisplayTemplate>
-                        @{
-                            var item = (MaterialRequestItemModel)context.DataItem;
-                            if (!SelectedFulfillmentQuantities.ContainsKey(item.Id))
-                            {
-                                SelectedFulfillmentQuantities[item.Id] = item.RequestedQuantity;
-                            }
-                        }
-                        <DxSpinEdit Value="@SelectedFulfillmentQuantities[item.Id]"
-                                    T="decimal"
-                                    ValueChanged="@((decimal newVal) => { SelectedFulfillmentQuantities[item.Id] = newVal; })"
-                                    Mask="@NumericMask.RealNumber"
-                                    Enabled="@(Model?.Status?.ToLower() == "open")"
-                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
-                    </CellDisplayTemplate>
-                </DxGridDataColumn>
-                <DxGridDataColumn FieldName="Unit" Caption="Birim" Width="80px" />
-
-                <DxGridDataColumn Caption="Karşılama Yöntemi" Width="200px">
-                    <CellDisplayTemplate>
-                        @{
-                            var item = (MaterialRequestItemModel)context.DataItem;
-                            if (!SelectedFulfillmentTypes.ContainsKey(item.Id))
-                            {
-                                SelectedFulfillmentTypes[item.Id] = !string.IsNullOrEmpty(item.FulfillmentType)
-                                ? item.FulfillmentType : "Stok";
-                            }
-                            if (!SelectedFulfillmentQuantities.ContainsKey(item.Id))
-                            {
-                                SelectedFulfillmentQuantities[item.Id] = item.RequestedQuantity;
-                            }
-                        }
-                        <DxComboBox Data="@FulfillmentOptions"
-                                    Value="@SelectedFulfillmentTypes[item.Id]"
-                                    ValueChanged="@((string newVal) => SelectedFulfillmentTypes[item.Id] = newVal)"
-                                    Enabled="@(Model?.Status?.ToLower() == "open")" />
-                    </CellDisplayTemplate>
-                </DxGridDataColumn>
-            </Columns>
-        </DxGrid>
-    </BodyContentTemplate>
-
-    <FooterContentTemplate Context="fFooter">
-        <DxButton RenderStyle="ButtonRenderStyle.Primary"
-                  Text="Seçimleri Gönder"
-                  IconCssClass="dx-icon-check"
-                  Click="OnConfirmFulfillment" />
-
-        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
-                  Text="Vazgeç"
-                  IconCssClass="dx-icon-close"
-                  Click="@(() => IsFulfillmentPopupVisible = false)" />
-    </FooterContentTemplate>
-</DxPopup>
-
 <div class="content-root">
     <div class="card toolbar">
         <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
@@ -138,9 +69,7 @@
 
             @if (Model != null)
             {
-                var status = Model.Status?.ToLower();
-
-                @if (status == "waiting")
+                @if (Model.Status == MaterialRequestStatus.PendingApproval)
                 {
                     <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
                         <Template>
@@ -161,7 +90,7 @@
                         </Template>
                     </DxToolbarItem>
                 }
-                else if (status == "open")
+                else if (Model.Status == MaterialRequestStatus.Open)
                 {
                     <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
                         <Template>
@@ -227,20 +156,8 @@
                                         Talep No: @Model.RequestNo
                                     </h5>
 
-                                    @{
-                                        var status = Model.Status?.ToLower();
-                                        var (cssClass, displayName) = status switch
-                                        {
-                                            "open" => ("status-open", "Onaylandı"),
-                                            "waiting" => ("status-waiting", "Bekliyor"),
-                                            "rejected" => ("status-rejected", "Reddedildi"),
-                                            "closed" => ("status-closed", "Kapalı"),
-                                            _ => ("status-closed", Model.Status ?? "-")
-                                        };
-                                    }
-
-                                    <span class="authority-badge @cssClass">
-                                        @displayName
+                                    <span class="authority-badge">
+                                        @(Model.Status.GetDescription())
                                     </span>
                                 </div>
 
@@ -273,16 +190,9 @@
                                     <div class="request-info-row">
                                         <span>Gerekli Tarih:</span>
                                         <span>
-                                            @if (Model.RequiredDate.HasValue)
-                                            {
-                                                <span class="@(Model.RequiredDate < DateTime.Today ? "text-danger" : "")">
-                                                    @Model.RequiredDate.Value.ToShortDateString()
-                                                </span>
-                                            }
-                                            else
-                                            {
-                                                <span>-</span>
-                                            }
+                                            <span class="@(Model.RequiredDate < DateTime.Today ? "text-danger" : "")">
+                                                @Model.RequiredDate.ToShortDateString()
+                                            </span>
                                         </span>
                                     </div>
 
@@ -291,11 +201,11 @@
                                         <span>@Model.RequestedByUserId</span>
                                     </div>
 
-                                    @if (!string.IsNullOrWhiteSpace(Model.SourceReference))
+                                    @if (Model.SourceType != MaterialRequestSourceType.None)
                                     {
                                         <div class="request-info-row">
                                             <span>Kaynak:</span>
-                                            <span>@Model.SourceReference</span>
+                                            <span>@(Model.SourceType.GetDescription())</span>
                                         </div>
                                     }
 
@@ -308,7 +218,7 @@
                                     }
                                 </div>
 
-                                @if (Model.Status == "Approved")
+                                @if (Model.Status == MaterialRequestStatus.Approved)
                                 {
                                     <h6 class="request-section-title">ONAY BİLGİSİ</h6>
                                     <div class="request-info">
@@ -323,7 +233,7 @@
                                     </div>
                                 }
 
-                                @if (Model.Status == "Rejected")
+                                @if (Model.Status == MaterialRequestStatus.Rejected)
                                 {
                                     <h6 class="request-section-title text-danger">RED NEDENİ</h6>
                                     <div class="request-info">
@@ -384,7 +294,9 @@
 
     private GridDevExtremeDataSource<MaterialRequestItemModel>? FulfillmentItems;
     bool IsFulfillmentPopupVisible { get; set; } = false;
-    List<string> FulfillmentOptions = new() { "Satın Alma", "Stok","Demirbaş" };
+    private MaterialRequestItemFulfillmentType[] MaterialRequestItemFulfillmentTypes =
+Enum.GetValues<MaterialRequestItemFulfillmentType>();
+
     Dictionary<int, string> SelectedFulfillmentTypes = new();
     Dictionary<int, decimal> SelectedFulfillmentQuantities = new();
 

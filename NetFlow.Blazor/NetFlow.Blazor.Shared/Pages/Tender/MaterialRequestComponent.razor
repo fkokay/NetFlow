@@ -24,10 +24,10 @@
                 <DxTextBox Text="@TenderOpex.Quantity.ToString()" ReadOnly="true" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Talep Türü" ColSpanMd="12">
-                <DxComboBox Data="RequestTypes" @bind-Value="model.RequestType" ValueFieldName="this" TextFieldName="this" ValidationEnabled="true" ShowValidationIcon="true" />
+                <DxComboBox Data="RequestTypes" @bind-Value="model.RequestType" ValueFieldName="Value" TextFieldName="Text" ValidationEnabled="true" ShowValidationIcon="true" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Öncelik" ColSpanMd="12">
-                <DxComboBox Data="Priorities" @bind-Value="model.Priority" ValueFieldName="this" TextFieldName="this" ValidationEnabled="true" ShowValidationIcon="true" />
+                <DxComboBox Data="Priorities" @bind-Value="model.Priority" ValueFieldName="Value" TextFieldName="Text" ValidationEnabled="true" ShowValidationIcon="true"/>
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Gerekli Tarih" ColSpanMd="12">
                 <DxDateEdit @bind-Date="model.RequiredDate" DisplayFormat="dd.MM.yyyy" ValidationEnabled="true" ShowValidationIcon="true" />
@@ -36,7 +36,7 @@
                 <DxTextBox @bind-Text="model.RequestedDepartment" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Kaynak Referans" ColSpanMd="12">
-                <DxComboBox Data="SourceReferences" @bind-Value="model.SourceReference" ValueFieldName="this" TextFieldName="this" />
+                <DxComboBox Data="SourceTypes" @bind-Value="model.SourceType" ValueFieldName="Value" TextFieldName="Text" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Açıklama" ColSpanMd="12">
                 <DxMemo @bind-Text="model.Description" Rows="4" />
@@ -54,10 +54,37 @@
     [Parameter] public required TenderModel Tender { get; set; }
     [Parameter] public required TenderOpexModel TenderOpex { get; set; }
 
+
     private MaterialRequestModel model = new();
-    private string[] RequestTypes = { "Open", "PendingApproval", "Approved", "Rejected", "Fulfilled", "Closed" };
-    private string[] Priorities = { "Low", "Normal", "Urgent" };
-    private string[] SourceReferences = { "WorkOrder", "Project", "Tender" };
+
+    private List<EnumItem<MaterialRequestPriority>> Priorities =
+    Enum.GetValues<MaterialRequestPriority>()
+    .Select(x => new EnumItem<MaterialRequestPriority>
+    {
+        Value = x,
+        Text = x.GetDescription()
+    })
+    .ToList();
+
+    private List<EnumItem<MaterialRequestType>> RequestTypes =
+    Enum.GetValues<MaterialRequestType>()
+    .Select(x => new EnumItem<MaterialRequestType>
+    {
+        Value = x,
+        Text = x.GetDescription()
+    })
+    .ToList();
+
+
+    private List<EnumItem<MaterialRequestSourceType>> SourceTypes =
+    Enum.GetValues<MaterialRequestSourceType>()
+    .Select(x => new EnumItem<MaterialRequestSourceType>
+    {
+        Value = x,
+        Text = x.GetDescription()
+    })
+    .ToList();
+
 
     private async Task OnSave()
     {
@@ -72,7 +99,7 @@
             Priority = model.Priority,
             RequiredDate = model.RequiredDate,
             RequestedDepartment = model.RequestedDepartment,
-            SourceReference = model.SourceReference,
+            SourceType = model.SourceType,
             Description = model.Description,
             ItemCode = TenderOpex.StockCode,
             ItemName = TenderOpex.StockName,
@@ -81,13 +108,14 @@
             Unit = TenderOpex.Unit,
             WarehouseCode = "1000",
             AlternateItemCode = "",
-            Status = "Open",
-            FulfillmentType = "Purchase"
+            Status = MaterialRequestItemStatus.Pending,
+            FulfillmentType = MaterialRequestItemFulfillmentType.Undefined
         });
 
         if (response.IsSuccessStatusCode)
         {
             IsPopupVisible = false;
+
         }
         else
         {

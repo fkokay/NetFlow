@@ -92,22 +92,8 @@
                 <DxGridDataColumn Caption="Öncelik" FieldName="Priority" />
                 <DxGridDataColumn Caption="Durum" FieldName="Status" Width="120px">
                     <CellDisplayTemplate>
-                        @{
-                            var row = (MaterialRequestModel)context.DataItem;
-                            var status = row.Status?.ToLower();
-
-                            var (cssClass, displayName) = status switch
-                            {
-                                "open" => ("status-open", "Onaylandý"),
-                                "waiting" => ("status-waiting", "Bekliyor"),
-                                "rejected" => ("status-rejected", "Reddedildi"),
-                                "closed" => ("status-closed", "Kapalý"),
-                                _ => ("status-closed", row.Status ?? "-")
-                            };
-                        }
-
-                        <span class="status-badge @cssClass">
-                            @displayName
+                        <span class="status-badge">
+                            @(((MaterialRequestModel)context.DataItem).Status.GetDescription())
                         </span>
                     </CellDisplayTemplate>
                 </DxGridDataColumn>
@@ -120,7 +106,7 @@
                 <DxGridDataColumn Caption="Gerekli Tarih" FieldName="RequiredDate" />
                 <DxGridDataColumn Caption="Açýklama" FieldName="Description" />
                 <DxGridDataColumn Caption="Onay Tarihi" FieldName="ApprovalDate" Visible="false" />
-                <DxGridDataColumn Caption="Kaynak Referans" FieldName="SourceReference" />
+                <DxGridDataColumn Caption="Kaynak Referans" FieldName="SourceType" />
             </Columns>
         </DxGrid>
     </div>

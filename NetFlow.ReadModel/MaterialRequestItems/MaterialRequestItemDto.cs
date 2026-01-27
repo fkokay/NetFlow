@@ -1,5 +1,7 @@
-﻿using System;
+﻿using NetFlow.Domain.Enums;
+using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using System.Text;
 
 namespace NetFlow.ReadModel.MaterialRequestItems
@@ -12,11 +14,12 @@ namespace NetFlow.ReadModel.MaterialRequestItems
         public string? ItemName { get; set; }
         public decimal RequestedQuantity { get; set; }
         public decimal FulfilledQuantity { get; set; }
-        public string Unit { get; set; } = null!;              // pcs / kg / meter
+        public string Unit { get; set; } = null!;
         public string? WarehouseCode { get; set; }
         public string? AlternateItemCode { get; set; }
-        public string? FulfillmentType { get; set; }          // FromStock / Purchase / Transfer
-        public string Status { get; set; } = "Pending";        // Pending / Fulfilled / Partial / Cancelled
+        public bool IsAlternateUsed { get; set; }
+        public MaterialRequestItemFulfillmentType FulfillmentType { get; set; }       
+        public MaterialRequestItemStatus Status { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

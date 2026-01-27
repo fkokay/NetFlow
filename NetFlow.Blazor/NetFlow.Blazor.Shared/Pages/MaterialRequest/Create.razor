@@ -41,7 +41,11 @@
                                     ValueFieldName="this"
                                     TextFieldName="this"
                                     ValidationEnabled="true"
-                                    ShowValidationIcon="true" />
+                                    ShowValidationIcon="true" >
+                            <ItemTemplate Context="item">
+                                @item.GetDescription()
+                            </ItemTemplate>
+                        </DxComboBox>
                     </DxFormLayoutItem>
 
                    
@@ -51,7 +55,11 @@
                                     ValueFieldName="this"
                                     TextFieldName="this"
                                     ValidationEnabled="true"
-                                    ShowValidationIcon="true" />
+                                    ShowValidationIcon="true" >
+                            <ItemTemplate Context="item">
+                                @item.GetDescription()
+                            </ItemTemplate>
+                        </DxComboBox>
                     </DxFormLayoutItem>
 
 
@@ -69,10 +77,14 @@
 
 
                     <DxFormLayoutItem Caption="Kaynak Referans">
-                        <DxComboBox Data="SourceReferences"
-                                    @bind-Value="model.SourceReference"
+                        <DxComboBox Data="SourceTypes"
+                                    @bind-Value="model.SourceType"
                                     ValueFieldName="this"
-                                    TextFieldName="this" />
+                                    TextFieldName="this" >
+                            <ItemTemplate Context="item">
+                                @item.GetDescription()
+                            </ItemTemplate>
+                                </DxComboBox>
                     </DxFormLayoutItem>
 
 
@@ -135,9 +147,16 @@
     private bool isSaving, popupVisible, isSuccess;
     private string popupTitle = "", popupMessage = "";
 
-    string[] RequestTypes = { "Open", "PendingApproval", "Approved", "Rejected", "Fulfilled", "Closed" };
-    string[] Priorities = { "Low", "Normal", "Urgent" };
-    string[] SourceReferences = { "WorkOrder", "Project", "Tender" };
+    private MaterialRequestType[] RequestTypes =
+    Enum.GetValues<MaterialRequestType>();
+
+
+    private MaterialRequestPriority[] Priorities =
+    Enum.GetValues<MaterialRequestPriority>();
+
+
+    private MaterialRequestSourceType[] SourceTypes =
+    Enum.GetValues<MaterialRequestSourceType>();
 
     protected override void OnInitialized()
     {

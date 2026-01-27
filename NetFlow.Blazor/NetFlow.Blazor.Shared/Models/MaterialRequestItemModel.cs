@@ -12,11 +12,11 @@ namespace NetFlow.Blazor.Shared.Models
         public string? ItemName { get; set; }
         public decimal RequestedQuantity { get; set; }
         public decimal FulfilledQuantity { get; set; }
-        public string Unit { get; set; } = null!;              // pcs / kg / meter
+        public string Unit { get; set; } = null!;
         public string? WarehouseCode { get; set; }
         public string? AlternateItemCode { get; set; }
-        public string? FulfillmentType { get; set; }          // FromStock / Purchase / Transfer
-        public string Status { get; set; } = "Pending";        // Pending / Fulfilled / Partial / Cancelled
+        public MaterialRequestItemFulfillmentType FulfillmentType { get; set; }
+        public MaterialRequestItemStatus Status { get; set; } = MaterialRequestItemStatus.Pending;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

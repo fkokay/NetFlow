@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DevExpress.XtraPrinting.Native;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
@@ -13,10 +14,10 @@ namespace NetFlow.Blazor.Shared.Models
         public int RequestedByUserId { get; set; }
         public string? RequestedDepartment { get; set; }
         public DateTime RequestDate { get; set; } = DateTime.UtcNow;
-        public DateTime? RequiredDate { get; set; }
-        public string RequestType { get; set; } = null!;     // Production / Maintenance / Office
-        public string Priority { get; set; } = "Normal";     // Low / Normal / Urgent
-        public string Status { get; set; } = "Open";          // Open / PendingApproval / Approved / Rejected / Fulfilled / Closed
+        public DateTime RequiredDate { get; set; } = DateTime.UtcNow.AddDays(7);
+        public MaterialRequestType RequestType { get; set; } = MaterialRequestType.Production;
+        public MaterialRequestPriority Priority { get; set; } = MaterialRequestPriority.Normal;
+        public MaterialRequestStatus Status { get; set; } = MaterialRequestStatus.Draft;
         public string? Description { get; set; }
         public int? ApprovedByUserId { get; set; }
         public int? AssignedToUserId { get; set; }
@@ -29,10 +30,6 @@ namespace NetFlow.Blazor.Shared.Models
         public string? AssignedDepartment { get; set; }
         public DateTime? ApprovalDate { get; set; }
         public string? RejectionReason { get; set; }
-        public string? SourceReference { get; set; }          // WorkOrder / Project / Tender
-        public DateTime CreateAt { get; set; } = DateTime.UtcNow;
-        public int CreateBy { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public int? UpdatedBy { get; set; }
+        public MaterialRequestSourceType SourceType { get; set; }     
     }
 }
