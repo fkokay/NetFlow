@@ -87,13 +87,11 @@
                     <CellDisplayTemplate>
                         @{
                             var item = (MaterialRequestItemModel)context.DataItem;
-                            // Karşılama tipi takibi
                             if (!SelectedFulfillmentTypes.ContainsKey(item.Id))
                             {
                                 SelectedFulfillmentTypes[item.Id] = !string.IsNullOrEmpty(item.FulfillmentType)
                                 ? item.FulfillmentType : "Stok";
                             }
-                            // Miktar değerini sayısal olarak sözlükte tutalım
                             if (!SelectedFulfillmentQuantities.ContainsKey(item.Id))
                             {
                                 SelectedFulfillmentQuantities[item.Id] = item.RequestedQuantity;

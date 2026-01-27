@@ -5,15 +5,20 @@
 <DxGrid Data="TenderPersonnelDataSource"
         ShowSearchBox="true"
         SearchBoxNullText="Arama yapmak için metin girin…"
+        DataItemDeleting="async (e) => await DeleteTenderPersonnel(((TenderPersonnelModel)e.DataItem).Id)"
         style="height:100%;">
     <ToolbarTemplate>
         <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
             <DxToolbarItem Text="Personel Ata"
                            Click="() => { ValidationMessage = null; PopupVisible = true; }"
-                           IconCssClass="dx-icon-add"
+                           RenderStyle="ButtonRenderStyle.Success"
+                           RenderStyleMode="ToolbarItemRenderStyleMode.Auto"
                            Alignment="ToolbarItemAlignment.Right" />
         </DxToolbar>
+
     </ToolbarTemplate>
+
+    
     <Columns>
         <DxGridDataColumn FieldName="PersonnelCode" Caption="Personel Kodu" />
         <DxGridDataColumn FieldName="FullName" Caption="Ad Soyad" />
@@ -24,6 +29,11 @@
         <DxGridDataColumn FieldName="CreatedAt"
                           Caption="Oluþturma Tarihi"
                           DisplayFormat="dd.MM.yyyy" />
+
+        <DxGridCommandColumn Width="120px"
+                             EditButtonVisible="false"
+                             DeleteButtonVisible="true"
+                             NewButtonVisible="false" />
     </Columns>
 </DxGrid>
 
@@ -139,5 +149,14 @@
             SelectedPersonnel = new List<object>();
             await LoadDataAsync();
         }
+
+
+    }
+    private async Task DeleteTenderPersonnel(int tenderPersonnelId)
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        var response = await client.DeleteAsync($"api/tender-personnel/{tenderPersonnelId}");
+        if (response.IsSuccessStatusCode)
+            await LoadDataAsync();
     }
 }

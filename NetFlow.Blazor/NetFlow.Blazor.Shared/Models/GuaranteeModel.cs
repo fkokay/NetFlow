@@ -63,6 +63,7 @@ namespace NetFlow.Blazor.Shared.Models
 
         public string TakasbankReferenceNo { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public DateTime? ReturnDate { get; set; }
 
         [NotMapped]
         public List<GuaranteeCommissionModel> GuaranteeCommissions { get; set; } = new List<GuaranteeCommissionModel>();

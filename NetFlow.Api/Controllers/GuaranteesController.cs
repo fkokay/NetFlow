@@ -101,6 +101,15 @@ namespace NetFlow.Api.Controllers
                 new { id },
                 null);
         }
+        [HttpPut("return")]
+        public async Task<IActionResult> Update([FromBody] ReturnRequest request)
+        {
+            var id = await _write.ReturnRequestAsync(request);
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)

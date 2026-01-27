@@ -1,0 +1,229 @@
+@page "/guarantee/settingcreateorupdate/{Id:int?}"
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <Items>
+                <DxToolbarItem IconCssClass="back-icon icon medium-icon" Tooltip="Geri Dön" Click="@NavigateBack" />
+                <DxToolbarItem>
+                    <Template>
+                        <div class="custom-item">
+                            <div class="title">@(Id > 0 ? "Teminat Tanýmý Düzenleme" : "Yeni Teminat Tanýmý Tanýmlama")</div>
+                        </div>
+                    </Template>
+                </DxToolbarItem>
+                <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                    <Template>
+                        <DxButton Text="Kaydet"
+                                  Click="SaveFromOutside"
+                                  Enabled="@(!IsSaving)"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  RenderStyle="ButtonRenderStyle.Success" />
+                    </Template>
+                </DxToolbarItem>
+            </Items>
+        </DxToolbar>
+    </div>
+
+    <div class="guarantee-setting-edit">
+        <DxLoadingPanel Visible="@(EditContext == null || IsSaving)"
+                        IsContentBlocked="true"
+                        IsContentVisible="@(EditContext != null)"
+                        IndicatorVisible="true"
+                        IndicatorAreaVisible="true"
+                        ZIndex="101"
+                        Text="@(IsSaving ? "Kaydediliyor..." : "Yükleniyor...")">
+
+            @if (EditContext != null && Model != null)
+            {
+                <DxGridLayout ColumnSpacing="1rem" RowSpacing="1rem" CssClass="h-100">
+                    <Columns>
+                        <DxGridLayoutColumn Width="100%" />
+                    </Columns>
+                    <Rows>
+                        <DxGridLayoutRow Areas="Item1" />
+                    </Rows>
+                    <Items>
+                        <DxGridLayoutItem Area="Item1">
+                            <Template>
+                                <EditForm EditContext="@EditContext" Context="formContext">
+                                    <DataAnnotationsValidator />
+
+                                    <DxFormLayout ColSpanMd="12">
+                                        <DxFormLayoutItem Caption="Dönem Süresi" ColSpanMd="6">
+                                            <DxSpinEdit @bind-Value="@Model.Period"
+                                                        ShowSpinButtons="true"
+                                                        MinValue="1" />
+                                        </DxFormLayoutItem>
+
+                                        <DxFormLayoutItem Caption="Dönem Adý" ColSpanMd="6">
+                                            <DxTextBox @bind-Text="Model.PeriodName" />
+
+                                            @if (ShowValidationMessages && string.IsNullOrWhiteSpace(Model.PeriodName))
+                                            {
+                                                <small class="text-danger mt-1">Dönem Adý zorunludur.</small>
+                                            }
+                                        </DxFormLayoutItem>
+
+                                        <DxFormLayoutItem ColSpanMd="12">
+                                            <ValidationSummary />
+                                        </DxFormLayoutItem>
+                                    </DxFormLayout>
+                                </EditForm>
+                            </Template>
+                        </DxGridLayoutItem>
+                    </Items>
+                </DxGridLayout>
+            }
+        </DxLoadingPanel>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private GuaranteeCommissionPeriodModel? Model = new();
+    private EditContext? EditContext;
+    private bool IsSaving, IsSuccess;
+    private bool ShowValidationMessages { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+            if (Id.HasValue && Id.Value > 0)
+            {
+                var httpClient = HttpClientFactory.CreateClient("ApiClient");
+                var api_client = await ApiClientFactory.CreateAsync(httpClient);
+                Model = await api_client.GetFromJsonAsync<GuaranteeCommissionPeriodModel>($"https://localhost:7071/api/guarantee-commission-periods/{Id.Value}");
+                if (Model == null)
+                {
+                    throw new Exception("Teminat Tanýmý bulunamadý");
+                }
+            }
+            else
+            {
+                Model = new GuaranteeCommissionPeriodModel { };
+            }
+
+            EditContext = new EditContext(Model);
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast(new ToastOptions()
+            {
+                ProviderName = "Overview",
+                ThemeMode = ToastThemeMode.Light,
+                RenderStyle = ToastRenderStyle.Warning,
+                Title = "Veriler Yüklenirken bir hata oluþtu",
+                Text = $"{ex.Message}"
+            }, RenderToastButton(true));
+        }
+    }
+
+    private RenderFragment RenderToastButton(bool isError)
+    {
+        return @<div class="d-flex gap-2">
+            <DxButton Click="@(isError? OnPopupError:OnPopupOk)" RenderStyle="@(isError? ButtonRenderStyle.Danger: ButtonRenderStyle.Success)">Kapat</DxButton>
+        </div>;
+    }
+
+    private async Task SaveFromOutside()
+    {
+        if (IsSaving || EditContext == null) return;
+
+        ShowValidationMessages = true;
+        var isDataAnnotationValid = EditContext.Validate();
+        var isBusinessLogicValid = IsSaveButtonEnabledForValidation();
+
+        if (isDataAnnotationValid && isBusinessLogicValid)
+        {
+            await HandleValidSubmit();
+        }
+        else
+        {
+            StateHasChanged();
+        }
+    }
+
+    private bool IsSaveButtonEnabledForValidation()
+    {
+        bool isBaseValid = Model?.Period > 0 && !string.IsNullOrWhiteSpace(Model.PeriodName);
+        return isBaseValid;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (IsSaving) return;
+        IsSaving = true;
+        IsSuccess = false;
+
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+            HttpResponseMessage response;
+
+            if (Model?.Id > 0)
+            {
+                response = await client.PutAsJsonAsync("api/guarantee-commission-periods", Model);
+            }
+            else
+            {
+                response = await client.PostAsJsonAsync("api/guarantee-commission-periods", Model);
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                IsSuccess = true;
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Success,
+                    Title = "Baþarýlý",
+                    Text = "Teminat bilgileri baþarýlý bir þekilde kaydedildi."
+                }, RenderToastButton(false));
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Danger,
+                    Title = "Hata",
+                    Text = errorMsg
+                }, RenderToastButton(true));
+            }
+        }
+        catch (Exception)
+        {
+            IsSuccess = false;
+        }
+        finally
+        {
+            IsSaving = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void OnPopupOk()
+    {
+        if (IsSuccess) NavigationManager.NavigateTo("/guarantee/settings");
+    }
+
+    private void OnPopupError() { }
+
+    private void NavigateBack() => NavigationManager.NavigateTo("/guarantee/settings");
+}

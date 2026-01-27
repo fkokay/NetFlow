@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NetFlow.ReadModel.GuaranteeCommissionPeriods
+namespace NetFlow.Application.GuaranteeCommissionPeriods
 {
-    public class GuaranteeCommissionPeriodDto
+    public class CreateGuaranteeCommissionPeriodRequest
     {
-        public int Id { get; set; }
         public string PeriodName { get; set; } = string.Empty;
         public int Period { get; set; }
     }

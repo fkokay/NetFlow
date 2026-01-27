@@ -1,6 +1,163 @@
 ﻿@page "/guarantee/settings"
-<h3>Teminat Ayarları</h3>
+@implements IDisposable
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar Title="@Title" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+          
+            <DxToolbarItem Text="Teminat Tanımı Oluştur"
+                           Tooltip="Yeni Teminat Tanımı Ekle"
+                           Alignment="ToolbarItemAlignment.Right"
+                           Click="OnAddClick"
+                           IconCssClass="add-icon icon medium-icon"
+                           RenderStyleMode="ToolbarItemRenderStyleMode.Plain" />
+
+            <DxToolbarItem Tooltip="Column Chooser" Alignment="ToolbarItemAlignment.Right" Click="OnColumnChooserItemClick" IconCssClass="column-chooser-icon icon medium-icon" />
+
+            <DxToolbarItem Text="Dışarı Aktar" Alignment="ToolbarItemAlignment.Right" IconCssClass="export-icon icon medium-icon">
+                <Items>
+                    <DxToolbarItem Text="Tüm verileri Excel'e aktar" Click="ExportAllDataToExcel" />
+                    <DxToolbarItem Text="Seçili satırları Excel'e aktar" Click="ExportSelectedRowsToExcel" />
+                    <DxToolbarItem Text="Tüm verileri CSV'ye aktar" Click="ExportAllDataToCsv" />
+                    <DxToolbarItem Text="Seçili satırları CSV'ye aktar" Click="ExportSelectedRowsDataToCsv" />
+                    <DxToolbarItem Text="Tüm verileri PDF'e aktar" Click="ExportAllDataToPdf" />
+                    <DxToolbarItem Text="Seçili satırları PDF'e aktar" Click="ExportSelectedRowsDataToPdf" />
+                </Items>
+            </DxToolbarItem>
+
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right" CssClass="search-textbox-item" Tooltip="Search">
+                <Template Context="SearchContext">
+                    <div class="custom-item">
+                        <DxSearchBox CssClass="search-textbox"
+                                     NullText="Ara"
+                                     BindValueMode="BindValueMode.OnInput"
+                                     ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                     @bind-Text=SearchText />
+                    </div>
+                </Template>
+            </DxToolbarItem>
+
+            <DxToolbarItem Tooltip="Refresh" Click="LoadGridDataAsync" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
+        </DxToolbar>
+    </div>
+
+    <div class="Guarantee-settings-root h-100">
+        <div class="h-100">
+            <DxGrid @ref="Grid"
+                    Data="Data"
+                    KeyFieldName="Id"
+                    CssClass="Guarantee-settings"
+                    style="height:100%;"
+                    SearchText="@SearchText"
+                    SkeletonRowsEnabled="true"
+                    ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                    TextWrapEnabled="false"
+                    FocusedRowEnabled="false"
+                    ShowAllRows="true"
+                    VirtualScrollingEnabled="true"
+                    RowClick="@OnRowClick"
+                    HighlightRowOnHover="true"
+                    EditStart="OnCommissionPeriodEditStart"
+                    DataItemDeleting="async (e) => await DeleteCommissionPeriod(((GuaranteeCommissionPeriodModel)e.DataItem).Id)">
+                <Columns>
+                    <DxGridSelectionColumn Width="75px" />
+                    <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
+                    <DxGridDataColumn Caption="Dönem Adı" FieldName="PeriodName" />
+                    <DxGridDataColumn Caption="Dönem Süresi" FieldName="Period" />
+
+                    <DxGridCommandColumn Width="120px"
+                                         EditButtonVisible="true"
+                                         DeleteButtonVisible="true"
+                                         NewButtonVisible="false" />
+                </Columns>
+                <GroupSummary>
+                    <DxGridSummaryItem DisplayText="Kayıt Sayısı:{0}" FieldName="Id" SummaryType="GridSummaryItemType.Count" />
+                    <DxGridSummaryItem DisplayText="Toplam:{0}" FieldName="GuaranteeAmount" SummaryType="GridSummaryItemType.Sum" FooterColumnName="GuaranteeAmount" />
+                    <DxGridSummaryItem DisplayText="Toplam:{0}" FieldName="CommissionAmount" SummaryType="GridSummaryItemType.Sum" FooterColumnName="CommissionAmount" />
+                </GroupSummary>
+                <TotalSummary>
+                    <DxGridSummaryItem DisplayText="Kayıt Sayısı:{0}" FieldName="Id" SummaryType="GridSummaryItemType.Count" />
+                    <DxGridSummaryItem DisplayText="Toplam:{0}" FieldName="GuaranteeAmount" SummaryType="GridSummaryItemType.Sum" FooterColumnName="GuaranteeAmount" />
+                    <DxGridSummaryItem DisplayText="Toplam:{0}" FieldName="CommissionAmount" SummaryType="GridSummaryItemType.Sum" FooterColumnName="CommissionAmount" />
+                </TotalSummary>
+            </DxGrid>
+        </div>
+    </div>
+</div>
+
+
 
 @code {
 
+    [Parameter] public required string Title { get; set; } = "Teminat Tanımı";
+    [Parameter] public required string Page { get; set; }
+    [CascadingParameter(Name = "ParentSizeMode")]
+    public SizeMode SizeMode { get; set; }
+    private GridDevExtremeDataSource<GuaranteeCommissionPeriodModel> Data { get; set; } = null!;
+    private IGrid? Grid { get; set; }
+    private string? SearchText { get; set; }
+    private CancellationTokenSource disposalTokenSource = new CancellationTokenSource();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        await LoadGridDataAsync();
+    }
+
+    async Task LoadGridDataAsync()
+    {
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        Data = new GridDevExtremeDataSource<GuaranteeCommissionPeriodModel>(client, NavigationManager.ToAbsoluteUri($"https://localhost:7071/api/guarantee-commission-periods/list/{Page}"));
+
+        if (Grid != null)
+            Grid.Reload();
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+    void OnColumnChooserItemClick(ToolbarItemClickEventArgs e) => Grid!.ShowColumnChooser();
+
+
+    async Task OnRowClick(GridRowClickEventArgs args)
+    {
+        
+    }
+
+
+    void OnAddClick(ToolbarItemClickEventArgs e) => NavigationManager.NavigateTo("/guarantee/settingcreateorupdate/");
+
+
+    Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Teminatlar");
+    Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Seçili Teminatlar", new GridXlExportOptions { ExportSelectedRowsOnly = true });
+    Task ExportAllDataToCsv() => Grid!.ExportToCsvAsync("Teminatlar");
+    Task ExportSelectedRowsDataToCsv() => Grid!.ExportToCsvAsync("Seçili Teminatlar", new GridCsvExportOptions { ExportSelectedRowsOnly = true });
+    Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Teminatlar");
+    Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Seçili Teminatlar", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
+    private void OnCommissionPeriodEditStart(GridEditStartEventArgs e)
+    {
+        e.Cancel = true;
+        var item = (GuaranteeCommissionPeriodModel)e.DataItem;
+        NavigationManager.NavigateTo($"/guarantee/settingcreateorupdate/{item.Id}");
+
+    }
+
+    private async Task DeleteCommissionPeriod(int commissionPeriodId)
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        var response = await client.DeleteAsync($"api/guarantee-commission-periods/{commissionPeriodId}");
+        if (response.IsSuccessStatusCode)
+            await LoadGridDataAsync();
+    }
+
+    public void Dispose()
+    {
+        disposalTokenSource.Cancel();
+        disposalTokenSource.Dispose();
+    }
 }

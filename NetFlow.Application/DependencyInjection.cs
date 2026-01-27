@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NetFlow.Application.Firms;
+using NetFlow.Application.GuaranteeCommissionPeriods;
 using NetFlow.Application.GuaranteeCommissions;
 using NetFlow.Application.Guarantees;
 using NetFlow.Application.MaterialRequests;
@@ -46,6 +47,7 @@ namespace NetFlow.Application
             services.AddScoped<ModuleWriteService>();
             services.AddScoped<UserWriteService>();
             services.AddScoped<GuaranteeWriteService>();
+            services.AddScoped<GuaranteeCommissionPeriodWriteService>();
             services.AddScoped<GuaranteeCommissionWriteService>();
             services.AddScoped<TenderWriteService>();
             services.AddScoped<TenderPersonnelWriteService>();

@@ -55,7 +55,6 @@
     height: 100%;
 }
 
-
 /*Sayfa Css*/
 
 .authority-header {
@@ -133,7 +132,9 @@
 ::deep .action-button-delete {
     margin-left: 5px;
 }
-
+::deep .action-button-return {
+    margin-right: 5px;
+}
 
 /* Status Badge */
 .guarantee-info .status-badge {
@@ -208,4 +209,25 @@
 .guarantee-info .text-danger {
     color: #c62828;
     font-weight: 600;
+}
+
+
+
+/* Delete Confirmation Popup Stilleri */
+.delete-confirmation.popup-body-content {
+    padding: 1.5rem;
+}
+
+
+.delete-confirmation.popup-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 10px;
+    width: 100%;
+}
+
+
+.delete-confirmation-popup .dxbl-popup-header {
+    background-color: #f8f9fa;
 }

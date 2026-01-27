@@ -8,6 +8,47 @@
 
 <DxLayoutBreakpoint DeviceSize="DeviceSize.XSmall | DeviceSize.Small | DeviceSize.Medium" @bind-IsActive="@IsSmallScreen" />
 
+
+<DxPopup @bind-Visible="@IsReturnPopupVisible"
+         ShowFooter="true"
+         HeaderText="İade Et"
+         Width="400px"
+         MaxWidth="95vw">
+    <BodyContentTemplate Context="popupContext">
+        @if (IsReturnPopupVisible)
+        {
+            <div class="rejection-popup-container">
+                <DxFormLayout CaptionPosition="CaptionPosition.Vertical">
+                    <DxFormLayoutItem Caption="İade Tarihi" ColSpanMd="12">
+                        <DxDateEdit @bind-Date="@ReturnDate"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                    Format="dd.MM.yyyy"
+                                    PickerDisplayMode="DatePickerDisplayMode.Calendar" />
+
+                        @if (ReturnDate == null)
+                        {
+                            <small class="text-danger mt-1">İade tarihi seçilmesi zorunludur.</small>
+                        }
+                    </DxFormLayoutItem>
+                </DxFormLayout>
+            </div>
+        }
+    </BodyContentTemplate>
+
+    <FooterContentTemplate Context="footerContext">
+        <DxButton RenderStyle="ButtonRenderStyle.Primary"
+                  Text="İadeyi Onayla"
+                  IconCssClass="dx-icon-check"
+                  Enabled="@(ReturnDate != null)"
+                  Click="OnConfirmReturn" />
+
+        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                  Text="Vazgeç"
+                  IconCssClass="dx-icon-close"
+                  Click="OnCancelReturn" />
+    </FooterContentTemplate>
+</DxPopup>
+
 <div class="content-root">
     <div class="card toolbar">
         <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
@@ -22,24 +63,46 @@
                     </div>
                 </Template>
             </DxToolbarItem>
+            @if (Model != null)
+            {
+                
 
+                @if (Model.ReturnDate.HasValue)
+                {
+                  
+                }
+                else
+                {
+                    <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                        <Template>
+                            <DxButton Text="İade Et"
+                                      class="action-button-return"
+                                      Click="@ReturnClick"
+                                      RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                      RenderStyle="ButtonRenderStyle.Primary" />
+                        </Template>
+                    </DxToolbarItem>
 
-            <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
-                <Template>
-                    <DxButton Text="Düzenle" Click="@OnEditClick" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
-                </Template>
-            </DxToolbarItem>
-            <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
-                <Template>
-                    <DxButton Text="Sil" Click="@OnDeleteClick" class="action-button-delete" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
-                </Template>
-            </DxToolbarItem>
+                    <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                        <Template>
+                            <DxButton Text="Düzenle" Click="@OnEditClick" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
+                        </Template>
+                    </DxToolbarItem>
+                    <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                        <Template>
+                            <DxButton Text="Sil" Click="@OnDeleteClick" class="action-button-delete" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
+                        </Template>
+                    </DxToolbarItem>
 
-
-            <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
-                           Click="@LoadDataAsync"
-                           Tooltip="Yenile"
-                           IconCssClass="refresh-icon icon medium-icon" />
+                    <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
+                                   Click="@LoadDataAsync"
+                                   Tooltip="Yenile"
+                                   IconCssClass="refresh-icon icon medium-icon" />
+                }
+            
+            }
+          
+           
         </DxToolbar>
     </div>
 
@@ -115,13 +178,11 @@
 
                                     <div class="guarantee-stats">
                                         <div class="guarantee-stat">
-                                            <i class="ti ti-gavel guarantee-icon-primary"></i>
                                             <div class="guarantee-stat-title">@Model.GuaranteeType</div>
                                             <small>Teminat Türü</small>
                                         </div>
 
                                         <div class="guarantee-stat">
-                                            <i class="ti ti-currency-dollar guarantee-icon-success"></i>
                                             <div class="guarantee-stat-title">
                                                 @Model.GuaranteeAmount.ToString("n2")
                                             </div>
@@ -132,6 +193,16 @@
                                     <h6 class="guarantee-section-title">GENEL BİLGİLER</h6>
 
                                     <div class="guarantee-info">
+
+                                        @if (Model.ReturnDate != null)
+                                        {
+                                            <div class="guarantee-info-row">
+                                                <span>İade Durumu</span>
+                                                <span class="guarantee-info-strong text-danger">
+                                                    İade Edildi (@Model.ReturnDate.Value.ToShortDateString())
+                                                </span>
+                                            </div>
+                                        }
 
                                         <div class="guarantee-info-row">
                                             <span>Teminat No</span>
@@ -165,7 +236,7 @@
 
                                         <div class="guarantee-info-row">
                                             <span>Bitiş Tarihi</span>
-                                            <span class="guarantee-info-strong @(Model.ExpiryDate < DateTime.Today ? "text-danger" : "")">
+                                            <span class="guarantee-info-strong @(Model.ExpiryDate <     DateTime.Today ? "text-danger" : "")">
                                                 @Model.ExpiryDate.ToShortDateString()
                                             </span>
                                         </div>
@@ -305,9 +376,32 @@
 </DxPopup>
 
 
+<DxPopup @bind-Visible="@DeleteConfirmationVisible"
+         HeaderText="Silme Onayı"
+         Width="400px"
+         ShowFooter="true"
+         CssClass="delete-confirmation-popup">
+    <BodyContentTemplate>
+        <div class="delete-confirmation-popup-body-content">
+            <p>Bu teminat mektubunu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.</p>
+        </div>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <div class="delete-confirmation-popup-footer-actions">
+            <DxButton Text="Vazgeç"
+                      RenderStyle="ButtonRenderStyle.Secondary"
+                      Click="@(() => DeleteConfirmationVisible = false)" />
+            <DxButton Text="Evet, Sil"
+                      RenderStyle="ButtonRenderStyle.Danger"
+                      Click="@ConfirmDelete" />
+        </div>
+    </FooterContentTemplate>
+</DxPopup>
+
+
 @code {
     [Parameter] public int Id { get; set; }
-
+    private bool DeleteConfirmationVisible { get; set; }
     private GuaranteeModel? Model { get; set; }
     private bool IsSmallScreen { get; set; }
     private bool IsDataLoaded { get; set; }
@@ -317,7 +411,8 @@
     private GridDevExtremeDataSource<GuaranteeCommissionModel>? CommissionDataSource { get; set; }
     private GuaranteeCommissionAddComponent? addFormRef;
 
-
+    bool IsReturnPopupVisible { get; set; } = false;
+    DateTime? ReturnDate { get; set; } = DateTime.Now;
     protected override async Task OnInitializedAsync()
     {
         IsDataLoaded = false;
@@ -422,8 +517,18 @@
         NavigationManager.NavigateTo($"/guarantee/createorupdate/{Id}");
     }
 
-    private async Task OnDeleteClick()
+
+    private void OnDeleteClick()
     {
+        DeleteConfirmationVisible = true;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        DeleteConfirmationVisible = false;
+        IsDataLoaded = false;
+        await InvokeAsync(StateHasChanged);
+
         try
         {
             var client = await ApiClientFactory.CreateAsync(
@@ -434,16 +539,15 @@
 
             if (response.IsSuccessStatusCode)
             {
-
                 NavigationManager.NavigateTo("/guarantee/list");
                 return;
             }
 
+            IsDataLoaded = true;
 
             if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
             {
                 var message = await response.Content.ReadAsStringAsync();
-
                 ToastService.ShowToast(new ToastOptions()
                 {
                     Id = "toast",
@@ -468,11 +572,10 @@
                     Text = "Silme işlemi sırasında beklenmeyen bir hata oluştu."
                 }, RenderToastButton(true));
             }
-
-            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
+            IsDataLoaded = true; 
             ToastService.ShowToast(new ToastOptions()
             {
                 Id = "toast",
@@ -482,16 +585,19 @@
                 Title = "Hata",
                 Text = ex.Message
             }, RenderToastButton(true));
-
+        }
+        finally
+        {
+            IsDataLoaded = true;
             await InvokeAsync(StateHasChanged);
         }
     }
-
     private RenderFragment RenderToastButton(bool isError)
     {
         return @<div class="d-flex gap-2">
             <DxButton Click="@(isError? OnPopupError:OnPopupOk)" RenderStyle="@(isError? ButtonRenderStyle.Danger: ButtonRenderStyle.Success)">Kapat</DxButton>
-        </div>;
+        </div>
+    ;
     }
     private void OnPopupOk()
     {
@@ -528,5 +634,79 @@
     private void NavigateBack()
     {
         NavigationManager.NavigateTo("/guarantee/list");
+    }
+    private async Task ReturnClick()
+    {
+        ReturnDate = DateTime.Now; 
+        IsReturnPopupVisible = true;
+    }
+
+    void OnCancelReturn() => IsReturnPopupVisible = false;
+
+    async Task OnConfirmReturn()
+    {
+        if (ReturnDate == null) return;
+
+        try
+        {
+            IsDataLoaded = false;
+            IsReturnPopupVisible = false;
+            await InvokeAsync(StateHasChanged);
+
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+
+            var model = new
+            {
+                Id = Id,
+                ReturnDate = ReturnDate.Value.ToString("yyyy-MM-dd")
+            };
+
+            var response = await client.PutAsJsonAsync($"https://localhost:7071/api/guarantees/return", model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadDataAsync();
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Success,
+                    Title = "Başarılı",
+                    Text = "İade işlemi gerçekleştirildi.",
+                }, RenderToastButton(false));
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Danger,
+                    Title = "Hata",
+                    Text = errorMsg
+                }, RenderToastButton(true));
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast(new ToastOptions()
+            {
+                Id = "toast",
+                ProviderName = "Overview",
+                ThemeMode = ToastThemeMode.Light,
+                RenderStyle = ToastRenderStyle.Danger,
+                Title = "Hata",
+                Text = ex.Message
+            }, RenderToastButton(true));
+        }
+        finally
+        {
+            IsDataLoaded = true;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 }

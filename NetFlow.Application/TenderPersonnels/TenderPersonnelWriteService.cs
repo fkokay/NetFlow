@@ -37,5 +37,15 @@ namespace NetFlow.Application.TenderPersonnels
 
             await _db.SaveChangesAsync();
         }
+
+        public async Task DeleteAsync(int id)
+        {
+            var tenderPersonnel = await _db.TenderPersonnels.FirstOrDefaultAsync(x => x.Id == id);
+            if (tenderPersonnel != null)
+            {
+                _db.TenderPersonnels.Remove(tenderPersonnel);
+                await _db.SaveChangesAsync();
+            }
+        }
     }
 }

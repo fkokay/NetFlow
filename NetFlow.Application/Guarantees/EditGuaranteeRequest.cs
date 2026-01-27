@@ -23,6 +23,7 @@ namespace NetFlow.Application.Guarantees
         public string GuaranteeCommissionPeriodName { get; set; } = string.Empty;
         public DateTime GuaranteeDate { get; set; }
         public DateTime ExpiryDate { get; set; }
+        public DateTime? ReturnDate { get; set; }
         public string BankCode { get; set; } = string.Empty;
         public string BankName { get; set; } = string.Empty;
         public string BankBranchCode { get; set; } = string.Empty;

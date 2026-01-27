@@ -38,5 +38,12 @@ namespace NetFlow.Api.Controllers
             await _write.EditAsync(request);
             return NoContent();
         }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _write.DeleteAsync(id);
+            return Ok();
+        }
     }
 }

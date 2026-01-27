@@ -141,7 +141,14 @@ namespace NetFlow.Application.Guarantees
             return guarantee.Id;
         }
 
-
+        public async Task<int> ReturnRequestAsync(ReturnRequest request)
+        {
+            var guarantee = await db.Guarantees.FirstOrDefaultAsync(x => x.Id == request.Id) ?? throw new Exception("Teminat bulunamadı");
+            guarantee.ReturnDate = request.ReturnDate;
+            guarantee.IsRefunded=true;
+            await db.SaveChangesAsync();
+            return guarantee.Id;
+        }
         public async Task DeleteAsync(int id)
         {
             bool isUsedInTender = await db.Tenders.AnyAsync(t =>

@@ -20,12 +20,14 @@ namespace NetFlow.Domain.Entities
         public int CommissionPeriodId { get; set; }
         public DateTime GuaranteeDate { get; set; }
         public DateTime ExpiryDate { get; set; }
+        public DateTime? ReturnDate { get; set; }
         public string BankCode { get; set; } = string.Empty;
         public string BankBranchCode { get; set; } = string.Empty;
         public string? PublicAuthorityCode { get; set; }
         public string? ExpenseAccountCode { get; set; }
         public string TakasbankReferenceNo { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public bool IsRefunded { get; set; }
         public FirmEntity? Firm { get; set; }
         public GuaranteeCommissionPeriodEntity? CommissionPeriod { get; set; }
         public ICollection<TenderEntity> FinalGuaranteeTenders { get; set; } = [];
