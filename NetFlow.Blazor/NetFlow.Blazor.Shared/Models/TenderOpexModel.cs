@@ -14,6 +14,10 @@
         public string Unit { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
         public string Currency { get; set; } = string.Empty;
+        public int? MaterialRequestId { get; set; }
+        public string? MaterialRequestNo { get; set; }
+        public string? MaterialRequestStatus { get; set; }
+        public int? MaterialRequestItemId { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

@@ -37,6 +37,7 @@ namespace NetFlow.Application.MaterialRequests
             materialRequest.Description = request.Description;
             materialRequest.SourceReference = request.SourceReference;
             materialRequest.Status = "Waiting";
+            materialRequest.AssignedToUserId = 1;
 
             _db.MaterialRequests.Add(materialRequest);
             await _db.SaveChangesAsync();

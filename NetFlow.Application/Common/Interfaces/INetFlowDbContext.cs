@@ -23,6 +23,7 @@ namespace NetFlow.Application.Common.Interfaces
         DbSet<GuaranteeCommissionPeriodEntity> GuaranteeCommissionPeriods { get; }
         DbSet<GuaranteeCommissionEntity> GuaranteeCommissions { get; }
         DbSet<TenderEntity> Tenders { get; }
+        DbSet<TenderOpexEntity> TenderOpexes { get; }
         DbSet<TenderPersonnelEntity> TenderPersonnels { get; }
         DbSet<MaterialRequestEntity> MaterialRequests { get; }
         DbSet<MaterialRequestItemEntity> MaterialRequestItems { get; }

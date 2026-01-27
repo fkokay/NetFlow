@@ -2,7 +2,7 @@
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
 
-<DxGrid Data="OpexDataSource" ShowSearchBox="true" SearchBoxNullText="Arama yapmak için metin girin…" style="height:100%;">
+<DxGrid Data="OpexDataSource" ShowSearchBox="true" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer" SearchBoxNullText="Arama yapmak için metin girin…" style="height:100%;">
     <Columns>
         <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
         <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
@@ -11,20 +11,60 @@
         <DxGridDataColumn FieldName="Quantity" Caption="Miktar" DisplayFormat="n2" />
         <DxGridDataColumn FieldName="UnitPrice" Caption="Tahmini Maliyet Fiyatý" DisplayFormat="n4" />
         <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
+        <DxGridDataColumn FieldName="MaterialRequestNo" Caption="Talep No" >
+            <CellDisplayTemplate>
+                @if (((TenderOpexModel)context.DataItem).MaterialRequestId.HasValue)
+                {
+                    <a href="@NavigationManager.ToAbsoluteUri($"/material-request/details/{((TenderOpexModel)context.DataItem).MaterialRequestId}")">
+                        @(((TenderOpexModel)context.DataItem).MaterialRequestNo)
+                    </a>
+                }
+                else
+                {
+                   <span>-</span>
+                }
+            </CellDisplayTemplate>
+
+        </DxGridDataColumn>
+        <DxGridDataColumn FieldName="MaterialRequestStatus" Caption="Talep Durumu" />
+        <DxGridDataColumn Caption="Ýþlemler" Width="100px" MinWidth="100">
+            <CellDisplayTemplate>
+                @if (!((TenderOpexModel)context.DataItem).MaterialRequestId.HasValue && !((TenderOpexModel)context.DataItem).MaterialRequestItemId.HasValue)
+                {
+                    <div @onclick:stopPropagation="true">
+                        <DxButton Text="Telp Oluþtur"
+                                  RenderStyle="ButtonRenderStyle.Info"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  Size="SizeMode.Small"
+                                  Click="() => OpenMaterialRequestPopup((TenderOpexModel)context.DataItem)" />
+                    </div>
+                }
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
     </Columns>
 </DxGrid>
+
+<MaterialRequestComponent IsPopupVisible="@IsMaterialRequestPopupVisible" Tender="@Tender" TenderOpex="@SelectedTenderOpex"></MaterialRequestComponent>
 
 
 @code {
     private GridDevExtremeDataSource<TenderOpexModel>? OpexDataSource { get; set; }
 
     [Parameter]
-    public int TenderId { get; set; }
+    public required TenderModel Tender { get; set; }
+    private bool IsMaterialRequestPopupVisible { get; set; } = false;
+    private TenderOpexModel? SelectedTenderOpex { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
         string baseUrl = "https://localhost:7071/api";
-        OpexDataSource = new GridDevExtremeDataSource<TenderOpexModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-opex?tenderId={TenderId}"));
+        OpexDataSource = new GridDevExtremeDataSource<TenderOpexModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-opex?tenderId={Tender.Id}"));
+    }
+
+    private void OpenMaterialRequestPopup(TenderOpexModel model)
+    {
+        SelectedTenderOpex = model;
+        IsMaterialRequestPopupVisible = true;
     }
 }

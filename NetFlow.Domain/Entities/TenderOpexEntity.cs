@@ -1,28 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace NetFlow.ReadModel.TenderOpex
+namespace NetFlow.Domain.Entities
 {
-    public sealed class TenderOpexDto
+    [Table("TenderOpex")]
+    public class TenderOpexEntity
     {
         public int Id { get; set; }
         public int TenderId { get; set; }
         public int? TenderAuthorityId { get; set; }
-        public string? ParentAuthorityCode { get; set; }
-        public string UnitCode { get; set; } = string.Empty;
-        public string UnitName { get; set; } = string.Empty;
-        public string StockCode { get; set; } = string.Empty;
-        public string StockName { get; set; } = string.Empty;
+        public string? StockCode { get; set; }
         public decimal Quantity { get; set; }
         public string Unit { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
         public string Currency { get; set; } = string.Empty;
         public int? MaterialRequestId { get; set; }
-        public string? MaterialRequestNo { get; set; }
-        public string? MaterialRequestStatus { get; set; }
         public int? MaterialRequestItemId { get; set; }
-
         public DateTime CreatedAt { get; set; }
     }
 }

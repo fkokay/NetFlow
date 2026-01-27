@@ -3,6 +3,7 @@ using NetFlow.Application.Firms;
 using NetFlow.Application.GuaranteeCommissionPeriods;
 using NetFlow.Application.GuaranteeCommissions;
 using NetFlow.Application.Guarantees;
+using NetFlow.Application.MaterialRequestItems;
 using NetFlow.Application.MaterialRequests;
 using NetFlow.Application.Modules;
 using NetFlow.Application.Netsis.AccountingVouchers;
@@ -16,6 +17,7 @@ using NetFlow.Application.Netsis.Shipments;
 using NetFlow.Application.Netsis.Warehouses;
 using NetFlow.Application.Personnels;
 using NetFlow.Application.Roles;
+using NetFlow.Application.TenderOpexes;
 using NetFlow.Application.TenderPersonnels;
 using NetFlow.Application.Tenders;
 using NetFlow.Application.Users;
@@ -50,8 +52,10 @@ namespace NetFlow.Application
             services.AddScoped<GuaranteeCommissionPeriodWriteService>();
             services.AddScoped<GuaranteeCommissionWriteService>();
             services.AddScoped<TenderWriteService>();
+            services.AddScoped<TenderOpexWriterService>();
             services.AddScoped<TenderPersonnelWriteService>();
             services.AddScoped<MaterialRequestWriteService>();
+            services.AddScoped<MaterialRequestItemWriteService>();
             return services;
         }
     }

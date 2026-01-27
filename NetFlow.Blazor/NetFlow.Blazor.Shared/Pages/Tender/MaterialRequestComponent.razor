@@ -1,0 +1,98 @@
+﻿@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+
+<DxPopup @bind-Visible="@IsPopupVisible" ShowFooter="true" HeaderText="Talep Oluştur" Width="800px">
+    <BodyContentTemplate Context="PopupContext">
+        <DxFormLayout CaptionPosition="CaptionPosition.Horizontal">
+            <DxFormLayoutItem Caption="Teminat No" ColSpanMd="12">
+                <DxTextBox Text="@Tender.TenderCode" ReadOnly="true" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Kamu/Kurum" ColSpanMd="12">
+                <DxTextBox Text="@Tender.PublicAuthorityName" ReadOnly="true" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Alt Kamu/Kurum" ColSpanMd="12">
+                <DxTextBox Text="@TenderOpex.UnitName" ReadOnly="true" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Stok Kodu" ColSpanMd="12">
+                <DxTextBox Text="@TenderOpex.StockCode" ReadOnly="true" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Stok Adı" ColSpanMd="12">
+                <DxTextBox Text="@TenderOpex.StockName" ReadOnly="true" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Miktar" ColSpanMd="12">
+                <DxTextBox Text="@TenderOpex.Quantity.ToString()" ReadOnly="true" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Talep Türü" ColSpanMd="12">
+                <DxComboBox Data="RequestTypes" @bind-Value="model.RequestType" ValueFieldName="this" TextFieldName="this" ValidationEnabled="true" ShowValidationIcon="true" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Öncelik" ColSpanMd="12">
+                <DxComboBox Data="Priorities" @bind-Value="model.Priority" ValueFieldName="this" TextFieldName="this" ValidationEnabled="true" ShowValidationIcon="true" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Gerekli Tarih" ColSpanMd="12">
+                <DxDateEdit @bind-Date="model.RequiredDate" DisplayFormat="dd.MM.yyyy" ValidationEnabled="true" ShowValidationIcon="true" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Talep Eden Departman" ColSpanMd="12">
+                <DxTextBox @bind-Text="model.RequestedDepartment" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Kaynak Referans" ColSpanMd="12">
+                <DxComboBox Data="SourceReferences" @bind-Value="model.SourceReference" ValueFieldName="this" TextFieldName="this" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Açıklama" ColSpanMd="12">
+                <DxMemo @bind-Text="model.Description" Rows="4" />
+            </DxFormLayoutItem>
+        </DxFormLayout>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <DxButton RenderStyle="ButtonRenderStyle.Primary" Text="Kaydet" IconCssClass="dx-icon-save" Click="OnSave" />
+        <DxButton RenderStyle="ButtonRenderStyle.Secondary" Text="Vazgeç" IconCssClass="dx-icon-close" Click="() => IsPopupVisible = false" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public required bool IsPopupVisible { get; set; }
+    [Parameter] public required TenderModel Tender { get; set; }
+    [Parameter] public required TenderOpexModel TenderOpex { get; set; }
+
+    private MaterialRequestModel model = new();
+    private string[] RequestTypes = { "Open", "PendingApproval", "Approved", "Rejected", "Fulfilled", "Closed" };
+    private string[] Priorities = { "Low", "Normal", "Urgent" };
+    private string[] SourceReferences = { "WorkOrder", "Project", "Tender" };
+
+    private async Task OnSave()
+    {
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+
+        var response = await client.PostAsJsonAsync("api/tender-opex/create-material-request", new
+        {
+            TenderId = Tender.Id,
+            TenderOpexId = TenderOpex.Id,
+            RequestType = model.RequestType,
+            Priority = model.Priority,
+            RequiredDate = model.RequiredDate,
+            RequestedDepartment = model.RequestedDepartment,
+            SourceReference = model.SourceReference,
+            Description = model.Description,
+            ItemCode = TenderOpex.StockCode,
+            ItemName = TenderOpex.StockName,
+            RequestedQuantity = TenderOpex.Quantity,
+            FulfilledQuantity = TenderOpex.Quantity,
+            Unit = TenderOpex.Unit,
+            WarehouseCode = "1000",
+            AlternateItemCode = "",
+            Status = "Open",
+            FulfillmentType = "Purchase"
+        });
+
+        if (response.IsSuccessStatusCode)
+        {
+            IsPopupVisible = false;
+        }
+        else
+        {
+            var error = await response.Content.ReadAsStringAsync();
+        }
+
+    }
+}
