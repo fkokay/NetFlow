@@ -25,7 +25,7 @@ namespace NetFlow.ReadModel.Modules
                 var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);
                 parameters.AddDynamicParams(p);
             }
-            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "Id DESC");
+            string orderBy = "ORDER BY " + DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "Id DESC");
             string countSql = $@"
                 SELECT COUNT(1) FROM Module (NOLOCK)
             ";

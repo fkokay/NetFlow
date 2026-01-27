@@ -31,7 +31,7 @@ namespace NetFlow.ReadModel.Users
             }
 
    
-            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(
+            string orderBy = "ORDER BY " + DevExtremeSqlBuilder.BuildOrderBy(
                 pagedRequest.Sort,
                 "usr.Id DESC"
             );

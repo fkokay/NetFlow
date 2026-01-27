@@ -12,7 +12,7 @@ namespace NetFlow.Api.Controllers
 {
     [ApiController]
     [Route("api/roles")]
-    [Authorize]
+    
     public class RolesController : ControllerBase
     {
         protected readonly CurrentUser _current;

@@ -27,7 +27,7 @@ namespace NetFlow.ReadModel.Firms
                 parameters.AddDynamicParams(p);
             }
 
-            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(
+            string orderBy = "ORDER BY " + DevExtremeSqlBuilder.BuildOrderBy(
                 pagedRequest.Sort,
                 "Id DESC"
             );

@@ -53,16 +53,6 @@ else
                     <DxTextBox @bind-Text="model.Currency" />
                 </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="Ödeme Durumu" ColSpanMd="12">
-                    <DxComboBox Data="@(new List<string> { "Beklemede", "Ödendi", "Ýptal" })"
-                                @bind-Value="model.PaymentStatus" />
-                </DxFormLayoutItem>
-
-                <DxFormLayoutItem Caption="Ödeme Tarihi" ColSpanMd="12">
-                    <DxDateEdit @bind-Date="model.PaymentDate"
-                                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
-                </DxFormLayoutItem>
-
                 <DxFormLayoutItem Caption="Banka Ref. No" ColSpanMd="12">
                     <DxTextBox @bind-Text="model.BankReferenceNo" />
                 </DxFormLayoutItem>
