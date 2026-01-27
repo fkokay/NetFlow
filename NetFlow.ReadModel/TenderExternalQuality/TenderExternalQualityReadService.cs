@@ -33,7 +33,7 @@ namespace NetFlow.ReadModel.TenderExternalQuality
 
             string orderBy = DevExtremeSqlBuilder.BuildOrderBy(
                 pagedRequest.Sort,
-                "Id DESC"
+                "ORDER BY Id DESC"
             );
 
             string countSql = $@"

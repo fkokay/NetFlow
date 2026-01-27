@@ -31,9 +31,9 @@ namespace NetFlow.ReadModel.TenderOpex
                 parameters.AddDynamicParams(p);
             }
 
-            string orderBy = "ORDER BY " + DevExtremeSqlBuilder.BuildOrderBy(
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(
                 pagedRequest.Sort,
-                "Id DESC"
+                "ORDER BY Id DESC"
             );
 
             string countSql = $@"

@@ -26,7 +26,7 @@ namespace NetFlow.ReadModel.Roles
                 var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);
                 parameters.AddDynamicParams(p);
             }
-            string orderBy = "ORDER BY "+ DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "Id DESC");
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "ORDER BY Id DESC");
             string countSql = $@"
                 SELECT COUNT(1) FROM Role (NOLOCK)
             ";

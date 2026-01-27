@@ -22,7 +22,6 @@ namespace NetFlow.ReadModel.Users
 
             string whereSql = "";
 
-            // 🔹 Filter
             if (!string.IsNullOrEmpty(pagedRequest.Filter))
             {
                 var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);
@@ -30,11 +29,7 @@ namespace NetFlow.ReadModel.Users
                 parameters.AddDynamicParams(p);
             }
 
-   
-            string orderBy = "ORDER BY " + DevExtremeSqlBuilder.BuildOrderBy(
-                pagedRequest.Sort,
-                "usr.Id DESC"
-            );
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "ORDER BY usr.Id DESC");
 
 
             string countSql = $@"
@@ -57,7 +52,7 @@ namespace NetFlow.ReadModel.Users
             parameters.Add("@Skip", pagedRequest.Skip ?? 0);
             parameters.Add("@Take", pagedRequest.Take ?? 10);
 
-           
+
             string dataSql = $@"
                  SELECT
                      usr.Id,

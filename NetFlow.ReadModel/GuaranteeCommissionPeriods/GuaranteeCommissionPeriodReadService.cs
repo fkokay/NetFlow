@@ -43,11 +43,7 @@ namespace NetFlow.ReadModel.GuaranteeCommissionPeriods
                 parameters.AddDynamicParams(p);
             }
 
-            var orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "Id DESC");
-            if (string.IsNullOrWhiteSpace(orderBy) || !orderBy.TrimStart().StartsWith("ORDER BY"))
-            {
-                orderBy = "ORDER BY Id DESC";
-            }
+            var orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "ORDER BY Id DESC");
 
             string countSql = @"
                  SELECT COUNT(1) FROM dbo.VM_GuaranteeCommissionPeriod WITH (NOLOCK)

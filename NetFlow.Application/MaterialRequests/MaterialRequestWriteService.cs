@@ -3,6 +3,7 @@ using NetFlow.Application.Common.Interfaces;
 using NetFlow.Application.GuaranteeCommissions;
 using NetFlow.Application.Guarantees;
 using NetFlow.Domain.Entities;
+using NetFlow.Domain.Enums;
 using NetFlow.Domain.Identity;
 using System;
 using System.Collections.Generic;
@@ -27,16 +28,16 @@ namespace NetFlow.Application.MaterialRequests
             materialRequest.FirmId = 2015;
             materialRequest.RequestedByUserId = 1;
             materialRequest.RequestDate = DateTime.UtcNow;
-            materialRequest.CreateAt = DateTime.UtcNow;
-            materialRequest.CreateBy = 1;
+            materialRequest.CreatedAt = DateTime.UtcNow;
+            materialRequest.CreatedByUserId = 1;
             materialRequest.RequestNo = "MR-" + DateTime.UtcNow.Ticks;
             materialRequest.RequestType = request.RequestType;
             materialRequest.RequiredDate = request.RequiredDate;
-            materialRequest.Priority = "Normal";
+            materialRequest.Priority = request.Priority;
             materialRequest.RequestedDepartment = request.RequestedDepartment;
             materialRequest.Description = request.Description;
-            materialRequest.SourceReference = request.SourceReference;
-            materialRequest.Status = "Waiting";
+            materialRequest.SourceType = request.SourceType;
+            materialRequest.Status = MaterialRequestStatus.PendingApproval;
             materialRequest.AssignedToUserId = 1;
 
             _db.MaterialRequests.Add(materialRequest);
@@ -52,7 +53,7 @@ namespace NetFlow.Application.MaterialRequests
             if (materialRequest == null)
                 throw new Exception("Talep bulunamadı");
 
-            materialRequest.Status = "Rejected";
+            materialRequest.Status = MaterialRequestStatus.Rejected;
             materialRequest.RejectionReason = request.RejectionReason;
 
             await _db.SaveChangesAsync();
@@ -66,7 +67,7 @@ namespace NetFlow.Application.MaterialRequests
             if (materialRequest == null)
                 throw new Exception("Talep bulunamadı");
 
-            materialRequest.Status = "Open";
+            materialRequest.Status = MaterialRequestStatus.Open;
             materialRequest.ApprovalDate = DateTime.UtcNow;
             materialRequest.ApprovedByUserId = currentUserId;
 

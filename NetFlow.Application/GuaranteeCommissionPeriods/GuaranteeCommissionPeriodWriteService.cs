@@ -8,15 +8,8 @@ using System.Text;
 
 namespace NetFlow.Application.GuaranteeCommissionPeriods
 {
-    public class GuaranteeCommissionPeriodWriteService
+    public class GuaranteeCommissionPeriodWriteService(INetFlowDbContext db)
     {
-        private readonly INetFlowDbContext _db;
-
-        public GuaranteeCommissionPeriodWriteService(INetFlowDbContext db)
-        {
-            _db = db;
-        }
-
         public async Task<int> CreateAsync(CreateGuaranteeCommissionPeriodRequest request)
         {
             var commissionPeriod = new GuaranteeCommissionPeriodEntity
@@ -25,27 +18,28 @@ namespace NetFlow.Application.GuaranteeCommissionPeriods
                 Period = request.Period
             };
 
-            _db.GuaranteeCommissionPeriods.Add(commissionPeriod);
-            await _db.SaveChangesAsync();
+            db.GuaranteeCommissionPeriods.Add(commissionPeriod);
+            await db.SaveChangesAsync();
 
             return commissionPeriod.Id;
         }
         public async Task<int> EditAsync(EditGuaranteeCommissionPeriodRequest request)
         {
-            var commissionPeriod = await _db.GuaranteeCommissionPeriods.FirstOrDefaultAsync(x => x.Id == request.Id);
+            var commissionPeriod = await db.GuaranteeCommissionPeriods.FirstOrDefaultAsync(x => x.Id == request.Id) ?? throw new Exception("Teminat komisyon periyodu bulunamadı");
             commissionPeriod.PeriodName = request.PeriodName;
             commissionPeriod.Period = request.Period;
-            _db.GuaranteeCommissionPeriods.Update(commissionPeriod);
-            await _db.SaveChangesAsync();
+
+            db.GuaranteeCommissionPeriods.Update(commissionPeriod);
+            await db.SaveChangesAsync();
             return commissionPeriod.Id;
         }
         public async Task DeleteAsync(int id)
         {
-            var commissionPeriod = await _db.GuaranteeCommissionPeriods.FirstOrDefaultAsync(x => x.Id == id);
+            var commissionPeriod = await db.GuaranteeCommissionPeriods.FirstOrDefaultAsync(x => x.Id == id);
             if (commissionPeriod != null)
             {
-                _db.GuaranteeCommissionPeriods.Remove(commissionPeriod);
-                await _db.SaveChangesAsync();
+                db.GuaranteeCommissionPeriods.Remove(commissionPeriod);
+                await db.SaveChangesAsync();
             }
         }
     }

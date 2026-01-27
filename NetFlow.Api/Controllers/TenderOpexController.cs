@@ -47,7 +47,7 @@ namespace NetFlow.Api.Controllers
                 RequestedDepartment = request.RequestedDepartment,
                 RequiredDate = request.RequiredDate,
                 RequestType = request.RequestType,
-                SourceReference = request.SourceReference
+                SourceType = request.SourceType
             });
 
             int materialRequestItemId = await _materialRequestItemWrite.CreateAsync(new CreateMaterialRequestItem()

@@ -30,7 +30,7 @@ public sealed class TenderAuthorityReadService
 
         string orderBy = DevExtremeSqlBuilder.BuildOrderBy(
             pagedRequest.Sort,
-            "Id DESC"
+            "ORDER BY Id DESC"
         );
 
         string countSql = $@"

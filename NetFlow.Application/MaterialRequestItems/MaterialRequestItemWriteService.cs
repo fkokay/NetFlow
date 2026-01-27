@@ -1,4 +1,5 @@
 ﻿using NetFlow.Application.Common.Interfaces;
+using NetFlow.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -25,9 +26,9 @@ namespace NetFlow.Application.MaterialRequestItems
             materialRequestItem.Unit = createMaterialRequestItem.Unit;
             materialRequestItem.WarehouseCode = createMaterialRequestItem.WarehouseCode;
             materialRequestItem.AlternateItemCode = createMaterialRequestItem.AlternateItemCode;
-            materialRequestItem.Status = createMaterialRequestItem.Status;
+            materialRequestItem.Status = (MaterialRequestItemStatus)createMaterialRequestItem.Status;
             materialRequestItem.CreatedAt = createMaterialRequestItem.CreatedAt;
-            materialRequestItem.FulfillmentType = createMaterialRequestItem.FulfillmentType;
+            materialRequestItem.FulfillmentType = (MaterialRequestItemFulfillmentType)createMaterialRequestItem.FulfillmentType;
 
             _db.MaterialRequestItems.Add(materialRequestItem);
             await _db.SaveChangesAsync();

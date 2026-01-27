@@ -30,7 +30,7 @@ namespace NetFlow.ReadModel.Assets
 
             string orderBy = DevExtremeSqlBuilder.BuildOrderBy(
                 pagedRequest.Sort,
-                "Id DESC"
+                "ORDER BY Id DESC"
                 
             );
 
