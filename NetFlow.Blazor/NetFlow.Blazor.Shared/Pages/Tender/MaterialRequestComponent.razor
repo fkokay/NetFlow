@@ -1,6 +1,7 @@
 ﻿@inject NavigationManager NavigationManager
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
 
 <DxPopup @bind-Visible="@IsPopupVisible" ShowFooter="true" HeaderText="Talep Oluştur" Width="800px">
     <BodyContentTemplate Context="PopupContext">
@@ -27,7 +28,7 @@
                 <DxComboBox Data="RequestTypes" @bind-Value="model.RequestType" ValueFieldName="Value" TextFieldName="Text" ValidationEnabled="true" ShowValidationIcon="true" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Öncelik" ColSpanMd="12">
-                <DxComboBox Data="Priorities" @bind-Value="model.Priority" ValueFieldName="Value" TextFieldName="Text" ValidationEnabled="true" ShowValidationIcon="true"/>
+                <DxComboBox Data="Priorities" @bind-Value="model.Priority" ValueFieldName="Value" TextFieldName="Text" ValidationEnabled="true" ShowValidationIcon="true" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Gerekli Tarih" ColSpanMd="12">
                 <DxDateEdit @bind-Date="model.RequiredDate" DisplayFormat="dd.MM.yyyy" ValidationEnabled="true" ShowValidationIcon="true" />
@@ -53,7 +54,8 @@
     [Parameter] public required bool IsPopupVisible { get; set; }
     [Parameter] public required TenderModel Tender { get; set; }
     [Parameter] public required TenderOpexModel TenderOpex { get; set; }
-
+    [Parameter] public EventCallback OnSaved { get; set; }
+    [Parameter] public EventCallback OnCanceled { get; set; }
 
     private MaterialRequestModel model = new();
 
@@ -88,39 +90,98 @@
 
     private async Task OnSave()
     {
-        var httpClient = HttpClientFactory.CreateClient("ApiClient");
-        var client = await ApiClientFactory.CreateAsync(httpClient);
-
-        var response = await client.PostAsJsonAsync("api/tender-opex/create-material-request", new
+        try
         {
-            TenderId = Tender.Id,
-            TenderOpexId = TenderOpex.Id,
-            RequestType = model.RequestType,
-            Priority = model.Priority,
-            RequiredDate = model.RequiredDate,
-            RequestedDepartment = model.RequestedDepartment,
-            SourceType = model.SourceType,
-            Description = model.Description,
-            ItemCode = TenderOpex.StockCode,
-            ItemName = TenderOpex.StockName,
-            RequestedQuantity = TenderOpex.Quantity,
-            FulfilledQuantity = TenderOpex.Quantity,
-            Unit = TenderOpex.Unit,
-            WarehouseCode = "1000",
-            AlternateItemCode = "",
-            Status = MaterialRequestItemStatus.Pending,
-            FulfillmentType = MaterialRequestItemFulfillmentType.Undefined
-        });
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
 
-        if (response.IsSuccessStatusCode)
-        {
-            IsPopupVisible = false;
+            var response = await client.PostAsJsonAsync("api/tender-opex/create-material-request", new
+            {
+                TenderId = Tender.Id,
+                TenderOpexId = TenderOpex.Id,
+                RequestType = model.RequestType,
+                Priority = model.Priority,
+                RequiredDate = model.RequiredDate,
+                RequestedDepartment = model.RequestedDepartment,
+                SourceType = model.SourceType,
+                Description = model.Description,
+                ItemCode = TenderOpex.StockCode,
+                ItemName = TenderOpex.StockName,
+                RequestedQuantity = TenderOpex.Quantity,
+                FulfilledQuantity = TenderOpex.Quantity,
+                Unit = TenderOpex.Unit,
+                WarehouseCode = "1000",
+                AlternateItemCode = "",
+                Status = MaterialRequestItemStatus.Pending,
+                FulfillmentType = MaterialRequestItemFulfillmentType.Undefined
+            });
 
+            if (response.IsSuccessStatusCode)
+            {
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Success,
+                    Title = "Başarılı",
+                    Text = "Malzeme talebi başarılı bir şekilde oluşturuldu."
+                }, RenderToastButton(false));
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Warning,
+                    Title = "Hata",
+                    Text = string.IsNullOrWhiteSpace(errorMsg) ? "Malzeme talebi kaydedilirken bir hata oluştu." : errorMsg
+
+                }, RenderToastButton(true));
+                var error = await response.Content.ReadAsStringAsync();
+            }
         }
-        else
+        catch (Exception ex)
         {
-            var error = await response.Content.ReadAsStringAsync();
+            ToastService.ShowToast(new ToastOptions()
+            {
+                Id = "toast",
+                ProviderName = "Overview",
+                ThemeMode = ToastThemeMode.Light,
+                RenderStyle = ToastRenderStyle.Danger,
+                Title = "Hata",
+                Text = string.IsNullOrWhiteSpace(ex.Message) ? "Beklenmedik bir hata oluştu." : ex.Message
+            }, RenderToastButton(true));
         }
 
+    }
+
+    private RenderFragment RenderToastButton(bool isError)
+    {
+        return  @<div class="d-flex gap-2">
+            <DxButton Click="@(isError? OnError : OnSuccess)" RenderStyle="@(isError? ButtonRenderStyle.Danger: ButtonRenderStyle.Success)">Kapat</DxButton>
+        </div>;
+    }
+
+
+    private async Task OnSuccess()
+    {
+        ToastService.CloseToast("toast");
+
+        if (OnCanceled.HasDelegate)
+            await OnCanceled.InvokeAsync();
+
+        IsPopupVisible = false;
+    }
+
+    private async Task OnError()
+    {
+        ToastService.CloseToast("toast");
+
+        if (OnCanceled.HasDelegate)
+            await OnCanceled.InvokeAsync();
     }
 }

@@ -30,6 +30,6 @@ namespace NetFlow.Blazor.Shared.Models
         public string? AssignedDepartment { get; set; }
         public DateTime? ApprovalDate { get; set; }
         public string? RejectionReason { get; set; }
-        public MaterialRequestSourceType SourceType { get; set; }     
+        public MaterialRequestSourceType SourceType { get; set; } = MaterialRequestSourceType.None;
     }
 }
