@@ -40,7 +40,7 @@ namespace NetFlow.Netsis.Repositories
 
             var dto = await con.QueryAsync<CustomerDto>(sql);
 
-            return dto.Select(x =>
+            return dto.Select(NetsisUtils.FixAllStrings).Select(x =>
                       Customer.Create(
                           x.SUBE_KODU,
                           x.ISLETME_KODU,

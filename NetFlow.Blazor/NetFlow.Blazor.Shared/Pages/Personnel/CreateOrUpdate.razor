@@ -52,11 +52,23 @@
                                         </DxFormLayoutItem>
 
                                         <DxFormLayoutItem Caption="Cari Kodu" ColSpanMd="6">
-                                            <DxComboBox Data="@Customers"
-                                                        @bind-Value="Model.CustomerCode"
-                                                        TextFieldName="Name"
-                                                        ValueFieldName="Code"
-                                                        SearchMode="ListSearchMode.AutoSearch" />
+                                            <DxTextBox @bind-Text="Model.CustomerCode" BindValueMode="BindValueMode.OnInput">
+                                                <Buttons>
+                                                    <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
+                                                                    Tooltip="Hesap Kodu Seç"
+                                                                    Click="OpenCustomerPopup" />
+                                                </Buttons>
+                                            </DxTextBox>
+
+                                        </DxFormLayoutItem>
+                                        <DxFormLayoutItem Caption="Cari Adý" ColSpanMd="6">
+                                            <DxTextBox @bind-Text="Model.CustomerName" BindValueMode="BindValueMode.OnInput">
+                                                <Buttons>
+                                                    <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
+                                                                    Tooltip="Hesap Kodu Seç"
+                                                                    Click="OpenCustomerPopup" />
+                                                </Buttons>
+                                            </DxTextBox>
 
                                         </DxFormLayoutItem>
 
@@ -133,6 +145,18 @@
     </div>
 </div>
 
+<DxPopup @bind-Visible="CustomerPopupVisible" HeaderText="Kamu Ýdare Unvaný Seçimi" Width="800px" Height="600px" Scrollable="true">
+    <BodyTemplate>
+        <DxGrid Data="@CustomerDataSource" ShowFilterRow="true" PageSize="12" SelectionMode="GridSelectionMode.Single" SelectedDataItemChanged="@OnCustomerSelected" VirtualScrollingEnabled="true" KeyFieldName="Code">
+            <Columns>
+                <DxGridSelectionColumn Width="100px" />
+                <DxGridDataColumn FieldName="Code" Caption="Hesap Kodu" Width="150px" />
+                <DxGridDataColumn FieldName="Name" Caption="Hesap Adý" />
+            </Columns>
+        </DxGrid>
+    </BodyTemplate>
+</DxPopup>
+
 
 
 
@@ -144,9 +168,10 @@
     private EditContext? EditContext;
     private bool IsSaving, IsSuccess;
     private IEnumerable<UserModel>? Users { get; set; }
-    private IEnumerable<CustomerModel>? Customers { get; set; }
     private IEnumerable<DepartmentModel>? Departments { get; set; }
     private bool ShowValidationMessages { get; set; } = false;
+    private bool CustomerPopupVisible { get; set; } = false;
+    private GridDevExtremeDataSource<CustomerModel>? CustomerDataSource;
 
     protected override async Task OnInitializedAsync()
     {
@@ -156,7 +181,6 @@
 
             await LoadDepartmentsAsync();
             await LoadUsersAsync();
-            await LoadCustomersAsync();
 
             if (Id.HasValue && Id.Value > 0)
             {
@@ -173,6 +197,8 @@
 
 
             EditContext = new EditContext(Model);
+            string baseUrl = "https://localhost:7071/api";
+            CustomerDataSource = new GridDevExtremeDataSource<CustomerModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/netsis/customers/pagedList"));
 
         }
         catch (Exception ex)
@@ -196,7 +222,6 @@
         ;
     }
 
-
     private async Task LoadDepartmentsAsync()
     {
         var httpClient = HttpClientFactory.CreateClient("ApiClient");
@@ -210,15 +235,6 @@
         var client = await ApiClientFactory.CreateAsync(httpClient);
         Users = await client.GetFromJsonAsync<List<UserModel>>("api/users/list");
     }
-    private async Task LoadCustomersAsync()
-    {
-        var httpClient = HttpClientFactory.CreateClient("ApiClient");
-        var client = await ApiClientFactory.CreateAsync(httpClient);
-        Customers = await client.GetFromJsonAsync<List<CustomerModel>>("api/netsis/customers/list");
-    }
-
-
-
 
     private async Task SaveFromOutside()
     {
@@ -236,6 +252,21 @@
         }
     }
 
+    private void OpenCustomerPopup()
+    {
+        CustomerPopupVisible = true;
+    }
+
+    private void OnCustomerSelected(object selectedItem)
+    {
+        if (selectedItem is CustomerModel selectedCustomer)
+        {
+            Model?.CustomerCode = selectedCustomer.Code;
+            Model?.CustomerName = selectedCustomer.Name;
+            CustomerPopupVisible = false;
+            StateHasChanged();
+        }
+    }
 
     private bool IsSaveButtonEnabledForValidation()
     {
@@ -249,6 +280,7 @@
                         new EmailAddressAttribute().IsValid(Model.Email);
         return isBaseValid && isEmailValid;
     }
+
     private async Task HandleValidSubmit()
     {
         if (IsSaving) return;

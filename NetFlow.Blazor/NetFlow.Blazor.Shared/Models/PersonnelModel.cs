@@ -13,6 +13,8 @@ namespace NetFlow.Blazor.Shared.Models
         public string PersonnelCode { get; set; } = null!;
         [Required(ErrorMessage = "Cari Kodu zorunludur.")]
         public string CustomerCode { get; set; } = null!;
+        [Required(ErrorMessage = "Cari Adı zorunludur.")]
+        public string CustomerName { get; set; } = null!;
         [Required(ErrorMessage = "Ad seçimi zorunludur.")]
         public string FirstName { get; set; } = null!;
         [Required(ErrorMessage = "Soyad seçimi zorunludur.")]
