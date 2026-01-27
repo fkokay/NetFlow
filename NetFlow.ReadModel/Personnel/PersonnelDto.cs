@@ -10,6 +10,7 @@ namespace NetFlow.ReadModel.Personnel
     {
         public int Id { get; set; }
         public string CustomerCode { get; set; } = null!;
+        public string CustomerName { get; set; } = null!;
         public string PersonnelCode { get; set; } = null!;
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
@@ -22,6 +23,9 @@ namespace NetFlow.ReadModel.Personnel
         public decimal? Salary { get; set; }
         public bool IsActive { get; set; }
         public int? UserId { get; set; }
+        public DateTime HireDate { get; set; }
+        public DateTime? TerminationDate { get; set; }
+        public string? UserFullName { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }

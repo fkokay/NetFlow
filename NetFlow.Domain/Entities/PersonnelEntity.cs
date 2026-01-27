@@ -25,6 +25,8 @@ namespace NetFlow.Domain.Entities
         public byte AuthorityLevel { get; set; }
         public bool IsActive { get; set; }
         public int? UserId { get; set; }
+        public DateTime HireDate { get; set; }
+        public DateTime? TerminationDate { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }
