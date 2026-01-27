@@ -51,8 +51,8 @@ namespace NetFlow.ReadModel.TenderReaktif
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<TenderReaktifDto>(),
-                    totalCount = totalCount
+                    Data = Array.Empty<TenderReaktifDto>(),
+                    TotalCount = totalCount
                 };
             }
 
@@ -74,8 +74,8 @@ namespace NetFlow.ReadModel.TenderReaktif
 
             return new PagedResult
             {
-                data = data,
-                totalCount = totalCount
+                Data = data,
+                TotalCount = totalCount
             };
         }
 

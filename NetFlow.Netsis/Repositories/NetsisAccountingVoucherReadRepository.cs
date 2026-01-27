@@ -15,11 +15,10 @@ using System.Text;
 
 namespace NetFlow.Netsis.Repositories
 {
-    public class NetsisAccountingVoucherReadRepository : IAccountingVoucherReadRepository
+    public class NetsisAccountingVoucherReadRepository(ISqlProvider sql, NetsisConnectionFactory factory) : IAccountingVoucherReadRepository
     {
-        private readonly ISqlProvider _sql;
-        private readonly NetsisConnectionFactory _factory;
-        Dictionary<string, string> fieldMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        private readonly ISqlProvider _sql = sql;
+        private readonly Dictionary<string, string> fieldMap = new(StringComparer.OrdinalIgnoreCase)
         {
             ["YearCode"] = "YIL_KODU",
             ["MonthCode"] = "AY_KODU",
@@ -51,15 +50,9 @@ namespace NetFlow.Netsis.Repositories
             ["UpdatedDate"] = "DUZELTMETARIHI"
         };
 
-        public NetsisAccountingVoucherReadRepository(ISqlProvider sql, NetsisConnectionFactory factory)
-        {
-            _sql = sql;
-            _factory = factory;
-
-        }
         public async Task<PagedResult> GetAccountingVouchers(string accountCode, PagedRequest request)
         {
-            using var con = _factory.Create();
+            using var con = factory.Create();
 
             var sql = _sql.Get("AccountingVouchers.sql");
             var sqlCount = _sql.Get("AccountingVouchersCount.sql");
@@ -99,8 +92,8 @@ namespace NetFlow.Netsis.Repositories
             {
                 return new PagedResult
                 {
-                    totalCount = totalCount,
-                    data = Array.Empty<AccountingVoucher>(),
+                    TotalCount = totalCount,
+                    Data = Array.Empty<AccountingVoucher>(),
                 };
             }
 
@@ -108,8 +101,8 @@ namespace NetFlow.Netsis.Repositories
 
             return new PagedResult
             {
-                totalCount = totalCount,
-                data = dto.Select(NetsisUtils.FixAllStrings).Select(x =>
+                TotalCount = totalCount,
+                Data = dto.Select(NetsisUtils.FixAllStrings).Select(x =>
                       AccountingVoucher.Create(
                             x.YIL_KODU,
                             x.AY_KODU,
@@ -122,22 +115,22 @@ namespace NetFlow.Netsis.Repositories
                             (DebitCreditType)x.BA,
                             x.TUTAR,
                             x.MIKTAR,
-                            x.ACIKLAMA,
-                            x.ACIKLAMA2,
+                            x.ACIKLAMA ?? "",
+                            x.ACIKLAMA2 ?? "",
                             x.REF_KOD,
                             x.ENTEGREFKEY,
                             x.DOVIZTIP,
                             x.DOVIZTUT,
                             x.FIRMADOVTIP,
                             x.FIRMADOVTUT,
-                            x.PROJE_KODU,
+                            x.PROJE_KODU ?? "",
                             x.SUBE_KODU,
                             x.SUBELI,
-                            x.GUID,
+                            x.GUID ??"",
                             x.ISLEMSIRANO,
                             x.KAYITYAPANKUL,
                             x.KAYITTARIHI,
-                            x.DUZELTMEYAPANKUL,
+                            x.DUZELTMEYAPANKUL ??"",
                             x.DUZELTMETARIHI
 
                       )).ToList()

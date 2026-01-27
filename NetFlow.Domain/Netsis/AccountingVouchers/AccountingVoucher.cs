@@ -12,80 +12,48 @@ namespace NetFlow.Domain.Netsis.AccountingVouchers
         Credit = 1   // Alacak
     }
 
-    public class AccountingVoucher
+    public class AccountingVoucher(int yearCode, int monthCode, string voucherNo, int lineNo, string accountCode, string accountName, DateTime transactionDate, DateTime? documentDate, DebitCreditType debitCredit, decimal amount, decimal quantity, string description1, string description2, string referenceCode, string integrationReference, byte? currencyType, decimal currencyAmount, byte? companyCurrencyType, decimal companyCurrencyAmount, string projectCode, short branchCode, char? isBranchBased, string rowGuid, int? transactionSequence, string createdBy, DateTime createdDate, string updatedBy, DateTime? updatedDate)
     {
-        public int YearCode { get;  }              // YIL_KODU
-        public int MonthCode { get;  }             // AY_KODU
+        public int YearCode { get; } = yearCode;
+        public int MonthCode { get; } = monthCode;
 
-        public string VoucherNo { get;  }           // FISNO
-        public int LineNo { get;  }                 // SIRA
+        public string VoucherNo { get; } = voucherNo;
+        public int LineNo { get; } = lineNo;
 
-        public string AccountCode { get;  }         // HES_KOD
-        public string AccountName { get;  }         // HESAPISMI
+        public string AccountCode { get; } = accountCode;
+        public string AccountName { get; } = accountName;
 
-        public DateTime TransactionDate { get;  }  // TARIH
-        public DateTime? DocumentDate { get;  }      // EVRAKTARIHI
+        public DateTime TransactionDate { get; } = transactionDate;
+        public DateTime? DocumentDate { get; } = documentDate;
 
-        public DebitCreditType DebitCredit { get;  } // BA
-        public decimal Amount { get;  }             // TUTAR
-        public decimal Quantity { get;  }           // MIKTAR
+        public DebitCreditType DebitCredit { get; } = debitCredit;
+        public decimal Amount { get; } = amount;
+        public decimal Quantity { get; } = quantity;
 
-        public string Description1 { get;  }        // ACIKLAMA
-        public string Description2 { get;  }        // ACIKLAMA2
+        public string Description1 { get; } = description1;
+        public string Description2 { get; } = description2;
 
-        public string ReferenceCode { get;  }       // REF_KOD
-        public string IntegrationReference { get;  } // ENTEGREFKEY
+        public string ReferenceCode { get; } = referenceCode;
+        public string IntegrationReference { get; } = integrationReference;
 
-        public byte? CurrencyType { get;  }           // DOVIZTIP
-        public decimal CurrencyAmount { get;  }     // DOVIZTUT
+        public byte? CurrencyType { get; } = currencyType;
+        public decimal CurrencyAmount { get; } = currencyAmount;
 
-        public byte? CompanyCurrencyType { get;  }    // FIRMADOVTIP
-        public decimal CompanyCurrencyAmount { get;  } // FIRMADOVTUT
+        public byte? CompanyCurrencyType { get; } = companyCurrencyType;
+        public decimal CompanyCurrencyAmount { get; } = companyCurrencyAmount;
 
-        public string ProjectCode { get;  }          // PROJE_KODU
-        public short BranchCode { get;  }           // SUBE_KODU
-        public char? IsBranchBased { get;  }          // SUBELI
+        public string ProjectCode { get; } = projectCode;
+        public short BranchCode { get; } = branchCode;
+        public char? IsBranchBased { get; } = isBranchBased;
 
-        public string RowGuid { get;  }                // GUID
-        public int? TransactionSequence { get;  }    // ISLEMSIRANO
+        public string RowGuid { get; } = rowGuid;
+        public int? TransactionSequence { get; } = transactionSequence;
 
-        public string CreatedBy { get;  }            // KAYITYAPANKUL
-        public DateTime CreatedDate { get;  }        // KAYITTARIHI
+        public string CreatedBy { get; } = createdBy;
+        public DateTime CreatedDate { get; } = createdDate;
 
-        public string UpdatedBy { get;  }            // DUZELTMEYAPANKUL
-        public DateTime? UpdatedDate { get;  }       // DUZELTMETARIHI
-
-        public AccountingVoucher(int yearCode, int monthCode, string voucherNo, int lineNo, string accountCode, string accountName, DateTime transactionDate, DateTime? documentDate, DebitCreditType debitCredit, decimal amount, decimal quantity, string description1, string description2, string referenceCode, string integrationReference, byte? currencyType, decimal currencyAmount, byte? companyCurrencyType, decimal companyCurrencyAmount, string projectCode, short branchCode, char? isBranchBased, string rowGuid, int? transactionSequence, string createdBy, DateTime createdDate, string updatedBy, DateTime? updatedDate)
-        {
-            YearCode = yearCode;
-            MonthCode = monthCode;
-            VoucherNo = voucherNo;
-            LineNo = lineNo;
-            AccountCode = accountCode;
-            AccountName = accountName;
-            TransactionDate = transactionDate;
-            DocumentDate = documentDate;
-            DebitCredit = debitCredit;
-            Amount = amount;
-            Quantity = quantity;
-            Description1 = description1;
-            Description2 = description2;
-            ReferenceCode = referenceCode;
-            IntegrationReference = integrationReference;
-            CurrencyType = currencyType;
-            CurrencyAmount = currencyAmount;
-            CompanyCurrencyType = companyCurrencyType;
-            CompanyCurrencyAmount = companyCurrencyAmount;
-            ProjectCode = projectCode;
-            BranchCode = branchCode;
-            IsBranchBased = isBranchBased;
-            RowGuid = rowGuid;
-            TransactionSequence = transactionSequence;
-            CreatedBy = createdBy;
-            CreatedDate = createdDate;
-            UpdatedBy = updatedBy;
-            UpdatedDate = updatedDate;
-        }
+        public string UpdatedBy { get; } = updatedBy;
+        public DateTime? UpdatedDate { get; } = updatedDate;
 
         public static AccountingVoucher Create(
             int yearCode,

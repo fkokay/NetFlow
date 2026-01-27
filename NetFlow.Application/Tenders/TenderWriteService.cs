@@ -17,7 +17,7 @@ namespace NetFlow.Application.Tenders
       
         public async Task<int> EditAsync(EditTenderRequest request)
         {
-            var tender = await _db.Tenders.FirstOrDefaultAsync(x => x.Id == request.Id);
+            var tender = await _db.Tenders.FirstAsync(x => x.Id == request.Id);
             tender.Id = request.Id;
             tender.FirmId = request.FirmId;
             tender.FirmName = request.FirmName;

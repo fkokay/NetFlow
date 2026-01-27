@@ -47,8 +47,8 @@ namespace NetFlow.ReadModel.Firms
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<FirmDto>(),
-                    totalCount = totalCount
+                    Data = Array.Empty<FirmDto>(),
+                    TotalCount = totalCount
                 };
             }
 
@@ -70,8 +70,8 @@ namespace NetFlow.ReadModel.Firms
 
             return new PagedResult
             {
-                data = data,
-                totalCount = totalCount
+                Data = data,
+                TotalCount = totalCount
             };
         }
         public async Task<List<FirmDto>> GetFirmListAsync()

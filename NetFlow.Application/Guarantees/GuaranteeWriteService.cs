@@ -5,15 +5,8 @@ using NetFlow.Domain.Entities;
 
 namespace NetFlow.Application.Guarantees
 {
-    public class GuaranteeWriteService
+    public class GuaranteeWriteService(INetFlowDbContext db)
     {
-        private readonly INetFlowDbContext _db;
-
-        public GuaranteeWriteService(INetFlowDbContext db)
-        {
-            _db = db;
-        }
-
         public async Task<int> CreateAsync(CreateGuaranteeRequest request)
         {
             var guarantee = new GuaranteeEntity
@@ -38,11 +31,10 @@ namespace NetFlow.Application.Guarantees
                 CreatedAt = DateTime.Now
             };
 
-            guarantee.CommissionPeriod = await _db.GuaranteeCommissionPeriods
-                .FirstOrDefaultAsync(x => x.Id == guarantee.CommissionPeriodId);
+            guarantee.CommissionPeriod = await db.GuaranteeCommissionPeriods.FirstAsync(x => x.Id == guarantee.CommissionPeriodId);
 
-            _db.Guarantees.Add(guarantee);
-            await _db.SaveChangesAsync();
+            db.Guarantees.Add(guarantee);
+            await db.SaveChangesAsync();
 
             await CreateGuaranteeCommissionsAsync(guarantee);
 
@@ -50,13 +42,8 @@ namespace NetFlow.Application.Guarantees
         }
         public async Task<int> EditAsync(EditGuaranteeRequest request)
         {
-            var guarantee = await _db.Guarantees
-                .FirstOrDefaultAsync(x => x.Id == request.Id);
-
-            if (guarantee == null)
-                throw new Exception("Teminat bulunamadı");
-
-
+            var guarantee = await db.Guarantees
+                .FirstOrDefaultAsync(x => x.Id == request.Id) ?? throw new Exception("Teminat bulunamadı");
             bool commissionChanged =
                 guarantee.CommissionRate != request.CommissionRate ||
                 guarantee.GuaranteeAmount != request.GuaranteeAmount ||
@@ -82,21 +69,20 @@ namespace NetFlow.Application.Guarantees
             guarantee.ExpenseAccountCode = request.ExpenseAccountCode;
             guarantee.TakasbankReferenceNo = request.TakasbankReferenceNo;
 
-            guarantee.CommissionPeriod = await _db.GuaranteeCommissionPeriods
-                .FirstOrDefaultAsync(x => x.Id == guarantee.CommissionPeriodId);
+            guarantee.CommissionPeriod = await db.GuaranteeCommissionPeriods.FirstAsync(x => x.Id == guarantee.CommissionPeriodId);
 
-            await _db.SaveChangesAsync();
+            await db.SaveChangesAsync();
 
             if (commissionChanged)
             {
-                var oldCommissions = await _db.GuaranteeCommissions
+                var oldCommissions = await db.GuaranteeCommissions
                     .Where(x => x.GuaranteeId == guarantee.Id)
                     .ToListAsync();
 
-                if (oldCommissions.Any())
-                    _db.GuaranteeCommissions.RemoveRange(oldCommissions);
+                if (oldCommissions.Count != 0)
+                    db.GuaranteeCommissions.RemoveRange(oldCommissions);
 
-                await _db.SaveChangesAsync();
+                await db.SaveChangesAsync();
 
                 await CreateGuaranteeCommissionsAsync(guarantee);
             }
@@ -105,25 +91,19 @@ namespace NetFlow.Application.Guarantees
         }
         public async Task<int> EditGuaranteeExtensionAsync(EditGuaranteeExtensionRequest request)
         {
-            var guarantee = await _db.Guarantees
-                .FirstOrDefaultAsync(x => x.Id == request.Id);
-
-            if (guarantee == null)
-                throw new Exception("Teminat bulunamadı");
-
-          
+            var guarantee = await db.Guarantees
+                .FirstOrDefaultAsync(x => x.Id == request.Id) ?? throw new Exception("Teminat bulunamadı");
             var oldExpiryDate = guarantee.ExpiryDate;
 
             bool commissionChanged = oldExpiryDate != request.ExpiryDate;
 
             guarantee.ExpiryDate = request.ExpiryDate;
 
-            guarantee.CommissionPeriod = await _db.GuaranteeCommissionPeriods
-                .FirstOrDefaultAsync(x => x.Id == guarantee.CommissionPeriodId);
+            guarantee.CommissionPeriod = await db.GuaranteeCommissionPeriods.FirstAsync(x => x.Id == guarantee.CommissionPeriodId);
 
-            await _db.SaveChangesAsync();
+            await db.SaveChangesAsync();
 
-        
+
             if (commissionChanged && request.ExpiryDate > oldExpiryDate)
             {
                 var extraMonthCount = DateUtils.GetMonthDifference(
@@ -152,10 +132,10 @@ namespace NetFlow.Application.Guarantees
                         CreatedBy = "System"
                     };
 
-                    _db.GuaranteeCommissions.Add(commission);
+                    db.GuaranteeCommissions.Add(commission);
                 }
 
-                await _db.SaveChangesAsync();
+                await db.SaveChangesAsync();
             }
 
             return guarantee.Id;
@@ -164,7 +144,7 @@ namespace NetFlow.Application.Guarantees
 
         public async Task DeleteAsync(int id)
         {
-            bool isUsedInTender = await _db.Tenders.AnyAsync(t =>
+            bool isUsedInTender = await db.Tenders.AnyAsync(t =>
                 t.TemporaryGuaranteeRateId == id ||
                 t.FinalGuaranteeRateId == id
             );
@@ -174,25 +154,25 @@ namespace NetFlow.Application.Guarantees
                     "Bu teminat bir veya daha fazla ihalede kullanıldığı için silinemez."
                 );
 
-            var guarantee = await _db.Guarantees.FirstOrDefaultAsync(x => x.Id == id);
+            var guarantee = await db.Guarantees.FirstOrDefaultAsync(x => x.Id == id);
             if (guarantee == null)
                 return;
 
-            var commissions = await _db.GuaranteeCommissions
+            var commissions = await db.GuaranteeCommissions
                 .Where(x => x.GuaranteeId == id)
                 .ToListAsync();
 
-            if (commissions.Any())
-                _db.GuaranteeCommissions.RemoveRange(commissions);
+            if (commissions.Count != 0)
+                db.GuaranteeCommissions.RemoveRange(commissions);
 
-            _db.Guarantees.Remove(guarantee);
-            await _db.SaveChangesAsync();
+            db.Guarantees.Remove(guarantee);
+            await db.SaveChangesAsync();
         }
-        
+
         private async Task CreateGuaranteeCommissionsAsync(GuaranteeEntity guarantee)
         {
-            if (guarantee == null)
-                throw new ArgumentNullException(nameof(guarantee));
+            ArgumentNullException.ThrowIfNull(guarantee);
+            ArgumentNullException.ThrowIfNull(guarantee.CommissionPeriod);
 
             var periodCount = DateUtils.GetMonthDifference(
                 guarantee.GuaranteeDate,
@@ -220,10 +200,10 @@ namespace NetFlow.Application.Guarantees
                     CreatedBy = "System"
                 };
 
-                _db.GuaranteeCommissions.Add(commission);
+                db.GuaranteeCommissions.Add(commission);
             }
 
-            await _db.SaveChangesAsync();
+            await db.SaveChangesAsync();
         }
 
     }

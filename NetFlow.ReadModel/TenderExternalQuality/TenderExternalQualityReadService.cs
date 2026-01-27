@@ -51,8 +51,8 @@ namespace NetFlow.ReadModel.TenderExternalQuality
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<TenderExternalQualityDto>(),
-                    totalCount = totalCount
+                    Data = Array.Empty<TenderExternalQualityDto>(),
+                    TotalCount = totalCount
                 };
             }
 
@@ -74,8 +74,8 @@ namespace NetFlow.ReadModel.TenderExternalQuality
 
             return new PagedResult
             {
-                data = data,
-                totalCount = totalCount
+                Data = data,
+                TotalCount = totalCount
             };
         }
 

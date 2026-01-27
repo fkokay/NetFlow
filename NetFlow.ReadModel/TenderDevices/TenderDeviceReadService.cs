@@ -50,8 +50,8 @@ namespace NetFlow.ReadModel.TenderDevices
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<TenderDeviceDto>(),
-                    totalCount = totalCount
+                    Data = Array.Empty<TenderDeviceDto>(),
+                    TotalCount = totalCount
                 };
             }
 
@@ -73,8 +73,8 @@ namespace NetFlow.ReadModel.TenderDevices
 
             return new PagedResult
             {
-                data = data,
-                totalCount = totalCount
+                Data = data,
+                TotalCount = totalCount
             };
         }
 

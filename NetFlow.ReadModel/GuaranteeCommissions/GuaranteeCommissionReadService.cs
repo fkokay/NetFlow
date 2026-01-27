@@ -48,8 +48,8 @@ namespace NetFlow.ReadModel.GuaranteeCommissions
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<GuaranteeCommissionDto>(),
-                    totalCount = totalCount
+                    Data = Array.Empty<GuaranteeCommissionDto>(),
+                    TotalCount = totalCount
                 };
             }
             parameters.Add("@Skip", pagedRequest.Skip ?? 0);
@@ -57,8 +57,8 @@ namespace NetFlow.ReadModel.GuaranteeCommissions
             var data = cn.Query<GuaranteeCommissionDto>(dataSql, parameters).ToList();
             return new PagedResult
             {
-                data = data,
-                totalCount = totalCount
+                Data = data,
+                TotalCount = totalCount
             };
         }
         public async Task<GuaranteeCommissionDto?> GetAsync(int id)

@@ -42,14 +42,14 @@ namespace NetFlow.Netsis.Repositories
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<ShipmentOrder>(),
-                    totalCount = dto.Count(),
+                    Data = Array.Empty<ShipmentOrder>(),
+                    TotalCount = dto.Count(),
                 };
             }
 
             return new PagedResult()
             {
-                data = dto.Select(NetsisUtils.FixAllStrings).Select(x =>
+                Data = dto.Select(NetsisUtils.FixAllStrings).Select(x =>
                       ShipmentOrder.Create(
                           x.ID,
                           x.SIPARIS_NO,
@@ -61,7 +61,7 @@ namespace NetFlow.Netsis.Repositories
                           x.DEPO_KODU,
                           x.DEPO_BAKIYE
                       )).ToList(),
-                totalCount = dto.Count(),
+                TotalCount = dto.Count(),
             };
         }
     }

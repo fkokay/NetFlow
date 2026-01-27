@@ -65,8 +65,8 @@ namespace NetFlow.ReadModel.Guarantees
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<GuaranteeDto>(),
-                    totalCount = totalCount
+                    Data = Array.Empty<GuaranteeDto>(),
+                    TotalCount = totalCount
                 };
             }
 
@@ -89,9 +89,9 @@ namespace NetFlow.ReadModel.Guarantees
 
                 return new PagedResult
                 {
-                    data = Array.Empty<object>(),
-                    totalCount = totalCount,
-                    summary = values
+                    Data = Array.Empty<object>(),
+                    TotalCount = totalCount,
+                    Summary = values
                 };
             }
 
@@ -100,8 +100,8 @@ namespace NetFlow.ReadModel.Guarantees
             var data = cn.Query<GuaranteeDto>(dataSql, parameters).ToList();
             return new PagedResult
             {
-                data = data,
-                totalCount = totalCount
+                Data = data,
+                TotalCount = totalCount
             };
         }
         public async Task<GuaranteeDto?> GetAsync(int id)

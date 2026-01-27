@@ -50,8 +50,8 @@ public sealed class TenderCapexReadService
         {
             return new PagedResult
             {
-                data = Array.Empty<TenderCapexDto>(),
-                totalCount = totalCount
+                Data = Array.Empty<TenderCapexDto>(),
+                TotalCount = totalCount
             };
         }
 
@@ -73,8 +73,8 @@ public sealed class TenderCapexReadService
 
         return new PagedResult
         {
-            data = data,
-            totalCount = totalCount
+            Data = data,
+            TotalCount = totalCount
         };
     }
 

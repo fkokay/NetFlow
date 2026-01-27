@@ -48,8 +48,8 @@ public sealed class TenderAuthorityReadService
         {
             return new PagedResult
             {
-                data = Array.Empty<TenderAuthorityDto>(),
-                totalCount = totalCount
+                Data = Array.Empty<TenderAuthorityDto>(),
+                TotalCount = totalCount
             };
         }
 
@@ -71,8 +71,8 @@ public sealed class TenderAuthorityReadService
 
         return new PagedResult
         {
-            data = data,
-            totalCount = totalCount
+            Data = data,
+            TotalCount = totalCount
         };
     }
 

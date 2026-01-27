@@ -374,7 +374,6 @@
 
     private MaterialRequestModel? Model;
     private GridDevExtremeDataSource<MaterialRequestItemModel>? ItemDataSource;
-    private bool IsSaving, IsSuccess;
     private bool IsSmallScreen;
     private bool IsDataLoaded;
     private int ActiveTabIndex;
@@ -394,7 +393,7 @@
     public class FulfillmentPostModel
     {
         public int ItemId { get; set; }
-        public string FulfillmentType { get; set; }
+        public string FulfillmentType { get; set; } = string.Empty;
         public decimal RequestedQuantity { get; set; }
     }
 
@@ -459,7 +458,6 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadDataAsync();
-                IsSuccess = true;
                 ToastService.ShowToast(new ToastOptions()
                 {
                     Id = "toast",
@@ -600,9 +598,13 @@
         @<div class="d-flex gap-2">
         <DxButton Click="@(isError? OnPopupError : OnPopupOk)"
                   RenderStyle="@(isError ? ButtonRenderStyle.Danger : ButtonRenderStyle.Success)">Kapat</DxButton>
-    </div>;
+    </div>
+    ;
 
-    private void OnPopupOk() { if (IsSuccess) NavigationManager.NavigateTo("/material-request/list"); }
+    private void OnPopupOk()
+    {
+          NavigationManager.NavigateTo("/material-request/list");
+    }
     private void OnPopupError() { }
 
     private Task OnRejectClick()
@@ -635,7 +637,6 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadDataAsync();
-                IsSuccess = true;
                 ToastService.ShowToast(new ToastOptions()
                 {
                     Id = "toast",

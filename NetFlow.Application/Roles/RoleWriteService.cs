@@ -29,7 +29,7 @@ namespace NetFlow.Application.Roles
         }
         public async Task<int> EditAsync(EditRoleRequest request)
         {
-            var role = await _db.Roles.FirstOrDefaultAsync(x => x.Id == request.Id);
+            var role = await _db.Roles.FirstAsync(x => x.Id == request.Id);
             role.Code = request.Code;
             role.Name = request.Name;
             _db.Roles.Update(role);

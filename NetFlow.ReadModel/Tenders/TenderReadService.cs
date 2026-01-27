@@ -52,8 +52,8 @@ namespace NetFlow.ReadModel.Tenders
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<TenderDto>(),
-                    totalCount = totalCount
+                    Data = Array.Empty<TenderDto>(),
+                    TotalCount = totalCount
                 };
             }
 
@@ -76,9 +76,9 @@ namespace NetFlow.ReadModel.Tenders
 
                 return new PagedResult
                 {
-                    data = Array.Empty<object>(),
-                    totalCount = totalCount,
-                    summary = values
+                    Data = Array.Empty<object>(),
+                    TotalCount = totalCount,
+                    Summary = values
                 };
             }
 
@@ -89,8 +89,8 @@ namespace NetFlow.ReadModel.Tenders
 
             return new PagedResult
             {
-                data = data,
-                totalCount = totalCount
+                Data = data,
+                TotalCount = totalCount
             };
         }
 

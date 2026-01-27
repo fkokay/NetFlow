@@ -43,7 +43,7 @@ namespace NetFlow.Application.Personnels
         }
         public async Task<int> EditAsync(EditPersonnelRequest request)
         {
-            var personnel = await _db.Personnels.FirstOrDefaultAsync(x => x.Id == request.Id);
+            var personnel = await _db.Personnels.FirstAsync(x => x.Id == request.Id);
             personnel.AuthorityLevel = request.AuthorityLevel;
             personnel.CreatedAt = request.CreatedAt;
             personnel.CustomerCode = request.CustomerCode;

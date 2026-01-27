@@ -46,8 +46,8 @@ namespace NetFlow.ReadModel.Roles
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<RoleDto>(),
-                    totalCount = totalCount
+                    Data = Array.Empty<RoleDto>(),
+                    TotalCount = totalCount
                 };
             }
 
@@ -58,8 +58,8 @@ namespace NetFlow.ReadModel.Roles
 
             return new PagedResult
             {
-                data = data,
-                totalCount = totalCount
+                Data = data,
+                TotalCount = totalCount
             };
         }
 

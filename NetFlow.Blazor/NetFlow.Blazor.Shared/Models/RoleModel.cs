@@ -9,8 +9,8 @@ namespace NetFlow.Blazor.Shared.Models
     {
         public int Id { get; set; }
         [Required(ErrorMessage = "Ad zorunludur")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         [Required(ErrorMessage = "Ad zorunludur")]
-        public string Code { get; set; }
+        public string Code { get; set; } = string.Empty;
     }
 }

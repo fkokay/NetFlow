@@ -47,8 +47,8 @@ namespace NetFlow.ReadModel.Personnel
             {
                 return new PagedResult
                 {
-                    data = Array.Empty<PersonnelDto>(),
-                    totalCount = totalCount
+                    Data = Array.Empty<PersonnelDto>(),
+                    TotalCount = totalCount
                 };
             }
 
@@ -59,8 +59,8 @@ namespace NetFlow.ReadModel.Personnel
 
             return new PagedResult
             {
-                data = data,
-                totalCount = totalCount
+                Data = data,
+                TotalCount = totalCount
             };
         }
 

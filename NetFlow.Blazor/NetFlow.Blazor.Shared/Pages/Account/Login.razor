@@ -122,14 +122,14 @@
     private bool isBusy;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new InputModel();
+    private InputModel? Input { get; set; }
 
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
     private List<FirmModel> Firms = default!;
 
-    override protected void OnInitialized()
+    protected override void OnInitialized()
     {
         Input = new InputModel();
     }
@@ -154,6 +154,11 @@
             isBusy = true;
             errorMessage = null;
             StateHasChanged();
+
+            if (Input == null)
+            {
+                return;
+            }
 
             await LoginService.LoginAsync(new Auth.LoginRequest
             {
@@ -186,6 +191,6 @@
         public string Email { get; set; } = "";
         [Required(ErrorMessage = "Şifre zorunludur.")]
         public string Password { get; set; } = "";
-        public bool RememberMe { get; set; }
+        public bool RememberMe { get; set; } = false;
     }
 }

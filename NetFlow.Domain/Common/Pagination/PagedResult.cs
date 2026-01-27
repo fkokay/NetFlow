@@ -9,15 +9,19 @@ namespace NetFlow.Domain.Common.Pagination
 {
     public class PagedResult
     {
-        public IEnumerable data { get; set; }
+        [JsonPropertyName("data")]
+        public IEnumerable Data { get; set; } = Array.Empty<object>();
 
+        [JsonPropertyName("totalCount")]
         [DefaultValue(-1)]
-        public int totalCount { get; set; } = -1;
+        public int TotalCount { get; set; } = -1;
 
+        [JsonPropertyName("groupCount")]
         [DefaultValue(-1)]
-        public int groupCount { get; set; } = -1;
+        public int GroupCount { get; set; } = -1;
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public object[] summary { get; set; }
+        [JsonPropertyName("summary")]
+        public object[] Summary { get; set; } = [];
     }
 }

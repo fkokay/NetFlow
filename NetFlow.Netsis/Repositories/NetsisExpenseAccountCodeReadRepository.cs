@@ -71,8 +71,8 @@ namespace NetFlow.Netsis.Repositories
             {
                 return new PagedResult
                 {
-                    totalCount = totalCount,
-                    data = Array.Empty<ExpenseAccountCode>(),
+                    TotalCount = totalCount,
+                    Data = Array.Empty<ExpenseAccountCode>(),
                 };
             }
 
@@ -80,8 +80,8 @@ namespace NetFlow.Netsis.Repositories
 
             return new PagedResult
             {
-                totalCount = totalCount,
-                data = dto.Select(NetsisUtils.FixAllStrings).Select(x =>
+                TotalCount = totalCount,
+                Data = dto.Select(NetsisUtils.FixAllStrings).Select(x =>
                       ExpenseAccountCode.Create(
                           x.SUBE_KODU,
                           x.HESAP_KODU,

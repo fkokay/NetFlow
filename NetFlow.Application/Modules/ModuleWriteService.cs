@@ -30,7 +30,7 @@ namespace NetFlow.Application.Modules
         }
         public async Task<int> EditAsync(EditModuleRequest request)
         {
-            var module = await _db.Modules.FirstOrDefaultAsync(x => x.Id == request.Id);
+            var module = await _db.Modules.FirstAsync(x => x.Id == request.Id);
             module.Code = request.Code;
             module.Name = request.Name;
             module.IsActive = request.IsActive;

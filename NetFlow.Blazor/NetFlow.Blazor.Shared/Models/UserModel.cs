@@ -18,12 +18,12 @@ namespace NetFlow.Blazor.Shared.Models
         public string Email { get; set; } = string.Empty;
         public string? Phone { get; set; }
         [Required(ErrorMessage = "Şifre zorunludur")]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
         public bool Active { get; set; } = true;
         public string Roles { get; set; } = string.Empty;
         public string Firms { get; set; } = string.Empty;
-        public List<int>? RoleIds { get; set; } = new List<int>();
-        public List<int>? FirmIds { get; set; } = new List<int>();
+        public List<int>? RoleIds { get; set; } = [];
+        public List<int>? FirmIds { get; set; } = [];
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";
     }
