@@ -25,18 +25,14 @@ namespace NetFlow.ReadModel.Personnel
                 parameters.AddDynamicParams(p);
             }
 
-            var orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "Id DESC");
-            if (string.IsNullOrWhiteSpace(orderBy) || !orderBy.TrimStart().StartsWith("ORDER BY"))
-            {
-                orderBy = "ORDER BY Id DESC";
-            }
+            var orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "ORDER BY Id DESC");
 
             string countSql = @"
-                 SELECT COUNT(1) FROM Personnel WITH (NOLOCK)
+                 SELECT COUNT(1) FROM VW_Personnel WITH (NOLOCK)
              ";
 
              string dataSql = $@"
-                 SELECT * FROM Personnel WITH (NOLOCK)
+                 SELECT * FROM VW_Personnel WITH (NOLOCK)
                  {orderBy}
                  OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
              ";
@@ -67,7 +63,7 @@ namespace NetFlow.ReadModel.Personnel
         public async Task<PersonnelDto?> GetAsync(int id)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
-            var sql = "SELECT TOP 1 * FROM Personnel WITH (NOLOCK) WHERE Id=@Id";
+            var sql = "SELECT TOP 1 * FROM VW_Personnel WITH (NOLOCK) WHERE Id=@Id";
             return await cn.QueryFirstOrDefaultAsync<PersonnelDto>(sql, new { Id = id });
         }
     }
