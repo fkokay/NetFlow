@@ -132,6 +132,9 @@ body {
 .three-point-icon {
     mask-image: url("images/icons/three-point.svg");
 }
+.personal-card-icon {
+    mask-image: url("images/icons/personal-card.svg");
+}
 
 .notification {
     position: relative;

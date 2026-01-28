@@ -14,32 +14,51 @@ namespace NetFlow.ReadModel.Personnel
         private readonly ReadModelOptions _opt;
         public PersonnelReadService(ReadModelOptions opt) => _opt = opt;
 
-        public async Task<PagedResult> ListAsync(PagedRequest pagedRequest)
+        public async Task<PagedResult> ListAsync(PagedRequest pagedRequest, bool isTerminate = false,bool isActive=false)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
             var parameters = new DynamicParameters();
 
+            var whereSql = "WHERE 1 = 1";
+
+            if (isTerminate)
+            {
+                whereSql += " AND TerminationDate IS NOT NULL";
+            }
+            if (isActive)
+            {
+                whereSql += " AND TerminationDate IS NULL";
+            }
+
             if (!string.IsNullOrEmpty(pagedRequest.Filter))
             {
                 var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);
+                whereSql += $" AND ({sql})";
                 parameters.AddDynamicParams(p);
             }
 
-            var orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "ORDER BY Id DESC");
+            var orderBy = DevExtremeSqlBuilder.BuildOrderBy(
+                pagedRequest.Sort,
+                "ORDER BY Id DESC"
+            );
 
-            string countSql = @"
-                 SELECT COUNT(1) FROM VW_Personnel WITH (NOLOCK)
-             ";
+            string countSql = $@"
+                SELECT COUNT(1)
+                FROM VW_Personnel WITH (NOLOCK)
+                {whereSql}
+            ";
 
-             string dataSql = $@"
-                 SELECT * FROM VW_Personnel WITH (NOLOCK)
-                 {orderBy}
-                 OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
-             ";
+                    string dataSql = $@"
+                SELECT *
+                FROM VW_Personnel WITH (NOLOCK)
+                {whereSql}
+                {orderBy}
+                OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
+            ";
 
             int totalCount = cn.ExecuteScalar<int>(countSql, parameters);
 
-            if (pagedRequest.IsCountQuery != null && pagedRequest.IsCountQuery.HasValue)
+            if (pagedRequest.IsCountQuery == true)
             {
                 return new PagedResult
                 {
@@ -59,7 +78,6 @@ namespace NetFlow.ReadModel.Personnel
                 TotalCount = totalCount
             };
         }
-
         public async Task<PersonnelDto?> GetAsync(int id)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);

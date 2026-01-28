@@ -26,7 +26,18 @@ namespace NetFlow.Api.Controllers
         {
             return Ok(await _read.ListAsync(pagedRequest));
         }
+        [HttpGet("active")]
+        public async Task<IActionResult> Active([FromQuery] PagedRequest pagedRequest)
+        {
+            return Ok(await _read.ListAsync(pagedRequest, isActive: true));
+        }
 
+        [HttpGet("terminate")]
+        public async Task<IActionResult> Terminate([FromQuery] PagedRequest pagedRequest)
+        {
+            return Ok(await _read.ListAsync(pagedRequest,isTerminate:true));
+        }
+        
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -53,7 +64,15 @@ namespace NetFlow.Api.Controllers
                 new { id },
                 null);
         }
-
+        [HttpPut("terminate")]
+        public async Task<IActionResult> Update([FromBody] TerminatePersonnelRequest request)
+        {
+            var id = await _write.TerminateAsync(request);
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

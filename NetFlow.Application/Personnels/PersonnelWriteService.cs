@@ -58,6 +58,15 @@ namespace NetFlow.Application.Personnels
             personnel.Phone = request.Phone;
             personnel.IsActive = request.IsActive;
             personnel.UserId = request.UserId;
+           // personnel.UpdatedAt = DateTime.UtcNow;
+            _db.Personnels.Update(personnel);
+            await _db.SaveChangesAsync();
+            return personnel.Id;
+        }
+        public async Task<int> TerminateAsync(TerminatePersonnelRequest request)
+        {
+            var personnel = await _db.Personnels.FirstAsync(x => x.Id == request.Id);
+            personnel.TerminationDate = request.TerminationDate;
             personnel.UpdatedAt = DateTime.UtcNow;
             _db.Personnels.Update(personnel);
             await _db.SaveChangesAsync();
