@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetFlow.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -20,7 +21,7 @@ namespace NetFlow.ReadModel.TenderOpex
         public string Currency { get; set; } = string.Empty;
         public int? MaterialRequestId { get; set; }
         public string? MaterialRequestNo { get; set; }
-        public string? MaterialRequestStatus { get; set; }
+        public MaterialRequestStatus MaterialRequestStatus { get; set; } = MaterialRequestStatus.Open;
         public int? MaterialRequestItemId { get; set; }
 
         public DateTime CreatedAt { get; set; }

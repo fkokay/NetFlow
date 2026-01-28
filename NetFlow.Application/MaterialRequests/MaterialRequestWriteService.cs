@@ -90,6 +90,7 @@ namespace NetFlow.Application.MaterialRequests
 
                 item.FulfillmentType = request.FulfillmentType;
                 item.RequestedQuantity = request.RequestedQuantity;
+                item.FulfilledQuantity = request.FulfilledQuantity;
                 updatedIds.Add(item.Id);
             }
 

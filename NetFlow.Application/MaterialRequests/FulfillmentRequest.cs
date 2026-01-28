@@ -10,6 +10,7 @@ namespace NetFlow.Application.MaterialRequests
         public int ItemId { get; set; }
         public MaterialRequestItemFulfillmentType FulfillmentType { get; set; } = MaterialRequestItemFulfillmentType.Undefined;
         public decimal RequestedQuantity { get; set; }
+        public decimal FulfilledQuantity { get; set; }
 
     }
 }

@@ -51,6 +51,91 @@
     </FooterContentTemplate>
 </DxPopup>
 
+<DxPopup @bind-Visible="@IsFulfillmentPopupVisible"
+         HeaderText="Talep Karşıla"
+         Width="900px"
+         ShowFooter="true">
+    <BodyContentTemplate Context="fulfillmentContext">
+        <DxGrid Data="FulfillmentItems" PageSize="10">
+            <Columns>
+                <DxGridDataColumn FieldName="ItemCode" Caption="Kod" Width="120px" />
+                <DxGridDataColumn FieldName="ItemName" Caption="Adı" />
+
+                <DxGridDataColumn Caption="Talep Miktar" Width="150px">
+                    <CellDisplayTemplate>
+                        @{
+                            var item = (MaterialRequestItemModel)context.DataItem;
+                            if (!SelectedRequestedQuantities.ContainsKey(item.Id))
+                            {
+                                SelectedRequestedQuantities[item.Id] = item.RequestedQuantity;
+                            }
+                        }
+                        <DxSpinEdit Value="@SelectedRequestedQuantities[item.Id]"
+                                    T="decimal"
+                                    ReadOnly="true"
+                                    Enabled="false"
+                                    Mask="@NumericMask.RealNumber" />
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+
+                <DxGridDataColumn Caption="Karşılanan Miktar" Width="150px">
+                    <CellDisplayTemplate>
+                        @{
+                            var item = (MaterialRequestItemModel)context.DataItem;
+                            if (!SelectedFulfillmentQuantities.ContainsKey(item.Id))
+                            {
+                                SelectedFulfillmentQuantities[item.Id] = item.FulfilledQuantity;
+                            }
+                        }
+                        <DxSpinEdit Value="@SelectedFulfillmentQuantities[item.Id]"
+                                    T="decimal"
+                                    ValueChanged="@((decimal newVal) => { SelectedFulfillmentQuantities[item.Id] = newVal; })"
+                                    Mask="@NumericMask.RealNumber"
+                                    Enabled="@(Model?.Status.GetDescription()?.ToLower() == "talep açıldı")"
+                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+
+                <DxGridDataColumn FieldName="Unit" Caption="Birim" Width="80px" />
+
+                <DxGridDataColumn Caption="Karşılama Yöntemi" Width="200px">
+                    <CellDisplayTemplate>
+                        @{
+                            var item = (MaterialRequestItemModel)context.DataItem;
+
+                            if (!SelectedFulfillmentTypes.ContainsKey(item.Id))
+                            {
+                                SelectedFulfillmentTypes[item.Id] = item.FulfillmentType;
+                            }
+                        }
+
+                        <DxComboBox Data="@FulfillmentTypes"
+                                    Value="@SelectedFulfillmentTypes[item.Id]"
+                                    ValueChanged="@((MaterialRequestItemFulfillmentType val) => SelectedFulfillmentTypes[item.Id] = val)"
+                                    TextFieldName="Text"
+                                    ValueFieldName="Value"
+                                    Enabled="@(Model?.Status.GetDescription()?.ToLower() == "talep açıldı")" />
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+            </Columns>
+        </DxGrid>
+    </BodyContentTemplate>
+
+    <FooterContentTemplate Context="fFooter">
+        <DxButton RenderStyle="ButtonRenderStyle.Primary"
+                  Text="Seçimleri Gönder"
+                  IconCssClass="dx-icon-check"
+                  Click="OnConfirmFulfillment" />
+
+        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                  Text="Vazgeç"
+                  IconCssClass="dx-icon-close"
+                  Click="@(() => IsFulfillmentPopupVisible = false)" />
+    </FooterContentTemplate>
+</DxPopup>
+
+
+
 <div class="content-root">
     <div class="card toolbar">
         <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
@@ -163,12 +248,12 @@
 
                                 <div class="request-stats">
                                     <div class="request-stat">
-                                        <div class="request-stat-title">@Model.RequestType</div>
+                                        <div class="request-stat-title"> @(Model.RequestType.GetDescription())</div>
                                         <small>Talep Türü</small>
                                     </div>
 
                                     <div class="request-stat">
-                                        <div class="request-stat-title">@Model.Priority</div>
+                                        <div class="request-stat-title">@(Model.Priority.GetDescription())</div>
                                         <small>Öncelik</small>
                                     </div>
 
@@ -264,8 +349,20 @@
                                         <DxGridDataColumn FieldName="FulfilledQuantity" Caption="Karşılanan" />
                                         <DxGridDataColumn FieldName="Unit" Caption="Birim" />
                                         <DxGridDataColumn FieldName="WarehouseCode" Caption="Depo" />
-                                        <DxGridDataColumn FieldName="Status" Caption="Durum" />
-                                        <DxGridDataColumn FieldName="FulfillmentType" Caption="Karşılama Türü" />
+                                        <DxGridDataColumn Caption="Durum" FieldName="Status" Width="120px">
+                                            <CellDisplayTemplate>
+                                                <span class="status-badge">
+                                                    @(((MaterialRequestItemModel)context.DataItem).Status.GetDescription())
+                                                </span>
+                                            </CellDisplayTemplate>
+                                        </DxGridDataColumn>
+                                        <DxGridDataColumn Caption="Karşılama Türü" FieldName="FulfillmentType" Width="120px">
+                                            <CellDisplayTemplate>
+                                                <span class="status-badge">
+                                                    @(((MaterialRequestItemModel)context.DataItem).FulfillmentType.GetDescription())
+                                                </span>
+                                            </CellDisplayTemplate>
+                                        </DxGridDataColumn>
                                     </Columns>
                                 </DxGrid>
                             </DxTabPage>
@@ -286,25 +383,35 @@
     private bool IsDataLoaded;
     private int ActiveTabIndex;
 
-
     bool IsRejectionPopupVisible { get; set; } = false;
     int SelectedMaterialId { get; set; }
     string? RejectionReason { get; set; } = "";
 
-
     private GridDevExtremeDataSource<MaterialRequestItemModel>? FulfillmentItems;
     bool IsFulfillmentPopupVisible { get; set; } = false;
-    private MaterialRequestItemFulfillmentType[] MaterialRequestItemFulfillmentTypes =
-Enum.GetValues<MaterialRequestItemFulfillmentType>();
 
-    Dictionary<int, string> SelectedFulfillmentTypes = new();
+    public class FulfillmentTypeItem
+    {
+        public MaterialRequestItemFulfillmentType Value { get; set; }
+        public string Text { get; set; }
+    }
+
+    List<FulfillmentTypeItem> FulfillmentTypes = Enum.GetValues<MaterialRequestItemFulfillmentType>().Select(x => new FulfillmentTypeItem
+    {
+        Value = x,
+        Text = x.GetDescription()
+    }).ToList();
+
+    Dictionary<int, MaterialRequestItemFulfillmentType> SelectedFulfillmentTypes = new();
     Dictionary<int, decimal> SelectedFulfillmentQuantities = new();
+    Dictionary<int, decimal> SelectedRequestedQuantities = new();
 
     public class FulfillmentPostModel
     {
         public int ItemId { get; set; }
         public string FulfillmentType { get; set; } = string.Empty;
         public decimal RequestedQuantity { get; set; }
+        public decimal FulfilledQuantity { get; set; }
     }
 
     protected override async Task OnInitializedAsync()
@@ -418,6 +525,10 @@ Enum.GetValues<MaterialRequestItemFulfillmentType>();
         try
         {
             IsDataLoaded = false;
+            SelectedFulfillmentQuantities.Clear();
+            SelectedRequestedQuantities.Clear();
+            SelectedFulfillmentTypes.Clear();
+
             await InvokeAsync(StateHasChanged);
 
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
@@ -457,13 +568,15 @@ Enum.GetValues<MaterialRequestItemFulfillmentType>();
             IsDataLoaded = false;
             IsFulfillmentPopupVisible = false;
 
-
             var postData = SelectedFulfillmentTypes.Select(x => new
             {
                 ItemId = x.Key,
                 FulfillmentType = x.Value,
-                RequestedQuantity = SelectedFulfillmentQuantities.ContainsKey(x.Key)
+                FulfilledQuantity = SelectedFulfillmentQuantities.ContainsKey(x.Key)
                                     ? SelectedFulfillmentQuantities[x.Key]
+                                    : 0,
+                RequestedQuantity = SelectedRequestedQuantities.ContainsKey(x.Key)
+                                    ? SelectedRequestedQuantities[x.Key]
                                     : 0
             }).ToList();
 
@@ -508,12 +621,11 @@ Enum.GetValues<MaterialRequestItemFulfillmentType>();
         @<div class="d-flex gap-2">
         <DxButton Click="@(isError? OnPopupError : OnPopupOk)"
                   RenderStyle="@(isError ? ButtonRenderStyle.Danger : ButtonRenderStyle.Success)">Kapat</DxButton>
-    </div>
-    ;
+    </div>;
 
     private void OnPopupOk()
     {
-          NavigationManager.NavigateTo("/material-request/list");
+        NavigationManager.NavigateTo("/material-request/list");
     }
     private void OnPopupError() { }
 

@@ -26,13 +26,19 @@
             </CellDisplayTemplate>
 
         </DxGridDataColumn>
-        <DxGridDataColumn FieldName="MaterialRequestStatus" Caption="Talep Durumu" />
+        <DxGridDataColumn Caption="Talep Durumu" FieldName="MaterialRequestStatus" Width="120px">
+            <CellDisplayTemplate>
+                <span class="status-badge">
+                    @(((TenderOpexModel)context.DataItem).MaterialRequestStatus.GetDescription())
+                </span>
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
         <DxGridDataColumn Caption="Ýþlemler" Width="100px" MinWidth="100">
             <CellDisplayTemplate>
                 @if (!((TenderOpexModel)context.DataItem).MaterialRequestId.HasValue && !((TenderOpexModel)context.DataItem).MaterialRequestItemId.HasValue)
                 {
                     <div @onclick:stopPropagation="true">
-                        <DxButton Text="Telp Oluþtur"
+                        <DxButton Text="Talep Oluþtur"
                                   RenderStyle="ButtonRenderStyle.Info"
                                   RenderStyleMode="ButtonRenderStyleMode.Outline"
                                   Size="SizeMode.Small"
