@@ -88,8 +88,20 @@
                     </CellDisplayTemplate>
                 </DxGridDataColumn>
 
-                <DxGridDataColumn Caption="Talep Türü" FieldName="RequestType" />
-                <DxGridDataColumn Caption="Öncelik" FieldName="Priority" />
+                <DxGridDataColumn Caption="Talep Türü" FieldName="RequestType" >
+                    <CellDisplayTemplate>
+                        <span>
+                            @(((MaterialRequestModel)context.DataItem).RequestType.GetDescription())
+                        </span>
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
+                <DxGridDataColumn Caption="Öncelik" FieldName="Priority" >
+                    <CellDisplayTemplate>
+                        <span>
+                            @(((MaterialRequestModel)context.DataItem).Priority.GetDescription())
+                        </span>
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
                 <DxGridDataColumn Caption="Durum" FieldName="Status" Width="120px">
                     <CellDisplayTemplate>
                         <span class="status-badge">
@@ -106,7 +118,13 @@
                 <DxGridDataColumn Caption="Gerekli Tarih" FieldName="RequiredDate" />
                 <DxGridDataColumn Caption="Açýklama" FieldName="Description" />
                 <DxGridDataColumn Caption="Onay Tarihi" FieldName="ApprovalDate" Visible="false" />
-                <DxGridDataColumn Caption="Kaynak Referans" FieldName="SourceType" />
+                <DxGridDataColumn Caption="Kaynak Referans" FieldName="SourceType" >
+                    <CellDisplayTemplate>
+                        <span>
+                            @(((MaterialRequestModel)context.DataItem).SourceType.GetDescription())
+                        </span>
+                    </CellDisplayTemplate>
+                </DxGridDataColumn>
             </Columns>
         </DxGrid>
     </div>

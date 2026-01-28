@@ -128,7 +128,6 @@
                     <DxGridLayoutColumn Width="100%" />
                 }
             </Columns>
-
             <Rows>
                 @if (!IsSmallScreen)
                 {
@@ -140,7 +139,6 @@
                     <DxGridLayoutRow Areas="item2" />
                 }
             </Rows>
-
             <Items>
                 <DxGridLayoutItem Area="item1">
                     <Template>
@@ -163,12 +161,12 @@
 
                                 <div class="request-stats">
                                     <div class="request-stat">
-                                        <div class="request-stat-title">@Model.RequestType</div>
+                                        <div class="request-stat-title">@Model.RequestType.GetDescription()</div>
                                         <small>Talep Türü</small>
                                     </div>
 
                                     <div class="request-stat">
-                                        <div class="request-stat-title">@Model.Priority</div>
+                                        <div class="request-stat-title">@Model.Priority.GetDescription()</div>
                                         <small>Öncelik</small>
                                     </div>
 
