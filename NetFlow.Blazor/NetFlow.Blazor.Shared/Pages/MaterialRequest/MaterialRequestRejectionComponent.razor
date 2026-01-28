@@ -1,0 +1,133 @@
+@using System.Net.Http.Json
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
+@inject NavigationManager NavigationManager
+
+<DxPopup @bind-Visible="@Visible"
+         HeaderText="Talebi Reddet"
+         Width="600px"
+         MaxWidth="95vw"
+         ShowFooter="true">
+
+    <BodyContentTemplate Context="popupContext">
+        <div style="position:relative">
+
+            <DxLoadingPanel @bind-Visible="@IsLoading"
+                            Text="Yükleniyor..."
+                            IsContentBlocked="true" />
+
+            <DxFormLayout CaptionPosition="CaptionPosition.Vertical">
+                <DxFormLayoutItem Caption="Reddetme Nedeni" ColSpanMd="12">
+                    <DxMemo @bind-Text="RejectionReason"
+                            Rows="5"
+                            BindValueMode="BindValueMode.OnInput"
+                            NullText="Reddetme nedenini detaylýca giriniz..."
+                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                            Enabled="!IsLoading" />
+
+                    @if (ShowValidation)
+                    {
+                        <small class="text-danger mt-1">
+                            Bu alanýn doldurulmasý zorunludur.
+                        </small>
+                    }
+                </DxFormLayoutItem>
+            </DxFormLayout>
+
+        </div>
+    </BodyContentTemplate>
+
+    <FooterContentTemplate>
+        <DxButton RenderStyle="ButtonRenderStyle.Danger"
+                  Text="Reddi Onayla"
+                  IconCssClass="dx-icon-check"
+                  Enabled="@CanSubmit"
+                  Click="ConfirmRejection" />
+
+        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                  Text="Vazgeç"
+                  IconCssClass="dx-icon-close"
+                  Enabled="!IsLoading"
+                  Click="Close" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+
+    [Parameter] public int RequestId { get; set; }
+    [Parameter] public EventCallback OnSuccess { get; set; }
+
+    private bool IsLoading { get; set; }
+    private string? RejectionReason { get; set; }
+
+    private bool ShowValidation =>
+        string.IsNullOrWhiteSpace(RejectionReason);
+
+    private bool CanSubmit =>
+        !IsLoading && !string.IsNullOrWhiteSpace(RejectionReason);
+
+    private async Task ConfirmRejection()
+    {
+        if (!CanSubmit) return;
+
+        try
+        {
+            IsLoading = true;
+
+            var client = await ApiClientFactory
+                .CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+
+            var model = new
+            {
+                Id = RequestId,
+                RejectionReason
+            };
+
+            var response = await client
+                .PutAsJsonAsync("api/material-requests/rejection", model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                ShowToast("Baþarýlý", "Talep reddedildi.", ToastRenderStyle.Success);
+                await OnSuccess.InvokeAsync();
+                await Close();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                ShowToast("Hata", error, ToastRenderStyle.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowToast("Hata", ex.Message, ToastRenderStyle.Danger);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task Close()
+    {
+        RejectionReason = null;
+        await VisibleChanged.InvokeAsync(false);
+    }
+
+    private void ShowToast(string title, string text, ToastRenderStyle style)
+    {
+        ToastService.ShowToast(new ToastOptions
+        {
+            Id = "toast",
+            ProviderName = "Overview",
+            ThemeMode = ToastThemeMode.Light,
+            RenderStyle = style,
+            Title = title,
+            Text = text
+        });
+    }
+}
+

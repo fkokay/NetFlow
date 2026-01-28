@@ -1,0 +1,189 @@
+﻿@using System.Net.Http.Json
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
+@inject NavigationManager NavigationManager
+
+<DxPopup @bind-Visible="@Visible"
+         HeaderText="@(MaterialRequestItemId > 0 ? "Kalem Düzenle" : "Kalem Ekle")"
+         Width="900px"
+         ShowFooter="true">
+    <BodyContentTemplate Context="itemContext">
+    
+        @if (editContext != null)
+        {
+            <EditForm EditContext="@editContext" Context="editContext">
+                <DataAnnotationsValidator />
+                <DxFormLayout>
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <ValidationSummary />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Ürün Kodu" ColSpanMd="6">
+                        <DxTextBox @bind-Text="model.ItemCode"
+                                   NullText="Ürün kodu giriniz"
+                                   ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Ürün Adı" ColSpanMd="6">
+                        <DxTextBox @bind-Text="model.ItemName"
+                                   NullText="Ürün adı"
+                                   ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Talep Edilen Miktar" ColSpanMd="6">
+                        <DxSpinEdit @bind-Value="model.RequestedQuantity"
+                                    Min="0"
+                                    Format="n4" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Fiyat" ColSpanMd="6">
+                        <DxSpinEdit @bind-Value="model.Price"
+                                    Min="0"
+                                    Format="n4" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Birim" ColSpanMd="6">
+                        <DxTextBox @bind-Text="model.Unit"
+                                   NullText="Örn: Adet, Kg, Metre" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Depo Kodu" ColSpanMd="6">
+                        <DxTextBox @bind-Text="model.WarehouseCode"
+                                   NullText="Depo kodu" />
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem Caption="Muadil Ürün Kodu" ColSpanMd="6">
+                        <DxTextBox @bind-Text="model.AlternateItemCode"
+                                   NullText="Varsa muadil ürün kodu" />
+                    </DxFormLayoutItem>
+                </DxFormLayout>
+            </EditForm>
+        }
+        else
+        {
+            <div class="text-center p-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <p class="mt-2">Veriler yükleniyor...</p>
+            </div>
+        }
+    </BodyContentTemplate>
+
+    <FooterContentTemplate Context="fFooter">
+        <DxButton RenderStyle="ButtonRenderStyle.Primary"
+                  Text="Kaydet"
+                  Click="OnSubmit"
+                  Enabled="!IsLoading && editContext != null" />
+        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                  Text="Vazgeç"
+                  Click="Close"
+                  Enabled="!IsLoading" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [Parameter] public int RequestId { get; set; }
+    [Parameter] public int MaterialRequestItemId { get; set; }
+    [Parameter] public EventCallback OnSuccess { get; set; }
+
+    private EditContext? editContext;
+    private MaterialRequestItemModel model = new();
+    private bool IsLoading;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!Visible) return;
+        if (MaterialRequestItemId > 0)
+        {
+            await LoadItem();
+        }
+        else
+        {
+            PrepareNewItem();
+        }
+
+      
+        editContext = new EditContext(model);
+    }
+
+    private async Task LoadItem()
+    {
+        IsLoading = true;
+        try
+        {
+            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+            model = await client.GetFromJsonAsync<MaterialRequestItemModel>($"api/material-request-items/{MaterialRequestItemId}") ?? new();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void PrepareNewItem()
+    {
+        model = new MaterialRequestItemModel
+        {
+            MaterialRequestId = RequestId
+        };
+    }
+
+    private async Task OnSubmit()
+    {
+        if (IsLoading) return;
+
+        IsLoading = true;
+        try
+        {
+            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+
+            HttpResponseMessage response;
+
+            if (MaterialRequestItemId > 0)
+                response = await client.PutAsJsonAsync($"api/material-request-items", model);
+            else
+                response = await client.PostAsJsonAsync($"api/material-request-items", model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                ShowToast("Başarılı", "İşlem tamamlandı", ToastRenderStyle.Success);
+                await OnSuccess.InvokeAsync();
+                await Close();
+            }
+            else
+            {
+                ShowToast("Hata", await response.Content.ReadAsStringAsync(), ToastRenderStyle.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowToast("Hata", ex.Message, ToastRenderStyle.Danger);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void ShowToast(string title, string text, ToastRenderStyle style)
+    {
+        ToastService.ShowToast(new ToastOptions()
+        {
+            Id = "toast",
+            ProviderName = "Overview",
+            ThemeMode = ToastThemeMode.Light,
+            RenderStyle = style,
+            Title = title,
+            Text = text,
+        });
+    }
+
+    private async Task Close()
+    {
+        await VisibleChanged.InvokeAsync(false);
+    }
+}

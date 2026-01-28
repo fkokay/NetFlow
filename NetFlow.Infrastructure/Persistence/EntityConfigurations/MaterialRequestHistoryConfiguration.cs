@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using NetFlow.Domain.Entities;
+using NetFlow.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,6 +23,12 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
 
             builder.Property(x => x.Notes)
                    .HasMaxLength(300);
+
+            builder.Property(x => x.Action)
+            .HasConversion<int>()
+            .HasDefaultValue(MaterialRequestHistoryAction.Created)
+            .IsRequired();
+
 
             builder.HasOne(x => x.MaterialRequest)
                    .WithMany(x => x.MaterialRequestHistories)

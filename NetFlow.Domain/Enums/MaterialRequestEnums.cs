@@ -62,4 +62,13 @@ namespace NetFlow.Domain.Enums
         Fulfilled = 3, // Tam karşılandı
         Cancelled = 4 // İptal edildi
     }
+
+
+    public enum MaterialRequestHistoryAction
+    {
+        Created = 1, // Oluşturuldu
+        Approved = 2, // Onaylandı
+        Rejected = 3, // Reddedildi
+        Fulfilled = 4 // Karşılandı / Tamamlandı
+    }
 }

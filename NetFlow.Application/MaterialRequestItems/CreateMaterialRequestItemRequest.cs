@@ -6,13 +6,14 @@ using System.Text;
 
 namespace NetFlow.Application.MaterialRequestItems
 {
-    public class CreateMaterialRequestItem
+    public class CreateMaterialRequestItemRequest
     {
         public int MaterialRequestId { get; set; }
         public string ItemCode { get; set; } = null!;
         public string? ItemName { get; set; }
         public decimal RequestedQuantity { get; set; }
         public decimal FulfilledQuantity { get; set; }
+        public decimal Price{ get; set; }
         public string Unit { get; set; } = null!;       
         public string? WarehouseCode { get; set; }
         public string? AlternateItemCode { get; set; }

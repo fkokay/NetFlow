@@ -50,7 +50,7 @@ namespace NetFlow.Api.Controllers
                 SourceType = request.SourceType
             });
 
-            int materialRequestItemId = await _materialRequestItemWrite.CreateAsync(new CreateMaterialRequestItem()
+            int materialRequestItemId = await _materialRequestItemWrite.CreateAsync(new CreateMaterialRequestItemRequest()
             {
                 MaterialRequestId = materialRequestId,
                 ItemCode = request.ItemCode,

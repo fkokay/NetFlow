@@ -130,6 +130,10 @@
 
                                         </DxFormLayoutItem>
 
+                                        <DxFormLayoutItem Caption="Ýþe Alým Tarihi" ColSpanMd="6">
+                                            <DxDateEdit @bind-Date="Model.HireDate" />
+                                        </DxFormLayoutItem>
+
 
                                         <DxFormLayoutItem ColSpanMd="12">
                                             <ValidationSummary />
@@ -275,7 +279,7 @@
                             !string.IsNullOrWhiteSpace(Model?.LastName) &&
                             !string.IsNullOrWhiteSpace(Model?.CustomerCode) &&
                             !string.IsNullOrWhiteSpace(Model?.PersonnelCode);
-
+                            
         bool isEmailValid = string.IsNullOrWhiteSpace(Model?.Email) ||
                         new EmailAddressAttribute().IsValid(Model.Email);
         return isBaseValid && isEmailValid;

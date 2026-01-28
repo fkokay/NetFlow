@@ -96,4 +96,17 @@ namespace NetFlow.Blazor.Shared.Models
         [Description("İptal edildi")]
         Cancelled = 4 // İptal edildi
     }
+
+
+    public enum MaterialRequestHistoryAction
+    {
+        [Description("Oluşturuldu")]
+        Created = 1, // Oluşturuldu
+        [Description("Onaylandı")]
+        Approved = 2, // Onaylandı
+        [Description("Reddedildi")]
+        Rejected = 3, // Reddedildi
+        [Description("Karşılandı")]
+        Fulfilled = 4 // Karşılandı
+    }
 }

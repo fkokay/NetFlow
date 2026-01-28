@@ -26,6 +26,9 @@ namespace NetFlow.Blazor.Shared.Models
         public string? Phone { get; set; }
         public string? Department { get; set; }
         public string? Title { get; set; }
+        [Required(ErrorMessage = "İşe alım tarih seçimi zorunludur.")]
+        public DateTime HireDate { get; set; }=DateTime.UtcNow;
+        public DateTime? TerminationDate { get; set; }
         public byte AuthorityLevel { get; set; }=1;
         public decimal? Salary { get; set; }
         public bool IsActive { get; set; } = true;

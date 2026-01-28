@@ -3,20 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace NetFlow.Domain.Entities
+namespace NetFlow.Application.MaterialRequestHistories
 {
-    public class MaterialRequestHistoryEntity
+    public class EditMaterialRequestHistoryRequest
     {
         public int Id { get; set; }
-
         public int MaterialRequestId { get; set; }
-        public MaterialRequestHistoryAction Action { get; set; } 
+        public MaterialRequestHistoryAction Action { get; set; }
         public string? Notes { get; set; }
-
         public int ActionByUserId { get; set; }
         public DateTime ActionDate { get; set; } = DateTime.UtcNow;
-
-        // Navigation
-        public MaterialRequestEntity MaterialRequest { get; set; } = null!;
     }
 }

@@ -1,0 +1,213 @@
+@using System.Net.Http.Json
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
+@inject NavigationManager NavigationManager
+
+<DxPopup @bind-Visible="@Visible"
+         HeaderText="Talep Karþýla"
+         Width="900px"
+         ShowFooter="true">
+    <BodyContentTemplate Context="fulfillmentContext">
+        <div style="position: relative;">
+
+            <DxLoadingPanel @bind-Visible="@IsLoading" Text="Yükleniyor..." />
+
+            <DxGrid Data="FulfillmentItems" PageSize="10">
+                <Columns>
+                    <DxGridDataColumn FieldName="ItemCode" Caption="Kod" Width="120px" />
+                    <DxGridDataColumn FieldName="ItemName" Caption="Adý" />
+
+                    <DxGridDataColumn Caption="Talep Miktar" Width="150px">
+                        <CellDisplayTemplate>
+                            @{
+                                var item = (MaterialRequestItemModel)context.DataItem;
+                                if (!SelectedRequestedQuantities.ContainsKey(item.Id))
+                                    SelectedRequestedQuantities[item.Id] = item.RequestedQuantity;
+                            }
+                            <DxSpinEdit Value="@SelectedRequestedQuantities[item.Id]"
+                                        T="decimal" ReadOnly="true" Enabled="false"
+                                        Mask="@NumericMask.RealNumber" />
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+
+                    <DxGridDataColumn Caption="Karþýlanan Miktar" Width="150px">
+                        <CellDisplayTemplate>
+                            @{
+                                var item = (MaterialRequestItemModel)context.DataItem;
+                                if (!SelectedFulfillmentQuantities.ContainsKey(item.Id))
+                                    SelectedFulfillmentQuantities[item.Id] = item.FulfilledQuantity;
+                            }
+                            <DxSpinEdit Value="@SelectedFulfillmentQuantities[item.Id]"
+                                        T="decimal"
+                                        ValueChanged="@((decimal newVal) => { SelectedFulfillmentQuantities[item.Id] = newVal; })"
+                                        Mask="@NumericMask.RealNumber"
+                                        Enabled="@(IsEditable && !IsLoading)"
+                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+
+                    <DxGridDataColumn Caption="Tahmini Fiyat" Width="150px">
+                        <CellDisplayTemplate>
+                            @{
+                                var item = (MaterialRequestItemModel)context.DataItem;
+                                if (!SelectedPrices.ContainsKey(item.Id))
+                                    SelectedPrices[item.Id] = item.Price;
+                            }
+                            <DxSpinEdit Value="@SelectedPrices[item.Id]"
+                                        T="decimal"
+                                        ValueChanged="@((decimal newVal) => { SelectedPrices[item.Id] = newVal; })"
+                                        Mask="@NumericMask.RealNumber"
+                                        Enabled="@(IsEditable && !IsLoading)"
+                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+
+                    <DxGridDataColumn FieldName="Unit" Caption="Birim" Width="80px" />
+
+                    <DxGridDataColumn Caption="Karþýlama Yöntemi" Width="200px">
+                        <CellDisplayTemplate>
+                            @{
+                                var item = (MaterialRequestItemModel)context.DataItem;
+                                if (!SelectedFulfillmentTypes.ContainsKey(item.Id))
+                                    SelectedFulfillmentTypes[item.Id] = item.FulfillmentType;
+                            }
+                            <DxComboBox Data="@FulfillmentTypes"
+                                        Value="@SelectedFulfillmentTypes[item.Id]"
+                                        ValueChanged="@((MaterialRequestItemFulfillmentType val) => SelectedFulfillmentTypes[item.Id] = val)"
+                                        TextFieldName="Text"
+                                        ValueFieldName="Value"
+                                        Enabled="@(IsEditable && !IsLoading)" />
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+                </Columns>
+            </DxGrid>
+        </div>
+    </BodyContentTemplate>
+
+    <FooterContentTemplate Context="fFooter">
+        <DxButton RenderStyle="ButtonRenderStyle.Primary"
+                  Text="Seçimleri Gönder"
+                  IconCssClass="dx-icon-check"
+                  Click="OnConfirm"
+                  Enabled="!IsLoading" />
+        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                  Text="Vazgeç"
+                  IconCssClass="dx-icon-close"
+                  Click="Close"
+                  Enabled="!IsLoading" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [Parameter] public int RequestId { get; set; }
+    [Parameter] public bool IsEditable { get; set; }
+    [Parameter] public EventCallback OnSuccess { get; set; }
+
+    private bool IsLoading { get; set; } = false;
+    private GridDevExtremeDataSource<MaterialRequestItemModel>? FulfillmentItems;
+    private Dictionary<int, MaterialRequestItemFulfillmentType> SelectedFulfillmentTypes = new();
+    private Dictionary<int, decimal> SelectedFulfillmentQuantities = new();
+    private Dictionary<int, decimal> SelectedRequestedQuantities = new();
+    private Dictionary<int, decimal> SelectedPrices= new();
+
+    private List<EnumItem<MaterialRequestItemFulfillmentType>> FulfillmentTypes =
+      Enum.GetValues<MaterialRequestItemFulfillmentType>()
+      .Select(x => new EnumItem<MaterialRequestItemFulfillmentType>
+      {
+          Value = x,
+          Text = x.GetDescription()
+      })
+      .ToList();
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Visible && RequestId > 0 && !IsLoading)
+        {
+            await LoadItems();
+        }
+    }
+
+    private async Task LoadItems()
+    {
+        try
+        {
+            IsLoading = true;
+            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+            var baseUrl = "https://localhost:7071/api";
+            SelectedFulfillmentQuantities.Clear();
+            SelectedRequestedQuantities.Clear();
+            SelectedFulfillmentTypes.Clear();
+
+            FulfillmentItems = new GridDevExtremeDataSource<MaterialRequestItemModel>(
+                client,
+                NavigationManager.ToAbsoluteUri($"{baseUrl}/material-request-items?materialRequestId={RequestId}")
+            );
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task OnConfirm()
+    {
+        if (IsLoading) return;
+
+        try
+        {
+
+            IsLoading = true;
+            var postData = SelectedFulfillmentTypes.Select(x => new
+            {
+                ItemId = x.Key,
+                FulfillmentType = x.Value,
+                FulfilledQuantity = SelectedFulfillmentQuantities.GetValueOrDefault(x.Key, 0),
+                RequestedQuantity = SelectedRequestedQuantities.GetValueOrDefault(x.Key, 0),
+                Price = SelectedPrices.GetValueOrDefault(x.Key, 0),
+            }).ToList();
+
+            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+            var response = await client.PutAsJsonAsync($"api/material-requests/fulfill-items", postData);
+
+            if (response.IsSuccessStatusCode)
+            {
+                ShowToast("Baþarýlý", "Ýþlem baþarýyla tamamlandý", ToastRenderStyle.Success);
+                await OnSuccess.InvokeAsync();
+                await Close();
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                ShowToast("Hata", errorMsg, ToastRenderStyle.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowToast("Hata", ex.Message, ToastRenderStyle.Danger);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    
+    private void ShowToast(string title, string text, ToastRenderStyle style)
+    {
+        ToastService.ShowToast(new ToastOptions()
+        {
+            Id = "toast",
+            ProviderName = "Overview",
+            ThemeMode = ToastThemeMode.Light,
+            RenderStyle = style,
+            Title = title,
+            Text = text,
+        });
+    }
+
+    private async Task Close() => await VisibleChanged.InvokeAsync(false);
+}

@@ -3,6 +3,7 @@ using NetFlow.Application.Firms;
 using NetFlow.Application.GuaranteeCommissionPeriods;
 using NetFlow.Application.GuaranteeCommissions;
 using NetFlow.Application.Guarantees;
+using NetFlow.Application.MaterialRequestHistories;
 using NetFlow.Application.MaterialRequestItems;
 using NetFlow.Application.MaterialRequests;
 using NetFlow.Application.Modules;
@@ -56,6 +57,7 @@ namespace NetFlow.Application
             services.AddScoped<TenderPersonnelWriteService>();
             services.AddScoped<MaterialRequestWriteService>();
             services.AddScoped<MaterialRequestItemWriteService>();
+            services.AddScoped<MaterialRequestHistoryWriteService>();
             return services;
         }
     }

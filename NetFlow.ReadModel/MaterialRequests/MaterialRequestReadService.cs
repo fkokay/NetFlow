@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Domain.Common.Pagination;
+using NetFlow.Domain.Enums;
 using NetFlow.Domain.Identity;
 using NetFlow.ReadModel.Tenders;
 using System;
@@ -25,17 +26,17 @@ namespace NetFlow.ReadModel.Requests
             if (open)
             {
                 whereSql += " AND Status = @Status";
-                parameters.Add("Status", "Open");
+                parameters.Add("Status", MaterialRequestStatus.Open);
             }
             if (closed)
             {
                 whereSql += " AND Status = @Status";
-                parameters.Add("Status", "Closed");
+                parameters.Add("Status", MaterialRequestStatus.Closed);
             }
             if (waiting)
             {
                 whereSql += " AND Status = @Status";
-                parameters.Add("Status", "Waiting");
+                parameters.Add("Status", MaterialRequestStatus.PendingApproval);
             }
             if (my)
             {
