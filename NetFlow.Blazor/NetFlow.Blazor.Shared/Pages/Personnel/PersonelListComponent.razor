@@ -43,12 +43,12 @@
         </DxToolbar>
     </div>
 
-    <div class="Guarantee-list-root h-100">
+    <div class="Personnel-list-root h-100">
         <div class="h-100">
             <DxGrid @ref="Grid"
                     Data="Data"
                     KeyFieldName="Id"
-                    CssClass="Guarantee-list"
+                    CssClass="Personnel-list"
                     style="height:100%;"
                     SearchText="@SearchText"
                     SkeletonRowsEnabled="true"
@@ -62,7 +62,16 @@
                 <Columns>
                     <DxGridSelectionColumn Width="75px" />
                     <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
-                    <DxGridDataColumn Caption="Personel Kodu" FieldName="PersonnelCode"  />
+                    <DxGridDataColumn Caption="Personel Kodu" FieldName="PersonnelCode" >
+                        <CellDisplayTemplate>
+                            <a href="javascript:void(0);"
+                               style="font-weight:bold;color:#0056b3"
+                               @onclick="() => OpenDetails((PersonnelModel)context.DataItem)"
+                               @onclick:stopPropagation>
+                                @context.Value
+                            </a>
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
                     <DxGridDataColumn Caption="Cari Kodu" FieldName="CustomerCode"  />
                     <DxGridDataColumn Caption="Cari Adý" FieldName="CustomerName" />
                     <DxGridDataColumn Caption="Maaþ" FieldName="Salary" />
@@ -128,7 +137,7 @@
 
     async Task OnRowClick(GridRowClickEventArgs args)
     {
-        var personnel = (GuaranteeModel)Grid!.GetDataItem(args.VisibleIndex);
+        var personnel = (PersonnelModel)Grid!.GetDataItem(args.VisibleIndex);
     }
 
     void OnAddClick(ToolbarItemClickEventArgs e) => NavigationManager.NavigateTo("/personnel/createorupdate/");
@@ -146,6 +155,8 @@
         NavigationManager.NavigateTo($"/personnel/createorupdate/{personnel.Id}");
     }
 
+    void OpenDetails(PersonnelModel item)
+        => NavigationManager.NavigateTo($"/personnel/details/{item.Id}");
 
     public void Dispose()
     {

@@ -54,6 +54,7 @@
 ::deep .h-100 {
     height: 100%;
 }
+
 ::deep .action-button-rejected {
     margin-left: 5px;
 }
@@ -91,13 +92,13 @@
         font-size: 0.85rem;
     }
 
-.request-stats {
+.personnel-stats {
     display: flex;
     gap: 10px;
     margin-bottom: 2rem;
 }
 
-    .request-stats .request-stat {
+    .personnel-stats .personnel-stat {
         flex: 1;
         background: #f8f9fa;
         padding: 10px;
@@ -105,33 +106,34 @@
         text-align: center;
     }
 
-        .request-stats .request-stat .request-stat-title {
+        .personnel-stats .personnel-stat .personnel-stat-title {
             font-weight: 700;
         }
 
-.request-section-title {
+.personnel-section-title {
     font-weight: 700;
     border-bottom: 1px solid #eee;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
 }
 
-.request-info {
+.personnel-info {
     display: flex;
     flex-direction: column;
     gap: 8px;
     font-size: 0.85rem;
 }
 
-    .request-info .request-info-row {
+    .personnel-info .personnel-info-row {
         display: flex;
         justify-content: space-between;
     }
 
-        .request-info .request-info-row .request-info-strong {
+        .personnel-info .personnel-info-row .personnel-info-strong {
             font-weight: 600;
             text-align: right;
         }
+
 .authority-badge {
     display: inline-block;
     padding: 4px 10px;
@@ -143,26 +145,26 @@
     min-width: 80px;
 }
 
-.authority-badge.status-open {
-    background-color: #e6f4ea;
-    color: #1e7e34;
-    border: 1px solid #c3e6cb;
-}
+    .authority-badge.status-open {
+        background-color: #e6f4ea;
+        color: #1e7e34;
+        border: 1px solid #c3e6cb;
+    }
 
-.authority-badge.status-waiting {
-    background-color: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeeba;
-}
+    .authority-badge.status-waiting {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
 
-.authority-badge.status-rejected {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
+    .authority-badge.status-rejected {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
 
-.authority-badge.status-closed {
-    background-color: #e2e3e5;
-    color: #383d41;
-    border: 1px solid #d6d8db;
-}
+    .authority-badge.status-closed {
+        background-color: #e2e3e5;
+        color: #383d41;
+        border: 1px solid #d6d8db;
+    }

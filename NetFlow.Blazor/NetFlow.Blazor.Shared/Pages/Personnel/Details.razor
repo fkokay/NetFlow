@@ -1,3 +1,332 @@
 @page "/personnel/details/{Id:int}"
+@using System.Net.Http.Json
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
 
-@code{}
+
+<DxLayoutBreakpoint DeviceSize="DeviceSize.XSmall | DeviceSize.Small | DeviceSize.Medium"
+                    @bind-IsActive="@IsSmallScreen" />
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+
+            <DxToolbarItem IconCssClass="back-icon icon medium-icon"
+                           Tooltip="Geri"
+                           Click="NavigateBack" />
+
+            <DxToolbarItem>
+                <Template>
+                    <div class="custom-item">
+                        <div class="title">Personel Detay Sayfasý</div>
+                    </div>
+                </Template>
+            </DxToolbarItem>
+
+            @if (Model != null)
+            {
+
+
+                <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
+                               Click="LoadDataAsync"
+                               Tooltip="Yenile"
+                               IconCssClass="refresh-icon icon medium-icon" />
+            }
+        </DxToolbar>
+    </div>
+
+    <DxLoadingPanel Visible="@(!IsDataLoaded)"
+                    IsContentBlocked="true"
+                    IsContentVisible="false"
+                    Text="Yükleniyor...">
+
+        <DxGridLayout ColumnSpacing="1rem" RowSpacing="1rem">
+            <Columns>
+                @if (!IsSmallScreen)
+                {
+                    <DxGridLayoutColumn Width="1fr" />
+                    <DxGridLayoutColumn Width="3fr" />
+                }
+                else
+                {
+                    <DxGridLayoutColumn Width="100%" />
+                }
+            </Columns>
+
+            <Rows>
+                @if (!IsSmallScreen)
+                {
+                    <DxGridLayoutRow Areas="item1 item2" />
+                }
+                else
+                {
+                    <DxGridLayoutRow Areas="item1" />
+                    <DxGridLayoutRow Areas="item2" />
+                }
+            </Rows>
+
+            <Items>
+                <DxGridLayoutItem Area="item1">
+                    <Template>
+                        @if (Model != null)
+                        {
+                            <div class="card h-100 personnel-card">
+
+                             
+                                <div class="authority-header">
+                                    <div class="authority-avatar">
+                                        @Model.FirstName[0]@Model.LastName[0]
+                                    </div>
+
+                                    <div class="flex-grow-1">
+                                        <h5 class="authority-title mb-0">
+                                            @($"{Model.FirstName} {Model.LastName}")
+                                        </h5>
+                                        <small class="text-muted">
+                                            Personel Kodu: @Model.PersonnelCode
+                                        </small>
+                                    </div>
+
+                                    <span class="authority-badge @(Model.IsActive ? "bg-success" : "bg-danger")">
+                                        @(Model.IsActive ? "AKTÝF" : "PASÝF")
+                                    </span>
+                                </div>
+
+                                <div class="personnel-stats">
+                                    <div class="personnel-stat">
+                                        <div class="personnel-stat-title">@Model.Department</div>
+                                        <small>Departman</small>
+                                    </div>
+
+                                    <div class="personnel-stat">
+                                        <div class="personnel-stat-title">@Model.Title</div>
+                                        <small>Ünvan</small>
+                                    </div>
+
+                                    <div class="personnel-stat">
+                                        <div class="personnel-stat-title">@Model.AuthorityLevel</div>
+                                        <small>Yetki Seviyesi</small>
+                                    </div>
+                                </div>
+
+                                <h6 class="personnel-section-title">GENEL BÝLGÝLER</h6>
+
+                                <div class="personnel-info">
+                                    <div class="personnel-info-row">
+                                        <span>Ýþe Giriþ Tarihi:</span>
+                                        <span>@Model.HireDate.ToShortDateString()</span>
+                                    </div>
+
+                                    <div class="personnel-info-row">
+                                        <span>Çalýþma Süresi:</span>
+                                        <span>
+                                            @{
+                                                var duration = DateTime.Today.Year - Model.HireDate.Year;
+                                            }
+                                            @duration yýl
+                                        </span>
+                                    </div>
+
+                                    <div class="personnel-info-row">
+                                        <span>Sistem Kullanýcýsý:</span>
+                                        <span>@(Model.UserId.HasValue ? "Var" : "Yok")</span>
+                                    </div>
+                                </div>
+
+
+                                @if (!string.IsNullOrWhiteSpace(Model.Email) || !string.IsNullOrWhiteSpace(Model.Phone))
+                                {
+                                    <h6 class="personnel-section-title">ÝLETÝÞÝM</h6>
+                                    <div class="personnel-info">
+                                        @if (!string.IsNullOrWhiteSpace(Model.Email))
+                                        {
+                                            <div class="personnel-info-row">
+                                                <span>E-posta:</span>
+                                                <span>@Model.Email</span>
+                                            </div>
+                                        }
+
+                                        @if (!string.IsNullOrWhiteSpace(Model.Phone))
+                                        {
+                                            <div class="personnel-info-row">
+                                                <span>Telefon:</span>
+                                                <span>@Model.Phone</span>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+
+
+                                @if (!Model.IsActive && Model.TerminationDate.HasValue)
+                                {
+                                    <h6 class="personnel-section-title text-danger">ÝÞTEN AYRILIÞ</h6>
+                                    <div class="personnel-info">
+                                        <div class="personnel-info-row">
+                                            <span>Ayrýlýþ Tarihi:</span>
+                                            <span>@Model.TerminationDate.Value.ToShortDateString()</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </Template>
+                </DxGridLayoutItem>
+
+                <DxGridLayoutItem Area="item2">
+                    <Template>
+                        <DxTabs CssClass="card tabs"
+                                ActiveTabIndex="@ActiveTabIndex"
+                                ActiveTabIndexChanged="OnActiveTabIndexChanged">
+
+                            <DxTabPage Text="Cari Hesap Hareketleri">
+                            </DxTabPage>
+                            <DxTabPage Text="Maaþ Hareketleri">
+                            </DxTabPage>
+                        </DxTabs>
+                    </Template>
+                </DxGridLayoutItem>
+            </Items>
+        </DxGridLayout>
+    </DxLoadingPanel>
+</div>
+
+
+
+
+
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private PersonnelModel? Model;
+    private GridDevExtremeDataSource<PersonnelModel>? ItemDataSource;
+    private bool IsSmallScreen;
+    private bool IsDataLoaded;
+    private int ActiveTabIndex;
+    private bool AddPopupVisible { get; set; }
+    private int? SelectedRequestId { get; set; }
+    int SelectedItemId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsDataLoaded = false;
+        await LoadDataAsync();
+        IsDataLoaded = true;
+    }
+
+    private async Task LoadDataAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        var response = await client.GetAsync($"api/personnels/{Id}");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/personnels/list");
+            return;
+        }
+
+        Model = await response.Content.ReadFromJsonAsync<PersonnelModel>();
+        await LoadTabData(ActiveTabIndex);
+    }
+
+    private async Task OnActiveTabIndexChanged(int index)
+    {
+        ActiveTabIndex = index;
+        await LoadTabData(index);
+    }
+
+    private async Task LoadTabData(int index)
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        var baseUrl = "https://localhost:7071/api";
+
+        if (index == 0)
+        {
+            ItemDataSource = new GridDevExtremeDataSource<PersonnelModel>(
+                client,
+                NavigationManager.ToAbsoluteUri($"{baseUrl}/material-personnel-items?materialRequestId={Id}")
+            );
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+
+
+
+
+
+
+    async Task Grid_EditStart(GridEditStartEventArgs e)
+    {
+
+        e.Cancel = true;
+
+        var editModel = (MaterialRequestItemModel)e.DataItem;
+        SelectedItemId = editModel.Id;
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+    async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
+    {
+        e.Cancel = true;
+        var requestItem = (MaterialRequestItemModel)e.DataItem;
+        try
+        {
+            IsDataLoaded = false;
+            await InvokeAsync(StateHasChanged);
+
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+            var response = await client.DeleteAsync($"api/material-request-items/{requestItem.Id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadDataAsync();
+                ShowToast("Baþarýlý", "Kalem baþarýyla silindi.", ToastRenderStyle.Success, false);
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                ShowToast("Hata", errorMsg, ToastRenderStyle.Danger, true);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowToast("Hata", ex.Message, ToastRenderStyle.Danger, true);
+        }
+        finally
+        {
+            IsDataLoaded = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+
+
+
+    private void ShowToast(string title, string text, ToastRenderStyle style, bool isError)
+    {
+        ToastService.ShowToast(new ToastOptions()
+        {
+            Id = "toast",
+            ProviderName = "Overview",
+            ThemeMode = ToastThemeMode.Light,
+            RenderStyle = style,
+            Title = title,
+            Text = text,
+        }, RenderToastButton(isError));
+    }
+
+    private RenderFragment RenderToastButton(bool isError) =>
+        @<div class="d-flex gap-2">
+        <DxButton Click="@(isError? OnPopupError : OnPopupOk)"
+                  RenderStyle="@(isError ? ButtonRenderStyle.Danger : ButtonRenderStyle.Success)">Kapat</DxButton>
+    </div>;
+
+    private void OnPopupOk() => NavigationManager.NavigateTo("/personnel/list");
+    private void OnPopupError() { }
+    private void NavigateBack() => NavigationManager.NavigateTo("/personnel/list");
+}
