@@ -15,73 +15,66 @@
 
             <DxGrid Data="FulfillmentItems" PageSize="10">
                 <Columns>
+
                     <DxGridDataColumn FieldName="ItemCode" Caption="Kod" Width="120px" />
                     <DxGridDataColumn FieldName="ItemName" Caption="Adý" />
 
                     <DxGridDataColumn Caption="Talep Miktar" Width="150px">
-                        <CellDisplayTemplate>
+                        <CellDisplayTemplate Context="c">
                             @{
-                                var item = (MaterialRequestItemModel)context.DataItem;
-                                if (!SelectedRequestedQuantities.ContainsKey(item.Id))
-                                    SelectedRequestedQuantities[item.Id] = item.RequestedQuantity;
+                                var source = (MaterialRequestItemModel)c.DataItem;
+                                var item = GetOrCreateItem(source);
                             }
-                            <DxSpinEdit Value="@SelectedRequestedQuantities[item.Id]"
-                                        T="decimal" ReadOnly="true" Enabled="false"
+                            <DxSpinEdit @bind-Value="item.RequestedQuantity"
+                                        T="decimal"
+                                        ReadOnly="true"
+                                        Enabled="false"
+                                        Mask="@NumericMask.RealNumber" />
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+                    <DxGridDataColumn Caption="Tahmini Fiyat" Width="150px">
+                        <CellDisplayTemplate Context="c">
+                            @{
+                                var source = (MaterialRequestItemModel)c.DataItem;
+                            }
+                            <DxSpinEdit Value="@source.Price"
+                                        T="decimal"
+                                        ReadOnly="true"
+                                        Enabled="false"
                                         Mask="@NumericMask.RealNumber" />
                         </CellDisplayTemplate>
                     </DxGridDataColumn>
 
                     <DxGridDataColumn Caption="Karþýlanan Miktar" Width="150px">
-                        <CellDisplayTemplate>
+                        <CellDisplayTemplate Context="c">
                             @{
-                                var item = (MaterialRequestItemModel)context.DataItem;
-                                if (!SelectedFulfillmentQuantities.ContainsKey(item.Id))
-                                    SelectedFulfillmentQuantities[item.Id] = item.FulfilledQuantity;
+                                var source = (MaterialRequestItemModel)c.DataItem;
+                                var item = GetOrCreateItem(source);
                             }
-                            <DxSpinEdit Value="@SelectedFulfillmentQuantities[item.Id]"
+                            <DxSpinEdit @bind-Value="item.FulfilledQuantity"
                                         T="decimal"
-                                        ValueChanged="@((decimal newVal) => { SelectedFulfillmentQuantities[item.Id] = newVal; })"
                                         Mask="@NumericMask.RealNumber"
-                                        Enabled="@(IsEditable && !IsLoading)"
-                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                                        Enabled="@(IsEditable && !IsLoading)" />
                         </CellDisplayTemplate>
                     </DxGridDataColumn>
-
-                    <DxGridDataColumn Caption="Tahmini Fiyat" Width="150px">
-                        <CellDisplayTemplate>
-                            @{
-                                var item = (MaterialRequestItemModel)context.DataItem;
-                                if (!SelectedPrices.ContainsKey(item.Id))
-                                    SelectedPrices[item.Id] = item.Price;
-                            }
-                            <DxSpinEdit Value="@SelectedPrices[item.Id]"
-                                        T="decimal"
-                                        ValueChanged="@((decimal newVal) => { SelectedPrices[item.Id] = newVal; })"
-                                        Mask="@NumericMask.RealNumber"
-                                        Enabled="@(IsEditable && !IsLoading)"
-                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
-                        </CellDisplayTemplate>
-                    </DxGridDataColumn>
-
-                    <DxGridDataColumn FieldName="Unit" Caption="Birim" Width="80px" />
 
                     <DxGridDataColumn Caption="Karþýlama Yöntemi" Width="200px">
-                        <CellDisplayTemplate>
+                        <CellDisplayTemplate Context="c">
                             @{
-                                var item = (MaterialRequestItemModel)context.DataItem;
-                                if (!SelectedFulfillmentTypes.ContainsKey(item.Id))
-                                    SelectedFulfillmentTypes[item.Id] = item.FulfillmentType;
+                                var source = (MaterialRequestItemModel)c.DataItem;
+                                var item = GetOrCreateItem(source);
                             }
                             <DxComboBox Data="@FulfillmentTypes"
-                                        Value="@SelectedFulfillmentTypes[item.Id]"
-                                        ValueChanged="@((MaterialRequestItemFulfillmentType val) => SelectedFulfillmentTypes[item.Id] = val)"
+                                        @bind-Value="item.FulfillmentType"
                                         TextFieldName="Text"
                                         ValueFieldName="Value"
                                         Enabled="@(IsEditable && !IsLoading)" />
                         </CellDisplayTemplate>
                     </DxGridDataColumn>
+
                 </Columns>
             </DxGrid>
+
         </div>
     </BodyContentTemplate>
 
@@ -105,30 +98,22 @@
     [Parameter] public int RequestId { get; set; }
     [Parameter] public bool IsEditable { get; set; }
     [Parameter] public EventCallback OnSuccess { get; set; }
-
-    private bool IsLoading { get; set; } = false;
+    private bool IsLoading { get; set; }
     private GridDevExtremeDataSource<MaterialRequestItemModel>? FulfillmentItems;
-    private Dictionary<int, MaterialRequestItemFulfillmentType> SelectedFulfillmentTypes = new();
-    private Dictionary<int, decimal> SelectedFulfillmentQuantities = new();
-    private Dictionary<int, decimal> SelectedRequestedQuantities = new();
-    private Dictionary<int, decimal> SelectedPrices= new();
+    private FulfillmentRequestModel Model { get; set; } = new();
 
     private List<EnumItem<MaterialRequestItemFulfillmentType>> FulfillmentTypes =
-      Enum.GetValues<MaterialRequestItemFulfillmentType>()
-      .Select(x => new EnumItem<MaterialRequestItemFulfillmentType>
-      {
-          Value = x,
-          Text = x.GetDescription()
-      })
-      .ToList();
-
+        Enum.GetValues<MaterialRequestItemFulfillmentType>()
+            .Select(x => new EnumItem<MaterialRequestItemFulfillmentType>
+            {
+                Value = x,
+                Text = x.GetDescription()
+            }).ToList();
 
     protected override async Task OnParametersSetAsync()
     {
         if (Visible && RequestId > 0 && !IsLoading)
-        {
             await LoadItems();
-        }
     }
 
     private async Task LoadItems()
@@ -136,15 +121,22 @@
         try
         {
             IsLoading = true;
-            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+
+            Model = new FulfillmentRequestModel
+            {
+                Id = RequestId
+            };
+
+            var client = await ApiClientFactory.CreateAsync(
+                HttpClientFactory.CreateClient("ApiClient"));
+
             var baseUrl = "https://localhost:7071/api";
-            SelectedFulfillmentQuantities.Clear();
-            SelectedRequestedQuantities.Clear();
-            SelectedFulfillmentTypes.Clear();
 
             FulfillmentItems = new GridDevExtremeDataSource<MaterialRequestItemModel>(
                 client,
-                NavigationManager.ToAbsoluteUri($"{baseUrl}/material-request-items?materialRequestId={RequestId}")
+                NavigationManager.ToAbsoluteUri(
+                    $"{baseUrl}/material-request-items?materialRequestId={RequestId}"
+                )
             );
         }
         finally
@@ -153,25 +145,39 @@
         }
     }
 
+
+    private FulfillmentRequestItemModel GetOrCreateItem(MaterialRequestItemModel model)
+    {
+        var item = Model.Items.FirstOrDefault(x => x.ItemId == model.Id);
+        if (item != null)
+            return item;
+
+        item = new FulfillmentRequestItemModel
+        {
+            ItemId = model.Id,
+            RequestedQuantity = model.RequestedQuantity,
+            FulfilledQuantity = model.FulfilledQuantity,
+            FulfillmentType = model.FulfillmentType,
+        };
+
+        Model.Items.Add(item);
+        return item;
+    }
+
     private async Task OnConfirm()
     {
         if (IsLoading) return;
 
         try
         {
-
             IsLoading = true;
-            var postData = SelectedFulfillmentTypes.Select(x => new
-            {
-                ItemId = x.Key,
-                FulfillmentType = x.Value,
-                FulfilledQuantity = SelectedFulfillmentQuantities.GetValueOrDefault(x.Key, 0),
-                RequestedQuantity = SelectedRequestedQuantities.GetValueOrDefault(x.Key, 0),
-                Price = SelectedPrices.GetValueOrDefault(x.Key, 0),
-            }).ToList();
 
-            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
-            var response = await client.PutAsJsonAsync($"api/material-requests/fulfill-items", postData);
+            var client = await ApiClientFactory.CreateAsync(
+                HttpClientFactory.CreateClient("ApiClient"));
+
+            var response = await client.PutAsJsonAsync(
+                "api/material-requests/fulfill-items",
+                Model);
 
             if (response.IsSuccessStatusCode)
             {
@@ -181,8 +187,9 @@
             }
             else
             {
-                var errorMsg = await response.Content.ReadAsStringAsync();
-                ShowToast("Hata", errorMsg, ToastRenderStyle.Danger);
+                ShowToast("Hata",
+                    await response.Content.ReadAsStringAsync(),
+                    ToastRenderStyle.Danger);
             }
         }
         catch (Exception ex)
@@ -195,7 +202,6 @@
         }
     }
 
-    
     private void ShowToast(string title, string text, ToastRenderStyle style)
     {
         ToastService.ShowToast(new ToastOptions()
@@ -209,5 +215,6 @@
         });
     }
 
-    private async Task Close() => await VisibleChanged.InvokeAsync(false);
+    private async Task Close() =>
+        await VisibleChanged.InvokeAsync(false);
 }

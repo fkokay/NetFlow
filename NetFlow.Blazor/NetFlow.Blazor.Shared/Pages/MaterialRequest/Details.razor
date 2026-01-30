@@ -61,10 +61,14 @@
                     </DxToolbarItem>
                 }
 
+
+
+
                 <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
                                Click="LoadDataAsync"
                                Tooltip="Yenile"
                                IconCssClass="refresh-icon icon medium-icon" />
+
             }
         </DxToolbar>
     </div>
@@ -253,6 +257,10 @@
                                     </Columns>
                                 </DxGrid>
                             </DxTabPage>
+
+                             <DxTabPage Text="Hareketler" CssClass="tab-page">
+                                <MaterialRequestHistory RequestId="Id" />
+                                </DxTabPage>
                         </DxTabs>
                     </Template>
                 </DxGridLayoutItem>
@@ -267,19 +275,14 @@
                               IsEditable="@(Model?.Status == MaterialRequestStatus.Open)"
                               OnSuccess="LoadDataAsync" />
 
-
 <MaterialRequestRejectionComponent @bind-Visible="IsRejectionPopupVisible"
                                    RequestId="@(Model?.Id ?? 0)"
                                    OnSuccess="LoadDataAsync" />
-@if (IsItemCreateOrUpdatePopupVisible)
-{
-    <ItemCreateOrUpdateComponent @bind-Visible="IsItemCreateOrUpdatePopupVisible"
-                                 RequestId="@(Model?.Id ?? 0)"
-                                 MaterialRequestItemId="SelectedItemId"
-                                 OnSuccess="LoadDataAsync" />
-}
 
-
+<ItemCreateOrUpdateComponent @bind-Visible="IsItemCreateOrUpdatePopupVisible"
+                             RequestId="@(Model?.Id ?? 0)"
+                             MaterialRequestItemId="SelectedItemId"
+                             OnSuccess="LoadDataAsync" />
 
 
 
@@ -342,7 +345,14 @@
     }
 
 
+    async Task ReopenPopup(Func<Task> beforeOpen = null)
+    {
+        if (beforeOpen != null)
+            await beforeOpen();
 
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+    }
 
 
 
@@ -380,35 +390,50 @@
             await InvokeAsync(StateHasChanged);
         }
     }
-    private void OnRejectClick()
+    async Task OnRejectClick()
     {
+        IsRejectionPopupVisible = false;
+        await ReopenPopup();
         IsRejectionPopupVisible = true;
     }
-    private void OnDemandFulfillmentClick() => IsFulfillmentPopupVisible = true;
+    async Task OnDemandFulfillmentClick()
+    {
+        IsFulfillmentPopupVisible = false;
+        await ReopenPopup();
+        IsFulfillmentPopupVisible = true;
+    }
+
    
-
-    
-
-
     //Kalem Ekleme Silme Düzenleme
     async Task OnAddNewItemClick()
     {
-        SelectedItemId = 0;
         IsItemCreateOrUpdatePopupVisible = false;
-        await Task.Yield();
+
+        await ReopenPopup(() =>
+        {
+            SelectedItemId = 0;
+            return Task.CompletedTask;
+        });
+
         IsItemCreateOrUpdatePopupVisible = true;
     }
     async Task Grid_EditStart(GridEditStartEventArgs e)
     {
-
         e.Cancel = true;
 
-        var editModel = (MaterialRequestItemModel)e.DataItem;
-        SelectedItemId = editModel.Id;
+        IsItemCreateOrUpdatePopupVisible = false;
+
+        await ReopenPopup(() =>
+        {
+            var editModel = (MaterialRequestItemModel)e.DataItem;
+            SelectedItemId = editModel.Id;
+            return Task.CompletedTask;
+        });
+
         IsItemCreateOrUpdatePopupVisible = true;
-        StateHasChanged();
-        await Task.CompletedTask;
     }
+
+
     async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
     {
         e.Cancel = true;
@@ -443,9 +468,6 @@
             await InvokeAsync(StateHasChanged);
         }
     }
-
-
-
 
     private void ShowToast(string title, string text, ToastRenderStyle style, bool isError)
     {

@@ -4,6 +4,7 @@ using NetFlow.Application.MaterialRequests;
 using NetFlow.Application.TenderOpexes;
 using NetFlow.Domain.Common;
 using NetFlow.Domain.Common.Pagination;
+using NetFlow.Domain.Identity;
 using NetFlow.ReadModel.TenderOpex;
 
 namespace NetFlow.Api.Controllers
@@ -16,13 +17,15 @@ namespace NetFlow.Api.Controllers
         private readonly TenderOpexWriterService _write;
         private readonly MaterialRequestWriteService _materialRequestWrite;
         private readonly MaterialRequestItemWriteService _materialRequestItemWrite;
+        private readonly CurrentUser _current;
 
-        public TenderOpexController(TenderOpexReadService read, TenderOpexWriterService writer, MaterialRequestWriteService materialRequestWriteService, MaterialRequestItemWriteService materialRequestItemWriteService)
+        public TenderOpexController(TenderOpexReadService read, TenderOpexWriterService writer, MaterialRequestWriteService materialRequestWriteService, MaterialRequestItemWriteService materialRequestItemWriteService, CurrentUser current)
         {
             _read = read;
             _write = writer;
             _materialRequestWrite = materialRequestWriteService;
             _materialRequestItemWrite = materialRequestItemWriteService;
+            _current = current;
         }
 
         // GET api/tender-opex?tenderId=5
@@ -40,7 +43,12 @@ namespace NetFlow.Api.Controllers
         [HttpPost("create-material-request")]
         public async Task<IActionResult> CreateMaterialRequest([FromBody] TenderOpexCreateMaterialRequest request)
         {
-            int materialRequestId = await _materialRequestWrite.CreateAsync(new CreateMaterialRequest()
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            int materialRequestId = await _materialRequestWrite.CreateAsync(_current.User.Id.Value, new CreateMaterialRequest()
             {
                 Description = request.Description,
                 Priority = request.Priority,

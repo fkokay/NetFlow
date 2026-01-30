@@ -134,6 +134,11 @@
             text-align: right;
         }
 
+.personnel-info-row.text-danger {
+    color: red !important;
+}
+
+
 .authority-badge {
     display: inline-block;
     padding: 4px 10px;

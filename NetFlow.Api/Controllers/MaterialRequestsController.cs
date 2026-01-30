@@ -86,7 +86,11 @@ namespace NetFlow.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateMaterialRequest request)
         {
-            var id = await _write.CreateAsync(request);
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+            var id = await _write.CreateAsync(_current.User.Id.Value, request);
 
             return CreatedAtAction(
                 nameof(Get),
@@ -97,7 +101,11 @@ namespace NetFlow.Api.Controllers
         [HttpPut("rejection")]
         public async Task<IActionResult> Rejection([FromBody] RejectionMaterialRequest request)
         {
-            var id = await _write.RejectionAsync(request);
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+            var id = await _write.RejectionAsync(_current.User.Id.Value, request);
 
             return CreatedAtAction(
                 nameof(Get),
@@ -123,9 +131,15 @@ namespace NetFlow.Api.Controllers
 
 
         [HttpPut("fulfill-items")]
-        public async Task<IActionResult> FulfillItems([FromBody] List<FulfillmentRequest> requests)
+        public async Task<IActionResult> FulfillItems([FromBody] FulfillmentRequest requests)
         {
-            var ids = await _write.FulFillmentAsync(requests);
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+
+            var ids = await _write.FulFillmentAsync(_current.User.Id.Value,requests);
             return Ok(new
             {
                 ids.Count,

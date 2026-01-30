@@ -49,7 +49,7 @@ namespace NetFlow.ReadModel.MaterialRequestItems
             {
                 return new PagedResult
                 {
-                    Data = Array.Empty<MaterialRequestDto>(),
+                    Data = Array.Empty<MaterialRequestItemDto>(),
                     TotalCount = totalCount
                 };
             }

@@ -1,17 +1,16 @@
-﻿using NetFlow.Domain.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace NetFlow.Application.MaterialRequests
+namespace NetFlow.Blazor.Shared.Models
 {
-    public class FulfillmentRequest
+    public class FulfillmentRequestModel
     {
         public int Id { get; set; }
-        public List<FulfillmentRequestItem> Items { get; set; } = new List<FulfillmentRequestItem>();
+        public List<FulfillmentRequestItemModel> Items { get; set; } = new List<FulfillmentRequestItemModel>();
     }
 
-    public class FulfillmentRequestItem
+    public class FulfillmentRequestItemModel
     {
         public int ItemId { get; set; }
         public MaterialRequestItemFulfillmentType FulfillmentType { get; set; } = MaterialRequestItemFulfillmentType.Undefined;

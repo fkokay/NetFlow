@@ -2,6 +2,7 @@
 using NetFlow.Application.Common.Interfaces;
 using NetFlow.Application.GuaranteeCommissions;
 using NetFlow.Application.Guarantees;
+using NetFlow.Application.MaterialRequestHistories;
 using NetFlow.Domain.Entities;
 using NetFlow.Domain.Enums;
 using NetFlow.Domain.Identity;
@@ -15,13 +16,15 @@ namespace NetFlow.Application.MaterialRequests
     public class MaterialRequestWriteService
     {
         private readonly INetFlowDbContext _db;
+        private readonly MaterialRequestHistoryWriteService _materialRequestHistoryWriteService;
 
-        public MaterialRequestWriteService(INetFlowDbContext db)
+        public MaterialRequestWriteService(INetFlowDbContext db, MaterialRequestHistoryWriteService materialRequestHistoryWriteService)
         {
             _db = db;
+            _materialRequestHistoryWriteService = materialRequestHistoryWriteService;
         }
 
-        public async Task<int> CreateAsync(CreateMaterialRequest request)
+        public async Task<int> CreateAsync(int userId, CreateMaterialRequest request)
         {
 
             var materialRequest = new MaterialRequestEntity();
@@ -29,7 +32,7 @@ namespace NetFlow.Application.MaterialRequests
             materialRequest.RequestedByUserId = 1;
             materialRequest.RequestDate = DateTime.UtcNow;
             materialRequest.CreatedAt = DateTime.UtcNow;
-            materialRequest.CreatedByUserId = 1;
+            materialRequest.CreatedByUserId = userId;
             materialRequest.RequestNo = "MR-" + DateTime.UtcNow.Ticks;
             materialRequest.RequestType = request.RequestType;
             materialRequest.RequiredDate = request.RequiredDate;
@@ -39,13 +42,22 @@ namespace NetFlow.Application.MaterialRequests
             materialRequest.SourceType = request.SourceType;
             materialRequest.Status = MaterialRequestStatus.PendingApproval;
             materialRequest.AssignedToUserId = 1;
+            await _db.MaterialRequests.AddAsync(materialRequest);
+            await _db.SaveChangesAsync();
 
-            _db.MaterialRequests.Add(materialRequest);
+            // Log history
+            var materialRequstHistory = new MaterialRequestHistoryEntity();
+            materialRequstHistory.Action = MaterialRequestHistoryAction.Created;
+            materialRequstHistory.ActionDate = DateTime.UtcNow;
+            materialRequstHistory.MaterialRequestId = materialRequest.Id;
+            materialRequstHistory.ActionByUserId = userId;
+            materialRequstHistory.Notes = "Talep Oluşturuldu";
+            await _db.MaterialRequestsHistory.AddAsync(materialRequstHistory);
             await _db.SaveChangesAsync();
             return materialRequest.Id;
         }
 
-        public async Task<int> RejectionAsync(RejectionMaterialRequest request)
+        public async Task<int> RejectionAsync(int currentUserId, RejectionMaterialRequest request)
         {
             var materialRequest = await _db.MaterialRequests
                 .FirstOrDefaultAsync(x => x.Id == request.Id);
@@ -55,8 +67,21 @@ namespace NetFlow.Application.MaterialRequests
 
             materialRequest.Status = MaterialRequestStatus.Rejected;
             materialRequest.RejectionReason = request.RejectionReason;
-
             await _db.SaveChangesAsync();
+
+
+
+            // Log history
+            var materialRequstHistory = new MaterialRequestHistoryEntity();
+            materialRequstHistory.Action = MaterialRequestHistoryAction.Rejected;
+            materialRequstHistory.ActionDate = DateTime.UtcNow;
+            materialRequstHistory.MaterialRequestId = materialRequest.Id;
+            materialRequstHistory.ActionByUserId = currentUserId;
+            materialRequstHistory.Notes = "Talep Reddedildi";
+            await _db.MaterialRequestsHistory.AddAsync(materialRequstHistory);
+            await _db.SaveChangesAsync();
+
+
             return materialRequest.Id;
         }
         public async Task<int> ApprovedAsync(int currentUserId, int materialId)
@@ -70,32 +95,53 @@ namespace NetFlow.Application.MaterialRequests
             materialRequest.Status = MaterialRequestStatus.Open;
             materialRequest.ApprovalDate = DateTime.UtcNow;
             materialRequest.ApprovedByUserId = currentUserId;
+            await _db.SaveChangesAsync();
 
+
+
+            // Log history
+            var materialRequstHistory = new MaterialRequestHistoryEntity();
+            materialRequstHistory.Action = MaterialRequestHistoryAction.Approved;
+            materialRequstHistory.ActionDate = DateTime.UtcNow;
+            materialRequstHistory.MaterialRequestId = materialRequest.Id;
+            materialRequstHistory.ActionByUserId = currentUserId;
+            materialRequstHistory.Notes = "Talep Onaylandı";
+            await _db.MaterialRequestsHistory.AddAsync(materialRequstHistory);
             await _db.SaveChangesAsync();
             return materialRequest.Id;
         }
 
 
-        public async Task<List<int>> FulFillmentAsync(List<FulfillmentRequest> requests)
+        public async Task<List<int>> FulFillmentAsync(int currentUserId, FulfillmentRequest request)
         {
             var updatedIds = new List<int>();
-
-            foreach (var request in requests)
+            
+            foreach (var item in request.Items)
             {
-                var item = await _db.MaterialRequestItems
-                    .FirstOrDefaultAsync(x => x.Id == request.ItemId);
+                var requestItem = await _db.MaterialRequestItems
+                    .FirstOrDefaultAsync(x => x.Id == item.ItemId);
 
-                if (item == null)
-                    throw new Exception($"Talep Satırı bulunamadı (ItemId: {request.ItemId})");
+                if (requestItem == null)
+                    throw new Exception($"Talep Satırı bulunamadı (ItemId: {item.ItemId})");
 
-                item.FulfillmentType = request.FulfillmentType;
-                item.RequestedQuantity = request.RequestedQuantity;
-                item.FulfilledQuantity = request.FulfilledQuantity;
-                item.Price = request.Price;
-                updatedIds.Add(item.Id);
+                requestItem.FulfillmentType = item.FulfillmentType;
+                requestItem.RequestedQuantity = item.RequestedQuantity;
+                requestItem.FulfilledQuantity = item.FulfilledQuantity;
+                updatedIds.Add(requestItem.Id);
             }
-
             await _db.SaveChangesAsync();
+
+
+            // Log history
+            var materialRequstHistory = new MaterialRequestHistoryEntity();
+            materialRequstHistory.Action = MaterialRequestHistoryAction.Fulfilled;
+            materialRequstHistory.ActionDate = DateTime.UtcNow;
+            materialRequstHistory.MaterialRequestId = request.Id;
+            materialRequstHistory.ActionByUserId = currentUserId;
+            materialRequstHistory.Notes = "Talep Karşılandı";
+            await _db.MaterialRequestsHistory.AddAsync(materialRequstHistory);
+            await _db.SaveChangesAsync();
+           
             return updatedIds;
         }
     }

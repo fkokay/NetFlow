@@ -1,0 +1,33 @@
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+
+<DxGrid Data="Model" ShowSearchBox="true" SearchBoxNullText="Arama yapmak için metin girin…" style="height:100%;">
+    <Columns>
+        <DxGridDataColumn FieldName="RequestNo" Caption="Talep Numarasý" />
+        <DxGridDataColumn FieldName="Notes" Caption="Notlar" />
+        <DxGridDataColumn FieldName="ActionByUserFullName" Caption="Personel" />
+        <DxGridDataColumn FieldName="ActionDate" Caption="Tarih" />
+        <DxGridDataColumn Caption="Durum" FieldName="Action" Width="120px">
+            <CellDisplayTemplate>
+                <span class="status-badge">
+                    @(((MaterialRequestHistoryModel)context.DataItem).Action.GetDescription())
+                </span>
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+    </Columns>
+</DxGrid>
+
+@code {
+    private GridDevExtremeDataSource<MaterialRequestHistoryModel>? Model { get; set; }
+
+    [Parameter]
+    public int RequestId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        string baseUrl = "https://localhost:7071/api";
+        Model = new GridDevExtremeDataSource<MaterialRequestHistoryModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/material-request-histories?materialRequestId={RequestId}"));
+    }
+}

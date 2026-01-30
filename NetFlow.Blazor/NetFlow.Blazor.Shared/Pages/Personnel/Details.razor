@@ -1,4 +1,4 @@
-@page "/personnel/details/{Id:int}"
+ï»¿@page "/personnel/details/{Id:int}"
 @using System.Net.Http.Json
 @inject NavigationManager NavigationManager
 @inject IApiClientFactory ApiClientFactory
@@ -20,7 +20,7 @@
             <DxToolbarItem>
                 <Template>
                     <div class="custom-item">
-                        <div class="title">Personel Detay Sayfasý</div>
+                        <div class="title">Personel Detay SayfasÄ±</div>
                     </div>
                 </Template>
             </DxToolbarItem>
@@ -28,7 +28,23 @@
             @if (Model != null)
             {
 
+                if (Model.TerminationDate != null)
+                {
 
+                }
+                else
+                {
+                    <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                        <Template>
+                            <DxButton Text="Ä°ÅŸten Ã‡Ä±kar"
+                                      Click="@TerminatedClick"
+                                      class="action-button-return"
+                                      RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                      RenderStyle="ButtonRenderStyle.Primary" />
+                        </Template>
+                    </DxToolbarItem>
+
+                }
                 <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
                                Click="LoadDataAsync"
                                Tooltip="Yenile"
@@ -40,7 +56,7 @@
     <DxLoadingPanel Visible="@(!IsDataLoaded)"
                     IsContentBlocked="true"
                     IsContentVisible="false"
-                    Text="Yükleniyor...">
+                    Text="YÃ¼kleniyor...">
 
         <DxGridLayout ColumnSpacing="1rem" RowSpacing="1rem">
             <Columns>
@@ -74,7 +90,7 @@
                         {
                             <div class="card h-100 personnel-card">
 
-                             
+
                                 <div class="authority-header">
                                     <div class="authority-avatar">
                                         @Model.FirstName[0]@Model.LastName[0]
@@ -90,7 +106,7 @@
                                     </div>
 
                                     <span class="authority-badge @(Model.IsActive ? "bg-success" : "bg-danger")">
-                                        @(Model.IsActive ? "AKTÝF" : "PASÝF")
+                                        @(Model.IsActive ? "AKTÄ°F" : "PASÄ°F")
                                     </span>
                                 </div>
 
@@ -102,7 +118,7 @@
 
                                     <div class="personnel-stat">
                                         <div class="personnel-stat-title">@Model.Title</div>
-                                        <small>Ünvan</small>
+                                        <small>Ãœnvan</small>
                                     </div>
 
                                     <div class="personnel-stat">
@@ -111,64 +127,44 @@
                                     </div>
                                 </div>
 
-                                <h6 class="personnel-section-title">GENEL BÝLGÝLER</h6>
+                                <h6 class="personnel-section-title">GENEL BÄ°LGÄ°LER</h6>
 
                                 <div class="personnel-info">
                                     <div class="personnel-info-row">
-                                        <span>Ýþe Giriþ Tarihi:</span>
+                                        <span>Ä°ÅŸe GiriÅŸ Tarihi:</span>
                                         <span>@Model.HireDate.ToShortDateString()</span>
                                     </div>
 
                                     <div class="personnel-info-row">
-                                        <span>Çalýþma Süresi:</span>
+                                        <span>Ã‡alÄ±ÅŸma SÃ¼resi:</span>
                                         <span>
                                             @{
                                                 var duration = DateTime.Today.Year - Model.HireDate.Year;
                                             }
-                                            @duration yýl
+                                            @duration yÄ±l
                                         </span>
                                     </div>
 
                                     <div class="personnel-info-row">
-                                        <span>Sistem Kullanýcýsý:</span>
+                                        <span>Sistem KullanÄ±cÄ±sÄ±:</span>
                                         <span>@(Model.UserId.HasValue ? "Var" : "Yok")</span>
+                                    </div>
+                                    <div class="personnel-info-row">
+                                        <span>E-posta:</span>
+                                        <span>@(!string.IsNullOrWhiteSpace(Model.Email) ? Model.Email : "-")</span>
+                                    </div>
+
+                                    <div class="personnel-info-row">
+                                        <span>Telefon:</span>
+                                        <span>@(!string.IsNullOrWhiteSpace(Model.Phone) ? Model.Phone : "-")</span>
+                                    </div>
+                                    <div class="personnel-info-row text-danger">
+                                        <span>AyrÄ±lÄ±ÅŸ Tarihi:</span>
+                                        <span>@(Model.TerminationDate.HasValue? Model.TerminationDate.Value.ToShortDateString() : "-")</span>
                                     </div>
                                 </div>
 
-
-                                @if (!string.IsNullOrWhiteSpace(Model.Email) || !string.IsNullOrWhiteSpace(Model.Phone))
-                                {
-                                    <h6 class="personnel-section-title">ÝLETÝÞÝM</h6>
-                                    <div class="personnel-info">
-                                        @if (!string.IsNullOrWhiteSpace(Model.Email))
-                                        {
-                                            <div class="personnel-info-row">
-                                                <span>E-posta:</span>
-                                                <span>@Model.Email</span>
-                                            </div>
-                                        }
-
-                                        @if (!string.IsNullOrWhiteSpace(Model.Phone))
-                                        {
-                                            <div class="personnel-info-row">
-                                                <span>Telefon:</span>
-                                                <span>@Model.Phone</span>
-                                            </div>
-                                        }
-                                    </div>
-                                }
-
-
-                                @if (!Model.IsActive && Model.TerminationDate.HasValue)
-                                {
-                                    <h6 class="personnel-section-title text-danger">ÝÞTEN AYRILIÞ</h6>
-                                    <div class="personnel-info">
-                                        <div class="personnel-info-row">
-                                            <span>Ayrýlýþ Tarihi:</span>
-                                            <span>@Model.TerminationDate.Value.ToShortDateString()</span>
-                                        </div>
-                                    </div>
-                                }
+                               
                             </div>
                         }
                     </Template>
@@ -182,7 +178,7 @@
 
                             <DxTabPage Text="Cari Hesap Hareketleri">
                             </DxTabPage>
-                            <DxTabPage Text="Maaþ Hareketleri">
+                            <DxTabPage Text="MaaÅŸ Hareketleri">
                             </DxTabPage>
                         </DxTabs>
                     </Template>
@@ -194,7 +190,9 @@
 
 
 
-
+<TerminatePersonnelComponent @bind-Visible="IsTerminatedPopupVisible"
+                             PersonnelId="Id"
+                             OnSuccess="OnTerminateSuccess" />
 
 
 @code {
@@ -205,9 +203,8 @@
     private bool IsSmallScreen;
     private bool IsDataLoaded;
     private int ActiveTabIndex;
-    private bool AddPopupVisible { get; set; }
-    private int? SelectedRequestId { get; set; }
-    int SelectedItemId;
+    private bool IsTerminatedPopupVisible { get; set; } = false;
+    private int SelectedPersonnelId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -218,7 +215,9 @@
 
     private async Task LoadDataAsync()
     {
-        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        var client = await ApiClientFactory.CreateAsync(
+            HttpClientFactory.CreateClient("ApiClient"));
+
         var response = await client.GetAsync($"api/personnels/{Id}");
 
         if (!response.IsSuccessStatusCode)
@@ -239,40 +238,35 @@
 
     private async Task LoadTabData(int index)
     {
-        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        var client = await ApiClientFactory.CreateAsync(
+            HttpClientFactory.CreateClient("ApiClient"));
+
         var baseUrl = "https://localhost:7071/api";
 
         if (index == 0)
         {
             ItemDataSource = new GridDevExtremeDataSource<PersonnelModel>(
                 client,
-                NavigationManager.ToAbsoluteUri($"{baseUrl}/material-personnel-items?materialRequestId={Id}")
+                NavigationManager.ToAbsoluteUri($"{baseUrl}/personnels?id={Id}")
             );
         }
+
         await InvokeAsync(StateHasChanged);
     }
 
-
-
-
-
-
-
-
     async Task Grid_EditStart(GridEditStartEventArgs e)
     {
-
         e.Cancel = true;
-
-        var editModel = (MaterialRequestItemModel)e.DataItem;
-        SelectedItemId = editModel.Id;
-        StateHasChanged();
-        await Task.CompletedTask;
+        var editModel = (PersonnelModel)e.DataItem;
+        SelectedPersonnelId = editModel.Id;
+        await InvokeAsync(StateHasChanged);
     }
+
     async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
     {
         e.Cancel = true;
-        var requestItem = (MaterialRequestItemModel)e.DataItem;
+        var personnel = (PersonnelModel)e.DataItem;
+
         try
         {
             IsDataLoaded = false;
@@ -280,22 +274,27 @@
 
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
-            var response = await client.DeleteAsync($"api/material-request-items/{requestItem.Id}");
+
+            var response = await client.DeleteAsync(
+                $"api/personnels/{personnel.Id}");
 
             if (response.IsSuccessStatusCode)
             {
                 await LoadDataAsync();
-                ShowToast("Baþarýlý", "Kalem baþarýyla silindi.", ToastRenderStyle.Success, false);
+                ShowToast("BaÅŸarÄ±lÄ±", "Personel baÅŸarÄ±yla silindi.",
+                          ToastRenderStyle.Success, false);
             }
             else
             {
                 var errorMsg = await response.Content.ReadAsStringAsync();
-                ShowToast("Hata", errorMsg, ToastRenderStyle.Danger, true);
+                ShowToast("Hata", errorMsg,
+                          ToastRenderStyle.Danger, true);
             }
         }
         catch (Exception ex)
         {
-            ShowToast("Hata", ex.Message, ToastRenderStyle.Danger, true);
+            ShowToast("Hata", ex.Message,
+                      ToastRenderStyle.Danger, true);
         }
         finally
         {
@@ -303,11 +302,28 @@
             await InvokeAsync(StateHasChanged);
         }
     }
+    async Task ReopenPopup(Func<Task> beforeOpen = null)
+    {
+        if (beforeOpen != null)
+            await beforeOpen();
 
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+    }
+    async Task TerminatedClick()
+    {
+        IsTerminatedPopupVisible = false;
+        await ReopenPopup();
+        IsTerminatedPopupVisible = true;
+    }
 
+    private async Task OnTerminateSuccess()
+    {
+        await LoadDataAsync();
+    }
 
-
-    private void ShowToast(string title, string text, ToastRenderStyle style, bool isError)
+    private void ShowToast(string title, string text,
+                           ToastRenderStyle style, bool isError)
     {
         ToastService.ShowToast(new ToastOptions()
         {
@@ -323,10 +339,17 @@
     private RenderFragment RenderToastButton(bool isError) =>
         @<div class="d-flex gap-2">
         <DxButton Click="@(isError? OnPopupError : OnPopupOk)"
-                  RenderStyle="@(isError ? ButtonRenderStyle.Danger : ButtonRenderStyle.Success)">Kapat</DxButton>
-    </div>;
+                  RenderStyle="@(isError ? ButtonRenderStyle.Danger
+                                                            : ButtonRenderStyle.Success)">
+        Kapat
+    </DxButton>
+</div>;
 
-    private void OnPopupOk() => NavigationManager.NavigateTo("/personnel/list");
+    private void OnPopupOk()
+        => NavigationManager.NavigateTo("/personnel/list");
+
     private void OnPopupError() { }
-    private void NavigateBack() => NavigationManager.NavigateTo("/personnel/list");
+
+    private void NavigateBack()
+        => NavigationManager.NavigateTo("/personnel/list");
 }

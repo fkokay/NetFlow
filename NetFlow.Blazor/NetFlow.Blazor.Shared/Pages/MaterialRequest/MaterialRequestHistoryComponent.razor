@@ -1,0 +1,87 @@
+@using System.Net.Http.Json
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
+@inject NavigationManager NavigationManager
+
+<DxPopup @bind-Visible="@Visible"
+         HeaderText="Hareke"
+         Width="900px"
+         ShowFooter="true">
+    <BodyContentTemplate Context="fulfillmentContext">
+        <div style="position: relative;">
+
+            <DxLoadingPanel @bind-Visible="@IsLoading" Text="Yükleniyor..." />
+
+            <DxGrid Data="Model"
+                    ShowFilterRow="true"
+                    ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
+                <Columns>
+                    <DxGridDataColumn FieldName="RequestNo" Caption="Talep Numarasý" />
+                    <DxGridDataColumn FieldName="Notes" Caption="Notlar" />
+                    <DxGridDataColumn FieldName="ActionByUserFullName" Caption="Personel" />
+                    <DxGridDataColumn FieldName="ActionDate" Caption="Tarih" />
+                    <DxGridDataColumn Caption="Durum" FieldName="Action" Width="120px">
+                        <CellDisplayTemplate>
+                            <span class="status-badge">
+                                @(((MaterialRequestHistoryModel)context.DataItem).Action.GetDescription())
+                            </span>
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+                </Columns>
+            </DxGrid>
+
+        </div>
+    </BodyContentTemplate>
+
+    <FooterContentTemplate Context="fFooter">
+
+        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                  Text="Vazgeç"
+                  IconCssClass="dx-icon-close"
+                  Click="Close"
+                  Enabled="!IsLoading" />
+    </FooterContentTemplate>
+</DxPopup>
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [Parameter] public int RequestId { get; set; }
+    [Parameter] public bool IsEditable { get; set; }
+    [Parameter] public EventCallback OnSuccess { get; set; }
+    private bool IsLoading { get; set; }
+    private GridDevExtremeDataSource<MaterialRequestHistoryModel>? Model;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Visible && RequestId > 0 && !IsLoading)
+            await LoadItems();
+    }
+
+    private async Task LoadItems()
+    {
+        try
+        {
+            IsLoading = true;
+
+            var client = await ApiClientFactory.CreateAsync(
+                HttpClientFactory.CreateClient("ApiClient"));
+
+            var baseUrl = "https://localhost:7071/api";
+
+            Model = new GridDevExtremeDataSource<MaterialRequestHistoryModel>(
+                client,
+                NavigationManager.ToAbsoluteUri(
+                    $"{baseUrl}/material-request-histories?materialRequestId={RequestId}"
+                )
+            );
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task Close() =>
+        await VisibleChanged.InvokeAsync(false);
+}

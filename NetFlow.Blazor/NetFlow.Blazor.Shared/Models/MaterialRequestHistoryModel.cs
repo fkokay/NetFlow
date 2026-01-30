@@ -1,11 +1,6 @@
-﻿using NetFlow.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace NetFlow.ReadModel.MaterialRequestHistories
+﻿namespace NetFlow.Blazor.Shared.Models
 {
-    public class MaterialRequestHistoryDto
+    public class MaterialRequestHistoryModel
     {
         public int Id { get; set; }
         public int MaterialRequestId { get; set; }
