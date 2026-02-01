@@ -28,6 +28,11 @@ namespace NetFlow.Application.Common.Interfaces
         DbSet<MaterialRequestEntity> MaterialRequests { get; }
         DbSet<MaterialRequestItemEntity> MaterialRequestItems { get; }
         DbSet<MaterialRequestHistoryEntity> MaterialRequestsHistory { get; }
+        DbSet<ServiceFormEntity> ServiceForms { get; }
+        DbSet<ServiceFormDetailEntity> erviceFormDetails { get; }
+        DbSet<ServiceFormDocumentEntity> ServiceFormDocuments { get; }
+        DbSet<ServiceFormHistoryEntity> ServiceFormHistories { get; }
+        DbSet<ServiceReplacedPartEntity> ServiceReplacedParts { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

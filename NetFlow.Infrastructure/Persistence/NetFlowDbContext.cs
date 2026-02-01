@@ -35,7 +35,11 @@ namespace NetFlow.Infrastructure.Persistence
         public DbSet<MaterialRequestEntity> MaterialRequests => Set<MaterialRequestEntity>();
         public DbSet<MaterialRequestItemEntity> MaterialRequestItems => Set<MaterialRequestItemEntity>();
         public DbSet<MaterialRequestHistoryEntity> MaterialRequestsHistory => Set<MaterialRequestHistoryEntity>();
-
+        public DbSet<ServiceFormEntity> ServiceForms => Set<ServiceFormEntity>();
+        public DbSet<ServiceFormDetailEntity> ServiceFormDetails => Set<ServiceFormDetailEntity>();
+        public DbSet<ServiceFormDocumentEntity> ServiceFormDocuments => Set<ServiceFormDocumentEntity>();
+        public DbSet<ServiceFormHistoryEntity> ServiceFormHistories => Set<ServiceFormHistoryEntity>();
+        public DbSet<ServiceReplacedPartEntity> ServiceReplacedParts => Set<ServiceReplacedPartEntity>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
