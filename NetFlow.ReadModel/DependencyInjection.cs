@@ -16,6 +16,7 @@ using NetFlow.ReadModel.ServiceFormDetails;
 using NetFlow.ReadModel.ServiceFormDocuments;
 using NetFlow.ReadModel.ServiceFormHistories;
 using NetFlow.ReadModel.ServiceForms;
+using NetFlow.ReadModel.ServiceReplacedParts;
 using NetFlow.ReadModel.TenderDevices;
 using NetFlow.ReadModel.TenderDocuments;
 using NetFlow.ReadModel.TenderExternalQuality;
@@ -66,6 +67,7 @@ namespace NetFlow.ReadModel
             services.AddScoped<ServiceFormHistoryReadService>();
             services.AddScoped<ServiceFormDetailReadService>();
             services.AddScoped<ServiceFormDocumentReadService>();
+            services.AddScoped<ServiceReplacedPartReadService>();
 
             return services;
         }

@@ -18,8 +18,4 @@
     <ProjectReference Include="..\NetFlow.Application\NetFlow.Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ServiceReplacedParts\" />
-  </ItemGroup>
-
 </Project>
