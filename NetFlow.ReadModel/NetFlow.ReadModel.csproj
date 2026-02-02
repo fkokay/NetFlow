@@ -20,10 +20,6 @@
 
   <ItemGroup>
     <Folder Include="ServiceReplacedParts\" />
-    <Folder Include="ServiceFormHistories\" />
-    <Folder Include="ServiceForms\" />
-    <Folder Include="ServiceFormDocuments\" />
-    <Folder Include="ServiceFormDetails\" />
   </ItemGroup>
 
 </Project>

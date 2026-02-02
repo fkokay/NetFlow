@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetFlow.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,9 +13,9 @@ namespace NetFlow.Domain.Entities
         [Key]
         public int Id { get; set; }
         public int ServiceFormId { get; set; }
-        public byte ActionType { get; set; }
-        public byte? OldStatus { get; set; }
-        public byte? NewStatus { get; set; }
+        public ServiceActionType ActionType { get; set; }= ServiceActionType.Undefined;
+        public ServiceType? OldStatus { get; set; }=ServiceType.Undefined;
+        public ServiceType? NewStatus { get; set; }=ServiceType.Undefined;
         public int? OldPersonnelId { get; set; }
         public int? NewPersonnelId { get; set; }
         public string? Description { get; set; }

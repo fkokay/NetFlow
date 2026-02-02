@@ -12,6 +12,10 @@ using NetFlow.ReadModel.Modules;
 using NetFlow.ReadModel.Personnel;
 using NetFlow.ReadModel.Requests;
 using NetFlow.ReadModel.Roles;
+using NetFlow.ReadModel.ServiceFormDetails;
+using NetFlow.ReadModel.ServiceFormDocuments;
+using NetFlow.ReadModel.ServiceFormHistories;
+using NetFlow.ReadModel.ServiceForms;
 using NetFlow.ReadModel.TenderDevices;
 using NetFlow.ReadModel.TenderDocuments;
 using NetFlow.ReadModel.TenderExternalQuality;
@@ -58,6 +62,10 @@ namespace NetFlow.ReadModel
             services.AddScoped<MaterialRequestReadService>();
             services.AddScoped<MaterialRequestItemReadService>();
             services.AddScoped<MaterialRequestHistoryReadService>();
+            services.AddScoped<ServiceFormReadService>();
+            services.AddScoped<ServiceFormHistoryReadService>();
+            services.AddScoped<ServiceFormDetailReadService>();
+            services.AddScoped<ServiceFormDocumentReadService>();
 
             return services;
         }

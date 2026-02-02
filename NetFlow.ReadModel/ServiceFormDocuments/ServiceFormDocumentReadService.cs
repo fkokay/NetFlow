@@ -1,0 +1,104 @@
+﻿using Dapper;
+using Microsoft.Data.SqlClient;
+using NetFlow.Application.Common.DevExtreme;
+using NetFlow.Domain.Common.Pagination;
+using NetFlow.ReadModel.ServiceFormHistories;
+using NetFlow.ReadModel.ServiceForms;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
+
+namespace NetFlow.ReadModel.ServiceFormDocuments
+{
+    public class ServiceFormDocumentReadService
+    {
+        private readonly ReadModelOptions _opt;
+
+        public ServiceFormDocumentReadService(ReadModelOptions opt) => _opt = opt;
+
+        public async Task<PagedResult> ListAsync(int userId, int serviceFormId, PagedRequest pagedRequest)
+        {
+            using var cn = new SqlConnection(_opt.ConnectionString);
+            var parameters = new DynamicParameters();
+            parameters.Add("ServiceFormId", serviceFormId);
+
+            string whereSql = "WHERE ServiceFormId = @serviceFormId";
+            if (!string.IsNullOrEmpty(pagedRequest.Filter))
+            {
+                var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);
+                whereSql += " AND " + sql;
+                parameters.AddDynamicParams(p);
+            }
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "ORDER BY Id DESC");
+            string countSql = $@"
+                SELECT COUNT(1) FROM dbo.VW_ServiceFormDocument WITH (NOLOCK)
+                {whereSql}
+            ";
+
+            string dataSql = $@"
+                SELECT * FROM dbo.VW_ServiceFormDocument WITH (NOLOCK)
+                {whereSql}
+                {orderBy}
+                OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
+            ";
+
+            int totalCount = cn.ExecuteScalar<int>(
+                countSql, parameters
+            );
+
+
+            if (pagedRequest.IsCountQuery != null && pagedRequest.IsCountQuery.HasValue)
+            {
+                return new PagedResult
+                {
+                    Data = Array.Empty<ServiceFormDocumentDto>(),
+                    TotalCount = totalCount
+                };
+            }
+
+            if (!string.IsNullOrWhiteSpace(pagedRequest.TotalSummary))
+            {
+                var (summarySqlPart, aliases) =
+                    DevExtremeSqlBuilder.BuildSummary(pagedRequest.TotalSummary);
+
+                string sql = $@"
+                    SELECT {summarySqlPart}
+                    FROM dbo.VW_ServiceFormDocument WITH (NOLOCK)
+                    {whereSql};
+                ";
+
+                var row = await cn.QuerySingleAsync(sql, parameters);
+
+                var values = aliases
+                    .Select(a => ((IDictionary<string, object>)row)[a])
+                    .ToArray();
+
+                return new PagedResult
+                {
+                    Data = Array.Empty<object>(),
+                    TotalCount = totalCount,
+                    Summary = values
+                };
+            }
+
+            parameters.Add("@Skip", pagedRequest.Skip ?? 0);
+            parameters.Add("@Take", pagedRequest.Take ?? 10);
+
+            var data = cn.Query<ServiceFormDocumentDto>(dataSql, parameters).ToList();
+
+            return new PagedResult
+            {
+                Data = data,
+                TotalCount = totalCount
+            };
+        }
+
+        public async Task<ServiceFormDocumentDto?> GetAsync(int id)
+        {
+            using var cn = new SqlConnection(_opt.ConnectionString);
+            var sql = "SELECT TOP 1 * FROM  dbo.VW_ServiceFormDocument WITH (NOLOCK) WHERE Id=@Id";
+            return await cn.QueryFirstOrDefaultAsync<ServiceFormDocumentDto>(sql, new { Id = id });
+        }
+    }
+}

@@ -1,19 +1,17 @@
 ﻿using NetFlow.Domain.Enums;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace NetFlow.Domain.Entities
+namespace NetFlow.ReadModel.ServiceForms
 {
-    [Table("ServiceForm")]
-    public class ServiceFormEntity
+    public class ServiceFormDto
     {
-        [Key]
         public int Id { get; set; }
         public string ServiceFormNo { get; set; } = null!;
-        public ServiceType ServiceType { get; set; } = ServiceType.Undefined;
+        public ServiceType ServiceType { get; set; }
+        public ServiceStatus ServiceStatus { get; set; }
         public int CustomerId { get; set; }
         public string CustomerName { get; set; } = null!;
         public int? ProductId { get; set; }
@@ -22,8 +20,15 @@ namespace NetFlow.Domain.Entities
         public string? Model { get; set; }
         public string ProblemDescription { get; set; } = null!;
         public string? ServiceDescription { get; set; }
-        public ServiceStatus ServiceStatus { get; set; } = ServiceStatus.Draft;
         public int? AssignedPersonnelId { get; set; }
+        [NotMapped]
+        public string? PersonnelCode { get; set; }
+        [NotMapped]
+        public string? AssignedPersonnelName { get; set; }
+        [NotMapped]
+        public string? AssignedPersonnelDepartment { get; set; }
+        [NotMapped]
+        public string? AssignedPersonnelTitle { get; set; }
         public DateTime? AssignedAt { get; set; }
         public DateTime? ServiceStartDate { get; set; }
         public DateTime? ServiceEndDate { get; set; }
@@ -31,19 +36,12 @@ namespace NetFlow.Domain.Entities
         public bool IsWarranty { get; set; }
         public decimal? LaborCost { get; set; }
         public decimal? MaterialCost { get; set; }
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public decimal TotalCost { get; private set; }
+        public decimal TotalCost { get; set; }
         public string? Notes { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public DateTime? ClosedAt { get; set; }
-
-
-        public ICollection<ServiceFormDetailEntity> ServiceFormDetails { get; set; } = new List<ServiceFormDetailEntity>();
-        public ICollection<ServiceFormDocumentEntity> ServiceFormDocuments { get; set; } = new List<ServiceFormDocumentEntity>();
-        public ICollection<ServiceFormHistoryEntity> ServiceFormHistories { get; set; } = new List<ServiceFormHistoryEntity>();
-
-        public PersonnelEntity? AssignedPersonnel { get; set; }
     }
+
 }
