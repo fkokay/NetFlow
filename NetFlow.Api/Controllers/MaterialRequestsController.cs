@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Mvc;
+using NetFlow.Application.MaterialRequestHistories;
 using NetFlow.Application.MaterialRequests;
 using NetFlow.Application.Modules;
 using NetFlow.Application.Users;
 using NetFlow.Domain.Common.Pagination;
+using NetFlow.Domain.Entities;
+using NetFlow.Domain.Enums;
 using NetFlow.Domain.Identity;
 using NetFlow.ReadModel.Requests;
 using NetFlow.ReadModel.Users;
@@ -16,12 +20,14 @@ namespace NetFlow.Api.Controllers
         private readonly CurrentUser _current;
         private readonly MaterialRequestReadService _read;
         private readonly MaterialRequestWriteService _write;
+        private readonly MaterialRequestHistoryWriteService _historyWrite;
 
-        public MaterialRequestsController(CurrentUser current, MaterialRequestReadService read, MaterialRequestWriteService write)
+        public MaterialRequestsController(CurrentUser current, MaterialRequestReadService read, MaterialRequestWriteService write, MaterialRequestHistoryWriteService historyWrite)
         {
             _current = current;
             _read = read;
             _write = write;
+            _historyWrite = historyWrite;
         }
 
         [HttpGet]
@@ -92,6 +98,15 @@ namespace NetFlow.Api.Controllers
             }
             var id = await _write.CreateAsync(_current.User.Id.Value, request);
 
+
+            var materialRequstHistory = new CreateMaterialRequestHistoryRequest();
+            materialRequstHistory.Action = MaterialRequestHistoryAction.Created;
+            materialRequstHistory.ActionDate = DateTime.UtcNow;
+            materialRequstHistory.MaterialRequestId = id;
+            materialRequstHistory.ActionByUserId = _current.User.Id.Value;
+            materialRequstHistory.Notes = "Talep Oluşturuldu";
+            var historyId=await _historyWrite.CreateAsync(materialRequstHistory);
+
             return CreatedAtAction(
                 nameof(Get),
                 new { id },
@@ -106,6 +121,16 @@ namespace NetFlow.Api.Controllers
                 return NotFound();
             }
             var id = await _write.RejectionAsync(_current.User.Id.Value, request);
+
+
+            var materialRequstHistory = new CreateMaterialRequestHistoryRequest();
+            materialRequstHistory.Action = MaterialRequestHistoryAction.Rejected;
+            materialRequstHistory.ActionDate = DateTime.UtcNow;
+            materialRequstHistory.MaterialRequestId = id;
+            materialRequstHistory.ActionByUserId = _current.User.Id.Value;
+            materialRequstHistory.Notes = "Talep Reddedildi";
+            var historyId = await _historyWrite.CreateAsync(materialRequstHistory);
+
 
             return CreatedAtAction(
                 nameof(Get),
@@ -123,6 +148,14 @@ namespace NetFlow.Api.Controllers
 
             var id = await _write.ApprovedAsync(_current.User.Id.Value, materialId);
 
+            var materialRequstHistory = new CreateMaterialRequestHistoryRequest();
+            materialRequstHistory.Action = MaterialRequestHistoryAction.Approved;
+            materialRequstHistory.ActionDate = DateTime.UtcNow;
+            materialRequstHistory.MaterialRequestId = id;
+            materialRequstHistory.ActionByUserId = _current.User.Id.Value;
+            materialRequstHistory.Notes = "Talep Onaylandı";
+            var historyId = await _historyWrite.CreateAsync(materialRequstHistory);
+
             return CreatedAtAction(
                 nameof(Get),
                 new { id },
@@ -139,7 +172,17 @@ namespace NetFlow.Api.Controllers
             }
 
 
-            var ids = await _write.FulFillmentAsync(_current.User.Id.Value,requests);
+            var ids = await _write.FulFillmentAsync(_current.User.Id.Value, requests);
+
+          
+            var materialRequstHistory = new CreateMaterialRequestHistoryRequest                                                     ();
+            materialRequstHistory.Action = MaterialRequestHistoryAction.Fulfilled;
+            materialRequstHistory.ActionDate = DateTime.UtcNow;
+            materialRequstHistory.MaterialRequestId = requests.Id;
+            materialRequstHistory.ActionByUserId = _current.User.Id.Value;
+            materialRequstHistory.Notes = "Talep Karşılandı";
+            var historyId = await _historyWrite.CreateAsync(materialRequstHistory);
+
             return Ok(new
             {
                 ids.Count,

@@ -23,7 +23,6 @@ namespace NetFlow.ReadModel.TenderOpex
         public string? MaterialRequestNo { get; set; }
         public MaterialRequestStatus MaterialRequestStatus { get; set; } = MaterialRequestStatus.Open;
         public int? MaterialRequestItemId { get; set; }
-
         public DateTime CreatedAt { get; set; }
     }
 }

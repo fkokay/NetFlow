@@ -3,13 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace NetFlow.Application.TenderOpexes
+namespace NetFlow.Application.TenderReaktifs
 {
-    public class TenderOpexCreateMaterialRequest
+    public class TenderReaktifCreateMaterialRequest
     {
-        public int TenderId { get; set; }   
-        public int TenderOpexId { get; set; }
-        public MaterialRequestType RequestType { get; set; } =  MaterialRequestType.Project;
+        public int TenderId { get; set; }
+        public int TenderReaktifId { get; set; }
+        public MaterialRequestType RequestType { get; set; } = MaterialRequestType.Project;
         public DateTime RequiredDate { get; set; }
         public MaterialRequestPriority Priority { get; set; } = MaterialRequestPriority.Normal;
         public string? RequestedDepartment { get; set; }

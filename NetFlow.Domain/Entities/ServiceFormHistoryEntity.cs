@@ -14,8 +14,8 @@ namespace NetFlow.Domain.Entities
         public int Id { get; set; }
         public int ServiceFormId { get; set; }
         public ServiceActionType ActionType { get; set; }= ServiceActionType.Undefined;
-        public ServiceType? OldStatus { get; set; }=ServiceType.Undefined;
-        public ServiceType? NewStatus { get; set; }=ServiceType.Undefined;
+        public ServiceStatus? OldStatus { get; set; }= ServiceStatus.Draft;
+        public ServiceStatus? NewStatus { get; set; }=ServiceStatus.Draft;
         public int? OldPersonnelId { get; set; }
         public int? NewPersonnelId { get; set; }
         public string? Description { get; set; }

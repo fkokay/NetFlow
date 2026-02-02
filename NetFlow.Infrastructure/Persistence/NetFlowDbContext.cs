@@ -40,6 +40,10 @@ namespace NetFlow.Infrastructure.Persistence
         public DbSet<ServiceFormDocumentEntity> ServiceFormDocuments => Set<ServiceFormDocumentEntity>();
         public DbSet<ServiceFormHistoryEntity> ServiceFormHistories => Set<ServiceFormHistoryEntity>();
         public DbSet<ServiceReplacedPartEntity> ServiceReplacedParts => Set<ServiceReplacedPartEntity>();
+        public DbSet<TenderCapexEntity> TenderCapexes => Set<TenderCapexEntity>();
+
+        public DbSet<TenderReaktifEntity> TenderReaktifs => Set<TenderReaktifEntity>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

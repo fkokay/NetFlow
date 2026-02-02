@@ -1,24 +1,28 @@
-﻿@page "/firm/edit/{Id:int}"
+﻿@page "/firm/createorupdate"
+@page "/firm/createorupdate/{Id:int}"
 
 @inject NavigationManager NavigationManager
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
-@using Microsoft.AspNetCore.Components
-@using Microsoft.AspNetCore.Components.Forms
-@using System.Net.Http.Json
-
+@inject IToastNotificationService ToastService
 <div class="content-root">
     <div class="card toolbar">
         <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
             <Items>
-                <DxToolbarItem IconCssClass="back-icon icon medium-icon" Tooltip="Go to Back" Click="@NavigateBack" />
+                <DxToolbarItem IconCssClass="back-icon icon medium-icon"
+                               Tooltip="Go to Back"
+                               Click="@NavigateBack" />
+
                 <DxToolbarItem>
                     <Template>
                         <div class="custom-item">
-                            <div class="title">Firma Düzenleme</div>
+                            <div class="title">
+                                @(IsEditMode ? "Firma Düzenleme" : "Firma Tanımlama")
+                            </div>
                         </div>
                     </Template>
                 </DxToolbarItem>
+
                 <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
                     <Template>
                         <DxButton Text="Kaydet"
@@ -32,7 +36,7 @@
         </DxToolbar>
     </div>
 
-    <div class="firm-edit">
+    <div class="firm-form">
         @if (editContext != null)
         {
             <EditForm EditContext="@editContext" Context="formContext">
@@ -41,11 +45,15 @@
                 <DxFormLayout ColSpanMd="6">
 
                     <DxFormLayoutItem Caption="Kodu">
-                        <DxTextBox @bind-Text="model.FirmCode" ValidationEnabled="true" ShowValidationIcon="true" />
+                        <DxTextBox @bind-Text="model.FirmCode"
+                                   ValidationEnabled="true"
+                                   ShowValidationIcon="true" />
                     </DxFormLayoutItem>
 
                     <DxFormLayoutItem Caption="Firma Adı">
-                        <DxTextBox @bind-Text="model.FirmName" ValidationEnabled="true" ShowValidationIcon="true" />
+                        <DxTextBox @bind-Text="model.FirmName"
+                                   ValidationEnabled="true"
+                                   ShowValidationIcon="true" />
                     </DxFormLayoutItem>
 
                     <DxFormLayoutItem Caption="Vergi Numarası">
@@ -57,11 +65,13 @@
                     </DxFormLayoutItem>
 
                     <DxFormLayoutItem Caption="Netsis REST API" ColSpanMd="12">
-                        <DxTextBox @bind-Text="model.NetsisRestApiUrl" Placeholder="https://netsis-api.firma.com" />
+                        <DxTextBox @bind-Text="model.NetsisRestApiUrl"
+                                   Placeholder="https://netsis-api.firma.com" />
                     </DxFormLayoutItem>
 
                     <DxFormLayoutItem Caption="DB Sunucu">
-                        <DxTextBox @bind-Text="model.NetsisDbServer" Placeholder="SERVER\INSTANCE veya IP" />
+                        <DxTextBox @bind-Text="model.NetsisDbServer"
+                                   Placeholder="SERVER\\INSTANCE veya IP" />
                     </DxFormLayoutItem>
 
                     <DxFormLayoutItem Caption="DB Adı">
@@ -126,103 +136,68 @@
 </div>
 
 
-<DxPopup @bind-Visible="popupVisible"
-         Width="460px"
-         ShowFooter="true"
-         CloseOnOutsideClick="false">
-
-    <HeaderTemplate>
-        <div class="popup-adv-header @(isSuccess ? "success" : "danger")">
-            <div class="popup-adv-header-icon">
-                @(isSuccess ? "✓" : "!")
-            </div>
-            <div>
-                <div class="popup-adv-header-title">
-                    @(isSuccess ? "İşlem Başarılı" : "İşlem Hatası")
-                </div>
-                <div class="popup-adv-header-subtitle">
-                    @popupTitle
-                </div>
-            </div>
-        </div>
-    </HeaderTemplate>
-
-    <BodyTemplate>
-        <div class="popup-adv-body">
-            <div class="popup-adv-body-icon @(isSuccess ? "success" : "danger")">
-                @(isSuccess ? "✓" : "!")
-            </div>
-            <div class="popup-adv-body-content">
-                <h5 class="popup-adv-body-title">
-                    @(isSuccess ? "Bilgiler Güncellendi" : "Hata Oluştu")
-                </h5>
-                <p class="popup-adv-body-message">
-                    @popupMessage
-                </p>
-            </div>
-        </div>
-    </BodyTemplate>
-
-    <FooterTemplate>
-        <div class="popup-adv-footer">
-            <DxButton Text="Kapat"
-                      Width="130px"
-                      RenderStyle="@(isSuccess ? ButtonRenderStyle.Success : ButtonRenderStyle.Danger)"
-                      Click="OnPopupOk" />
-        </div>
-    </FooterTemplate>
-
-</DxPopup>
 
 @code {
     [Parameter] public int Id { get; set; }
 
     private FirmModel model = new();
     private EditContext? editContext;
-    private bool isSaving, popupVisible, isSuccess;
-    private string popupTitle = "", popupMessage = "";
+    private bool isSaving;
+    private bool IsEditMode => Id > 0;
 
     protected override async Task OnInitializedAsync()
     {
-        if (Id > 0)
+        editContext = new EditContext(model);
+
+        if (!IsEditMode)
+            return;
+
+        try
         {
-            try
-            {
-                var httpClient = HttpClientFactory.CreateClient("ApiClient");
-                var client = await ApiClientFactory.CreateAsync(httpClient);
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
 
-                var result = await client.GetFromJsonAsync<FirmModel>($"api/firms/{Id}");
+            var result = await client.GetFromJsonAsync<FirmModel>($"api/firms/{Id}");
 
-                if (result != null)
-                {
-                    model = result;
-                    editContext = new EditContext(model);
-                }
-                else
-                {
-                    NavigationManager.NavigateTo("/firm/list");
-                }
-            }
-            catch (Exception ex)
+            if (result == null)
             {
-                popupTitle = "Yükleme Hatası";
-                popupMessage = "Veriler getirilirken bir hata oluştu: " + ex.Message;
-                isSuccess = false;
-                popupVisible = true;
+                ShowToast(
+                    "Kayıt Bulunamadı",
+                    "Firma bulunamadı, liste ekranına yönlendiriliyorsunuz.",
+                    ToastRenderStyle.Warning
+                );
+
+                NavigationManager.NavigateTo("/firm/list");
+                return;
             }
+
+            model = result;
+            editContext = new EditContext(model);
+        }
+        catch (Exception ex)
+        {
+            ShowToast(
+                "Yükleme Hatası",
+                ex.Message,
+                ToastRenderStyle.Danger
+            );
         }
     }
+
 
     private async Task SaveFromOutside()
     {
         if (isSaving || editContext == null) return;
-        if (!editContext.Validate()) return;
-        await HandleValidSubmit();
-    }
+        if (!editContext.Validate())
+        {
+            ShowToast(
+                "Doğrulama Hatası",
+                "Lütfen zorunlu alanları kontrol edin.",
+                ToastRenderStyle.Danger
+            );
+            return;
+        }
 
-    private async Task HandleValidSubmit()
-    {
-        if (isSaving) return;
         isSaving = true;
 
         try
@@ -230,41 +205,59 @@
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
 
-            var response = await client.PutAsJsonAsync("api/firms", model);
+            HttpResponseMessage response = IsEditMode
+                ? await client.PutAsJsonAsync("api/firms", model)
+                : await client.PostAsJsonAsync("api/firms", model);
 
             if (response.IsSuccessStatusCode)
             {
-                isSuccess = true;
-                popupTitle = "Başarılı";
-                popupMessage = "Firma bilgileri başarıyla güncellendi.";
+                ShowToast(
+                    "Başarılı",
+                    IsEditMode ? "Firma güncellendi." : "Firma oluşturuldu.",
+                    ToastRenderStyle.Success
+                );
+
+                NavigationManager.NavigateTo("/firm/list");
             }
             else
             {
-                var errorMsg = await response.Content.ReadAsStringAsync();
-                isSuccess = false;
-                popupTitle = "Sunucu Hatası";
-                popupMessage = string.IsNullOrEmpty(errorMsg) ? "Güncelleme sırasında bir hata oluştu." : errorMsg;
+                var error = await response.Content.ReadAsStringAsync();
+
+                ShowToast(
+                    "İşlem Hatası",
+                    error,
+                    ToastRenderStyle.Danger
+                );
             }
         }
         catch (Exception ex)
         {
-            isSuccess = false;
-            popupTitle = "Bağlantı Hatası";
-            popupMessage = "Sunucuyla iletişim kurulamadı: " + ex.Message;
+            ShowToast(
+                "Bağlantı Hatası",
+                ex.Message,
+                ToastRenderStyle.Danger
+            );
         }
         finally
         {
-            popupVisible = true;
             isSaving = false;
         }
     }
 
-    private void OnPopupOk()
+
+    private void ShowToast(string title, string text, ToastRenderStyle style)
     {
-        popupVisible = false;
-        if (isSuccess)
-            NavigationManager.NavigateTo("/firm/list");
+        ToastService.ShowToast(new ToastOptions()
+        {
+            Id = Guid.NewGuid().ToString(),
+            ProviderName = "Overview",
+            ThemeMode = ToastThemeMode.Light,
+            RenderStyle = style,
+            Title = title,
+            Text = text,
+        });
     }
 
-    private void NavigateBack() => NavigationManager.NavigateTo("/firm/list");
+    private void NavigateBack()
+        => NavigationManager.NavigateTo("/firm/list");
 }

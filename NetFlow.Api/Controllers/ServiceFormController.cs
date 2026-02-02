@@ -32,6 +32,26 @@ namespace NetFlow.Api.Controllers
             return Ok(await _read.ListAsync(_current.User.Id.Value,pagedRequest));
         }
 
+        [HttpGet("open")]
+        public async Task<IActionResult> Open([FromQuery] PagedRequest pagedRequest)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(await _read.ListAsync(_current.User.Id.Value, pagedRequest, open: true));
+        }
+        [HttpGet("closed")]
+        public async Task<IActionResult> Closed([FromQuery] PagedRequest pagedRequest)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(await _read.ListAsync(_current.User.Id.Value, pagedRequest, closed: true));
+        }
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(int id)
         {

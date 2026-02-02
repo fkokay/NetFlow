@@ -16,7 +16,6 @@
         public string Currency { get; set; } = string.Empty;
         public int? MaterialRequestId { get; set; }
         public string? MaterialRequestNo { get; set; }
-
         public MaterialRequestType RequestType { get; set; } = MaterialRequestType.Production;
         public MaterialRequestPriority Priority { get; set; } = MaterialRequestPriority.Normal;
         public MaterialRequestStatus MaterialRequestStatus { get; set; } = Shared.Models.MaterialRequestStatus.Draft;

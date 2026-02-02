@@ -44,16 +44,6 @@ namespace NetFlow.Application.MaterialRequests
             materialRequest.AssignedToUserId = 1;
             await _db.MaterialRequests.AddAsync(materialRequest);
             await _db.SaveChangesAsync();
-
-            // Log history
-            var materialRequstHistory = new MaterialRequestHistoryEntity();
-            materialRequstHistory.Action = MaterialRequestHistoryAction.Created;
-            materialRequstHistory.ActionDate = DateTime.UtcNow;
-            materialRequstHistory.MaterialRequestId = materialRequest.Id;
-            materialRequstHistory.ActionByUserId = userId;
-            materialRequstHistory.Notes = "Talep Oluşturuldu";
-            await _db.MaterialRequestsHistory.AddAsync(materialRequstHistory);
-            await _db.SaveChangesAsync();
             return materialRequest.Id;
         }
 
@@ -68,20 +58,6 @@ namespace NetFlow.Application.MaterialRequests
             materialRequest.Status = MaterialRequestStatus.Rejected;
             materialRequest.RejectionReason = request.RejectionReason;
             await _db.SaveChangesAsync();
-
-
-
-            // Log history
-            var materialRequstHistory = new MaterialRequestHistoryEntity();
-            materialRequstHistory.Action = MaterialRequestHistoryAction.Rejected;
-            materialRequstHistory.ActionDate = DateTime.UtcNow;
-            materialRequstHistory.MaterialRequestId = materialRequest.Id;
-            materialRequstHistory.ActionByUserId = currentUserId;
-            materialRequstHistory.Notes = "Talep Reddedildi";
-            await _db.MaterialRequestsHistory.AddAsync(materialRequstHistory);
-            await _db.SaveChangesAsync();
-
-
             return materialRequest.Id;
         }
         public async Task<int> ApprovedAsync(int currentUserId, int materialId)
@@ -95,18 +71,6 @@ namespace NetFlow.Application.MaterialRequests
             materialRequest.Status = MaterialRequestStatus.Open;
             materialRequest.ApprovalDate = DateTime.UtcNow;
             materialRequest.ApprovedByUserId = currentUserId;
-            await _db.SaveChangesAsync();
-
-
-
-            // Log history
-            var materialRequstHistory = new MaterialRequestHistoryEntity();
-            materialRequstHistory.Action = MaterialRequestHistoryAction.Approved;
-            materialRequstHistory.ActionDate = DateTime.UtcNow;
-            materialRequstHistory.MaterialRequestId = materialRequest.Id;
-            materialRequstHistory.ActionByUserId = currentUserId;
-            materialRequstHistory.Notes = "Talep Onaylandı";
-            await _db.MaterialRequestsHistory.AddAsync(materialRequstHistory);
             await _db.SaveChangesAsync();
             return materialRequest.Id;
         }
@@ -129,19 +93,7 @@ namespace NetFlow.Application.MaterialRequests
                 requestItem.FulfilledQuantity = item.FulfilledQuantity;
                 updatedIds.Add(requestItem.Id);
             }
-            await _db.SaveChangesAsync();
-
-
-            // Log history
-            var materialRequstHistory = new MaterialRequestHistoryEntity();
-            materialRequstHistory.Action = MaterialRequestHistoryAction.Fulfilled;
-            materialRequstHistory.ActionDate = DateTime.UtcNow;
-            materialRequstHistory.MaterialRequestId = request.Id;
-            materialRequstHistory.ActionByUserId = currentUserId;
-            materialRequstHistory.Notes = "Talep Karşılandı";
-            await _db.MaterialRequestsHistory.AddAsync(materialRequstHistory);
-            await _db.SaveChangesAsync();
-           
+            await _db.SaveChangesAsync();           
             return updatedIds;
         }
     }

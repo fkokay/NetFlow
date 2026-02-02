@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Domain.Common.Pagination;
+using NetFlow.Domain.Enums;
 using NetFlow.ReadModel.Requests;
 
 namespace NetFlow.ReadModel.ServiceForms
@@ -13,12 +14,22 @@ namespace NetFlow.ReadModel.ServiceForms
         public ServiceFormReadService(ReadModelOptions opt) => _opt = opt;
 
 
-        public async Task<PagedResult> ListAsync(int userId, PagedRequest pagedRequest)
+        public async Task<PagedResult> ListAsync(int userId, PagedRequest pagedRequest, bool open = false, bool closed = false)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
             var parameters = new DynamicParameters();
             string whereSql = "WHERE 1 = 1";
-          
+            if (open)
+            {
+                whereSql += " AND ServiceStatus = @ServiceStatus";
+                parameters.Add("ServiceStatus", ServiceStatus.Open);
+            }
+            if (closed)
+            {
+                whereSql += " AND ServiceStatus = @ServiceStatus";
+                parameters.Add("ServiceStatus", ServiceStatus.Closed);
+            }
+
             if (!string.IsNullOrEmpty(pagedRequest.Filter))
             {
                 var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);

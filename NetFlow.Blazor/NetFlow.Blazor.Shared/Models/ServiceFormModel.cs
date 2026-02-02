@@ -1,0 +1,42 @@
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace NetFlow.Blazor.Shared.Models
+{
+    public class ServiceFormModel
+    {
+        public int Id { get; set; }
+        public string ServiceFormNo { get; set; } = null!;
+        public ServiceType ServiceType { get; set; }
+        public ServiceStatus ServiceStatus { get; set; }
+        public int CustomerId { get; set; }
+        public string CustomerName { get; set; } = null!;
+        public int? ProductId { get; set; }
+        public string? ProductName { get; set; }
+        public string? SerialNumber { get; set; }
+        public string? Model { get; set; }
+        public string ProblemDescription { get; set; } = null!;
+        public string? ServiceDescription { get; set; }
+        public int? AssignedPersonnelId { get; set; }
+        [NotMapped]
+        public string? PersonnelCode { get; set; }
+        [NotMapped]
+        public string? AssignedPersonnelName { get; set; }
+        [NotMapped]
+        public string? AssignedPersonnelDepartment { get; set; }
+        [NotMapped]
+        public string? AssignedPersonnelTitle { get; set; }
+        public DateTime? AssignedAt { get; set; }
+        public DateTime? ServiceStartDate { get; set; }
+        public DateTime? ServiceEndDate { get; set; }
+        public bool IsOnSite { get; set; }
+        public bool IsWarranty { get; set; }
+        public decimal? LaborCost { get; set; }
+        public decimal? MaterialCost { get; set; }
+        public decimal TotalCost { get; set; }
+        public string? Notes { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public DateTime? ClosedAt { get; set; }
+    }
+}

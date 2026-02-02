@@ -1,0 +1,244 @@
+@implements IDisposable
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar Title="@Title" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+          
+            <DxToolbarItem Text="Yeni Servis Oluþtur"
+                           Tooltip="Yeni Servis Ekle"
+                           Alignment="ToolbarItemAlignment.Right"
+                           Click="OnAddClick"
+                           IconCssClass="add-icon icon medium-icon"
+                           RenderStyleMode="ToolbarItemRenderStyleMode.Plain" />
+
+            <DxToolbarItem Tooltip="Column Chooser" Alignment="ToolbarItemAlignment.Right" Click="OnColumnChooserItemClick" IconCssClass="column-chooser-icon icon medium-icon" />
+
+            <DxToolbarItem Text="Dýþarý Aktar" Alignment="ToolbarItemAlignment.Right" IconCssClass="export-icon icon medium-icon">
+                <Items>
+                    <DxToolbarItem Text="Tüm verileri Excel'e aktar" Click="ExportAllDataToExcel" />
+                    <DxToolbarItem Text="Seçili satýrlarý Excel'e aktar" Click="ExportSelectedRowsToExcel" />
+                    <DxToolbarItem Text="Tüm verileri CSV'ye aktar" Click="ExportAllDataToCsv" />
+                    <DxToolbarItem Text="Seçili satýrlarý CSV'ye aktar" Click="ExportSelectedRowsDataToCsv" />
+                    <DxToolbarItem Text="Tüm verileri PDF'e aktar" Click="ExportAllDataToPdf" />
+                    <DxToolbarItem Text="Seçili satýrlarý PDF'e aktar" Click="ExportSelectedRowsDataToPdf" />
+                </Items>
+            </DxToolbarItem>
+
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right" CssClass="search-textbox-item" Tooltip="Search">
+                <Template Context="SearchContext">
+                    <div class="custom-item">
+                        <DxSearchBox CssClass="search-textbox"
+                                     NullText="Ara"
+                                     BindValueMode="BindValueMode.OnInput"
+                                     ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                     @bind-Text=SearchText />
+                    </div>
+                </Template>
+            </DxToolbarItem>
+
+            <DxToolbarItem Tooltip="Refresh" Click="LoadGridDataAsync" BeginGroup="true" Alignment="ToolbarItemAlignment.Right" IconCssClass="refresh-icon icon medium-icon" />
+        </DxToolbar>
+    </div>
+
+    <div class="Service-list-root h-100">
+        <div class="h-100">
+            <DxGrid @ref="Grid"
+                    Data="Data"
+                    KeyFieldName="Id"
+                    CssClass="Service-list"
+                    Style="height:100%;"
+                    SearchText="@SearchText"
+                    SkeletonRowsEnabled="true"
+                    ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                    TextWrapEnabled="false"
+                    FocusedRowEnabled="false"
+                    ShowAllRows="true"
+                    VirtualScrollingEnabled="true"
+                    RowClick="@OnRowClick"
+                    HighlightRowOnHover="true">
+
+                <Columns>
+
+                    <!-- Seçim -->
+                    <DxGridSelectionColumn Width="60px" />
+
+           
+                    <DxGridDataColumn FieldName="Id" Visible="false" />
+                    <DxGridDataColumn FieldName="CustomerId" Visible="false" />
+                    <DxGridDataColumn FieldName="ProductId" Visible="false" />
+                    <DxGridDataColumn FieldName="AssignedPersonnelId" Visible="false" />
+
+
+                    <DxGridDataColumn Caption="Servis No" FieldName="ServiceFormNo" Width="130px">
+                        <CellDisplayTemplate>
+                            <a href="javascript:void(0);"
+                               style="font-weight:600; color:#0d6efd; text-decoration:none;"
+                               @onclick:stopPropagation>
+                                @context.Value
+                            </a>
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+
+                    <DxGridDataColumn Caption="Müþteri" FieldName="CustomerName" MinWidth="180" />
+
+                    <DxGridDataColumn Caption="Servis Türü"
+                                      FieldName="ServiceType"
+                                      Width="140px" />
+
+                    <DxGridDataColumn Caption="Durum"
+                                      FieldName="ServiceStatus"
+                                      Width="140px" />
+
+                    <!-- Ürün Bilgileri -->
+                    <DxGridDataColumn Caption="Ürün"
+                                      FieldName="ProductName"
+                                      MinWidth="160" />
+
+                    <DxGridDataColumn Caption="Seri No"
+                                      FieldName="SerialNumber"
+                                      Width="140px" />
+
+                    <DxGridDataColumn Caption="Model"
+                                      FieldName="Model"
+                                      Width="140px" />
+
+                    <!-- Açýklamalar -->
+                    <DxGridDataColumn Caption="Problem Açýklamasý"
+                                      FieldName="ProblemDescription"
+                                      MinWidth="250" />
+
+                    <DxGridDataColumn Caption="Servis Açýklamasý"
+                                      FieldName="ServiceDescription"
+                                      Visible="false" />
+
+                    <!-- Personel -->
+                    <DxGridDataColumn Caption="Atanan Personel"
+                                      FieldName="AssignedPersonnelName"
+                                      MinWidth="180" />
+
+                    <DxGridDataColumn Caption="Departman"
+                                      FieldName="AssignedPersonnelDepartment"
+                                      Width="150px"
+                                      Visible="false" />
+
+                    <DxGridDataColumn Caption="Ünvan"
+                                      FieldName="AssignedPersonnelTitle"
+                                      Width="150px"
+                                      Visible="false" />
+
+                    <!-- Tarihler -->
+                    <DxGridDataColumn Caption="Atanma Tarihi"
+                                      FieldName="AssignedAt"
+                                      DisplayFormat="dd.MM.yyyy HH:mm"
+                                      Width="160px" />
+
+                    <DxGridDataColumn Caption="Baþlangýç"
+                                      FieldName="ServiceStartDate"
+                                      DisplayFormat="dd.MM.yyyy"
+                                      Width="130px" />
+
+                    <DxGridDataColumn Caption="Bitiþ"
+                                      FieldName="ServiceEndDate"
+                                      DisplayFormat="dd.MM.yyyy"
+                                      Width="130px" />
+
+                    <!-- Maliyet -->
+                    <DxGridDataColumn Caption="Ýþçilik"
+                                      FieldName="LaborCost"
+                                      DisplayFormat="N2"
+                                      Width="120px" />
+
+                    <DxGridDataColumn Caption="Malzeme"
+                                      FieldName="MaterialCost"
+                                      DisplayFormat="N2"
+                                      Width="120px" />
+
+                    <DxGridDataColumn Caption="Toplam"
+                                      FieldName="TotalCost"
+                                      DisplayFormat="N2"
+                                      Width="130px" />
+
+                    <!-- Bayraklar -->
+                    <DxGridDataColumn Caption="Yerinde"
+                                      FieldName="IsOnSite"
+                                      Width="90px" />
+
+                    <DxGridDataColumn Caption="Garanti"
+                                      FieldName="IsWarranty"
+                                      Width="90px" />
+
+                    <!-- Ýþlemler -->
+
+                </Columns>
+            </DxGrid>
+
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    [Parameter] public required string Title { get; set; } = "Servis Talepleri";
+    [Parameter] public required string Page { get; set; }
+    [CascadingParameter(Name = "ParentSizeMode")]
+    public SizeMode SizeMode { get; set; }
+
+    private GridDevExtremeDataSource<ServiceFormModel> Data { get; set; } = null!;
+    private IGrid? Grid { get; set; }
+    private string? SearchText { get; set; }
+    private ServiceFormModel? SelectedServiceFormModel;
+    private CancellationTokenSource disposalTokenSource = new CancellationTokenSource();
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        await LoadGridDataAsync();
+    }
+
+    async Task LoadGridDataAsync()
+    {
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        Data = new GridDevExtremeDataSource<ServiceFormModel>(client, NavigationManager.ToAbsoluteUri($"https://localhost:7071/api/service-forms/{Page}"));
+
+        if (Grid != null)
+            Grid.Reload();
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    void OnColumnChooserItemClick(ToolbarItemClickEventArgs e) => Grid!.ShowColumnChooser();
+
+   
+
+    async Task OnRowClick(GridRowClickEventArgs args)
+    {
+        var service = (ServiceFormModel)Grid!.GetDataItem(args.VisibleIndex);
+        if (service != null) NavigationManager.NavigateTo($"/service-forms/details/{service.Id}");
+    }
+
+
+    void OnAddClick(ToolbarItemClickEventArgs e) => NavigationManager.NavigateTo("/service-forms/createorupdate/");
+
+
+    Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Teminatlar");
+    Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Seçili Teminatlar", new GridXlExportOptions { ExportSelectedRowsOnly = true });
+    Task ExportAllDataToCsv() => Grid!.ExportToCsvAsync("Teminatlar");
+    Task ExportSelectedRowsDataToCsv() => Grid!.ExportToCsvAsync("Seçili Teminatlar", new GridCsvExportOptions { ExportSelectedRowsOnly = true });
+    Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Teminatlar");
+    Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Seçili Teminatlar", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
+
+
+    public void Dispose()
+    {
+        disposalTokenSource.Cancel();
+        disposalTokenSource.Dispose();
+    }
+
+}

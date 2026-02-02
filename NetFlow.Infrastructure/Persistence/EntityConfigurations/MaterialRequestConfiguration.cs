@@ -46,7 +46,6 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
 
             builder.Property(x => x.SourceType)
             .HasConversion<int>()
-            .HasDefaultValue(MaterialRequestSourceType.None)
             .IsRequired();
 
 

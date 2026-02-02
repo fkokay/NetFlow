@@ -2,30 +2,78 @@
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
 
-<DxGrid Data="ReaktifDataSource" ShowSearchBox="true" SearchBoxNullText="Arama yapmak için metin girin…" style="height:100%;">
+
+<DxGrid Data="ReaktifDataSource" ShowSearchBox="true" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer" SearchBoxNullText="Arama yapmak için metin girin…" style="height:100%;">
     <Columns>
         <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
         <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
         <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
-        <DxGridDataColumn FieldName="SutCode" Caption="SUT Kodu" />
         <DxGridDataColumn FieldName="TestName" Caption="Test Adý" />
         <DxGridDataColumn FieldName="TestCount" Caption="Test Sayýsý" />
         <DxGridDataColumn FieldName="UnitPrice" Caption="Birim Fiyat" DisplayFormat="n2" />
         <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
+        <DxGridDataColumn FieldName="MaterialRequestNo" Caption="Talep No">
+            <CellDisplayTemplate>
+                @if (((TenderReaktifModel)context.DataItem).MaterialRequestId.HasValue)
+                {
+                    <a href="@NavigationManager.ToAbsoluteUri($"/material-request/details/{((TenderReaktifModel)context.DataItem).MaterialRequestId}")">
+                        @(((TenderReaktifModel)context.DataItem).MaterialRequestNo)
+                    </a>
+                }
+                else
+                {
+                    <span>-</span>
+                }
+            </CellDisplayTemplate>
+
+        </DxGridDataColumn>
+        <DxGridDataColumn Caption="Talep Durumu" FieldName="MaterialRequestStatus" Width="120px">
+            <CellDisplayTemplate>
+                <span class="status-badge">
+                    @(((TenderReaktifModel)context.DataItem).MaterialRequestStatus.GetDescription())
+                </span>
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+        <DxGridDataColumn Caption="Ýþlemler" Width="100px" MinWidth="100">
+            <CellDisplayTemplate>
+                @if (!((TenderReaktifModel)context.DataItem).MaterialRequestId.HasValue && !((TenderReaktifModel)context.DataItem).MaterialRequestItemId.HasValue)
+                {
+                    <div @onclick:stopPropagation="true">
+                        <DxButton Text="Talep Oluþtur"
+                                  RenderStyle="ButtonRenderStyle.Info"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  Size="SizeMode.Small"
+                                  Click="() => OpenMaterialRequestPopup((TenderReaktifModel)context.DataItem)" />
+                    </div>
+                }
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
     </Columns>
 </DxGrid>
+
+<ReaktifMaterialRequestComponent IsPopupVisible="@IsReaktifMaterialRequestPopupVisible" Tender="@Tender" TenderReaktif="@SelectedTenderReaktif"></ReaktifMaterialRequestComponent>
+
 
 
 @code {
     private GridDevExtremeDataSource<TenderReaktifModel>? ReaktifDataSource { get; set; }
 
     [Parameter]
-    public int TenderId { get; set; }
+    public required TenderModel Tender { get; set; }
+    private bool IsReaktifMaterialRequestPopupVisible { get; set; } = false;
+    private TenderReaktifModel? SelectedTenderReaktif { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
         string baseUrl = "https://localhost:7071/api";
-        ReaktifDataSource = new GridDevExtremeDataSource<TenderReaktifModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-reaktif?tenderId={TenderId}"));
+        ReaktifDataSource = new GridDevExtremeDataSource<TenderReaktifModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-reaktif?tenderId={Tender.Id}"));
+    }
+
+    private void OpenMaterialRequestPopup(TenderReaktifModel model)
+    {
+        SelectedTenderReaktif = model;
+        IsReaktifMaterialRequestPopupVisible = true;
     }
 }
+

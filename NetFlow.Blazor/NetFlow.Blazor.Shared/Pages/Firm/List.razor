@@ -143,18 +143,18 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    void OnAddClick() => NavigationManager.NavigateTo("/firm/create");
+    void OnAddClick() => NavigationManager.NavigateTo("/firm/createorupdate");
 
     void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e)
     {
         if (e.IsNew)
         {
-            NavigationManager.NavigateTo("/firm/create");
+            NavigationManager.NavigateTo("/firm/createorupdate");
         }
         else
         {
             var firm = (FirmModel)e.DataItem;
-            NavigationManager.NavigateTo($"/firm/edit/{firm.Id}");
+            NavigationManager.NavigateTo($"/firm/createorupdate/{firm.Id}");
         }
     }
 

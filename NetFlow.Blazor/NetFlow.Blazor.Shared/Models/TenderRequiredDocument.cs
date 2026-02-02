@@ -1,6 +1,6 @@
 ﻿namespace NetFlow.Blazor.Shared.Models
 {
-    public class TenderRequiredDocument
+    public partial class TenderRequiredDocument
     {
         public int Id { get; set; }
         public int TenderId { get; set; }

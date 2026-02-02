@@ -50,7 +50,7 @@
     </Columns>
 </DxGrid>
 
-<MaterialRequestComponent IsPopupVisible="@IsMaterialRequestPopupVisible" Tender="@Tender" TenderOpex="@SelectedTenderOpex"></MaterialRequestComponent>
+<OpexMaterialRequestComponent IsPopupVisible="@IsOpexMaterialRequestPopupVisible" Tender="@Tender" TenderOpex="@SelectedTenderOpex"></OpexMaterialRequestComponent>
 
 
 @code {
@@ -58,7 +58,7 @@
 
     [Parameter]
     public required TenderModel Tender { get; set; }
-    private bool IsMaterialRequestPopupVisible { get; set; } = false;
+    private bool IsOpexMaterialRequestPopupVisible { get; set; } = false;
     private TenderOpexModel? SelectedTenderOpex { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -71,6 +71,6 @@
     private void OpenMaterialRequestPopup(TenderOpexModel model)
     {
         SelectedTenderOpex = model;
-        IsMaterialRequestPopupVisible = true;
+        IsOpexMaterialRequestPopupVisible = true;
     }
 }
