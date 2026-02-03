@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NetFlow.Application.Guarantees;
+using NetFlow.Application.Roles;
+using NetFlow.Application.ServiceForms;
 using NetFlow.Domain.Common.Pagination;
 using NetFlow.Domain.Identity;
 using NetFlow.ReadModel.Guarantees;
@@ -13,12 +15,14 @@ namespace NetFlow.Api.Controllers
     public class ServiceFormController : ControllerBase
     {
         private readonly ServiceFormReadService _read;
+        private readonly ServiceFormWriteService _write;
         protected readonly CurrentUser _current;
 
-        public ServiceFormController(ServiceFormReadService read, CurrentUser current)
+        public ServiceFormController(ServiceFormReadService read, CurrentUser current, ServiceFormWriteService write)
         {
             _read = read;
             _current = current;
+            _write = write;
         }
 
         [HttpGet("list")]
@@ -57,6 +61,32 @@ namespace NetFlow.Api.Controllers
         {
             var row = await _read.GetAsync(id);
             return row is null ? NotFound() : Ok(row);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateServiceFormRequest request)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            var id = await _write.CreateAsync(_current.User.Id.Value, request);
+
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] EditServiceFormRequest request)
+        {
+            var id = await _write.EditAsync(request);
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
         }
     }
 }

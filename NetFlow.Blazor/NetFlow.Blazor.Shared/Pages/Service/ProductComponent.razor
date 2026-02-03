@@ -1,0 +1,80 @@
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+
+<DxGrid Data="ServiceFormDetailDataSource"
+        ShowSearchBox="true"
+        SearchBoxNullText="Arama yapmak için metin girin…"
+        style="height:100%;">
+
+    <Columns>
+        <DxGridDataColumn FieldName="LineNo" Caption="Satýr No" Width="80px" />
+
+        <DxGridDataColumn FieldName="DetailType" Caption="Detay Tipi" />
+
+        <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
+        <DxGridDataColumn FieldName="StockName" Caption="Stok Adý" />
+
+        <DxGridDataColumn FieldName="Description" Caption="Açýklama" />
+
+        <DxGridDataColumn FieldName="Quantity" Caption="Miktar" />
+        <DxGridDataColumn FieldName="Unit" Caption="Birim" />
+
+        <DxGridDataColumn FieldName="UnitPrice"
+                          Caption="Birim Fiyat"
+                          DisplayFormat="n2" />
+
+        <DxGridDataColumn FieldName="DiscountRate"
+                          Caption="Ýsk. %"
+                          DisplayFormat="n2" />
+
+        <DxGridDataColumn FieldName="TaxRate"
+                          Caption="KDV %"
+                          DisplayFormat="n2" />
+
+        <DxGridDataColumn FieldName="TotalAmount"
+                          Caption="Toplam Tutar"
+                          DisplayFormat="n2" />
+
+        <DxGridDataColumn FieldName="IsWarranty"
+                          Caption="Garanti"
+                          Width="90px" />
+
+        <DxGridDataColumn FieldName="IsBillable"
+                          Caption="Faturalý"
+                          Width="90px" />
+
+        <DxGridDataColumn FieldName="CreatedAt"
+                          Caption="Oluþturma Tarihi"
+                          DisplayFormat="dd.MM.yyyy HH:mm" />
+    </Columns>
+</DxGrid>
+
+@code {
+
+    private GridDevExtremeDataSource<ServiceFormDetailModel>? ServiceFormDetailDataSource { get; set; }
+
+    [Parameter]
+    public int ServiceFormId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(
+            HttpClientFactory.CreateClient("ApiClient"));
+
+        string baseUrl = "https://localhost:7071/api";
+
+        ServiceFormDetailDataSource =
+            new GridDevExtremeDataSource<ServiceFormDetailModel>(
+                client,
+                NavigationManager.ToAbsoluteUri(
+                    $"{baseUrl}/service-form-details?serviceFormId={ServiceFormId}"
+                )
+            );
+    }
+}

@@ -18,6 +18,7 @@ using NetFlow.Application.Netsis.Shipments;
 using NetFlow.Application.Netsis.Warehouses;
 using NetFlow.Application.Personnels;
 using NetFlow.Application.Roles;
+using NetFlow.Application.ServiceForms;
 using NetFlow.Application.TenderCapexes;
 using NetFlow.Application.TenderDevices;
 using NetFlow.Application.TenderOpexes;
@@ -50,6 +51,7 @@ namespace NetFlow.Application
             services.AddScoped<FirmWriteService>();
             services.AddScoped<RoleWriteService>();
             services.AddScoped<PersonnelWriteService>();
+            services.AddScoped<ServiceFormWriteService>();
             services.AddScoped<ModuleWriteService>();
             services.AddScoped<UserWriteService>();
             services.AddScoped<GuaranteeWriteService>();

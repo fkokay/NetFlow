@@ -1,12 +1,11 @@
-﻿using NetFlow.Domain.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace NetFlow.ReadModel.ServiceFormDetails
+namespace NetFlow.Blazor.Shared.Models
 {
-    public class ServiceFormDetailDto
+    public class ServiceFormDetailModel
     {
         public int Id { get; set; }
         public int ServiceFormId { get; set; }
@@ -30,7 +29,5 @@ namespace NetFlow.ReadModel.ServiceFormDetails
         public bool IsBillable { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        
     }
-
 }

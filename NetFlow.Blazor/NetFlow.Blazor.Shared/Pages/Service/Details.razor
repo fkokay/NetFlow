@@ -1,0 +1,369 @@
+@page "/service/details/{Id:int}"
+@using System.Net.Http.Json
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
+
+
+<DxLayoutBreakpoint DeviceSize="DeviceSize.XSmall | DeviceSize.Small | DeviceSize.Medium"
+                    @bind-IsActive="@IsSmallScreen" />
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+
+            <DxToolbarItem IconCssClass="back-icon icon medium-icon"
+                           Tooltip="Geri"
+                           Click="NavigateBack" />
+
+            <DxToolbarItem>
+                <Template>
+                    <div class="custom-item">
+                        <div class="title">Servis Detay Sayfasý</div>
+                    </div>
+                </Template>
+            </DxToolbarItem>
+
+            @if (Model != null)
+            {
+
+
+                <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
+                               Click="LoadDataAsync"
+                               Tooltip="Yenile"
+                               IconCssClass="refresh-icon icon medium-icon" />
+            }
+        </DxToolbar>
+    </div>
+
+    <DxLoadingPanel Visible="@(!IsDataLoaded)"
+                    IsContentBlocked="true"
+                    IsContentVisible="false"
+                    Text="Yükleniyor...">
+
+        <DxGridLayout ColumnSpacing="1rem" RowSpacing="1rem">
+            <Columns>
+                @if (!IsSmallScreen)
+                {
+                    <DxGridLayoutColumn Width="1fr" />
+                    <DxGridLayoutColumn Width="3fr" />
+                }
+                else
+                {
+                    <DxGridLayoutColumn Width="100%" />
+                }
+            </Columns>
+
+            <Rows>
+                @if (!IsSmallScreen)
+                {
+                    <DxGridLayoutRow Areas="item1 item2" />
+                }
+                else
+                {
+                    <DxGridLayoutRow Areas="item1" />
+                    <DxGridLayoutRow Areas="item2" />
+                }
+            </Rows>
+
+            <Items>
+                <DxGridLayoutItem Area="item1">
+                    <Template>
+                        @if (Model != null)
+                        {
+                            <div class="card h-100 service-card">
+                                <div class="authority-header">
+
+                                    <div class="authority-avatar">
+                                        @Model.ServiceFormNo[0]
+                                    </div>
+
+                                    <div class="flex-grow-1">
+                                        <h5 class="authority-title mb-0">
+                                            Servis No: @Model.ServiceFormNo
+                                        </h5>
+                                        <small class="text-muted">
+                                            @Model.CustomerCode
+                                        </small>
+                                        <hr />
+                                        <small class="text-muted">
+                                            @Model.CustomerName
+                                        </small>
+
+                                    </div>
+
+                                    <span class="authority-badge
+                                                    @(Model.ServiceStatus == ServiceStatus.Completed ? "bg-success" :
+                                                          Model.ServiceStatus == ServiceStatus.InProgress ? "bg-warning" :
+                                                          "bg-secondary")">
+                                        @Model.ServiceStatus.GetDescription()
+                                    </span>
+                                </div>
+
+                                <div class="service-stats">
+
+                                    <div class="service-stat">
+                                        <div class="service-stat-title">
+                                            @Model.ServiceType.GetDescription()
+                                        </div>
+                                        <small>Servis Türü</small>
+                                    </div>
+
+                                    <div class="service-stat">
+                                        <div class="service-stat-title">
+                                            @(Model.IsOnSite ? "Yerinde" : "Atölye")
+                                        </div>
+                                        <small>Servis Þekli</small>
+                                    </div>
+
+                                    <div class="service-stat">
+                                        <div class="service-stat-title">
+                                            @(Model.IsWarranty ? "Var" : "Yok")
+                                        </div>
+                                        <small>Garanti</small>
+                                    </div>
+
+                                </div>
+
+                                <h6 class="service-section-title">SERVÝS BÝLGÝLERÝ</h6>
+
+                                <!-- INFO -->
+                                <div class="service-info">
+
+                                    <div class="service-info-row">
+                                        <span>Problem:</span>
+                                        <span>@Model.ProblemDescription</span>
+                                    </div>
+
+                                    <div class="service-info-row">
+                                        <span>Servis Açýklamasý:</span>
+                                        <span>@(string.IsNullOrWhiteSpace(Model.ServiceDescription) ? "-" : Model.ServiceDescription)</span>
+                                    </div>
+
+                                    <div class="service-info-row">
+                                        <span>Atanan Personel:</span>
+                                        <span>
+                                            @(!string.IsNullOrWhiteSpace(Model.AssignedPersonnelName)
+                                                                                    ? Model.AssignedPersonnelName
+                                                                                    : "Atanmadý")
+                                        </span>
+                                    </div>
+
+                                    <div class="service-info-row">
+                                        <span>Departman:</span>
+                                        <span>@(Model.AssignedPersonnelDepartment ?? "-")</span>
+                                    </div>
+
+                                    <div class="service-info-row">
+                                        <span>Ünvan:</span>
+                                        <span>@(Model.AssignedPersonnelTitle ?? "-")</span>
+                                    </div>
+
+                                    <div class="service-info-row">
+                                        <span>Atanma Tarihi:</span>
+                                        <span>@(Model.AssignedAt?.ToShortDateString() ?? "-")</span>
+                                    </div>
+
+                                    <div class="service-info-row">
+                                        <span>Servis Baþlangýç:</span>
+                                        <span>@(Model.ServiceStartDate?.ToShortDateString() ?? "-")</span>
+                                    </div>
+
+                                    <div class="service-info-row">
+                                        <span>Servis Bitiþ:</span>
+                                        <span class="@(Model.ServiceEndDate.HasValue ? "" : "text-danger")">
+                                            @(Model.ServiceEndDate?.ToShortDateString() ?? "Devam Ediyor")
+                                        </span>
+                                    </div>
+                                    <div class="service-info-row">
+                                        <span>Ýþçilik:</span>
+                                        <span>@Model.LaborCost?.ToString("C2")</span>
+                                    </div>
+
+                                    <div class="service-info-row">
+                                        <span>Malzeme:</span>
+                                        <span>@Model.MaterialCost?.ToString("C2")</span>
+                                    </div>
+
+                                    <div class="service-info-row fw-bold">
+                                        <span>Toplam:</span>
+                                        <span>@Model.TotalCost.ToString("C2")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </Template>
+                </DxGridLayoutItem>
+
+                <DxGridLayoutItem Area="item2">
+                    <Template>
+                        <DxTabs CssClass="card tabs"
+                                ActiveTabIndex="@ActiveTabIndex"
+                                ActiveTabIndexChanged="OnActiveTabIndexChanged">
+                            <DxTabPage Text="Ürünler">
+                                <ProductComponent ServiceFormId="Id" />
+                            </DxTabPage>
+
+                        </DxTabs>
+                    </Template>
+                </DxGridLayoutItem>
+            </Items>
+        </DxGridLayout>
+    </DxLoadingPanel>
+</div>
+
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private ServiceFormModel? Model;
+    private GridDevExtremeDataSource<ServiceFormModel>? ItemDataSource;
+    private bool IsSmallScreen;
+    private bool IsDataLoaded;
+    private int ActiveTabIndex;
+    private bool IsTerminatedPopupVisible { get; set; } = false;
+    private int SelectedPersonnelId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsDataLoaded = false;
+        await LoadDataAsync();
+        IsDataLoaded = true;
+    }
+
+    private async Task LoadDataAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(
+            HttpClientFactory.CreateClient("ApiClient"));
+
+        var response = await client.GetAsync($"api/service-forms/{Id}");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/service/request");
+            return;
+        }
+
+        Model = await response.Content.ReadFromJsonAsync<ServiceFormModel>();
+        await LoadTabData(ActiveTabIndex);
+    }
+
+    private async Task OnActiveTabIndexChanged(int index)
+    {
+        ActiveTabIndex = index;
+        await LoadTabData(index);
+    }
+
+    private async Task LoadTabData(int index)
+    {
+        var client = await ApiClientFactory.CreateAsync(
+            HttpClientFactory.CreateClient("ApiClient"));
+
+        var baseUrl = "https://localhost:7071/api";
+
+        if (index == 0)
+        {
+            ItemDataSource = new GridDevExtremeDataSource<ServiceFormModel>(
+                client,
+                NavigationManager.ToAbsoluteUri($"{baseUrl}/service-forms?id={Id}")
+            );
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    async Task Grid_EditStart(GridEditStartEventArgs e)
+    {
+        e.Cancel = true;
+        var editModel = (ServiceFormModel)e.DataItem;
+        SelectedPersonnelId = editModel.Id;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
+    {
+        e.Cancel = true;
+        var personnel = (ServiceFormModel)e.DataItem;
+
+        try
+        {
+            IsDataLoaded = false;
+            await InvokeAsync(StateHasChanged);
+
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+
+            var response = await client.DeleteAsync(
+                $"api/personnels/{personnel.Id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadDataAsync();
+                ShowToast("Baþarýlý", "Personel baþarýyla silindi.",
+                          ToastRenderStyle.Success, false);
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                ShowToast("Hata", errorMsg,
+                          ToastRenderStyle.Danger, true);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowToast("Hata", ex.Message,
+                      ToastRenderStyle.Danger, true);
+        }
+        finally
+        {
+            IsDataLoaded = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    async Task ReopenPopup(Func<Task> beforeOpen = null)
+    {
+        if (beforeOpen != null)
+            await beforeOpen();
+
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+    }
+
+
+    private async Task OnTerminateSuccess()
+    {
+        await LoadDataAsync();
+    }
+
+    private void ShowToast(string title, string text,
+                           ToastRenderStyle style, bool isError)
+    {
+        ToastService.ShowToast(new ToastOptions()
+        {
+            Id = "toast",
+            ProviderName = "Overview",
+            ThemeMode = ToastThemeMode.Light,
+            RenderStyle = style,
+            Title = title,
+            Text = text,
+        }, RenderToastButton(isError));
+    }
+
+    private RenderFragment RenderToastButton(bool isError) =>
+        @<div class="d-flex gap-2">
+        <DxButton Click="@(isError? OnPopupError : OnPopupOk)"
+                  RenderStyle="@(isError ? ButtonRenderStyle.Danger
+                                                                                                                                    : ButtonRenderStyle.Success)">
+        Kapat
+    </DxButton>
+</div>;
+
+    private void OnPopupOk()
+        => NavigationManager.NavigateTo("/service/requests");
+
+    private void OnPopupError() { }
+
+    private void NavigateBack()
+        => NavigationManager.NavigateTo("/service/requests");
+}

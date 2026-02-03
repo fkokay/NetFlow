@@ -1,4 +1,5 @@
 ﻿using NetFlow.Domain.Enums;
+using NetFlow.ReadModel.ServiceFormDetails;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,12 +13,9 @@ namespace NetFlow.ReadModel.ServiceForms
         public string ServiceFormNo { get; set; } = null!;
         public ServiceType ServiceType { get; set; }
         public ServiceStatus ServiceStatus { get; set; }
-        public int CustomerId { get; set; }
+        public string CustomerCode { get; set; } = null!;
         public string CustomerName { get; set; } = null!;
-        public int? ProductId { get; set; }
-        public string? ProductName { get; set; }
-        public string? SerialNumber { get; set; }
-        public string? Model { get; set; }
+
         public string ProblemDescription { get; set; } = null!;
         public string? ServiceDescription { get; set; }
         public int? AssignedPersonnelId { get; set; }
@@ -42,6 +40,9 @@ namespace NetFlow.ReadModel.ServiceForms
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public DateTime? ClosedAt { get; set; }
+
+        public List<ServiceFormDetailDto> Details { get; set; } = new();
+
     }
 
 }

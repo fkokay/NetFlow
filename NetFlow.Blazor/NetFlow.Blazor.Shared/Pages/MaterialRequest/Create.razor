@@ -80,7 +80,7 @@
                         <DxComboBox Data="SourceTypes"
                                     @bind-Value="model.SourceType"
                                     ValueFieldName="this"
-                                    TextFieldName="this" >
+                                    TextFieldName="item.GetDescription()">
                             <ItemTemplate Context="item">
                                 @item.GetDescription()
                             </ItemTemplate>

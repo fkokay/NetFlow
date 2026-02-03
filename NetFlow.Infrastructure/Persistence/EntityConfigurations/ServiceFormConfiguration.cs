@@ -17,22 +17,19 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.ServiceFormNo)
-          .HasMaxLength(50);
+                .HasMaxLength(50);
 
             builder.Property(x => x.ServiceStatus)
-           .HasConversion<int>()
+           .HasConversion<byte>()
            .HasDefaultValue(ServiceStatus.Draft)
            .IsRequired();
 
 
             builder.Property(x => x.ServiceType)
-          .HasConversion<int>()
-          .HasDefaultValue(ServiceType.Undefined)
-          .IsRequired();
+                .HasConversion<byte>()
+                .IsRequired();
 
-
-            builder.HasIndex(x => x.ServiceType);
-            builder.HasIndex(x => x.ServiceStatus);
+            ;
 
             // Relationships
 
