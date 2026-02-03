@@ -63,10 +63,10 @@ namespace NetFlow.Api.Controllers
             int materialRequestItemId = await _materialRequestItemWrite.CreateAsync(new CreateMaterialRequestItemRequest()
             {
                 MaterialRequestId = materialRequestId,
-                ItemCode = request.UnitCode,
-                ItemName = request.UnitName,
-                RequestedQuantity = request.Quantity,
-                FulfilledQuantity = request.Quantity,
+                ItemCode = request.ItemCode,
+                ItemName = request.ItemName,
+                RequestedQuantity = request.RequestedQuantity,
+                FulfilledQuantity = request.FulfilledQuantity,
                 Unit = request.Unit,
                 WarehouseCode = request.WarehouseCode,
                 AlternateItemCode = request.AlternateItemCode,

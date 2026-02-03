@@ -15,7 +15,7 @@ namespace NetFlow.Application.TenderReaktifs
         }
         public async Task<bool> UpdateMaterialRequest(TenderReaktifCreateMaterialRequest request, int materialRequestId, int materialRequestItemId)
         {
-            var tenderReaktif = await _db.TenderOpexes.FindAsync(request.TenderReaktifId);
+            var tenderReaktif = await _db.TenderReaktifs.FindAsync(request.TenderReaktifId);
             if (tenderReaktif == null)
             {
                 return false;
@@ -23,7 +23,7 @@ namespace NetFlow.Application.TenderReaktifs
             tenderReaktif.MaterialRequestId = materialRequestId;
             tenderReaktif.MaterialRequestItemId = materialRequestItemId;
 
-            _db.TenderOpexes.Update(tenderReaktif);
+            _db.TenderReaktifs.Update(tenderReaktif);
             await _db.SaveChangesAsync();
             return true;
 

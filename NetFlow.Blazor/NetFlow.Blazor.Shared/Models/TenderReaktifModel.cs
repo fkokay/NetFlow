@@ -8,10 +8,11 @@
         public string ParentAuthorityCode { get; set; } = string.Empty;
         public string UnitCode { get; set; } = string.Empty;
         public string UnitName { get; set; } = string.Empty;
-        public string StockCode { get; set; } = string.Empty;//itemcode
+        public string StockCode { get; set; } = string.Empty;
+        public string StockName { get; set; } = string.Empty;
         public string SutCode { get; set; } = string.Empty;
         public string? TestName { get; set; }
-        public decimal TestCount { get; set; } = 0m;//quantity
+        public decimal TestCount { get; set; } = 0m;
         public decimal SutPoint { get; set; } = 0m;
         public decimal TotalSutPoint { get; set; } = 0m;
         public string Currency { get; set; } = "TRY";

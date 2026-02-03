@@ -15,6 +15,12 @@
             <DxFormLayoutItem Caption="Alt Kamu/Kurum" ColSpanMd="12">
                 <DxTextBox Text="@TenderCapex.UnitName" ReadOnly="true" />
             </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Stok Kodu" ColSpanMd="12">
+                <DxTextBox Text="@TenderCapex.StockCode" ReadOnly="true" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Stok Adý" ColSpanMd="12">
+                <DxTextBox Text="@TenderCapex.StockName" ReadOnly="true" />
+            </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Miktar" ColSpanMd="12">
                 <DxTextBox Text="@TenderCapex.Quantity.ToString()" ReadOnly="true" />
             </DxFormLayoutItem>
@@ -88,7 +94,8 @@
         {
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
-            var x = new
+            
+            var response = await client.PostAsJsonAsync("api/tender-capex/create-material-request", new
             {
                 TenderId = Tender.Id,
                 TenderCapexId = TenderCapex.Id,
@@ -98,19 +105,16 @@
                 RequestedDepartment = model.RequestedDepartment,
                 SourceType = model.SourceType,
                 Description = model.Description,
+                ItemCode = TenderCapex.StockCode,
+                ItemName = TenderCapex.StockName,
                 RequestedQuantity = TenderCapex.Quantity,
                 FulfilledQuantity = TenderCapex.Quantity,
-                ItemCode = TenderCapex.AssetCode,
                 Unit = TenderCapex.Unit,
-                UnitCode = TenderCapex.UnitCode,
-                AssetCode = TenderCapex.AssetCode,
-                UnitName = TenderCapex.UnitName,
                 WarehouseCode = "1000",
                 AlternateItemCode = "",
                 Status = MaterialRequestItemStatus.Pending,
                 FulfillmentType = MaterialRequestItemFulfillmentType.Undefined
-            };
-            var response = await client.PostAsJsonAsync("api/tender-capex/create-material-request",x );
+            });
 
             if (response.IsSuccessStatusCode)
             {

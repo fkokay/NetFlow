@@ -14,6 +14,8 @@ namespace NetFlow.ReadModel.TenderCapex
         public string UnitCode { get; set; } = string.Empty;
         public string UnitName { get; set; } = string.Empty;
         public string AssetCode { get; set; } = string.Empty;
+        public string StockCode { get; set; } = string.Empty;
+        public string StockName { get; set; } = string.Empty;
         public int Quantity { get; set; }
         public string Unit { get; set; } = string.Empty;
         public int? MaterialRequestId { get; set; }

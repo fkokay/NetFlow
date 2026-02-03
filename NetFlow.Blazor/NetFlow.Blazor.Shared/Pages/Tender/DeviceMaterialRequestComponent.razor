@@ -3,7 +3,6 @@
 @inject IHttpClientFactory HttpClientFactory
 @inject IToastNotificationService ToastService
 
-
 <DxPopup @bind-Visible="@IsPopupVisible" ShowFooter="true" HeaderText="Talep Oluþtur" Width="800px">
     <BodyContentTemplate Context="PopupContext">
         <DxFormLayout CaptionPosition="CaptionPosition.Horizontal">
@@ -13,14 +12,20 @@
             <DxFormLayoutItem Caption="Kamu/Kurum" ColSpanMd="12">
                 <DxTextBox Text="@Tender.PublicAuthorityName" ReadOnly="true" />
             </DxFormLayoutItem>
-            <DxFormLayoutItem Caption="Alt Kamu/Kurum" ColSpanMd="12">
-                <DxTextBox Text="@TenderReaktif.UnitName" ReadOnly="true" />
+            <DxFormLayoutItem Caption="Müþteri Kodu" ColSpanMd="12">
+                <DxTextBox Text="@TenderDevice.CustomerCode" ReadOnly="true" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Müþteri Adý" ColSpanMd="12">
+                <DxTextBox Text="@TenderDevice.CustomerCode" ReadOnly="true" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Stok Kodu" ColSpanMd="12">
-                <DxTextBox Text="@TenderReaktif.StockCode" ReadOnly="true" />
+                <DxTextBox Text="@TenderDevice.StockCode" ReadOnly="true" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Stok Adý" ColSpanMd="12">
-                <DxTextBox Text="@TenderReaktif.StockName" ReadOnly="true" />
+                <DxTextBox Text="@TenderDevice.StockName" ReadOnly="true" />
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Miktar" ColSpanMd="12">
+                <DxTextBox Text="@TenderDevice.Quantity.ToString()" ReadOnly="true" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Talep Türü" ColSpanMd="12">
                 <DxComboBox Data="RequestTypes" @bind-Value="model.RequestType" ValueFieldName="Value" TextFieldName="Text" ValidationEnabled="true" ShowValidationIcon="true" />
@@ -51,7 +56,7 @@
 @code {
     [Parameter] public required bool IsPopupVisible { get; set; }
     [Parameter] public required TenderModel Tender { get; set; }
-    [Parameter] public required TenderReaktifModel TenderReaktif { get; set; }
+    [Parameter] public required TenderDeviceModel TenderDevice { get; set; }
     [Parameter] public EventCallback OnSaved { get; set; }
     [Parameter] public EventCallback OnCanceled { get; set; }
 
@@ -93,21 +98,21 @@
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
 
-            var response = await client.PostAsJsonAsync("api/tender-reaktif/create-material-request", new
+            var response = await client.PostAsJsonAsync("api/tender-device/create-material-request", new
             {
                 TenderId = Tender.Id,
-                TenderReaktifId = TenderReaktif.Id,
+                TenderDeviceId = TenderDevice.Id,
                 RequestType = model.RequestType,
                 Priority = model.Priority,
                 RequiredDate = model.RequiredDate,
                 RequestedDepartment = model.RequestedDepartment,
                 SourceType = model.SourceType,
                 Description = model.Description,
-                ItemCode = TenderReaktif.StockCode,
-                ItemName = TenderReaktif.StockName,
-                RequestedQuantity = TenderReaktif.TestCount,
-                FulfilledQuantity = TenderReaktif.TestCount,
-                Unit = "Test",
+                ItemCode = TenderDevice.StockCode,
+                ItemName = TenderDevice.StockName,
+                RequestedQuantity = TenderDevice.Quantity,
+                FulfilledQuantity = TenderDevice.Quantity,
+                Unit = "Adet",
                 WarehouseCode = "1000",
                 AlternateItemCode = "",
                 Status = MaterialRequestItemStatus.Pending,

@@ -14,6 +14,7 @@ namespace NetFlow.ReadModel.TenderReaktif
         public string UnitCode { get; set; } = string.Empty;
         public string UnitName { get; set; } = string.Empty;
         public string StockCode { get; set; } = string.Empty;
+        public string StockName { get; set; } = string.Empty;
         public string SutCode { get; set; } = string.Empty;
         public string TestName { get; set; } = string.Empty;
         public decimal TestCount { get; set; }

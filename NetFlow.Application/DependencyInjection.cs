@@ -19,6 +19,7 @@ using NetFlow.Application.Netsis.Warehouses;
 using NetFlow.Application.Personnels;
 using NetFlow.Application.Roles;
 using NetFlow.Application.TenderCapexes;
+using NetFlow.Application.TenderDevices;
 using NetFlow.Application.TenderOpexes;
 using NetFlow.Application.TenderPersonnels;
 using NetFlow.Application.TenderReaktifs;
@@ -57,6 +58,7 @@ namespace NetFlow.Application
             services.AddScoped<TenderWriteService>();
             services.AddScoped<TenderOpexWriterService>();
             services.AddScoped<TenderCapexWriterService>();
+            services.AddScoped<TenderDeviceWriterService>();
             services.AddScoped<TenderReaktifWriterService>();
             services.AddScoped<TenderPersonnelWriteService>();
             services.AddScoped<MaterialRequestWriteService>();

@@ -3,12 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace NetFlow.Application.TenderCapexes
+namespace NetFlow.Application.TenderDevices
 {
-    public class TenderCapexCreateMaterialRequest
+    public class TenderDeviceCreateMaterialRequest
     {
         public int TenderId { get; set; }
-        public int TenderCapexId { get; set; }
+        public int TenderDeviceId { get; set; }
         public MaterialRequestType RequestType { get; set; } = MaterialRequestType.Project;
         public DateTime RequiredDate { get; set; }
         public MaterialRequestPriority Priority { get; set; } = MaterialRequestPriority.Normal;

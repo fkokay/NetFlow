@@ -131,26 +131,35 @@
                     </DxGridLayoutItem>
                     <DxGridLayoutItem Area="item2">
                         <Template>
-                            <DxTabs CssClass="card tabs">
-                                <DxTabPage Text="Cihazlar" CssClass="tab-page">
-                                    <TenderDevice TenderId="Id" />
-                                </DxTabPage>
-                                <DxTabPage Text="Opex" CssClass="tab-page">
-                                    <TenderOpex Tender="@Model" />
-                                </DxTabPage>
-                                <DxTabPage Text="Capex" CssClass="tab-page">
-                                    <TenderCapex Tender="@Model" />
-                                </DxTabPage>
-                                <DxTabPage Text="Reaktif" CssClass="tab-page">
-                                    <TenderReaktif Tender="@Model"  />
-                                </DxTabPage>
-                                <DxTabPage Text="Belgeler" CssClass="tab-page">
-                                    <TenderDocuments TenderId="Id" />
-                                </DxTabPage>
-                                <DxTabPage Text="Personeller" CssClass="tab-page">
-                                    <TenderPersonnel TenderId="Id" />
-                                </DxTabPage>
-                            </DxTabs>
+                            @if (Model != null)
+                            {
+                                <DxTabs CssClass="card tabs">
+                                    <DxTabPage Text="Cihazlar">
+                                        <TenderDevice Tender="@Model" />
+                                    </DxTabPage>
+
+                                    <DxTabPage Text="Opex">
+                                        <TenderOpex Tender="@Model" />
+                                    </DxTabPage>
+
+                                    <DxTabPage Text="Capex">
+                                        <TenderCapex Tender="@Model" />
+                                    </DxTabPage>
+
+                                    <DxTabPage Text="Reaktif">
+                                        <TenderReaktif Tender="@Model" />
+                                    </DxTabPage>
+
+                                    <DxTabPage Text="Belgeler">
+                                        <TenderDocuments TenderId="Id" />
+                                    </DxTabPage>
+
+                                    <DxTabPage Text="Personeller">
+                                        <TenderPersonnel TenderId="Id" />
+                                    </DxTabPage>
+                                </DxTabs>
+                            }
+
                         </Template>
                     </DxGridLayoutItem>
                 </Items>

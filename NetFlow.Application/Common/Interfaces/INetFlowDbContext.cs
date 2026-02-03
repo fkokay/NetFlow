@@ -26,6 +26,7 @@ namespace NetFlow.Application.Common.Interfaces
         DbSet<TenderOpexEntity> TenderOpexes { get; }
         DbSet<TenderCapexEntity> TenderCapexes { get; }
         DbSet<TenderReaktifEntity> TenderReaktifs { get; }
+        DbSet<TenderDeviceEntity> TenderDevices { get; }
         DbSet<TenderPersonnelEntity> TenderPersonnels { get; }
         DbSet<MaterialRequestEntity> MaterialRequests { get; }
         DbSet<MaterialRequestItemEntity> MaterialRequestItems { get; }
