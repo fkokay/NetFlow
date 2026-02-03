@@ -41,8 +41,6 @@ namespace NetFlow.ReadModel.ServiceForms
         public DateTime? UpdatedAt { get; set; }
         public DateTime? ClosedAt { get; set; }
 
-        public List<ServiceFormDetailDto> Details { get; set; } = new();
-
     }
 
 }

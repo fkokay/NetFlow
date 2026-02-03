@@ -67,7 +67,6 @@ namespace NetFlow.Blazor.Shared.Models
             TotalCost = (_laborCost ?? 0) + (_materialCost ?? 0);
         }
 
-        public List<ServiceFormDetailModel> Details { get; set; } = new();
     }
 
 }

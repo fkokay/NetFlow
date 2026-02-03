@@ -105,28 +105,8 @@ namespace NetFlow.ReadModel.ServiceForms
         public async Task<ServiceFormDto?> GetAsync(int id)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
-
-            var sql = @"
-                SELECT TOP 1 *
-                FROM dbo.VW_ServiceForm WITH (NOLOCK)
-                WHERE Id = @Id;
-
-                SELECT *
-                FROM dbo.VW_ServiceFormDetail WITH (NOLOCK)
-                WHERE ServiceFormId = @Id
-                ORDER BY [LineNo];
-            ";
-
-            using var multi = await cn.QueryMultipleAsync(sql, new { Id = id });
-
-            var form = await multi.ReadFirstOrDefaultAsync<ServiceFormDto>();
-            if (form == null)
-                return null;
-
-            var details = await multi.ReadAsync<ServiceFormDetailDto>();
-            form.Details = details.ToList();
-
-            return form;
+            var sql = "SELECT TOP 1 * FROM  dbo.VW_ServiceForm WITH (NOLOCK) WHERE Id=@Id";
+            return await cn.QueryFirstOrDefaultAsync<ServiceFormDto>(sql, new { Id = id });
         }
 
 
