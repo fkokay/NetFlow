@@ -60,7 +60,7 @@
                     VirtualScrollingEnabled="true"
                     RowClick="@OnRowClick"
                     HighlightRowOnHover="true"
-                    CustomizeEditModel="Grid_CustomizeEditModel">
+                    EditStart="OnEditStart">
 
                 <Columns>
 
@@ -239,12 +239,14 @@
     Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Teminatlar");
     Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Seçili Teminatlar", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
 
-    void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e)
+    
+    private void OnEditStart(GridEditStartEventArgs e)
     {
+        e.Cancel = true;
         var service = (ServiceFormModel)e.DataItem;
         NavigationManager.NavigateTo($"/service/createorupdate/{service.Id}");
-    }
 
+    }
     private void GoToDetails(ServiceFormModel service)
     {
         if (service != null && service.Id > 0)

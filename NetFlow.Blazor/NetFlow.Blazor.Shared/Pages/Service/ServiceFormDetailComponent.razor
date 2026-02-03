@@ -1,0 +1,421 @@
+﻿@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
+
+
+<div style="position:relative">
+
+    <DxLoadingPanel @bind-Visible="IsGridLoading" Text="İşlem yapılıyor..." />
+    <DxGrid Data="ServiceFormDetailDataSource"
+            EditStart="OnEditStart"
+            ShowSearchBox="true"
+            SearchBoxNullText="Arama yapmak için metin girin…"
+            style="height:100%;"
+            DataItemDeleting="Grid_DataItemDeleting">
+        <ToolbarTemplate>
+            <DxToolbar>
+                <Items>
+                    <DxToolbarItem Text="Yeni Ürüm Ekle"
+                                   Click="OnAddNewClick"
+                                   RenderStyle="ButtonRenderStyle.Primary" />
+                </Items>
+            </DxToolbar>
+        </ToolbarTemplate>
+        <Columns>
+            <DxGridDataColumn FieldName="LineNo" Caption="Satır No" Width="80px" />
+            <DxGridDataColumn Caption="Detay Tipi" FieldName="DetailType" Width="120px">
+                <CellDisplayTemplate>
+                    <span class="status-badge">
+                        @(((ServiceFormDetailModel)context.DataItem).DetailType.GetDescription())
+                    </span>
+                </CellDisplayTemplate>
+            </DxGridDataColumn>
+            <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
+            <DxGridDataColumn FieldName="StockName" Caption="Stok Adı" />
+            <DxGridDataColumn FieldName="Description" Caption="Açıklama" />
+            <DxGridDataColumn FieldName="Quantity" Caption="Miktar" />
+            <DxGridDataColumn FieldName="Unit" Caption="Birim" />
+
+            <DxGridDataColumn FieldName="UnitPrice"
+                              Caption="Birim Fiyat"
+                              DisplayFormat="n2" />
+
+            <DxGridDataColumn FieldName="DiscountRate"
+                              Caption="İsk. %"
+                              DisplayFormat="n2" />
+
+            <DxGridDataColumn FieldName="TaxRate"
+                              Caption="KDV %"
+                              DisplayFormat="n2" />
+
+            <DxGridDataColumn FieldName="TotalAmount"
+                              Caption="Toplam Tutar"
+                              DisplayFormat="n2" />
+
+            <DxGridDataColumn FieldName="IsWarranty"
+                              Caption="Garanti"
+                              Width="90px" />
+
+            <DxGridDataColumn FieldName="IsBillable"
+                              Caption="Faturalı"
+                              Width="90px" />
+
+            <DxGridDataColumn FieldName="CreatedAt"
+                              Caption="Oluşturma Tarihi"
+                              DisplayFormat="dd.MM.yyyy HH:mm" />
+
+
+            <DxGridCommandColumn Width="6em" DeleteButtonVisible="true" EditButtonVisible="true" />
+        </Columns>
+    </DxGrid>
+</div>
+
+
+
+<DxPopup @bind-Visible="@PopupVisible"
+         HeaderText="Servis Detay Yönetimi"
+         Width="800px">
+    <BodyContentTemplate Context="popupContext">
+        <DxLoadingPanel @bind-Visible="IsLoadingForPopup" Text="İşlem yapılıyor..." />
+        @if (Model != null)
+        {
+            <DxFormLayout>
+
+                <DxFormLayoutItem Caption="Satır No" ColSpanMd="12">
+                    <DxSpinEdit @bind-Value="Model.LineNo"
+                                MinValue="1" />
+                </DxFormLayoutItem>
+
+
+                <DxFormLayoutItem Caption="Ürün Kodu" ColSpanMd="12">
+                    <DxTextBox @bind-Text="Model.StockCode" BindValueMode="BindValueMode.OnInput">
+                        <Buttons>
+                            <DxEditorButton IconCssClass="three-point-icon icon medium-icon" Click="OpenProductPopup" />
+                        </Buttons>
+                    </DxTextBox>
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Ürün Adı" ColSpanMd="12">
+                    <DxTextBox @bind-Text="Model.StockName" BindValueMode="BindValueMode.OnInput" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Servis Tipi" ColSpanMd="12">
+                    <DxComboBox Data="@DetailTypes"
+                                @bind-Value="Model.DetailType"
+                                ValueFieldName="Value"
+                                TextFieldName="Text"
+                                ValidationEnabled="true"
+                                ShowValidationIcon="true" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Açıklama" ColSpanMd="12">
+                    <DxMemo @bind-Text="Model.Description" Rows="3" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Miktar" ColSpanMd="12">
+                    <DxSpinEdit @bind-Value="Model.Quantity"
+                                Increment="1"
+                                MinValue="0" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Birim" ColSpanMd="12">
+                    <DxTextBox @bind-Text="Model.Unit" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Birim Fiyat" ColSpanMd="12">
+                    <DxSpinEdit @bind-Value="Model.UnitPrice"
+                                DisplayFormat="n2"
+                                MinValue="0" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="İndirim %" ColSpanMd="12">
+                    <DxSpinEdit @bind-Value="Model.DiscountRate"
+                                DisplayFormat="n2"
+                                MinValue="0"
+                                MaxValue="100" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="KDV %" ColSpanMd="12">
+                    <DxSpinEdit @bind-Value="Model.TaxRate"
+                                DisplayFormat="n2"
+                                MinValue="0"
+                                MaxValue="100" />
+                </DxFormLayoutItem>
+
+                <!-- Hesaplanan Alanlar -->
+                <DxFormLayoutItem Caption="Satır Tutarı" ColSpanMd="12">
+                    <DxSpinEdit Value="Model.LineAmount"
+                                DisplayFormat="n2"
+                                ReadOnly="true" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="İndirim Tutarı" ColSpanMd="12">
+                    <DxSpinEdit Value="Model.DiscountAmount"
+                                DisplayFormat="n2"
+                                ReadOnly="true" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="KDV Tutarı" ColSpanMd="12">
+                    <DxSpinEdit Value="Model.TaxAmount"
+                                DisplayFormat="n2"
+                                ReadOnly="true" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Toplam Tutar" ColSpanMd="12">
+                    <DxSpinEdit Value="Model.TotalAmount"
+                                DisplayFormat="n2"
+                                ReadOnly="true" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Garanti Kapsamında" ColSpanMd="6">
+                    <DxCheckBox @bind-Checked="Model.IsWarranty" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Faturalandırılabilir" ColSpanMd="6">
+                    <DxCheckBox @bind-Checked="Model.IsBillable" />
+                </DxFormLayoutItem>
+            </DxFormLayout>
+        }
+        else
+        {
+            <p>Yükleniyor...</p>
+        }
+        <DxButton Text="Kaydet"
+                  Click="HandleSave"
+                  Enabled="!IsLoadingForPopup"
+                  RenderStyle="ButtonRenderStyle.Primary" />
+
+        <DxButton Text="Vazgeç"
+                  Enabled="!IsLoadingForPopup"
+                  Click="() => PopupVisible = false"
+                  RenderStyle="ButtonRenderStyle.Secondary" />
+    </BodyContentTemplate>
+</DxPopup>
+
+
+
+<DxPopup @bind-Visible="ProductPopupVisible" HeaderText="Ürün Seçimi" Width="800px" Height="600px" Scrollable="true">
+    <BodyTemplate>
+        <DxGrid Data="@ProductDataSource" ShowFilterRow="true" PageSize="12" SelectionMode="GridSelectionMode.Single" SelectedDataItemChanged="@OnProductSelected" VirtualScrollingEnabled="true" KeyFieldName="Code">
+            <Columns>
+                <DxGridSelectionColumn Width="100px" />
+                <DxGridDataColumn FieldName="Code" Caption="Stok Kodu" Width="150px" />
+                <DxGridDataColumn FieldName="Name" Caption="Stok Adı" />
+            </Columns>
+        </DxGrid>
+    </BodyTemplate>
+</DxPopup>
+
+
+@code {
+    [Parameter]
+    public int ServiceFormId { get; set; }
+    private GridDevExtremeDataSource<ServiceFormDetailModel>? ServiceFormDetailDataSource { get; set; }
+    private bool PopupVisible { get; set; } = false;
+    private ServiceFormDetailModel? Model = new();
+    private GridDevExtremeDataSource<ProductModel>? ProductDataSource;
+    private bool ProductPopupVisible { get; set; } = false;
+    private bool IsLoadingForPopup { get; set; }
+    private bool IsGridLoading { get; set; }
+
+    private List<EnumItem<ServiceDetailType>> DetailTypes =
+   Enum.GetValues<ServiceDetailType>()
+       .Select(x => new EnumItem<ServiceDetailType>
+       {
+           Value = x,
+           Text = x.GetDescription()
+       })
+       .ToList();
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        string baseUrl = "https://localhost:7071/api";
+        await LoadDataAsync();
+        ProductDataSource = new GridDevExtremeDataSource<ProductModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/netsis/products/pagedList"));
+    }
+
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            IsLoadingForPopup = true;
+
+            var client = await ApiClientFactory.CreateAsync(
+                HttpClientFactory.CreateClient("ApiClient"));
+
+            string baseUrl = "https://localhost:7071/api";
+
+            ServiceFormDetailDataSource =
+                new GridDevExtremeDataSource<ServiceFormDetailModel>(
+                    client,
+                    NavigationManager.ToAbsoluteUri(
+                        $"{baseUrl}/service-form-details?serviceFormId={ServiceFormId}"
+                    )
+                );
+        }
+        catch (Exception ex)
+        {
+            ShowToast("Hata", ex.Message, ToastRenderStyle.Danger);
+        }
+        finally
+        {
+            IsLoadingForPopup = false;
+        }
+    }
+
+
+
+    private async Task HandleSave()
+    {
+        if (Model == null || IsLoadingForPopup) return;
+
+        try
+        {
+            IsLoadingForPopup = true;
+
+            var client = await ApiClientFactory.CreateAsync(
+                HttpClientFactory.CreateClient("ApiClient"));
+
+            string baseUrl = "https://localhost:7071/api/service-form-details";
+
+            HttpResponseMessage response;
+
+            if (Model.Id > 0)
+            {
+                response = await client.PutAsJsonAsync(baseUrl, Model);
+            }
+            else
+            {
+                Model.ServiceFormId = ServiceFormId;
+                response = await client.PostAsJsonAsync(baseUrl, Model);
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                ShowToast("Başarılı", "Kayıt başarıyla tamamlandı", ToastRenderStyle.Success);
+
+                PopupVisible = false;
+                await LoadDataAsync();
+            }
+            else
+            {
+                ShowToast("Hata",
+                    await response.Content.ReadAsStringAsync(),
+                    ToastRenderStyle.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowToast("Sistem Hatası", ex.Message, ToastRenderStyle.Danger);
+        }
+        finally
+        {
+            IsLoadingForPopup = false;
+            StateHasChanged();
+        }
+    }
+
+    private void OpenProductPopup()
+    {
+        ProductPopupVisible = true;
+    }
+
+    private void OnEditStart(GridEditStartEventArgs e)
+    {
+        e.Cancel = true;
+        var dataItem = (ServiceFormDetailModel)e.DataItem;
+
+        Model = new ServiceFormDetailModel
+        {
+            Id = dataItem.Id,
+            ServiceFormId = dataItem.ServiceFormId,
+            LineNo = dataItem.LineNo,
+            StockCode = dataItem.StockCode,
+            StockName = dataItem.StockName,
+            DetailType = dataItem.DetailType,
+            Description = dataItem.Description,
+            Quantity = dataItem.Quantity,
+            Unit = dataItem.Unit,
+            UnitPrice = dataItem.UnitPrice,
+            DiscountRate = dataItem.DiscountRate,
+            TaxRate = dataItem.TaxRate,
+            IsWarranty = dataItem.IsWarranty,
+            IsBillable = dataItem.IsBillable
+        };
+
+        PopupVisible = true;
+    }
+    private void OnProductSelected(object selectedItem)
+    {
+        if (selectedItem is ProductModel selectedProduct)
+        {
+
+            Model ??= new ServiceFormDetailModel();
+
+            Model.StockCode = selectedProduct.Code;
+            Model.StockName = selectedProduct.Name;
+
+            ProductPopupVisible = false;
+            StateHasChanged();
+        }
+    }
+    private void OnAddNewClick()
+    {
+        Model = new ServiceFormDetailModel();
+        PopupVisible = true;
+    }
+
+    async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
+    {
+        e.Cancel = true;
+        var serviceDetail = (ServiceFormDetailModel)e.DataItem;
+
+        try
+        {
+            
+            IsGridLoading = true;
+            StateHasChanged(); 
+
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+
+            var response = await client.DeleteAsync($"api/service-form-details/{serviceDetail.Id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                ShowToast("Başarılı", "Kayıt başarıyla silindi", ToastRenderStyle.Success);
+                await LoadDataAsync();
+            }
+            else
+            {
+                ShowToast("Hata", await response.Content.ReadAsStringAsync(), ToastRenderStyle.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowToast("Sistem Hatası", ex.Message, ToastRenderStyle.Danger);
+        }
+        finally
+        {
+            IsGridLoading = false;
+            StateHasChanged();
+        }
+    }
+    private void ShowToast(string title, string text, ToastRenderStyle style)
+    {
+        ToastService.ShowToast(new ToastOptions
+        {
+            Id = "toast",
+            ProviderName = "Overview",
+            ThemeMode = ToastThemeMode.Light,
+            RenderStyle = style,
+            Title = title,
+            Text = text
+        });
+    }
+
+}

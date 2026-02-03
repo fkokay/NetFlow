@@ -150,8 +150,6 @@
                                                     ResizeMode="MemoResizeMode.Vertical" />
                                         </DxFormLayoutItem>
 
-                                       
-
                                         <DxFormLayoutItem ColSpanMd="12">
                                             <ValidationSummary />
                                         </DxFormLayoutItem>
@@ -165,8 +163,16 @@
                     </Items>
                 </DxGridLayout>
             }
+
         </DxLoadingPanel>
     </div>
+
+
+    @if (Id.HasValue && Id.Value > 0)
+    {
+        <ServiceFormDetailComponent ServiceFormId="@Id.Value" />
+    }
+
 </div>
 <DxPopup @bind-Visible="CustomerPopupVisible" HeaderText="Kamu Ýdare Unvaný Seçimi" Width="800px" Height="600px" Scrollable="true">
     <BodyTemplate>
@@ -438,7 +444,7 @@
         Users = await client.GetFromJsonAsync<List<UserModel>>("https://localhost:7071/api/users/list");
     }
 
-  
+
 
     private void OnPopupOk()
     {

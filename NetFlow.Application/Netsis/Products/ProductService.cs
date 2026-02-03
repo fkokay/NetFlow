@@ -1,4 +1,5 @@
 ﻿using NetFlow.Application.Netsis.Shipments;
+using NetFlow.Domain.Common.Pagination;
 using NetFlow.Domain.Netsis.Products;
 using NetFlow.Domain.Netsis.Shipments;
 using System;
@@ -19,6 +20,11 @@ namespace NetFlow.Application.Netsis.Products
         public async Task<List<Product>> GetProducts()
         {
             return await _readRepo.GetProducts();
+        }
+
+        public async Task<PagedResult> GetPagedAsync(PagedRequest request)
+        {
+            return await _readRepo.GetProducts(request);
         }
     }
 }

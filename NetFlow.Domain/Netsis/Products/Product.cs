@@ -20,15 +20,17 @@ namespace NetFlow.Domain.Netsis.Products
             Name = name;
         }
 
-        public static Product Create(short branchCode, short businessCode, string code, string name)
+        public static Product? Create(short branchCode, short businessCode, string code, string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new InvalidProductNameException();
+                return null;
+
             return new Product(
                 branchCode,
                 businessCode,
                 code,
                 name);
         }
+
     }
 }

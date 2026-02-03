@@ -17,8 +17,7 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.DetailType)
-           .HasConversion<int>()
-           .HasDefaultValue(ServiceDetailType.Undefined)
+           .HasConversion<byte>()
            .IsRequired();
 
         }
