@@ -176,8 +176,35 @@
                     <DxGridDataColumn Caption="Garanti"
                                       FieldName="IsWarranty"
                                       Width="90px" />
+
+                    <DxGridDataColumn Caption="Teknisyen Atandý Mý"
+                                      FieldName="IsTechnicianAssigned"
+                                      Width="90px" />
                     <!-- Ýþlemler -->
                     <DxGridCommandColumn Width="6em" DeleteButtonVisible="false" EditButtonVisible="true" />
+
+                    <DxGridDataColumn Caption="Ýþlemler"
+                                      Width="150px"
+                                      MinWidth="100"
+                                      Visible="@ShowAssignmentButton">
+                        <CellDisplayTemplate Context="cellContext">
+                            @{
+                                var row = (ServiceFormModel)cellContext.DataItem;
+                            }
+
+                            @if (!row.IsTechnicianAssigned)
+                            {
+                                <div @onclick:stopPropagation="true">
+                                    <DxButton Text="Teknisyen Ata"
+                                              RenderStyle="ButtonRenderStyle.Info"
+                                              RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                              Size="SizeMode.Small"
+                                              Click="() => OpenTechnicianAssignmentPopup(row)" />
+                                </div>
+                            }
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+
 
                 </Columns>
             </DxGrid>
@@ -186,20 +213,24 @@
     </div>
 </div>
 
-
+@if (AssignmentPopupVisible && SelectedService != null)
+{
+    <TechnicianAssignmentComponent ServiceForm="SelectedService" IsTechnicianAssignmentPopupVisible="true" OnCanceled="TechnicianAssignmentOnCanceled" OnSaved="TechnicianAssignmentOnSaved" />
+}
 @code {
 
     [Parameter] public required string Title { get; set; } = "Servis Talepleri";
     [Parameter] public required string Page { get; set; }
     [CascadingParameter(Name = "ParentSizeMode")]
     public SizeMode SizeMode { get; set; }
-
+    [Parameter] public bool ShowAssignmentButton { get; set; } = false;
     private GridDevExtremeDataSource<ServiceFormModel> Data { get; set; } = null!;
     private IGrid? Grid { get; set; }
     private string? SearchText { get; set; }
     private CancellationTokenSource disposalTokenSource = new CancellationTokenSource();
-
-
+    
+    private bool AssignmentPopupVisible = false;
+    private ServiceFormModel? SelectedService;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -260,5 +291,20 @@
         disposalTokenSource.Cancel();
         disposalTokenSource.Dispose();
     }
+    void OpenTechnicianAssignmentPopup(ServiceFormModel item)
+    {
+        SelectedService = item;
+        AssignmentPopupVisible = true;
+    }
 
+    private async Task TechnicianAssignmentOnSaved()
+    {
+        AssignmentPopupVisible = false;
+        await LoadGridDataAsync();
+    }
+
+    private void TechnicianAssignmentOnCanceled()
+    {
+        AssignmentPopupVisible = false;
+    }
 }

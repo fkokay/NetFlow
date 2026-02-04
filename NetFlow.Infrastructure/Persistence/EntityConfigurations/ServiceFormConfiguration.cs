@@ -29,26 +29,6 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
                 .HasConversion<byte>()
                 .IsRequired();
 
-            ;
-
-            // Relationships
-
-            builder.HasMany(x => x.ServiceFormDetails)
-           .WithOne(x => x.ServiceForm)
-           .HasForeignKey(x => x.ServiceFormId)
-           .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasMany(x => x.ServiceFormHistories)
-            .WithOne(x => x.ServiceForm)
-            .HasForeignKey(x => x.ServiceFormId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasMany(x => x.ServiceFormDocuments)
-            .WithOne(x => x.ServiceForm)
-            .HasForeignKey(x => x.ServiceFormId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-
         }
     }
 }

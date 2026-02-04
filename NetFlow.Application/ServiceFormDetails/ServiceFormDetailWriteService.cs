@@ -21,11 +21,13 @@ namespace NetFlow.Application.ServiceFormDetails
 
         public async Task<int> CreateAsync(int userId, CreateServiceFormDetailRequest request)
         {
+            var nextLineNo = await _db.ServiceFormDetails.Where(x => x.ServiceFormId == request.ServiceFormId).Select(x => (int?)x.LineNo).MaxAsync() ?? 0;
+
             var serviceDetail = new ServiceFormDetailEntity
             {
                 ServiceFormId = request.ServiceFormId,
-                LineNo = request.LineNo,
                 DetailType = request.DetailType,
+                LineNo = nextLineNo + 1,
                 StockCode = request.StockCode,
                 StockName = request.StockName,
                 Description = request.Description,

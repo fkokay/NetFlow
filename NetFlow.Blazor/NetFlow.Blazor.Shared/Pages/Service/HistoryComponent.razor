@@ -1,0 +1,104 @@
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+
+<DxGrid Data="ServiceFormHistoryDataSource"
+        ShowSearchBox="true"
+        SearchBoxNullText="Arama yapmak için metin girin…"
+        style="height:100%;">
+
+    <Columns>
+
+        <DxGridDataColumn FieldName="ServiceFormNo"
+                          Caption="Servis Form No"
+                          Width="140px" />
+
+       
+        <DxGridDataColumn Caption="Ýþlem Tipi" FieldName="ActionType" Width="120px">
+            <CellDisplayTemplate>
+                <span class="status-badge">
+                    @(((ServiceFormHistoryModel)context.DataItem).ActionType.GetDescription())
+                </span>
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+
+
+        <DxGridDataColumn Caption="Eski Durum" FieldName="OldStatus" Width="120px">
+            <CellDisplayTemplate>
+                <span class="status-badge">
+                    @(((ServiceFormHistoryModel)context.DataItem).OldStatus?.GetDescription())
+                </span>
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+
+        <DxGridDataColumn Caption="Yeni Durum" FieldName="NewStatus" Width="120px">
+            <CellDisplayTemplate>
+                <span class="status-badge">
+                    @(((ServiceFormHistoryModel)context.DataItem).NewStatus?.GetDescription())
+                </span>
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+
+
+
+        <DxGridDataColumn FieldName="OldPersonnelName"
+                          Caption="Eski Personel"
+                          Width="180px" />
+
+        <DxGridDataColumn FieldName="NewPersonnelName"
+                          Caption="Yeni Personel"
+                          Width="180px" />
+
+        <DxGridDataColumn FieldName="Description"
+                          Caption="Açýklama"
+                          Width="250px" />
+
+        <DxGridDataColumn FieldName="ActionByPersonnelName"
+                          Caption="Ýþlemi Yapan"
+                          Width="180px" />
+
+        <DxGridDataColumn FieldName="ActionAt"
+                          Caption="Ýþlem Tarihi"
+                          DisplayFormat="dd.MM.yyyy HH:mm"
+                          Width="160px" />
+
+        <DxGridDataColumn FieldName="IpAddress"
+                          Caption="IP"
+                          Width="130px" />
+
+        <DxGridDataColumn FieldName="Source"
+                          Caption="Kaynak"
+                          Width="100px" />
+
+    </Columns>
+
+</DxGrid>
+
+@code {
+
+    private GridDevExtremeDataSource<ServiceFormHistoryModel>? ServiceFormHistoryDataSource { get; set; }
+
+    [Parameter]
+    public int ServiceFormId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(
+            HttpClientFactory.CreateClient("ApiClient"));
+
+        string baseUrl = "https://localhost:7071/api";
+
+        ServiceFormHistoryDataSource =
+            new GridDevExtremeDataSource<ServiceFormHistoryModel>(
+                client,
+                NavigationManager.ToAbsoluteUri(
+                    $"{baseUrl}/service-form-histories?serviceFormId={ServiceFormId}"
+                )
+            );
+    }
+}

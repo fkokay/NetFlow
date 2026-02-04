@@ -36,6 +36,7 @@ namespace NetFlow.Application.Common.Interfaces
         DbSet<ServiceFormDocumentEntity> ServiceFormDocuments { get; }
         DbSet<ServiceFormHistoryEntity> ServiceFormHistories { get; }
         DbSet<ServiceReplacedPartEntity> ServiceReplacedParts { get; }
+        DbSet<ServiceFormTechnicianEntity> ServiceFormTechnicians { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

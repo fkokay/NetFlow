@@ -24,7 +24,5 @@ namespace NetFlow.Domain.Entities
         public int? TakenBy { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
-        public ServiceFormEntity ServiceForm { get; set; } = null!;
-        public PersonnelEntity? TakenByPersonnel { get; set; }
     }
 }

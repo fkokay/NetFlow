@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using NetFlow.Application.Guarantees;
 using NetFlow.Application.Roles;
+using NetFlow.Application.ServiceFormHistories;
 using NetFlow.Application.ServiceForms;
 using NetFlow.Domain.Common.Pagination;
+using NetFlow.Domain.Enums;
 using NetFlow.Domain.Identity;
 using NetFlow.ReadModel.Guarantees;
 using NetFlow.ReadModel.ServiceForms;
@@ -16,13 +18,15 @@ namespace NetFlow.Api.Controllers
     {
         private readonly ServiceFormReadService _read;
         private readonly ServiceFormWriteService _write;
+        private readonly ServiceFormHistoryWriteService _historyWrite;
         protected readonly CurrentUser _current;
 
-        public ServiceFormController(ServiceFormReadService read, CurrentUser current, ServiceFormWriteService write)
+        public ServiceFormController(ServiceFormReadService read, CurrentUser current, ServiceFormWriteService write, ServiceFormHistoryWriteService historyWrite)
         {
             _read = read;
             _current = current;
             _write = write;
+            _historyWrite = historyWrite;
         }
 
         [HttpGet("list")]
@@ -33,7 +37,7 @@ namespace NetFlow.Api.Controllers
                 return NotFound();
             }
 
-            return Ok(await _read.ListAsync(_current.User.Id.Value,pagedRequest));
+            return Ok(await _read.ListAsync(_current.User.Id.Value, pagedRequest));
         }
 
         [HttpGet("open")]
@@ -73,7 +77,19 @@ namespace NetFlow.Api.Controllers
             }
 
             var id = await _write.CreateAsync(_current.User.Id.Value, request);
+            var historyRequest = new CreateServiceFormHistoryRequest
+            {
+                ServiceFormId = id,
+                ActionType = ServiceActionType.Created,
+                NewStatus = ServiceStatus.Draft,
+                NewPersonnelId = request.AssignedPersonnelId,
+                Description = "Servis formu oluşturuldu",
+                ActionBy = _current.User.Id.Value,
+                ActionAt = DateTime.UtcNow,
+                Source = "Web"
+            };
 
+            await _historyWrite.CreateAsync(_current.User.Id.Value, historyRequest);
             return CreatedAtAction(
                 nameof(Get),
                 new { id },

@@ -1,0 +1,95 @@
+﻿@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+
+<DxGrid Data="ServiceFormTechnicianDataSource"
+        ShowSearchBox="true"
+        SearchBoxNullText="Arama yapmak için metin girin…"
+        style="height:100%;">
+
+    <Columns>
+
+        <DxGridDataColumn FieldName="AssignedPersonnelCode"
+                          Caption="Personel Kodu"
+                          Width="140px" />
+
+        <DxGridDataColumn FieldName="AssignedPersonnelName"
+                          Caption="Personel Adı"
+                          Width="180px" />
+
+        <DxGridDataColumn FieldName="AssignedPersonnelDepartment"
+                          Caption="Departman"
+                          Width="160px" />
+
+        <DxGridDataColumn FieldName="AssignedPersonnelTitle"
+                          Caption="Ünvan"
+                          Width="160px" />
+
+        <DxGridDataColumn FieldName="AssignedPersonnelEmail"
+                          Caption="E-Posta"
+                          Width="220px" />
+
+        <DxGridDataColumn FieldName="AssignedPersonnelPhone"
+                          Caption="Telefon"
+                          Width="150px" />
+
+        <DxGridDataColumn FieldName="AssignedAt"
+                          Caption="Atama Tarihi"
+                          DisplayFormat="dd.MM.yyyy HH:mm"
+                          Width="160px" />
+
+        <DxGridDataColumn FieldName="CreatedByPersonnelName"
+                          Caption="Atamayı Yapan"
+                          Width="180px" />
+
+        <DxGridDataColumn FieldName="CreatedByDepartment"
+                          Caption="Oluşturan Departman"
+                          Width="180px" />
+
+        <DxGridDataColumn FieldName="CreatedByTitle"
+                          Caption="Oluşturan Ünvan"
+                          Width="160px" />
+
+        <DxGridDataColumn FieldName="CreatedAt"
+                          Caption="Oluşturma Tarihi"
+                          DisplayFormat="dd.MM.yyyy HH:mm"
+                          Width="160px" />
+
+        <DxGridDataColumn FieldName="UpdatedAt"
+                          Caption="Güncelleme Tarihi"
+                          DisplayFormat="dd.MM.yyyy HH:mm"
+                          Width="160px" />
+
+    </Columns>
+
+</DxGrid>
+
+
+@code {
+
+    private GridDevExtremeDataSource<ServiceFormTechnicianModel>? ServiceFormTechnicianDataSource { get; set; }
+
+    [Parameter]
+    public int ServiceFormId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(
+            HttpClientFactory.CreateClient("ApiClient"));
+
+        string baseUrl = "https://localhost:7071/api";
+
+        ServiceFormTechnicianDataSource =
+            new GridDevExtremeDataSource<ServiceFormTechnicianModel>(
+                client,
+                NavigationManager.ToAbsoluteUri(
+                    $"{baseUrl}/service-form-technicians?serviceFormId={ServiceFormId}"
+                )
+            );
+    }
+}

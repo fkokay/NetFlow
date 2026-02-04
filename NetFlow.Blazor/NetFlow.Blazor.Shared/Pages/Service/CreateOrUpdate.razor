@@ -5,6 +5,7 @@
 @inject IToastNotificationService ToastService
 
 
+
 <div class="content-root">
     <div class="card toolbar">
         <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
@@ -13,7 +14,7 @@
                 <DxToolbarItem>
                     <Template>
                         <div class="custom-item">
-                            <div class="title">@(Id > 0 ? "Talep Düzenleme" : "Yeni Talep Tanýmlama")</div>
+                            <div class="title">@(Id > 0 ? "Servis Talebi Düzenleme" : "Yeni Servis Talebi Tanýmlama")</div>
                         </div>
                     </Template>
                 </DxToolbarItem>
@@ -170,10 +171,13 @@
 
     @if (Id.HasValue && Id.Value > 0)
     {
-        <ServiceFormDetailComponent ServiceFormId="@Id.Value" />
+        <div class="service-form-component-space">
+            <ServiceFormDetailComponent ServiceFormId="@Id.Value" />
+        </div>
     }
-
 </div>
+
+
 <DxPopup @bind-Visible="CustomerPopupVisible" HeaderText="Kamu Ýdare Unvaný Seçimi" Width="800px" Height="600px" Scrollable="true">
     <BodyTemplate>
         <DxGrid Data="@CustomerDataSource" ShowFilterRow="true" PageSize="12" SelectionMode="GridSelectionMode.Single" SelectedDataItemChanged="@OnCustomerSelected" VirtualScrollingEnabled="true" KeyFieldName="Code">

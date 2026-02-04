@@ -25,6 +25,7 @@ namespace NetFlow.Domain.Entities
         public DateTime? ServiceEndDate { get; set; }
         public bool IsOnSite { get; set; }
         public bool IsWarranty { get; set; }
+        public bool IsTechnicianAssigned { get; set; }
         public decimal? LaborCost { get; set; }
         public decimal? MaterialCost { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
@@ -35,11 +36,5 @@ namespace NetFlow.Domain.Entities
         public DateTime? UpdatedAt { get; set; }
         public DateTime? ClosedAt { get; set; }
 
-
-        public ICollection<ServiceFormDetailEntity> ServiceFormDetails { get; set; } = new List<ServiceFormDetailEntity>();
-        public ICollection<ServiceFormDocumentEntity> ServiceFormDocuments { get; set; } = new List<ServiceFormDocumentEntity>();
-        public ICollection<ServiceFormHistoryEntity> ServiceFormHistories { get; set; } = new List<ServiceFormHistoryEntity>();
-
-        public PersonnelEntity? AssignedPersonnel { get; set; }
     }
 }

@@ -1,12 +1,11 @@
-﻿using NetFlow.Domain.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace NetFlow.ReadModel.ServiceFormHistories
+namespace NetFlow.Blazor.Shared.Models
 {
-    public class ServiceFormHistoryDto
+    public class ServiceFormHistoryModel
     {
         public int Id { get; set; }
         public int ServiceFormId { get; set; }
@@ -34,5 +33,4 @@ namespace NetFlow.ReadModel.ServiceFormHistories
         public string? IpAddress { get; set; }
         public string? Source { get; set; }
     }
-
 }

@@ -35,6 +35,19 @@ namespace NetFlow.Blazor.Shared.Models
         public bool IsBillable { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; }
+
+        public void ApplyWarrantyRules()
+        {
+            if (IsWarranty)
+            {
+                UnitPrice = 0;
+                DiscountRate = 0;
+                TaxRate = 0;
+                Quantity = 0;
+                IsBillable = false;
+            }
+        }
+
     }
 
 }

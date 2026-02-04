@@ -9,7 +9,6 @@ namespace NetFlow.Application.ServiceFormDetails
     public class CreateServiceFormDetailRequest
     {
         public int ServiceFormId { get; set; }
-        public int LineNo { get; set; }
         public ServiceDetailType DetailType { get; set; }
         public string? StockCode { get; set; }
         public string? StockName { get; set; }

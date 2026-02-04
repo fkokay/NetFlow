@@ -16,20 +16,16 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
 
             builder.HasKey(x => x.Id);
 
-
             builder.Property(x => x.OldStatus)
-           .HasConversion<int>()
-           .HasDefaultValue(ServiceStatus.Draft)
+           .HasConversion<byte>()
            .IsRequired();
 
             builder.Property(x => x.NewStatus)
-           .HasConversion<int>()
-           .HasDefaultValue(ServiceStatus.Draft)
+           .HasConversion<byte>()
            .IsRequired();
             
             builder.Property(x => x.ActionType)
-           .HasConversion<int>()
-           .HasDefaultValue(ServiceActionType.Undefined)
+           .HasConversion<byte>()
            .IsRequired();
 
         }

@@ -18,6 +18,7 @@ namespace NetFlow.ReadModel.ServiceForms
 
         public string ProblemDescription { get; set; } = null!;
         public string? ServiceDescription { get; set; }
+        public bool IsTechnicianAssigned { get; set; }
         public int? AssignedPersonnelId { get; set; }
         [NotMapped]
         public string? PersonnelCode { get; set; }

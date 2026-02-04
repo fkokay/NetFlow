@@ -44,6 +44,8 @@ namespace NetFlow.Infrastructure.Persistence
         public DbSet<TenderReaktifEntity> TenderReaktifs => Set<TenderReaktifEntity>();
         public DbSet<TenderDeviceEntity> TenderDevices => Set<TenderDeviceEntity>();
 
+        public DbSet<ServiceFormTechnicianEntity> ServiceFormTechnicians => Set<ServiceFormTechnicianEntity>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

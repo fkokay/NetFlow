@@ -15,7 +15,6 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
             builder.ToTable("ServiceFormDetail");
 
             builder.HasKey(x => x.Id);
-
             builder.Property(x => x.DetailType)
            .HasConversion<byte>()
            .IsRequired();

@@ -35,6 +35,5 @@ namespace NetFlow.Domain.Entities
         public bool IsBillable { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        public virtual ServiceFormEntity ServiceForm { get; set; } = null!;
     }
 }

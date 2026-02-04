@@ -1,17 +1,12 @@
 ﻿using NetFlow.Domain.Enums;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace NetFlow.Domain.Entities
+namespace NetFlow.Application.ServiceFormHistories
 {
-    [Table("ServiceFormHistory")]
-    public class ServiceFormHistoryEntity
+    public class CreateServiceFormHistoryRequest
     {
-        [Key]
-        public int Id { get; set; }
         public int ServiceFormId { get; set; }
         public ServiceActionType ActionType { get; set; }= ServiceActionType.Undefined;
         public ServiceStatus? OldStatus { get; set; }

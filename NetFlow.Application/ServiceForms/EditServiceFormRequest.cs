@@ -22,6 +22,7 @@ namespace NetFlow.Application.ServiceForms
         public bool IsOnSite { get; set; }
         public bool IsWarranty { get; set; }
         public decimal? LaborCost { get; set; }
+        public bool IsTechnicianAssigned { get; set; }
         public decimal? MaterialCost { get; set; }
         public decimal TotalCost { get; set; }
         public string? Notes { get; set; }
@@ -30,4 +31,5 @@ namespace NetFlow.Application.ServiceForms
         public DateTime? UpdatedAt { get; set; }
         public DateTime? ClosedAt { get; set; }
     }
+
 }

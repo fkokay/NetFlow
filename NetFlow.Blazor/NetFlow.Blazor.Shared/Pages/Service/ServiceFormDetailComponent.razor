@@ -18,7 +18,8 @@
                 <Items>
                     <DxToolbarItem Text="Yeni Ürüm Ekle"
                                    Click="OnAddNewClick"
-                                   RenderStyle="ButtonRenderStyle.Primary" />
+                                   Alignment="ToolbarItemAlignment.Right"
+                                   RenderStyleMode="ToolbarItemRenderStyleMode.Plain" />
                 </Items>
             </DxToolbar>
         </ToolbarTemplate>
@@ -74,22 +75,17 @@
 
 
 <DxPopup @bind-Visible="@PopupVisible"
-         HeaderText="Servis Detay Yönetimi"
+         HeaderText="Servis Detay Yönetimi / Ürün Ekle"
          Width="800px">
     <BodyContentTemplate Context="popupContext">
         <DxLoadingPanel @bind-Visible="IsLoadingForPopup" Text="İşlem yapılıyor..." />
+
         @if (Model != null)
         {
             <DxFormLayout>
-
-                <DxFormLayoutItem Caption="Satır No" ColSpanMd="12">
-                    <DxSpinEdit @bind-Value="Model.LineNo"
-                                MinValue="1" />
-                </DxFormLayoutItem>
-
-
+              
                 <DxFormLayoutItem Caption="Ürün Kodu" ColSpanMd="12">
-                    <DxTextBox @bind-Text="Model.StockCode" BindValueMode="BindValueMode.OnInput">
+                    <DxTextBox @bind-Text="Model.StockCode" BindValueMode="BindValueMode.OnInput" ValidationEnabled="true">
                         <Buttons>
                             <DxEditorButton IconCssClass="three-point-icon icon medium-icon" Click="OpenProductPopup" />
                         </Buttons>
@@ -114,9 +110,7 @@
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Miktar" ColSpanMd="12">
-                    <DxSpinEdit @bind-Value="Model.Quantity"
-                                Increment="1"
-                                MinValue="0" />
+                    <DxSpinEdit @bind-Value="Model.Quantity" Increment="1" MinValue="0" ReadOnly="Model.IsWarranty" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Birim" ColSpanMd="12">
@@ -124,56 +118,40 @@
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Birim Fiyat" ColSpanMd="12">
-                    <DxSpinEdit @bind-Value="Model.UnitPrice"
-                                DisplayFormat="n2"
-                                MinValue="0" />
+                    <DxSpinEdit @bind-Value="Model.UnitPrice" DisplayFormat="n2" MinValue="0" ReadOnly="Model.IsWarranty" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="İndirim %" ColSpanMd="12">
-                    <DxSpinEdit @bind-Value="Model.DiscountRate"
-                                DisplayFormat="n2"
-                                MinValue="0"
-                                MaxValue="100" />
+                    <DxSpinEdit @bind-Value="Model.DiscountRate" DisplayFormat="n2" MinValue="0" MaxValue="100" ReadOnly="Model.IsWarranty" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="KDV %" ColSpanMd="12">
-                    <DxSpinEdit @bind-Value="Model.TaxRate"
-                                DisplayFormat="n2"
-                                MinValue="0"
-                                MaxValue="100" />
+                    <DxSpinEdit @bind-Value="Model.TaxRate" DisplayFormat="n2" MinValue="0" MaxValue="100" ReadOnly="Model.IsWarranty" />
                 </DxFormLayoutItem>
 
-                <!-- Hesaplanan Alanlar -->
                 <DxFormLayoutItem Caption="Satır Tutarı" ColSpanMd="12">
-                    <DxSpinEdit Value="Model.LineAmount"
-                                DisplayFormat="n2"
-                                ReadOnly="true" />
+                    <DxSpinEdit Value="Model.LineAmount" DisplayFormat="n2" ReadOnly="true"/>
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="İndirim Tutarı" ColSpanMd="12">
-                    <DxSpinEdit Value="Model.DiscountAmount"
-                                DisplayFormat="n2"
-                                ReadOnly="true" />
+                    <DxSpinEdit Value="Model.DiscountAmount" DisplayFormat="n2" ReadOnly="true" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="KDV Tutarı" ColSpanMd="12">
-                    <DxSpinEdit Value="Model.TaxAmount"
-                                DisplayFormat="n2"
-                                ReadOnly="true" />
+                    <DxSpinEdit Value="Model.TaxAmount" DisplayFormat="n2" ReadOnly="true" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Toplam Tutar" ColSpanMd="12">
-                    <DxSpinEdit Value="Model.TotalAmount"
-                                DisplayFormat="n2"
-                                ReadOnly="true" />
+                    <DxSpinEdit Value="Model.TotalAmount" DisplayFormat="n2" ReadOnly="true" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Garanti Kapsamında" ColSpanMd="6">
-                    <DxCheckBox @bind-Checked="Model.IsWarranty" />
+                    <DxCheckBox Checked="Model.IsWarranty"
+                                CheckedChanged="@((bool val) => OnWarrantyChanged(val))" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Faturalandırılabilir" ColSpanMd="6">
-                    <DxCheckBox @bind-Checked="Model.IsBillable" />
+                    <DxCheckBox @bind-Checked="Model.IsBillable" Enabled="!Model.IsWarranty" />
                 </DxFormLayoutItem>
             </DxFormLayout>
         }
@@ -181,15 +159,21 @@
         {
             <p>Yükleniyor...</p>
         }
-        <DxButton Text="Kaydet"
-                  Click="HandleSave"
-                  Enabled="!IsLoadingForPopup"
-                  RenderStyle="ButtonRenderStyle.Primary" />
 
-        <DxButton Text="Vazgeç"
-                  Enabled="!IsLoadingForPopup"
-                  Click="() => PopupVisible = false"
-                  RenderStyle="ButtonRenderStyle.Secondary" />
+
+        <div class="popup-footer-container">
+            <DxButton Text="Vazgeç"
+                      Enabled="!IsLoadingForPopup"
+                      Click="() => PopupVisible = false"
+                      RenderStyle="ButtonRenderStyle.Secondary"
+                      CssClass="footer-action-btn" />
+
+            <DxButton Text="Kaydet"
+                      Click="HandleSave"
+                      Enabled="!IsLoadingForPopup"
+                      RenderStyle="ButtonRenderStyle.Primary"
+                      CssClass="footer-action-btn" />
+        </div>
     </BodyContentTemplate>
 </DxPopup>
 
@@ -268,11 +252,25 @@
     }
 
 
+    private void OnWarrantyChanged(bool value)
+    {
+        if (Model == null) return;
 
+        Model.IsWarranty = value;
+
+        if (value)
+        {
+            Model.ApplyWarrantyRules();
+            StateHasChanged();
+        }
+    }
     private async Task HandleSave()
     {
         if (Model == null || IsLoadingForPopup) return;
-
+        if (Model.IsWarranty)
+        {
+            Model.ApplyWarrantyRules();
+        }
         try
         {
             IsLoadingForPopup = true;
@@ -353,12 +351,9 @@
     {
         if (selectedItem is ProductModel selectedProduct)
         {
-
             Model ??= new ServiceFormDetailModel();
-
             Model.StockCode = selectedProduct.Code;
             Model.StockName = selectedProduct.Name;
-
             ProductPopupVisible = false;
             StateHasChanged();
         }
@@ -376,9 +371,8 @@
 
         try
         {
-            
             IsGridLoading = true;
-            StateHasChanged(); 
+            StateHasChanged();
 
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);

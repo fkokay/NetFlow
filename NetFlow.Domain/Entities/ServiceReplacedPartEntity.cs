@@ -18,6 +18,5 @@ namespace NetFlow.Domain.Entities
         public string? Currency { get; set; }
         public bool? IsWarranty { get; set; }
         public DateTime? CreatedAt { get; set; }
-        public virtual ServiceFormEntity ServiceForm { get; set; } = null!;
     }
 }
