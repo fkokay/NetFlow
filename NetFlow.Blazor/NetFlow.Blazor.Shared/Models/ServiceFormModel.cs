@@ -14,7 +14,10 @@ namespace NetFlow.Blazor.Shared.Models
         public string? ServiceDescription { get; set; }
         public bool IsTechnicianAssigned { get; set; }
         public int? AssignedPersonnelId { get; set; }
-
+        [NotMapped]
+        public int? TechnicianId { get; set; }
+        [NotMapped]
+        public string? TechnicianName { get; set; }
         [NotMapped]
         public string? PersonnelCode { get; set; }
         [NotMapped]

@@ -67,14 +67,16 @@
                     <!-- Seçim -->
                     <DxGridSelectionColumn Width="60px" />
 
-
+                    <!-- Gizli Alanlar -->
                     <DxGridDataColumn FieldName="Id" Visible="false" />
                     <DxGridDataColumn FieldName="CustomerId" Visible="false" />
                     <DxGridDataColumn FieldName="ProductId" Visible="false" />
                     <DxGridDataColumn FieldName="AssignedPersonnelId" Visible="false" />
 
-
-                    <DxGridDataColumn Caption="Servis No" FieldName="ServiceFormNo" Width="130px">
+                    <!-- Servis / Ýþ Emri No -->
+                    <DxGridDataColumn Caption="Servis No"
+                                      FieldName="ServiceFormNo"
+                                      Width="130px">
                         <CellDisplayTemplate>
                             @{
                                 var service = (ServiceFormModel)context.DataItem;
@@ -88,11 +90,15 @@
                         </CellDisplayTemplate>
                     </DxGridDataColumn>
 
-                    <DxGridDataColumn Caption="Müþteri" FieldName="CustomerName" MinWidth="180" />
+                    <!-- Müþteri -->
+                    <DxGridDataColumn Caption="Müþteri"
+                                      FieldName="CustomerName"
+                                      MinWidth="180" />
 
-
-
-                    <DxGridDataColumn Caption="Servis Türü" FieldName="ServiceType" Width="140px">
+                    <!-- Servis Türü -->
+                    <DxGridDataColumn Caption="Servis Türü"
+                                      FieldName="ServiceType"
+                                      Width="140px">
                         <CellDisplayTemplate>
                             <span class="status-badge">
                                 @(((ServiceFormModel)context.DataItem).ServiceType.GetDescription())
@@ -100,8 +106,10 @@
                         </CellDisplayTemplate>
                     </DxGridDataColumn>
 
-
-                    <DxGridDataColumn Caption="Durum" FieldName="ServiceStatus" Width="140px">
+                    <!-- Durum -->
+                    <DxGridDataColumn Caption="Durum"
+                                      FieldName="ServiceStatus"
+                                      Width="140px">
                         <CellDisplayTemplate>
                             <span class="status-badge">
                                 @(((ServiceFormModel)context.DataItem).ServiceStatus.GetDescription())
@@ -109,21 +117,21 @@
                         </CellDisplayTemplate>
                     </DxGridDataColumn>
 
-
-
-                    <!-- Açýklamalar -->
+                    <!-- Açýklamalar (Ýþ Emrinde GÝZLÝ) -->
                     <DxGridDataColumn Caption="Problem Açýklamasý"
                                       FieldName="ProblemDescription"
-                                      MinWidth="250" />
+                                      MinWidth="250"
+                                      Visible="@(!IsWorkOrderPage)" />
 
                     <DxGridDataColumn Caption="Servis Açýklamasý"
                                       FieldName="ServiceDescription"
                                       Visible="false" />
 
-                    <!-- Personel -->
-                    <DxGridDataColumn Caption="Atanan Personel"
+                    <!-- Sorumlu Personel -->
+                    <DxGridDataColumn Caption="Sorumlu Personel"
                                       FieldName="AssignedPersonnelName"
-                                      MinWidth="180" />
+                                      MinWidth="180"
+                                      Visible="@IsWorkOrderPage" />
 
                     <DxGridDataColumn Caption="Departman"
                                       FieldName="AssignedPersonnelDepartment"
@@ -134,59 +142,75 @@
                                       FieldName="AssignedPersonnelTitle"
                                       Width="150px"
                                       Visible="false" />
-
+                    <!-- Teknisyen-->
+                    <DxGridDataColumn Caption="Teknisyen"
+                                      FieldName="TechnicianName"
+                                      MinWidth="180"
+                                      Visible="@IsWorkOrderPage" />
                     <!-- Tarihler -->
                     <DxGridDataColumn Caption="Atanma Tarihi"
                                       FieldName="AssignedAt"
                                       DisplayFormat="dd.MM.yyyy HH:mm"
-                                      Width="160px" />
-
+                                      Width="160px"
+                                      Visible="@(!IsWorkOrderPage)" />
 
                     <DxGridDataColumn Caption="Baþlangýç"
                                       FieldName="ServiceStartDate"
                                       DisplayFormat="dd.MM.yyyy"
-                                      Width="130px" />
+                                      Width="130px"
+                                      Visible="@IsWorkOrderPage" />
 
                     <DxGridDataColumn Caption="Bitiþ"
                                       FieldName="ServiceEndDate"
                                       DisplayFormat="dd.MM.yyyy"
-                                      Width="130px" />
+                                      Width="130px"
+                                      Visible="@IsWorkOrderPage" />
 
                     <!-- Maliyet -->
                     <DxGridDataColumn Caption="Ýþçilik"
                                       FieldName="LaborCost"
                                       DisplayFormat="N2"
-                                      Width="120px" />
+                                      Width="120px"
+                                      Visible="@(!IsWorkOrderPage)" />
 
                     <DxGridDataColumn Caption="Malzeme"
                                       FieldName="MaterialCost"
                                       DisplayFormat="N2"
-                                      Width="120px" />
+                                      Width="120px"
+                                      Visible="@(!IsWorkOrderPage)" />
 
-                    <DxGridDataColumn Caption="Toplam"
+                    <DxGridDataColumn Caption="Toplam Maliyet"
                                       FieldName="TotalCost"
                                       DisplayFormat="N2"
-                                      Width="130px" />
+                                      Width="130px"
+                                      Visible="@IsWorkOrderPage" />
 
                     <!-- Bayraklar -->
                     <DxGridDataColumn Caption="Yerinde"
                                       FieldName="IsOnSite"
-                                      Width="90px" />
+                                      Width="90px"
+                                      Visible="@(!IsWorkOrderPage)" />
 
                     <DxGridDataColumn Caption="Garanti"
                                       FieldName="IsWarranty"
-                                      Width="90px" />
+                                      Width="90px"
+                                      Visible="@IsWorkOrderPage" />
 
                     <DxGridDataColumn Caption="Teknisyen Atandý Mý"
                                       FieldName="IsTechnicianAssigned"
-                                      Width="90px" />
-                    <!-- Ýþlemler -->
-                    <DxGridCommandColumn Width="6em" DeleteButtonVisible="false" EditButtonVisible="true" />
+                                      Width="120px"
+                                      Visible="@(!IsWorkOrderPage)" />
 
+                    <!-- Varsayýlan Edit -->
+                    <DxGridCommandColumn Width="6em"
+                                         DeleteButtonVisible="false"
+                                         EditButtonVisible="true" />
+
+                    <!-- Teknisyen Ata -->
                     <DxGridDataColumn Caption="Ýþlemler"
                                       Width="150px"
                                       MinWidth="100"
-                                      Visible="@ShowAssignmentButton">
+                                      Visible="@(!IsWorkOrderPage && ShowAssignmentButton)">
                         <CellDisplayTemplate Context="cellContext">
                             @{
                                 var row = (ServiceFormModel)cellContext.DataItem;
@@ -205,8 +229,8 @@
                         </CellDisplayTemplate>
                     </DxGridDataColumn>
 
-
                 </Columns>
+
             </DxGrid>
 
         </div>
@@ -221,6 +245,9 @@
 
     [Parameter] public required string Title { get; set; } = "Servis Talepleri";
     [Parameter] public required string Page { get; set; }
+    [Parameter] public string? Type { get; set; }
+    private bool IsWorkOrderPage =>
+    string.Equals(Type, "work-orders", StringComparison.OrdinalIgnoreCase);
     [CascadingParameter(Name = "ParentSizeMode")]
     public SizeMode SizeMode { get; set; }
     [Parameter] public bool ShowAssignmentButton { get; set; } = false;
@@ -228,7 +255,7 @@
     private IGrid? Grid { get; set; }
     private string? SearchText { get; set; }
     private CancellationTokenSource disposalTokenSource = new CancellationTokenSource();
-    
+
     private bool AssignmentPopupVisible = false;
     private ServiceFormModel? SelectedService;
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -270,7 +297,7 @@
     Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Teminatlar");
     Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Seçili Teminatlar", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
 
-    
+
     private void OnEditStart(GridEditStartEventArgs e)
     {
         e.Cancel = true;
@@ -280,11 +307,16 @@
     }
     private void GoToDetails(ServiceFormModel service)
     {
-        if (service != null && service.Id > 0)
-        {
-            NavigationManager.NavigateTo($"/service/details/{service.Id}");
-        }
+        if (service == null || service.Id <= 0)
+            return;
+
+        var url = IsWorkOrderPage
+            ? $"/service/work-order-detail/{service.Id}"
+            : $"/service/details/{service.Id}";
+
+        NavigationManager.NavigateTo(url);
     }
+
 
     public void Dispose()
     {

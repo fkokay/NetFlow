@@ -9,17 +9,12 @@
 
     <Columns>
         <DxGridDataColumn FieldName="LineNo" Caption="Satýr No" Width="80px" />
-
         <DxGridDataColumn FieldName="DetailType" Caption="Detay Tipi" />
-
         <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
         <DxGridDataColumn FieldName="StockName" Caption="Stok Adý" />
-
         <DxGridDataColumn FieldName="Description" Caption="Açýklama" />
-
         <DxGridDataColumn FieldName="Quantity" Caption="Miktar" />
         <DxGridDataColumn FieldName="Unit" Caption="Birim" />
-
         <DxGridDataColumn FieldName="UnitPrice"
                           Caption="Birim Fiyat"
                           DisplayFormat="n2" />
@@ -54,8 +49,8 @@
 
     private GridDevExtremeDataSource<ServiceFormDetailModel>? ServiceFormDetailDataSource { get; set; }
 
-    [Parameter]
-    public int ServiceFormId { get; set; }
+    [Parameter]public int ServiceFormId { get; set; }
+    [Parameter]public ServiceDetailType? ServiceDetailType { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

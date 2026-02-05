@@ -16,7 +16,7 @@
         <ToolbarTemplate>
             <DxToolbar>
                 <Items>
-                    <DxToolbarItem Text="Yeni Ürüm Ekle"
+                    <DxToolbarItem Text="Yeni Ürün Ekle"
                                    Click="OnAddNewClick"
                                    Alignment="ToolbarItemAlignment.Right"
                                    RenderStyleMode="ToolbarItemRenderStyleMode.Plain" />
@@ -202,7 +202,9 @@
     private bool ProductPopupVisible { get; set; } = false;
     private bool IsLoadingForPopup { get; set; }
     private bool IsGridLoading { get; set; }
-
+    private bool IsLabor => Model?.DetailType == ServiceDetailType.Labor;
+    private bool IsMaterial => Model?.DetailType == ServiceDetailType.Material;
+    private bool IsExpense => Model?.DetailType == ServiceDetailType.Expense;
     private List<EnumItem<ServiceDetailType>> DetailTypes =
    Enum.GetValues<ServiceDetailType>()
        .Select(x => new EnumItem<ServiceDetailType>
@@ -399,6 +401,8 @@
             StateHasChanged();
         }
     }
+
+
     private void ShowToast(string title, string text, ToastRenderStyle style)
     {
         ToastService.ShowToast(new ToastOptions

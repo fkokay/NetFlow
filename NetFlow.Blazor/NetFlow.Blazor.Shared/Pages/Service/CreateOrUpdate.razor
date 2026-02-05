@@ -59,8 +59,6 @@
                                                                     Click="OpenCustomerPopup" />
                                                 </Buttons>
                                             </DxTextBox>
-
-
                                         </DxFormLayoutItem>
 
                                         <DxFormLayoutItem Caption="Cari Adý" ColSpanMd="6">
@@ -116,22 +114,22 @@
 
                                         <DxFormLayoutItem Caption="Ýþçilik Bedeli" ColSpanMd="6">
                                             <DxSpinEdit @bind-Value="Model.LaborCost"
-                                                        Format="c2"
-                                                        Min="0"
-                                                        ReadOnly="Model.IsWarranty" />
+                                                        DisplayFormat="c2"
+                                                        MinValue="0"
+                                                        ReadOnly="true" />
 
                                         </DxFormLayoutItem>
 
                                         <DxFormLayoutItem Caption="Malzeme Bedeli" ColSpanMd="6">
                                             <DxSpinEdit @bind-Value="Model.MaterialCost"
-                                                        Format="c2"
-                                                        Min="0"
-                                                        ReadOnly="Model.IsWarranty" />
+                                                        DisplayFormat="c2"
+                                                        MinValue="0"
+                                                        ReadOnly="true" />
                                         </DxFormLayoutItem>
 
                                         <DxFormLayoutItem Caption="Toplam Tutar" ColSpanMd="6">
                                             <DxSpinEdit @bind-Value="Model.TotalCost"
-                                                        Format="c2"
+                                                        DisplayFormat="c2"
                                                         ReadOnly="true" />
                                         </DxFormLayoutItem>
 
@@ -140,9 +138,7 @@
                                         </DxFormLayoutItem>
 
                                         <DxFormLayoutItem Caption="Garanti Kapsamýnda" ColSpanMd="6">
-                                            <DxCheckBox Checked="Model.IsWarranty"
-                                                        CheckedExpression="@(() => Model.IsWarranty)"
-                                                        CheckedChanged="@((bool value) => OnWarrantyChanged(value))" />
+                                            <DxCheckBox @bind-Checked="Model.IsWarranty" />
                                         </DxFormLayoutItem>
 
                                         <DxFormLayoutItem Caption="Notlar" ColSpanMd="12">
@@ -332,15 +328,6 @@
             AddError(nameof(Model.ServiceEndDate), "Tamamlanan servislerde bitiþ tarihi zorunludur.");
         }
 
-        if (!Model.IsWarranty)
-        {
-            bool hasAnyCost =
-                (Model.LaborCost ?? 0) > 0 ||
-                (Model.MaterialCost ?? 0) > 0;
-
-            if (!hasAnyCost)
-                AddError(nameof(Model.TotalCost), "Garanti dýþý servislerde en az bir maliyet girilmelidir.");
-        }
 
         EditContext.NotifyValidationStateChanged();
         return isValid;
@@ -421,24 +408,6 @@
             CustomerPopupVisible = false;
             StateHasChanged();
         }
-    }
-
-    private async Task OnWarrantyChanged(bool value)
-    {
-        Model!.IsWarranty = value;
-
-        if (value)
-        {
-            Model.LaborCost = 0;
-            Model.MaterialCost = 0;
-            Model.TotalCost = 0;
-        }
-
-        EditContext?.NotifyFieldChanged(EditContext.Field(nameof(Model.IsWarranty)));
-        EditContext?.NotifyFieldChanged(EditContext.Field(nameof(Model.LaborCost)));
-        EditContext?.NotifyFieldChanged(EditContext.Field(nameof(Model.MaterialCost)));
-
-        await Task.CompletedTask;
     }
 
     private async Task LoadUsersAsync()

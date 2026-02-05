@@ -1,4 +1,4 @@
-@page "/service/details/{Id:int}"
+ï»¿@page "/service/work-order-detail/{Id:int}"
 @using System.Net.Http.Json
 @inject NavigationManager NavigationManager
 @inject IApiClientFactory ApiClientFactory
@@ -20,7 +20,7 @@
             <DxToolbarItem>
                 <Template>
                     <div class="custom-item">
-                        <div class="title">Servis Detay Sayfasý</div>
+                        <div class="title">Ä°ÅŸ Emri Detay SayfasÄ±</div>
                     </div>
                 </Template>
             </DxToolbarItem>
@@ -40,7 +40,7 @@
     <DxLoadingPanel Visible="@(!IsDataLoaded)"
                     IsContentBlocked="true"
                     IsContentVisible="false"
-                    Text="Yükleniyor...">
+                    Text="YÃ¼kleniyor...">
 
         <DxGridLayout ColumnSpacing="1rem" RowSpacing="1rem">
             <Columns>
@@ -73,48 +73,51 @@
                         @if (Model != null)
                         {
                             <div class="card h-100 service-card">
+
+                                <!-- HEADER -->
                                 <div class="authority-header">
 
                                     <div class="authority-avatar">
-                                        @Model.ServiceFormNo[0]
+                                        @Model.ServiceFormNo?[0]
                                     </div>
 
                                     <div class="flex-grow-1">
                                         <h5 class="authority-title mb-0">
                                             Servis No: @Model.ServiceFormNo
                                         </h5>
-                                        <small class="text-muted">
+
+                                        <small class="text-muted d-block">
                                             @Model.CustomerCode
                                         </small>
-                                        <hr />
-                                        <small class="text-muted">
+
+                                        <small class="text-muted d-block">
                                             @Model.CustomerName
                                         </small>
-
                                     </div>
 
                                     <span class="authority-badge
-                                                    @(Model.ServiceStatus == ServiceStatus.Completed ? "bg-success" :
-                                                          Model.ServiceStatus == ServiceStatus.InProgress ? "bg-warning" :
-                                                          "bg-secondary")">
+                                            @(Model.ServiceStatus == ServiceStatus.Completed ? "bg-success" : Model.ServiceStatus == ServiceStatus.InProgress ? "bg-warning" : "bg-secondary")">
                                         @Model.ServiceStatus.GetDescription()
                                     </span>
+
+
                                 </div>
 
+                                <!-- STATS -->
                                 <div class="service-stats">
 
                                     <div class="service-stat">
                                         <div class="service-stat-title">
                                             @Model.ServiceType.GetDescription()
                                         </div>
-                                        <small>Servis Türü</small>
+                                        <small>Servis TÃ¼rÃ¼</small>
                                     </div>
 
                                     <div class="service-stat">
                                         <div class="service-stat-title">
-                                            @(Model.IsOnSite ? "Yerinde" : "Atölye")
+                                            @(Model.IsOnSite ? "Yerinde" : "AtÃ¶lye")
                                         </div>
-                                        <small>Servis Þekli</small>
+                                        <small>Servis Åžekli</small>
                                     </div>
 
                                     <div class="service-stat">
@@ -126,74 +129,84 @@
 
                                 </div>
 
-                                <h6 class="service-section-title">SERVÝS BÝLGÝLERÝ</h6>
+                                <h6 class="service-section-title">SERVÄ°S BÄ°LGÄ°LERÄ°</h6>
 
                                 <!-- INFO -->
                                 <div class="service-info">
 
                                     <div class="service-info-row">
                                         <span>Problem:</span>
-                                        <span>@Model.ProblemDescription</span>
-                                    </div>
-
-                                    <div class="service-info-row">
-                                        <span>Servis Açýklamasý:</span>
-                                        <span>@(string.IsNullOrWhiteSpace(Model.ServiceDescription) ? "-" : Model.ServiceDescription)</span>
-                                    </div>
-
-                                    <div class="service-info-row">
-                                        <span>Atanan Personel:</span>
-                                        <span>
-                                            @(!string.IsNullOrWhiteSpace(Model.AssignedPersonnelName)
-                                                                                    ? Model.AssignedPersonnelName
-                                                                                    : "Atanmadý")
+                                        <span class="text-truncate" title="@Model.ProblemDescription">
+                                            @Model.ProblemDescription
                                         </span>
                                     </div>
 
                                     <div class="service-info-row">
-                                        <span>Departman:</span>
-                                        <span>@(Model.AssignedPersonnelDepartment ?? "-")</span>
+                                        <span>Servis AÃ§Ä±klamasÄ±:</span>
+                                        <span class="text-truncate" title="@Model.ServiceDescription">
+                                            @(string.IsNullOrWhiteSpace(Model.ServiceDescription) ? "-" : Model.ServiceDescription)
+                                        </span>
                                     </div>
 
                                     <div class="service-info-row">
-                                        <span>Ünvan:</span>
+                                        <span>Teknisyen:</span>
+                                        <span class="fw-medium">
+                                            @(!string.IsNullOrWhiteSpace(Model.TechnicianName)
+                                                                                    ? Model.TechnicianName
+                                                                                    : "AtanmadÄ±")
+                                        </span>
+                                    </div>
+
+
+                                    <div class="service-info-row">
+                                        <span>Ãœnvan:</span>
                                         <span>@(Model.AssignedPersonnelTitle ?? "-")</span>
                                     </div>
 
                                     <div class="service-info-row">
                                         <span>Atanma Tarihi:</span>
-                                        <span>@(Model.AssignedAt?.ToShortDateString() ?? "-")</span>
+                                        <span>@(Model.AssignedAt?.ToString("dd.MM.yyyy") ?? "-")</span>
                                     </div>
 
                                     <div class="service-info-row">
-                                        <span>Servis Baþlangýç:</span>
-                                        <span>@(Model.ServiceStartDate?.ToShortDateString() ?? "-")</span>
+                                        <span>Servis BaÅŸlangÄ±Ã§:</span>
+                                        <span>@(Model.ServiceStartDate?.ToString("dd.MM.yyyy") ?? "-")</span>
                                     </div>
 
                                     <div class="service-info-row">
-                                        <span>Servis Bitiþ:</span>
-                                        <span class="@(Model.ServiceEndDate.HasValue ? "" : "text-danger")">
-                                            @(Model.ServiceEndDate?.ToShortDateString() ?? "Devam Ediyor")
+                                        <span>Servis BitiÅŸ:</span>
+                                        <span class="@(Model.ServiceEndDate.HasValue ? "" : "text-danger fw-semibold")">
+                                            @(Model.ServiceEndDate?.ToString("dd.MM.yyyy") ?? "Devam Ediyor")
                                         </span>
                                     </div>
                                     <div class="service-info-row">
-                                        <span>Ýþçilik:</span>
-                                        <span>@Model.LaborCost?.ToString("C2")</span>
+                                        <span>Ä°ÅŸÃ§ilik:</span>
+                                        <span>
+                                            @(Model.LaborCost.HasValue ? Model.LaborCost.Value.ToString("C2")
+                                                                                    : "-")
+                                        </span>
                                     </div>
 
                                     <div class="service-info-row">
                                         <span>Malzeme:</span>
-                                        <span>@Model.MaterialCost?.ToString("C2")</span>
+                                        <span>
+                                            @(Model.MaterialCost.HasValue ? Model.MaterialCost.Value.ToString("C2")
+                                                                                    : "-")
+                                        </span>
                                     </div>
 
                                     <div class="service-info-row fw-bold">
                                         <span>Toplam:</span>
-                                        <span>@Model.TotalCost.ToString("C2")</span>
+                                        <span class="text-primary">
+                                            @Model.TotalCost.ToString("C2")
+                                        </span>
                                     </div>
+
                                 </div>
                             </div>
                         }
                     </Template>
+
                 </DxGridLayoutItem>
 
                 <DxGridLayoutItem Area="item2">
@@ -201,16 +214,9 @@
                         <DxTabs CssClass="card tabs"
                                 ActiveTabIndex="@ActiveTabIndex"
                                 ActiveTabIndexChanged="OnActiveTabIndexChanged">
-                            <DxTabPage Text="Ürünler">
+                            <DxTabPage Text="Servis DetaylarÄ±">
                                 <ProductComponent ServiceFormId="Id" />
                             </DxTabPage>
-                            <DxTabPage Text="Atanan Teknisyen">
-                                <TechicianComponent ServiceFormId="Id" />
-                            </DxTabPage>
-                            <DxTabPage Text="Hareketler">
-                                <HistoryComponent ServiceFormId="Id" />
-                            </DxTabPage>
-
                         </DxTabs>
                     </Template>
                 </DxGridLayoutItem>
@@ -305,7 +311,7 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadDataAsync();
-                ShowToast("Baþarýlý", "Personel baþarýyla silindi.",
+                ShowToast("BaÅŸarÄ±lÄ±", "Personel baÅŸarÄ±yla silindi.",
                           ToastRenderStyle.Success, false);
             }
             else
@@ -359,15 +365,15 @@
         @<div class="d-flex gap-2">
         <DxButton Click="@(isError? OnPopupError : OnPopupOk)"
                   RenderStyle="@(isError ? ButtonRenderStyle.Danger: ButtonRenderStyle.Success)">
-        Kapat
-    </DxButton>
-</div>;
+            Kapat
+        </DxButton>
+    </div>;
 
     private void OnPopupOk()
-        => NavigationManager.NavigateTo("/service/requests");
+        => NavigationManager.NavigateTo("/service/work-orders");
 
     private void OnPopupError() { }
 
     private void NavigateBack()
-        => NavigationManager.NavigateTo("/service/requests");
+        => NavigationManager.NavigateTo("/service/work-orders");
 }
