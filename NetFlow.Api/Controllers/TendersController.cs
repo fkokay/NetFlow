@@ -32,9 +32,19 @@ namespace NetFlow.Api.Controllers
                 return NotFound();
             }
 
-            return Ok(await _read.ListAsync(_current.User.Firm.Id,pagedRequest));
+            return Ok(await _read.ListAsync(_current.User.Firm.Id, pagedRequest));
         }
 
+        [HttpGet("sub")]
+        public async Task<IActionResult> List([FromQuery] int tenderId, [FromQuery] string authorityCode, [FromQuery] PagedRequest pagedRequest)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(await _read.GetSubUnitsByTenderAuthorityAsync(tenderId, authorityCode, pagedRequest));
+        }
         // GET api/tenders/10
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(int id)

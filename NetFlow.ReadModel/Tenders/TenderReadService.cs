@@ -94,6 +94,81 @@ namespace NetFlow.ReadModel.Tenders
             };
         }
 
+        public async Task<PagedResult> GetSubUnitsByTenderAuthorityAsync(int tenderId,string authorityCode,PagedRequest pagedRequest)
+        {
+            using var cn = new SqlConnection(_opt.ConnectionString);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@TenderId", tenderId);
+            parameters.Add("@AuthorityCode", authorityCode);
+
+            string whereSql = @"
+                WHERE Tender.Id = @TenderId
+                  AND TenderAuthority.ParentAuthorityCode = @AuthorityCode
+            ";
+
+            if (!string.IsNullOrEmpty(pagedRequest.Filter))
+            {
+                var (sql, p) = DevExtremeSqlBuilder.Compile(pagedRequest.Filter);
+                whereSql += " AND " + sql;
+                parameters.AddDynamicParams(p);
+            }
+
+            string orderBy = DevExtremeSqlBuilder.BuildOrderBy(
+                pagedRequest.Sort,
+                "ORDER BY TenderAuthority.UnitCode"
+            );
+
+            string countSql = $@"
+                SELECT COUNT(1)
+                FROM dbo.VW_Tender AS Tender WITH (NOLOCK)
+                INNER JOIN dbo.VW_TenderAuthority AS TenderAuthority
+                    ON TenderAuthority.TenderId = Tender.Id
+                INNER JOIN TEST2025.dbo.TBLCASABIT AS UnitAuthority
+                    ON UnitAuthority.CARI_KOD = TenderAuthority.UnitCode
+                {whereSql}
+            ";
+
+            int totalCount = await cn.ExecuteScalarAsync<int>(countSql, parameters);
+
+            if (pagedRequest.IsCountQuery == true)
+            {
+                return new PagedResult
+                {
+                    Data = Array.Empty<TenderUnitDto>(),
+                    TotalCount = totalCount
+                };
+            }
+
+            parameters.Add("@Skip", pagedRequest.Skip ?? 0);
+            parameters.Add("@Take", pagedRequest.Take ?? 10);
+
+          string dataSql = $@"
+                SELECT
+                    Tender.Id AS TenderId,
+                    TenderAuthority.UnitCode,
+                    TenderAuthority.UnitName
+                FROM dbo.VW_Tender AS Tender WITH (NOLOCK)
+                INNER JOIN dbo.VW_TenderAuthority AS TenderAuthority
+                    ON TenderAuthority.TenderId = Tender.Id
+                INNER JOIN TEST2025.dbo.TBLCASABIT AS UnitAuthority
+                    ON UnitAuthority.CARI_KOD = TenderAuthority.UnitCode
+                {whereSql}
+                {orderBy}
+                OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
+            ";
+
+            var data = (await cn.QueryAsync<TenderUnitDto>(
+                dataSql, parameters)).ToList();
+
+            return new PagedResult
+            {
+                Data = data,
+                TotalCount = totalCount
+            };
+        }
+
+
         public async Task<TenderDto?> GetAsync(int id)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);

@@ -29,14 +29,11 @@ namespace NetFlow.Domain.Enums
     public enum ServiceDetailType
     {
         Undefined = 0,      // Güvenli default
-        Labor = 1,          // İşçilik
-        Material = 2,       // Malzeme / Yedek Parça
-        Expense = 3,        // Masraf (yol, konaklama vb.)
-        ServiceFee = 4,     // Servis bedeli (sabit ücret)
-        Discount = 5,       // Satır bazlı indirim
-        AdditionalCharge = 6 // Ek ücret
+        Material = 1,       // Malzeme / Yedek Parça
+        Expense = 2,        // Masraf (yol, konaklama vb.)
+        ServiceFee = 3,     // Servis bedeli (sabit ücret)
     }
-
+    
     public enum ServiceActionType
     {
         Undefined = 0,          // Güvenli default

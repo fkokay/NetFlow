@@ -33,8 +33,10 @@ namespace NetFlow.Blazor.Shared.Models
 
         public bool IsOnSite { get; set; }
         public bool IsWarranty { get; set; }
-
-   
+        public string? TenderCode { get; set; }
+        public string? TenderName { get; set; }
+        public string? SubCustomerCode { get; set; }
+        public string? SubCustomerName { get; set; }
         private decimal? _laborCost;
         public decimal? LaborCost
         {

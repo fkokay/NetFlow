@@ -12,3 +12,21 @@
 .footer-action-btn {
     min-width: 100px;
 }
+.service-info-badge-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.service-info-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background-color: #e8f2ff;
+    color: #0b5ed7; 
+
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid #cfe2ff;
+}

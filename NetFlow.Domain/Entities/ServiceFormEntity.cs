@@ -16,6 +16,10 @@ namespace NetFlow.Domain.Entities
         public ServiceType ServiceType { get; set; } = ServiceType.Undefined;
         public string CustomerCode { get; set; } = null!;
         public string CustomerName { get; set; } = null!;
+        public string? TenderCode { get; set; }
+        public string? TenderName { get; set; }
+        public string? SubCustomerCode { get; set; }
+        public string? SubCustomerName { get; set; }
         public string ProblemDescription { get; set; } = null!;
         public string? ServiceDescription { get; set; }
         public ServiceStatus ServiceStatus { get; set; } = ServiceStatus.Draft;

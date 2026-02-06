@@ -3,7 +3,6 @@
 @inject IHttpClientFactory HttpClientFactory
 @inject IToastNotificationService ToastService
 
-
 <div style="position:relative">
 
     <DxLoadingPanel @bind-Visible="IsGridLoading" Text="İşlem yapılıyor..." />
@@ -16,7 +15,7 @@
         <ToolbarTemplate>
             <DxToolbar>
                 <Items>
-                    <DxToolbarItem Text="Yeni Ürün Ekle"
+                    <DxToolbarItem Text="Yeni Servis Kalemi Ekle"
                                    Click="OnAddNewClick"
                                    Alignment="ToolbarItemAlignment.Right"
                                    RenderStyleMode="ToolbarItemRenderStyleMode.Plain" />
@@ -75,7 +74,7 @@
 
 
 <DxPopup @bind-Visible="@PopupVisible"
-         HeaderText="Servis Detay Yönetimi / Ürün Ekle"
+         HeaderText="Servis Detay Yönetimi / Servis Kalemi Ekle"
          Width="800px">
     <BodyContentTemplate Context="popupContext">
         <DxLoadingPanel @bind-Visible="IsLoadingForPopup" Text="İşlem yapılıyor..." />
@@ -83,22 +82,33 @@
         @if (Model != null)
         {
             <DxFormLayout>
-              
-                <DxFormLayoutItem Caption="Ürün Kodu" ColSpanMd="12">
-                    <DxTextBox @bind-Text="Model.StockCode" BindValueMode="BindValueMode.OnInput" ValidationEnabled="true">
+                <DxFormLayoutItem ColSpanMd="12">
+                    <div class="service-info-badge-wrapper">
+                        <span class="service-info-badge">
+                            ℹ️ Faturalandırılabilir kalemler toplam fiyata eklenir
+                        </span>
+                    </div>
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Ürün Kodu" ColSpanMd="12"
+                                  Visible="IsMaterial">
+                    <DxTextBox @bind-Text="Model.StockCode">
                         <Buttons>
-                            <DxEditorButton IconCssClass="three-point-icon icon medium-icon" Click="OpenProductPopup" />
+                            <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
+                                            Click="OpenProductPopup" />
                         </Buttons>
                     </DxTextBox>
                 </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="Ürün Adı" ColSpanMd="12">
-                    <DxTextBox @bind-Text="Model.StockName" BindValueMode="BindValueMode.OnInput" />
+                <DxFormLayoutItem Caption="Ürün Adı" ColSpanMd="12"
+                                  Visible="IsMaterial">
+                    <DxTextBox @bind-Text="Model.StockName" ReadOnly="true" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Servis Tipi" ColSpanMd="12">
                     <DxComboBox Data="@DetailTypes"
-                                @bind-Value="Model.DetailType"
+                                Value="Model.DetailType"
+                                ValueChanged="@((ServiceDetailType type) => OnDetailTypeChanged(type))"
                                 ValueFieldName="Value"
                                 TextFieldName="Text"
                                 ValidationEnabled="true"
@@ -109,51 +119,75 @@
                     <DxMemo @bind-Text="Model.Description" Rows="3" />
                 </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="Miktar" ColSpanMd="12">
-                    <DxSpinEdit @bind-Value="Model.Quantity" Increment="1" MinValue="0" ReadOnly="Model.IsWarranty" />
+                <DxFormLayoutItem Caption="Miktar" ColSpanMd="12"
+                                  Visible="!IsExpense && !IsServiceFee">
+                    <DxSpinEdit @bind-Value="Model.Quantity"
+                                MinValue="0"
+                                ReadOnly="Model.IsWarranty" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Birim" ColSpanMd="12">
-                    <DxTextBox @bind-Text="Model.Unit" />
+                    <DxTextBox @bind-Text="Model.Unit"
+                               ReadOnly="IsExpense || IsServiceFee" />
                 </DxFormLayoutItem>
+
 
                 <DxFormLayoutItem Caption="Birim Fiyat" ColSpanMd="12">
-                    <DxSpinEdit @bind-Value="Model.UnitPrice" DisplayFormat="n2" MinValue="0" ReadOnly="Model.IsWarranty" />
+                    <DxSpinEdit @bind-Value="Model.UnitPrice"
+                                MinValue="0"
+                                ReadOnly="Model.IsWarranty" />
                 </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="İndirim %" ColSpanMd="12">
-                    <DxSpinEdit @bind-Value="Model.DiscountRate" DisplayFormat="n2" MinValue="0" MaxValue="100" ReadOnly="Model.IsWarranty" />
+                <DxFormLayoutItem Caption="İndirim %" ColSpanMd="12"
+                                  Visible="IsMaterial">
+                    <DxSpinEdit @bind-Value="Model.DiscountRate"
+                                MinValue="0"
+                                MaxValue="100"
+                                ReadOnly="Model.IsWarranty" />
                 </DxFormLayoutItem>
+
 
                 <DxFormLayoutItem Caption="KDV %" ColSpanMd="12">
-                    <DxSpinEdit @bind-Value="Model.TaxRate" DisplayFormat="n2" MinValue="0" MaxValue="100" ReadOnly="Model.IsWarranty" />
+                    <DxSpinEdit @bind-Value="Model.TaxRate"
+                                MinValue="0"
+                                MaxValue="100"
+                                ReadOnly="Model.IsWarranty" />
                 </DxFormLayoutItem>
 
+
                 <DxFormLayoutItem Caption="Satır Tutarı" ColSpanMd="12">
-                    <DxSpinEdit Value="Model.LineAmount" DisplayFormat="n2" ReadOnly="true"/>
+                    <DxSpinEdit Value="Model.LineAmount" ReadOnly="true" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="İndirim Tutarı" ColSpanMd="12">
-                    <DxSpinEdit Value="Model.DiscountAmount" DisplayFormat="n2" ReadOnly="true" />
+                    <DxSpinEdit Value="Model.DiscountAmount" ReadOnly="true" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="KDV Tutarı" ColSpanMd="12">
-                    <DxSpinEdit Value="Model.TaxAmount" DisplayFormat="n2" ReadOnly="true" />
+                    <DxSpinEdit Value="Model.TaxAmount" ReadOnly="true" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Toplam Tutar" ColSpanMd="12">
-                    <DxSpinEdit Value="Model.TotalAmount" DisplayFormat="n2" ReadOnly="true" />
+                    <DxSpinEdit Value="Model.TotalAmount" ReadOnly="true" />
                 </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="Garanti Kapsamında" ColSpanMd="6">
+
+                <DxFormLayoutItem Caption="Garanti Kapsamında"
+                                  ColSpanMd="6"
+                                  Visible="!IsExpense">
                     <DxCheckBox Checked="Model.IsWarranty"
-                                CheckedChanged="@((bool val) => OnWarrantyChanged(val))" />
+                                CheckedExpression="@(() => Model.IsWarranty)"
+                                CheckedChanged="@((bool value) => OnWarrantyChanged(value))" />
                 </DxFormLayoutItem>
+
 
                 <DxFormLayoutItem Caption="Faturalandırılabilir" ColSpanMd="6">
-                    <DxCheckBox @bind-Checked="Model.IsBillable" Enabled="!Model.IsWarranty" />
+                    <DxCheckBox @bind-Checked="Model.IsBillable"
+                                Enabled="!Model.IsWarranty" />
                 </DxFormLayoutItem>
+
             </DxFormLayout>
+
         }
         else
         {
@@ -190,6 +224,17 @@
         </DxGrid>
     </BodyTemplate>
 </DxPopup>
+<DxPopup @bind-Visible="ProductPopupVisible" HeaderText="Ürün Seçimi" Width="800px" Height="600px" Scrollable="true">
+    <BodyTemplate>
+        <DxGrid Data="@ProductDataSource" ShowFilterRow="true" PageSize="12" SelectionMode="GridSelectionMode.Single" SelectedDataItemChanged="@OnProductSelected" VirtualScrollingEnabled="true" KeyFieldName="Code">
+            <Columns>
+                <DxGridSelectionColumn Width="100px" />
+                <DxGridDataColumn FieldName="Code" Caption="Stok Kodu" Width="150px" />
+                <DxGridDataColumn FieldName="Name" Caption="Stok Adı" />
+            </Columns>
+        </DxGrid>
+    </BodyTemplate>
+</DxPopup>
 
 
 @code {
@@ -199,12 +244,13 @@
     private bool PopupVisible { get; set; } = false;
     private ServiceFormDetailModel? Model = new();
     private GridDevExtremeDataSource<ProductModel>? ProductDataSource;
+    private GridDevExtremeDataSource<TenderModel>? TenderDataSource;
     private bool ProductPopupVisible { get; set; } = false;
     private bool IsLoadingForPopup { get; set; }
     private bool IsGridLoading { get; set; }
-    private bool IsLabor => Model?.DetailType == ServiceDetailType.Labor;
     private bool IsMaterial => Model?.DetailType == ServiceDetailType.Material;
     private bool IsExpense => Model?.DetailType == ServiceDetailType.Expense;
+    private bool IsServiceFee => Model?.DetailType == ServiceDetailType.ServiceFee;
     private List<EnumItem<ServiceDetailType>> DetailTypes =
    Enum.GetValues<ServiceDetailType>()
        .Select(x => new EnumItem<ServiceDetailType>
@@ -222,6 +268,7 @@
         string baseUrl = "https://localhost:7071/api";
         await LoadDataAsync();
         ProductDataSource = new GridDevExtremeDataSource<ProductModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/netsis/products/pagedList"));
+        TenderDataSource = new GridDevExtremeDataSource<TenderModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tenders/"));
     }
 
     private async Task LoadDataAsync()
@@ -254,18 +301,20 @@
     }
 
 
-    private void OnWarrantyChanged(bool value)
+    private async Task OnWarrantyChanged(bool value)
     {
         if (Model == null) return;
-
         Model.IsWarranty = value;
 
         if (value)
         {
             Model.ApplyWarrantyRules();
-            StateHasChanged();
         }
+        StateHasChanged();
+        await Task.CompletedTask;
     }
+
+
     private async Task HandleSave()
     {
         if (Model == null || IsLoadingForPopup) return;
@@ -299,7 +348,7 @@
                 ShowToast("Başarılı", "Kayıt başarıyla tamamlandı", ToastRenderStyle.Success);
 
                 PopupVisible = false;
-                await LoadDataAsync();
+                NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
             }
             else
             {
@@ -402,7 +451,41 @@
         }
     }
 
+    private async Task OnDetailTypeChanged(ServiceDetailType type)
+    {
+        if (Model == null) return;
 
+        Model.DetailType = type;
+
+        switch (type)
+        {
+            case ServiceDetailType.Material:
+                Model.Unit = "Adet";
+                if (Model.Quantity <= 0) Model.Quantity = 1;
+                break;
+
+            case ServiceDetailType.Expense:
+                Model.StockCode = null;
+                Model.StockName = null;
+                Model.Unit = "Adet";
+                Model.Quantity = 1;
+                Model.DiscountRate = 0;
+                Model.IsWarranty = false;
+                break;
+
+            case ServiceDetailType.ServiceFee:
+                Model.StockCode = null;
+                Model.StockName = null;
+                Model.Unit = "Saat";
+                Model.Quantity = 1;
+                Model.DiscountRate = 0;
+                break;
+        }
+
+
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
     private void ShowToast(string title, string text, ToastRenderStyle style)
     {
         ToastService.ShowToast(new ToastOptions
@@ -415,5 +498,4 @@
             Text = text
         });
     }
-
 }

@@ -48,11 +48,36 @@
                                 <EditForm EditContext="@EditContext" Context="formContext">
                                     <DataAnnotationsValidator />
 
-                                    <DxFormLayout ColSpanMd="6">
+                                    <DxFormLayout>
+
+                                        <!-- Ýhale Bilgileri -->
+                                        <DxFormLayoutItem Caption="Ýhale Kodu" ColSpanMd="6">
+                                            <DxTextBox Text="@Model.TenderCode"
+                                                       TextChanged="@((string val) => OnTenderCodeChanged(val))"
+                                                       TextExpression="@(() => Model.TenderCode)"
+                                                       ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                                       BindValueMode="BindValueMode.OnInput">
+                                                <Buttons>
+                                                    <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
+                                                                    Tooltip="Ýhale Seç"
+                                                                    Click="OpenTenderPopup" />
+                                                </Buttons>
+                                            </DxTextBox>
+                                        </DxFormLayoutItem>
+
+                                        <DxFormLayoutItem Caption="Ýhale Adý" ColSpanMd="6">
+                                            <DxTextBox @bind-Text="Model.TenderName" BindValueMode="BindValueMode.OnInput" />
+                                        </DxFormLayoutItem>
+
 
                                         <!-- Cari Bilgileri -->
                                         <DxFormLayoutItem Caption="Cari Kodu" ColSpanMd="6">
-                                            <DxTextBox @bind-Text="Model.CustomerCode" BindValueMode="BindValueMode.OnInput">
+                                            <DxTextBox Text="@Model.CustomerCode"
+                                                       TextChanged="@((string val) => OnCustomerCodeChanged(val))"
+                                                       TextExpression="@(() => Model.CustomerCode)"
+                                                       Enabled="@(string.IsNullOrEmpty(Model.TenderCode))"
+                                                       ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                                       BindValueMode="BindValueMode.OnInput">
                                                 <Buttons>
                                                     <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
                                                                     Tooltip="Hesap Kodu Seç"
@@ -64,6 +89,29 @@
                                         <DxFormLayoutItem Caption="Cari Adý" ColSpanMd="6">
                                             <DxTextBox @bind-Text="Model.CustomerName" BindValueMode="BindValueMode.OnInput" />
                                         </DxFormLayoutItem>
+
+
+                                        <!--Alt Cari Bilgileri -->
+                                        @if (HasSubCustomers)
+                                        {
+                                            <DxFormLayoutItem Caption="Alt Cari Kodu" ColSpanMd="6">
+                                                <DxTextBox Text="@Model.SubCustomerCode"
+                                                           TextChanged="@((string val) => OnSubCustomerCodeChanged(val))"
+                                                           TextExpression="@(() => Model.SubCustomerCode)"
+                                                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                                                           BindValueMode="BindValueMode.OnInput">
+                                                    <Buttons>
+                                                        <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
+                                                                        Tooltip="Alt Birim Seç"
+                                                                        Click="OpenTenderUnitPopup" />
+                                                    </Buttons>
+                                                </DxTextBox>
+                                            </DxFormLayoutItem>
+
+                                            <DxFormLayoutItem Caption="Alt Cari Adý" ColSpanMd="6">
+                                                <DxTextBox @bind-Text="Model.SubCustomerName" BindValueMode="BindValueMode.OnInput" ReadOnly="true" />
+                                            </DxFormLayoutItem>
+                                        }
 
                                         <DxFormLayoutItem Caption="Servis Numarasý" ColSpanMd="6">
                                             <DxTextBox @bind-Text="Model.ServiceFormNo" />
@@ -185,6 +233,34 @@
         </DxGrid>
     </BodyTemplate>
 </DxPopup>
+
+<DxPopup @bind-Visible="TenderUnitPopupVisible" HeaderText="Alt Birim Seçimi" Width="800px" Height="600px" Scrollable="true">
+    <BodyTemplate>
+        <DxGrid Data="@TenderUnitDataSource"
+                ShowFilterRow="true"
+                PageSize="12"
+                SelectionMode="GridSelectionMode.Single"
+                SelectedDataItemChanged="@OnTenderUnitSelected"
+                KeyFieldName="UnitCode">
+            <Columns>
+                <DxGridSelectionColumn Width="100px" />
+                <DxGridDataColumn FieldName="UnitCode" Caption="Birim Kodu" Width="150px" />
+                <DxGridDataColumn FieldName="UnitName" Caption="Birim Adý" />
+            </Columns>
+        </DxGrid>
+    </BodyTemplate>
+</DxPopup>
+<DxPopup @bind-Visible="TenderPopupVisible" HeaderText="Ýhale Seçimi" Width="800px" Height="600px" Scrollable="true">
+    <BodyTemplate>
+        <DxGrid Data="@TenderDataSource" ShowFilterRow="true" PageSize="12" SelectionMode="GridSelectionMode.Single" SelectedDataItemChanged="@OnTenderSelected" VirtualScrollingEnabled="true" KeyFieldName="TenderCode">
+            <Columns>
+                <DxGridSelectionColumn Width="100px" />
+                <DxGridDataColumn FieldName="TenderCode" Caption="Ýhale Kodu" Width="150px" />
+                <DxGridDataColumn FieldName="TenderName" Caption="Ýhale Adý" />
+            </Columns>
+        </DxGrid>
+    </BodyTemplate>
+</DxPopup>
 @code {
     [Parameter] public int? Id { get; set; }
 
@@ -192,13 +268,18 @@
     private EditContext? EditContext;
     private bool IsSaving, IsSuccess;
     private bool CustomerPopupVisible { get; set; } = false;
+    private bool TenderPopupVisible { get; set; } = false;
+    private bool TenderUnitPopupVisible { get; set; } = false;
     private bool ShowValidationMessages { get; set; } = false;
+    private bool HasSubCustomers { get; set; } = false;
     private IEnumerable<UserModel>? Users { get; set; }
+    private GridDevExtremeDataSource<TenderModel>? TenderDataSource;
     private GridDevExtremeDataSource<CustomerModel>? CustomerDataSource;
+    private GridDevExtremeDataSource<TenderUnitModel>? TenderUnitDataSource;
     private ValidationMessageStore? _validationMessageStore;
     private bool IsEditMode => Id is > 0;
     private bool IsEndDateReadOnly => !IsEditMode;
-
+    private bool IsSubCustomerEnabled => !string.IsNullOrEmpty(Model?.TenderCode);
     private List<EnumItem<ServiceType>> ServiceTypes =
     Enum.GetValues<ServiceType>()
         .Select(x => new EnumItem<ServiceType>
@@ -241,6 +322,7 @@
             EditContext = new EditContext(Model);
             _validationMessageStore = new ValidationMessageStore(EditContext);
             CustomerDataSource = new GridDevExtremeDataSource<CustomerModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/netsis/customers/pagedList"));
+            TenderDataSource = new GridDevExtremeDataSource<TenderModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tenders/"));
         }
         catch (Exception ex)
         {
@@ -262,10 +344,6 @@
         </div>;
     }
 
-
-
-
-
     private async Task SaveFromOutside()
     {
         if (IsSaving || EditContext == null) return;
@@ -285,8 +363,6 @@
         }
     }
 
-
-
     private bool IsSaveButtonEnabledForValidation()
     {
         if (Model == null || EditContext == null || _validationMessageStore == null)
@@ -299,6 +375,12 @@
         {
             _validationMessageStore.Add(EditContext.Field(fieldName), message);
             isValid = false;
+        }
+
+
+        if (HasSubCustomers && string.IsNullOrWhiteSpace(Model.SubCustomerCode))
+        {
+            AddError(nameof(Model.SubCustomerCode), "Ýhaleye ait alt birim seçimi zorunludur.");
         }
 
         if (string.IsNullOrWhiteSpace(Model.CustomerCode))
@@ -332,8 +414,6 @@
         EditContext.NotifyValidationStateChanged();
         return isValid;
     }
-
-
     private async Task HandleValidSubmit()
     {
         if (IsSaving) return;
@@ -394,11 +474,13 @@
             IsSaving = false;
         }
     }
+
+
+    #region Customers
     private void OpenCustomerPopup()
     {
         CustomerPopupVisible = true;
     }
-
     private void OnCustomerSelected(object selectedItem)
     {
         if (selectedItem is CustomerModel selectedCustomer)
@@ -409,13 +491,116 @@
             StateHasChanged();
         }
     }
+    private void OnCustomerCodeChanged(string newValue)
+    {
+        Model.CustomerCode = newValue;
 
+        if (string.IsNullOrWhiteSpace(newValue))
+        {
+            Model.CustomerName = null;
+        }
+    }
+
+    #endregion
+
+    #region Users
     private async Task LoadUsersAsync()
     {
         var httpClient = HttpClientFactory.CreateClient("ApiClient");
         var client = await ApiClientFactory.CreateAsync(httpClient);
         Users = await client.GetFromJsonAsync<List<UserModel>>("https://localhost:7071/api/users/list");
     }
+    #endregion
+
+    #region Tender-TenderUnit
+
+    private void OpenTenderPopup()
+    {
+        TenderPopupVisible = true;
+    }
+
+
+
+    private async Task OnTenderSelected(object selectedItem)
+    {
+        if (selectedItem is TenderModel selectedTender)
+        {
+            Model ??= new ServiceFormModel();
+            Model.TenderCode = selectedTender.TenderCode;
+            Model.TenderName = selectedTender.TenderName;
+
+            Model.CustomerCode = selectedTender.PublicAuthorityCode;
+            Model.CustomerName = selectedTender.PublicAuthorityName;
+
+            Model.SubCustomerCode = null;
+            Model.SubCustomerName = null;
+
+            await LoadTenderUnitsAsync(selectedTender.Id, selectedTender.PublicAuthorityCode);
+
+            HasSubCustomers = true;
+
+            TenderPopupVisible = false;
+            StateHasChanged();
+        }
+    }
+
+    private void OnTenderCodeChanged(string newValue)
+    {
+        Model.TenderCode = newValue;
+
+
+        if (string.IsNullOrWhiteSpace(newValue))
+        {
+            Model.TenderName = null;
+            Model.CustomerCode = null;
+            Model.CustomerName = null;
+            Model.SubCustomerCode = null;
+            Model.SubCustomerName = null;
+
+            HasSubCustomers = false;
+        }
+    }
+
+
+
+    private void OpenTenderUnitPopup()
+    {
+        TenderUnitPopupVisible = true;
+    }
+    private void OnTenderUnitSelected(object selectedItem)
+    {
+        if (selectedItem is TenderUnitModel selectedUnit)
+        {
+            Model.SubCustomerCode = selectedUnit.UnitCode;
+            Model.SubCustomerName = selectedUnit.UnitName;
+            TenderUnitPopupVisible = false;
+            StateHasChanged();
+        }
+    }
+    private async Task LoadTenderUnitsAsync(int tenderId, string authorityCode)
+    {
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        string baseUrl = "https://localhost:7071/api";
+
+        TenderUnitDataSource = new GridDevExtremeDataSource<TenderUnitModel>(
+            client,
+            NavigationManager.ToAbsoluteUri($"{baseUrl}/tenders/sub?tenderId={tenderId}&authorityCode={authorityCode}")
+        );
+    }
+
+    private void OnSubCustomerCodeChanged(string newValue)
+    {
+        Model.SubCustomerCode = newValue;
+
+
+        if (string.IsNullOrWhiteSpace(newValue))
+        {
+            Model.SubCustomerName = null;
+        }
+    }
+    #endregion
+
 
 
 

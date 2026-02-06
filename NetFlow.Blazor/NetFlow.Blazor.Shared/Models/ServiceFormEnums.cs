@@ -60,23 +60,14 @@ namespace NetFlow.Blazor.Shared.Models
         [Description("Tanımsız")]
         Undefined = 0,
 
-        [Description("İşçilik")]
-        Labor = 1,
-
         [Description("Malzeme / Yedek Parça")]
-        Material = 2,
+        Material = 1,
 
         [Description("Masraf (Yol, Konaklama vb.)")]
-        Expense = 3,
+        Expense = 2,
 
         [Description("Servis Bedeli")]
-        ServiceFee = 4,
-
-        [Description("İndirim")]
-        Discount = 5,
-
-        [Description("Ek Ücret")]
-        AdditionalCharge = 6
+        ServiceFee = 3,
     }
 
     public enum ServiceActionType

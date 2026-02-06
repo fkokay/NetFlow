@@ -34,6 +34,10 @@ namespace NetFlow.Application.ServiceForms
                 ServiceStatus = request.ServiceStatus,
                 CustomerCode = request.CustomerCode,
                 CustomerName = request.CustomerName,
+                TenderCode = request.TenderCode,
+                TenderName = request.TenderName,
+                SubCustomerCode = request.SubCustomerCode,
+                SubCustomerName = request.SubCustomerName,
                 ProblemDescription = request.ProblemDescription,
                 ServiceDescription = request.ServiceDescription,
                 AssignedPersonnelId = request.AssignedPersonnelId,
@@ -129,6 +133,10 @@ namespace NetFlow.Application.ServiceForms
             service.ServiceStatus = request.ServiceStatus;
             service.CustomerCode = request.CustomerCode;
             service.CustomerName = request.CustomerName;
+            service.TenderCode = request.TenderCode;
+            service.TenderName = request.TenderName;
+            service.SubCustomerCode = request.SubCustomerCode;
+            service.SubCustomerName = request.SubCustomerName;
             service.CreatedBy = request.CreatedBy;
             service.ProblemDescription = request.ProblemDescription;
             service.ServiceDescription = request.ServiceDescription;
