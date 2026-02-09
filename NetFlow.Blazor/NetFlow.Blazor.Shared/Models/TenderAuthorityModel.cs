@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NetFlow.ReadModel.TenderAuthorities
+namespace NetFlow.Blazor.Shared.Models
 {
-    public sealed class TenderAuthorityDto
+    public class TenderAuthorityModel
     {
         public int Id { get; set; }
         public int TenderId { get; set; }

@@ -3,6 +3,7 @@ using Dapper;
 using Microsoft.Data.SqlClient;
 using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Domain.Common.Pagination;
+using NetFlow.ReadModel.Firms;
 using NetFlow.ReadModel.Tenders;
 using System;
 using System.Collections.Generic;
@@ -104,6 +105,19 @@ namespace NetFlow.ReadModel.Guarantees
                 TotalCount = totalCount
             };
         }
+
+        public async Task<List<GuaranteeDto>> GetFirmListAsync()
+        {
+            using var cn = new SqlConnection(_opt.ConnectionString);
+
+            const string sql = @"
+                SELECT * FROM VW_Guarantee WITH (NOLOCK) where GuaranteeType='Geçici' ORDER BY Id    
+            ";
+
+            var data = await cn.QueryAsync<GuaranteeDto>(sql);
+            return data.ToList();
+        }
+
         public async Task<GuaranteeDto?> GetAsync(int id)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);

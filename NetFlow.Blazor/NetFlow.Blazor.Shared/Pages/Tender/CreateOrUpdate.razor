@@ -47,21 +47,34 @@
                                     <DataAnnotationsValidator />
 
                                     <DxFormLayout>
-
                                         <DxFormLayoutItem Caption="Firma" ColSpanMd="12">
+                                            <DxComboBox TData="FirmModel"
+                                                        TValue="int"
+                                                        Data="@Firms"
+                                                        TextFieldName="@nameof(FirmModel.FirmName)"
+                                                        ValueFieldName="@nameof(FirmModel.Id)"
+                                                        @bind-Value="@Model.FirmId"
+                                                        FilteringMode="DataGridFilteringMode.Contains"
+                                                        NullText="Firma seçiniz veya arayýn..."
+                                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto">
+                                            </DxComboBox>
                                         </DxFormLayoutItem>
+
+
                                         <DxFormLayoutItem Caption="Ýhale Kodu" ColSpanMd="6">
                                             <DxTextBox @bind-Text="Model.TenderCode" BindValueMode="BindValueMode.OnInput" />
                                         </DxFormLayoutItem>
                                         <DxFormLayoutItem Caption="Ýhale Adý" ColSpanMd="6">
                                             <DxTextBox @bind-Text="Model.TenderName" BindValueMode="BindValueMode.OnInput" />
                                         </DxFormLayoutItem>
-                                        <!-- Ýhale Bilgileri -->
+
+
+
+                                        <!--Kamu idaresi / Kurum -->
                                         <DxFormLayoutItem Caption="Cari Kodu" ColSpanMd="6">
-                                            <DxTextBox Text="@Model.CustomerCode"
+                                            <DxTextBox Text="@Model.PublicAuthorityCode"
                                                        TextChanged="@((string val) => OnCustomerCodeChanged(val))"
-                                                       TextExpression="@(() => Model.CustomerCode)"
-                                                       Enabled="@(string.IsNullOrEmpty(Model.TenderCode))"
+                                                       TextExpression="@(() => Model.PublicAuthorityCode)"
                                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
                                                        BindValueMode="BindValueMode.OnInput">
                                                 <Buttons>
@@ -73,61 +86,99 @@
                                         </DxFormLayoutItem>
 
                                         <DxFormLayoutItem Caption="Cari Adý" ColSpanMd="6">
-                                            <DxTextBox @bind-Text="Model.CustomerName" BindValueMode="BindValueMode.OnInput" />
+                                            <DxTextBox Text="@Model.PublicAuthorityName"
+                                                       TextChanged="@((val) => Model.PublicAuthorityName = val)"
+                                                       TextExpression="@(() => Model.PublicAuthorityName)"
+                                                       ReadOnly="true"
+                                                       BindValueMode="BindValueMode.OnInput" />
                                         </DxFormLayoutItem>
-                                       
+                                        <!--Kamu idaresi / Kurum -->
 
-                                        
-                                        <!--Alt Cari Bilgileri -->
-                                        @if (HasSubCustomers)
-                                        {
-                                            <DxFormLayoutItem Caption="Alt Cari Kodu" ColSpanMd="6">
-                                                <DxTextBox Text="@Model.SubCustomerCode"
-                                                           TextChanged="@((string val) => OnSubCustomerCodeChanged(val))"
-                                                           TextExpression="@(() => Model.SubCustomerCode)"
-                                                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
-                                                           BindValueMode="BindValueMode.OnInput">
-                                                    <Buttons>
-                                                        <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
-                                                                        Tooltip="Alt Birim Seç"
-                                                                        Click="OpenTenderUnitPopup" />
-                                                    </Buttons>
-                                                </DxTextBox>
-                                            </DxFormLayoutItem>
 
-                                            <DxFormLayoutItem Caption="Alt Cari Adý" ColSpanMd="6">
-                                                <DxTextBox @bind-Text="Model.SubCustomerName" BindValueMode="BindValueMode.OnInput" ReadOnly="true" />
-                                            </DxFormLayoutItem>
-                                        }
+                                        <DxFormLayoutItem Caption="Ýhale Türü" ColSpanMd="6">
+                                            <DxComboBox Data="@IhaleTurleri"
+                                                        @bind-Value="@SecilenTur"
+                                                        FilteringMode="DataGridFilteringMode.Contains"
+                                                        NullText="Tür arayýn veya seçin..."
+                                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                                        </DxFormLayoutItem>
+
+                                        <DxFormLayoutItem Caption="Ýhale Metodu" ColSpanMd="6">
+                                            <DxComboBox Data="@IhaleMetotlari"
+                                                        @bind-Value="@SecilenMetot"
+                                                        FilteringMode="DataGridFilteringMode.Contains"
+                                                        NullText="Metot arayýn veya seçin..."
+                                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                                        </DxFormLayoutItem>
 
                                         <DxFormLayoutItem Caption="Ýhale Baþlangýç" ColSpanMd="6">
-                                            <DxDateEdit @bind-Date="Model.ServiceStartDate" />
+                                            <DxDateEdit @bind-Date="Model.TenderStartDate" />
                                         </DxFormLayoutItem>
 
                                         <DxFormLayoutItem Caption="Ýhale Bitiþ" ColSpanMd="6">
-                                            <DxDateEdit @bind-Date="Model.ServiceEndDate"
+                                            <DxDateEdit @bind-Date="Model.TenderEndDate"
                                                         ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
                                         </DxFormLayoutItem>
 
 
                                         <DxFormLayoutItem Caption="Ýhale Miktarý" ColSpanMd="6">
-                                            <DxSpinEdit @bind-Value="Model.LaborCost"
+                                            <DxSpinEdit @bind-Value="Model.TenderQuantity"
                                                         DisplayFormat="c2"
                                                         MinValue="0" />
 
                                         </DxFormLayoutItem>
                                         <DxFormLayoutItem Caption="Ýhale Toplam Tutarý" ColSpanMd="6">
-                                            <DxSpinEdit @bind-Value="Model.LaborCost"
+                                            <DxSpinEdit @bind-Value="Model.TenderAmount"
                                                         DisplayFormat="c2"
                                                         MinValue="0" />
 
                                         </DxFormLayoutItem>
                                         <DxFormLayoutItem Caption="Birim Fiyat" ColSpanMd="6">
-                                            <DxSpinEdit @bind-Value="Model.LaborCost"
+                                            <DxSpinEdit @bind-Value="Model.UnitPrice"
                                                         DisplayFormat="c2"
                                                         MinValue="0" />
-
                                         </DxFormLayoutItem>
+
+                                        <DxFormLayoutItem Caption="Para Birimi" ColSpanMd="6">
+                                            <DxComboBox Data="@ParaBirimleri"
+                                                        @bind-Value="@SecilenPara"
+                                                        FilteringMode="DataGridFilteringMode.Contains"
+                                                        NullText="Birim arayýn veya seçin..."
+                                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                                        </DxFormLayoutItem>
+
+
+                                        <DxFormLayoutItem Caption="Geçici Teminat" ColSpanMd="6">
+                                            <DxComboBox TData="GuaranteeModel"
+                                                        TValue="int?"
+                                                        Data="@TemporaryGuarantees"
+                                                        TextFieldName="@nameof(GuaranteeModel.Subject)"
+                                                        ValueFieldName="@nameof(GuaranteeModel.Id)"
+                                                        @bind-Value="@Model.TemporaryGuaranteeRateId"
+                                                        FilteringMode="DataGridFilteringMode.Contains"
+                                                        NullText="Teminat seçiniz veya arayýn..."
+                                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto">
+                                            </DxComboBox>
+                                        </DxFormLayoutItem>
+
+
+                                        <DxFormLayoutItem Caption="Ýhale Ýlan Tarihi" ColSpanMd="6">
+                                            <DxDateEdit @bind-Date="Model.AnnouncementDate" />
+                                        </DxFormLayoutItem>
+
+                                        <DxFormLayoutItem Caption="Ýhale Ödeme Vadesi(Gün)" ColSpanMd="4">
+                                            <DxSpinEdit @bind-Value="Model.TenderDueDate"
+                                                        MinValue="0" />
+                                        </DxFormLayoutItem>
+
+                                        <DxFormLayoutItem Caption="Sözleþme Davet Tarihi" ColSpanMd="4">
+                                            <DxDateEdit @bind-Date="Model.ContractInvitationDate" />
+                                        </DxFormLayoutItem>
+
+                                        <DxFormLayoutItem Caption="Sözleþme Tarihi" ColSpanMd="4">
+                                            <DxDateEdit @bind-Date="Model.ContractDate" />
+                                        </DxFormLayoutItem>
+
                                         <DxFormLayoutItem ColSpanMd="12">
                                             <ValidationSummary />
                                         </DxFormLayoutItem>
@@ -145,6 +196,48 @@
         </DxLoadingPanel>
     </div>
 
+
+    <div class="tender-detail-component-space ">
+        <DxLayoutBreakpoint DeviceSize="DeviceSize.XSmall | DeviceSize.Small | DeviceSize.Medium" @bind-IsActive="@IsSmallScreen" />
+
+        <DxGridLayout ColumnSpacing="1rem" RowSpacing="1rem" CssClass="h-100">
+            <Columns>
+                @if (!IsSmallScreen)
+                {
+                    <DxGridLayoutColumn Width="3fr" />
+                }
+                else
+                {
+                    <DxGridLayoutColumn Width="100%" />
+                }
+            </Columns>
+            <Rows>
+                @if (!IsSmallScreen)
+                {
+                    <DxGridLayoutRow Areas="item1" />
+                }
+                else
+                {
+                    <DxGridLayoutRow Areas="item1" />
+                }
+            </Rows>
+            <Items>
+                <DxGridLayoutItem Area="item1">
+                    <Template>
+                        @if (Model != null)
+                        {
+                            <DxTabs CssClass="card tabs">
+                                <DxTabPage Text="Alt Kurumlar">
+                                    <TenderSubComponent TenderId=@Id.Value/>
+                                </DxTabPage>
+                            </DxTabs>
+                        }
+                    </Template>
+                </DxGridLayoutItem>
+            </Items>
+        </DxGridLayout>
+    </div>
+
 </div>
 <DxPopup @bind-Visible="CustomerPopupVisible" HeaderText="Kamu Ýdare Unvaný Seçimi" Width="800px" Height="600px" Scrollable="true">
     <BodyTemplate>
@@ -158,25 +251,30 @@
     </BodyTemplate>
 </DxPopup>
 
+
+
 @code {
     [Parameter] public int? Id { get; set; }
+    List<string> IhaleTurleri = new List<string> { "Kamu", "Özel" };
+    List<string> IhaleMetotlari = new List<string> { "Hizmet Alýmý", "Mal Alýmý" };
+    List<string> ParaBirimleri = new List<string> { "TRY", "USD", "EUR" };
+    string? SecilenTur;
+    string? SecilenMetot;
+    string? SecilenPara;
 
-    private ServiceFormModel? Model = new();
+    private List<FirmModel> Firms { get; set; } = new();
+    private List<GuaranteeModel> TemporaryGuarantees { get; set; } = new();
+    private TenderModel? Model = new();
     private EditContext? EditContext;
     private bool IsSaving, IsSuccess;
     private bool CustomerPopupVisible { get; set; } = false;
-    private bool TenderPopupVisible { get; set; } = false;
-    private bool TenderUnitPopupVisible { get; set; } = false;
     private bool ShowValidationMessages { get; set; } = false;
-    private bool HasSubCustomers { get; set; } = false;
     private IEnumerable<UserModel>? Users { get; set; }
     private GridDevExtremeDataSource<TenderModel>? TenderDataSource;
     private GridDevExtremeDataSource<CustomerModel>? CustomerDataSource;
-    private GridDevExtremeDataSource<TenderUnitModel>? TenderUnitDataSource;
     private ValidationMessageStore? _validationMessageStore;
     private bool IsEditMode => Id is > 0;
     private bool IsEndDateReadOnly => !IsEditMode;
-    private bool IsSubCustomerEnabled => !string.IsNullOrEmpty(Model?.TenderCode);
     private List<EnumItem<ServiceType>> ServiceTypes =
     Enum.GetValues<ServiceType>()
         .Select(x => new EnumItem<ServiceType>
@@ -185,7 +283,7 @@
             Text = x.GetDescription()
         })
         .ToList();
-
+    private bool IsSmallScreen { get; set; }
     protected override async Task OnInitializedAsync()
     {
         try
@@ -193,16 +291,20 @@
             var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
             string baseUrl = "https://localhost:7071/api";
             await LoadUsersAsync();
-
+            await LoadTemporaryGuaranteesAsync();
+            await LoadFirmsAsync();
             if (Id.HasValue && Id.Value > 0)
             {
                 var httpClient = HttpClientFactory.CreateClient("ApiClient");
                 var api_client = await ApiClientFactory.CreateAsync(httpClient);
-                var result = await api_client.GetFromJsonAsync<ServiceFormModel>($"api/service-forms/{Id.Value}");
+                var result = await api_client.GetFromJsonAsync<TenderModel>($"api/tenders/{Id.Value}");
 
                 if (result != null)
                 {
                     Model = result;
+                    SecilenMetot = Model.TenderMethod;
+                    SecilenTur = Model.TenderType;
+                    SecilenPara = Model.Currency;
                     EditContext = new EditContext(Model);
                     _validationMessageStore = new ValidationMessageStore(EditContext);
                 }
@@ -213,7 +315,7 @@
             }
             else
             {
-                Model = new ServiceFormModel { };
+                Model = new TenderModel { };
             }
 
             EditContext = new EditContext(Model);
@@ -233,6 +335,8 @@
             }, RenderToastButton(true));
         }
     }
+
+
 
     private RenderFragment RenderToastButton(bool isError)
     {
@@ -275,42 +379,65 @@
         }
 
 
-        if (HasSubCustomers && string.IsNullOrWhiteSpace(Model.SubCustomerCode))
+        if (Model.FirmId <= 0)
+            AddError(nameof(Model.FirmId), "Firma seçilmesi zorunludur.");
+
+        if (string.IsNullOrWhiteSpace(Model.TenderCode))
+            AddError(nameof(Model.TenderCode), "Ýhale kodu zorunludur.");
+        if (string.IsNullOrWhiteSpace(Model.TenderName))
+            AddError(nameof(Model.TenderName), "Ýhale adý zorunludur.");
+
+        if (string.IsNullOrWhiteSpace(Model.PublicAuthorityCode))
+            AddError(nameof(Model.PublicAuthorityCode), "Cari kodu zorunludur.");
+        if (SecilenTur == null || (SecilenTur is string s1 && string.IsNullOrWhiteSpace(s1)))
+            AddError(nameof(SecilenTur), "Ýhale türü seçilmelidir.");
+        if (SecilenMetot == null || (SecilenMetot is string s2 && string.IsNullOrWhiteSpace(s2)))
+            AddError(nameof(SecilenMetot), "Ýhale metodu seçilmelidir.");
+
+        if (Model.TenderStartDate == DateTime.MinValue)
+            AddError(nameof(Model.TenderStartDate), "Ýhale baþlangýç tarihi zorunludur.");
+        if (Model.TenderEndDate == DateTime.MinValue)
+            AddError(nameof(Model.TenderEndDate), "Ýhale bitiþ tarihi zorunludur.");
+
+        if (Model.TenderStartDate != DateTime.MinValue &&
+            Model.TenderEndDate != DateTime.MinValue &&
+            Model.TenderEndDate.Date < Model.TenderStartDate.Date)
         {
-            AddError(nameof(Model.SubCustomerCode), "Ýhaleye ait alt birim seçimi zorunludur.");
+            AddError(nameof(Model.TenderEndDate), "Ýhale bitiþ tarihi baþlangýç tarihinden küçük olamaz.");
         }
 
-        if (string.IsNullOrWhiteSpace(Model.CustomerCode))
-            AddError(nameof(Model.CustomerCode), "Cari kodu zorunludur.");
-
-        if (string.IsNullOrWhiteSpace(Model.CustomerName))
-            AddError(nameof(Model.CustomerName), "Cari adý zorunludur.");
-
-        if (string.IsNullOrWhiteSpace(Model.ServiceFormNo))
-            AddError(nameof(Model.ServiceFormNo), "Servis numarasý zorunludur.");
-
-        if (string.IsNullOrWhiteSpace(Model.ProblemDescription))
-            AddError(nameof(Model.ProblemDescription), "Problem açýklamasý zorunludur.");
-
-        if (!Model.AssignedPersonnelId.HasValue)
-            AddError(nameof(Model.AssignedPersonnelId), "Atanan personel seçilmelidir.");
+        if (Model.TenderDueDate <= 0)
+            AddError(nameof(Model.TenderDueDate), "Ýhale ödeme vadesi (gün) zorunludur.");
 
 
-        if (Model.ServiceStartDate.HasValue && Model.ServiceEndDate.HasValue)
+        if (Model.TenderQuantity <= 0)
+            AddError(nameof(Model.TenderQuantity), "Ýhale miktarý 0'dan büyük olmalýdýr.");
+
+        if (Model.TenderAmount <= 0)
+            AddError(nameof(Model.TenderAmount), "Ýhale toplam tutarý 0'dan büyük olmalýdýr.");
+
+        if (Model.UnitPrice <= 0)
+            AddError(nameof(Model.UnitPrice), "Birim fiyat 0'dan büyük olmalýdýr.");
+
+        if (SecilenPara == null || (SecilenPara is string s3 && string.IsNullOrWhiteSpace(s3)))
+            AddError(nameof(SecilenPara), "Para birimi seçilmelidir.");
+
+
+        if (Model.AnnouncementDate == DateTime.MinValue)
+            AddError(nameof(Model.AnnouncementDate), "Ýhale ilan tarihi zorunludur.");
+
+
+        if (Model.AnnouncementDate != DateTime.MinValue &&
+            Model.TenderStartDate != DateTime.MinValue &&
+            Model.AnnouncementDate.Date > Model.TenderStartDate.Date)
         {
-            if (Model.ServiceEndDate < Model.ServiceStartDate)
-                AddError(nameof(Model.ServiceEndDate), "Servis bitiþ tarihi baþlangýçtan küçük olamaz.");
+            AddError(nameof(Model.AnnouncementDate), "Ýlan tarihi ihale baþlangýç tarihinden sonra olamaz.");
         }
-
-        if (Model.ServiceStatus == ServiceStatus.Completed && !Model.ServiceEndDate.HasValue)
-        {
-            AddError(nameof(Model.ServiceEndDate), "Tamamlanan servislerde bitiþ tarihi zorunludur.");
-        }
-
 
         EditContext.NotifyValidationStateChanged();
         return isValid;
     }
+
     private async Task HandleValidSubmit()
     {
         if (IsSaving) return;
@@ -325,11 +452,14 @@
 
             if (Model?.Id > 0)
             {
-                response = await client.PutAsJsonAsync("api/service-forms", Model);
+                response = await client.PutAsJsonAsync("api/tenders", Model);
             }
             else
             {
-                response = await client.PostAsJsonAsync("api/service-forms", Model);
+                Model.TenderMethod = SecilenMetot;
+                Model.Currency = SecilenPara;
+                Model.TenderType = SecilenTur;
+                response = await client.PostAsJsonAsync("api/tenders", Model);
             }
 
             if (response.IsSuccessStatusCode)
@@ -382,19 +512,35 @@
     {
         if (selectedItem is CustomerModel selectedCustomer)
         {
-            Model?.CustomerCode = selectedCustomer.Code;
-            Model?.CustomerName = selectedCustomer.Name;
+            Model.PublicAuthorityCode = selectedCustomer.Code;
+            Model.PublicAuthorityName = selectedCustomer.Name;
+
+            NotifyFieldChanged(nameof(Model.PublicAuthorityCode));
+
             CustomerPopupVisible = false;
             StateHasChanged();
         }
     }
+
     private void OnCustomerCodeChanged(string newValue)
     {
-        Model.CustomerCode = newValue;
+        Model.PublicAuthorityCode = newValue;
 
         if (string.IsNullOrWhiteSpace(newValue))
         {
-            Model.CustomerName = null;
+            Model.PublicAuthorityName = null;
+        }
+
+        NotifyFieldChanged(nameof(Model.PublicAuthorityCode));
+    }
+
+    private void NotifyFieldChanged(string fieldName)
+    {
+        if (EditContext != null && _validationMessageStore != null)
+        {
+            var fieldIdentifier = EditContext.Field(fieldName);
+            _validationMessageStore.Clear(fieldIdentifier);
+            EditContext.NotifyFieldChanged(fieldIdentifier);
         }
     }
 
@@ -409,97 +555,51 @@
     }
     #endregion
 
-    #region Tender-TenderUnit
-
-    private void OpenTenderPopup()
+    #region Firms
+    private async Task LoadFirmsAsync()
     {
-        TenderPopupVisible = true;
-    }
-
-
-
-    private async Task OnTenderSelected(object selectedItem)
-    {
-        if (selectedItem is TenderModel selectedTender)
+        try
         {
-            Model ??= new ServiceFormModel();
-            Model.TenderCode = selectedTender.TenderCode;
-            Model.TenderName = selectedTender.TenderName;
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
 
-            Model.CustomerCode = selectedTender.PublicAuthorityCode;
-            Model.CustomerName = selectedTender.PublicAuthorityName;
+            var result = await client.GetFromJsonAsync<List<FirmModel>>("api/firms/list");
 
-            Model.SubCustomerCode = null;
-            Model.SubCustomerName = null;
-
-            await LoadTenderUnitsAsync(selectedTender.Id, selectedTender.PublicAuthorityCode);
-
-            HasSubCustomers = true;
-
-            TenderPopupVisible = false;
-            StateHasChanged();
+            if (result != null)
+            {
+                Firms = result;
+                await InvokeAsync(StateHasChanged);
+            }
         }
-    }
-
-    private void OnTenderCodeChanged(string newValue)
-    {
-        Model.TenderCode = newValue;
-
-
-        if (string.IsNullOrWhiteSpace(newValue))
+        catch (Exception ex)
         {
-            Model.TenderName = null;
-            Model.CustomerCode = null;
-            Model.CustomerName = null;
-            Model.SubCustomerCode = null;
-            Model.SubCustomerName = null;
-
-            HasSubCustomers = false;
-        }
-    }
-
-
-
-    private void OpenTenderUnitPopup()
-    {
-        TenderUnitPopupVisible = true;
-    }
-    private void OnTenderUnitSelected(object selectedItem)
-    {
-        if (selectedItem is TenderUnitModel selectedUnit)
-        {
-            Model.SubCustomerCode = selectedUnit.UnitCode;
-            Model.SubCustomerName = selectedUnit.UnitName;
-            TenderUnitPopupVisible = false;
-            StateHasChanged();
-        }
-    }
-    private async Task LoadTenderUnitsAsync(int tenderId, string authorityCode)
-    {
-        var httpClient = HttpClientFactory.CreateClient("ApiClient");
-        var client = await ApiClientFactory.CreateAsync(httpClient);
-        string baseUrl = "https://localhost:7071/api";
-
-        TenderUnitDataSource = new GridDevExtremeDataSource<TenderUnitModel>(
-            client,
-            NavigationManager.ToAbsoluteUri($"{baseUrl}/tenders/sub?tenderId={tenderId}&authorityCode={authorityCode}")
-        );
-    }
-
-    private void OnSubCustomerCodeChanged(string newValue)
-    {
-        Model.SubCustomerCode = newValue;
-
-
-        if (string.IsNullOrWhiteSpace(newValue))
-        {
-            Model.SubCustomerName = null;
+            Console.WriteLine($"Firma yükleme hatasý: {ex.Message}");
         }
     }
     #endregion
 
+    #region TemporaryGuarantees
+    private async Task LoadTemporaryGuaranteesAsync()
+    {
+        try
+        {
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
 
+            var result = await client.GetFromJsonAsync<List<GuaranteeModel>>("api/guarantees/temporaries");
 
+            if (result != null)
+            {
+                TemporaryGuarantees = result;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Firma yükleme hatasý: {ex.Message}");
+        }
+    }
+    #endregion
 
     private void OnPopupOk()
     {

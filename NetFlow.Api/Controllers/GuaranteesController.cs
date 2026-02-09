@@ -22,6 +22,16 @@ namespace NetFlow.Api.Controllers
             _write = write;
         }
 
+        [HttpGet("temporaries")]
+        public async Task<IActionResult> List()
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(await _read.GetFirmListAsync());
+        }
         [HttpGet("list")]
         public async Task<IActionResult> List([FromQuery] PagedRequest pagedRequest)
         {
@@ -32,7 +42,6 @@ namespace NetFlow.Api.Controllers
 
             return Ok(await _read.ListAsync(_current.User.Firm.Id, pagedRequest));
         }
-
         [HttpGet("expiring")]
         public async Task<IActionResult> Expiring([FromQuery] PagedRequest pagedRequest)
         {

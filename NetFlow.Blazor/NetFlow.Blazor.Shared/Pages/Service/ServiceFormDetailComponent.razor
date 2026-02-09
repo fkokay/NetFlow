@@ -230,8 +230,6 @@
     </BodyContentTemplate>
 </DxPopup>
 
-
-
 <DxPopup @bind-Visible="ProductPopupVisible" HeaderText="Ürün Seçimi" Width="800px" Height="600px" Scrollable="true">
     <BodyTemplate>
         <DxGrid Data="@ProductDataSource" ShowFilterRow="true" PageSize="12" SelectionMode="GridSelectionMode.Single" SelectedDataItemChanged="@OnProductSelected" VirtualScrollingEnabled="true" KeyFieldName="Code">
@@ -254,8 +252,6 @@
         </DxGrid>
     </BodyTemplate>
 </DxPopup>
-
-
 
 @code {
     [Parameter]

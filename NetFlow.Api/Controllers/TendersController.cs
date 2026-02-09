@@ -52,7 +52,15 @@ namespace NetFlow.Api.Controllers
             var row = await _read.GetAsync(id);
             return row is null ? NotFound() : Ok(row);
         }
-
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateTenderRequest request)
+        {
+            var id = await _write.CreateAsync(request);
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] EditTenderRequest request)
         {

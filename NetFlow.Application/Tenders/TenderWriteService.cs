@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NetFlow.Application.Common.Interfaces;
 using NetFlow.Application.Roles;
+using NetFlow.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,17 +15,44 @@ namespace NetFlow.Application.Tenders
         {
             _db = db;
         }
-      
+
+        public async Task<int> CreateAsync(CreateTenderRequest request)
+        {
+            TenderEntity tender = new()
+            {
+                FirmId = request.FirmId,
+                TenderType = request.TenderType,
+                AnnouncementDate = request.AnnouncementDate,
+                ContractDate = request.ContractDate,
+                CreatedAt = request.CreatedAt,
+                Currency = request.Currency,
+                DocumentUploadDate = request.DocumentUploadDate,
+                FinalGuaranteeRateId = request.FinalGuaranteeRateId,
+                PublicAuthorityCode = request.PublicAuthorityCode,
+                TemporaryGuaranteeRateId = request.TemporaryGuaranteeRateId,
+                TenderAmount = request.TenderAmount,
+                TenderCode = request.TenderCode,
+                TenderDueDate = request.TenderDueDate,
+                TenderEndDate = request.TenderEndDate,
+                TenderMethod = request.TenderMethod,
+                TenderStatus = request.TenderStatus,
+                TenderName = request.TenderName,
+                TenderQuantity = request.TenderQuantity,
+                TenderStartDate = request.TenderStartDate,
+                UnitPrice = request.UnitPrice,
+            };
+            await _db.Tenders.AddAsync(tender);
+            await _db.SaveChangesAsync();
+            return tender.Id;
+        }
         public async Task<int> EditAsync(EditTenderRequest request)
         {
             var tender = await _db.Tenders.FirstAsync(x => x.Id == request.Id);
             tender.Id = request.Id;
             tender.FirmId = request.FirmId;
-            tender.FirmName = request.FirmName;
             tender.TenderCode = request.TenderCode;
             tender.TenderName = request.TenderName;
             tender.PublicAuthorityCode = request.PublicAuthorityCode;
-            tender.PublicAuthorityName = request.PublicAuthorityName;
             tender.TenderType = request.TenderType;
             tender.TenderMethod = request.TenderMethod;
             tender.TenderStartDate = request.TenderStartDate;
@@ -32,11 +60,10 @@ namespace NetFlow.Application.Tenders
             tender.TenderDueDate = request.TenderDueDate;
             tender.TenderQuantity = request.TenderQuantity;
             tender.TenderAmount = request.TenderAmount;
+            tender.UnitPrice = request.UnitPrice;
             tender.Currency = request.Currency;
             tender.TemporaryGuaranteeRateId = request.TemporaryGuaranteeRateId;
-            tender.TemporaryGuaranteeSubject = request.TemporaryGuaranteeSubject;
             tender.FinalGuaranteeRateId = request.FinalGuaranteeRateId;
-            tender.FinalGuaranteeSubject = request.FinalGuaranteeSubject;
             tender.AnnouncementDate = request.AnnouncementDate;
             tender.TenderStatus = request.TenderStatus;
             tender.DocumentUploadDate = request.DocumentUploadDate;

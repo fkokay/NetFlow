@@ -2,17 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NetFlow.ReadModel.Tenders
+namespace NetFlow.Application.Tenders
 {
-    public class TenderDto
+    public class CreateTenderRequest
     {
-        public int Id { get; set; }
         public int FirmId { get; set; }
-        public string? FirmName { get; set; }
         public string TenderCode { get; set; } = "";
         public string TenderName { get; set; } = "";
         public string PublicAuthorityCode { get; set; } = "";
-        public string? PublicAuthorityName { get; set; }
         public string TenderType { get; set; } = "";
         public string TenderMethod { get; set; } = "";
         public DateTime TenderStartDate { get; set; }
@@ -20,14 +17,12 @@ namespace NetFlow.ReadModel.Tenders
         public int TenderDueDate { get; set; }
         public decimal TenderQuantity { get; set; }
         public decimal TenderAmount { get; set; }
+        public decimal UnitPrice { get; set; }
         public string Currency { get; set; } = "TRY";
         public int? TemporaryGuaranteeRateId { get; set; }
-        public string? TemporaryGuaranteeSubject { get; set; }
         public int? FinalGuaranteeRateId { get; set; }
-        public string? FinalGuaranteeSubject { get; set; }
         public DateTime AnnouncementDate { get; set; }
         public string? TenderStatus { get; set; }
-        public decimal UnitPrice { get; set; }
         public DateTime? DocumentUploadDate { get; set; }
         public DateTime? ContractDate { get; set; }
         public DateTime CreatedAt { get; set; }

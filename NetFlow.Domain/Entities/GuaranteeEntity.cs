@@ -30,7 +30,9 @@ namespace NetFlow.Domain.Entities
         public bool IsRefunded { get; set; }
         public FirmEntity? Firm { get; set; }
         public GuaranteeCommissionPeriodEntity? CommissionPeriod { get; set; }
+        [NotMapped]
         public ICollection<TenderEntity> FinalGuaranteeTenders { get; set; } = [];
+        [NotMapped]
         public ICollection<TenderEntity> TemporaryGuaranteeTenders { get; set; } = [];
     }
 }

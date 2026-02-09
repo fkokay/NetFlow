@@ -43,7 +43,8 @@
                     ShowSearchBox="false"
                     SearchText="@SearchText"
                     style="height:100%;"
-                    TextWrapEnabled="false">
+                    TextWrapEnabled="false"
+                    EditStart="OnEditStart">
                 <Columns>
                     <DxGridSelectionColumn Width="75px" />
                     <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
@@ -70,6 +71,11 @@
                     <DxGridDataColumn Caption="İhale Tutarı" FieldName="TenderAmount" />
                     <DxGridDataColumn Caption="İhale Durumu" FieldName="TenderStatus" />
                     <DxGridDataColumn Caption="Sözleşme Tarihi" FieldName="ContractDate" Visible="false" />
+
+                    <!-- Varsayılan Edit -->
+                    <DxGridCommandColumn Width="6em"
+                                         DeleteButtonVisible="false"
+                                         EditButtonVisible="true" />
                 </Columns>
                 <GroupSummary>
                     <DxGridSummaryItem FieldName="Id" SummaryType="GridSummaryItemType.Count" />
@@ -114,6 +120,14 @@
     Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Seçili Satış Siparişleri", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
 
     void OnAddClick(ToolbarItemClickEventArgs e) => NavigationManager.NavigateTo("/tender/createorupdate/");
+
+    private void OnEditStart(GridEditStartEventArgs e)
+    {
+        e.Cancel = true;
+        var tender = (TenderModel)e.DataItem;
+        NavigationManager.NavigateTo($"/tender/createorupdate/{tender.Id}");
+
+    }
     void OnTenderCodeClick(TenderModel tender)
     {
         if (tender != null)

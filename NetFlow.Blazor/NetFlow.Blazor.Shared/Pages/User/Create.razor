@@ -55,7 +55,7 @@
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Yetkili Firmalar" ColSpanMd="12">
-                    <DxTagBox TData="FirmSelectModel"
+                    <DxTagBox TData="FirmModel"
                               TValue="int"
                               Data="@Firms"
                               TextFieldName="FirmName"
@@ -120,7 +120,7 @@
     private EditContext editContext = null!;
     private bool isSaving, popupVisible, isSuccess;
     private string popupTitle = "", popupMessage = "";
-    private List<FirmSelectModel> Firms { get; set; } = new();
+    private List<FirmModel> Firms { get; set; } = new();
 
     protected override void OnInitialized()
     {
@@ -143,7 +143,7 @@
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
 
-            var result = await client.GetFromJsonAsync<List<FirmSelectModel>>("api/firms/simple");
+            var result = await client.GetFromJsonAsync<List<FirmModel>>("api/firms/list");
 
             if (result != null)
             {
