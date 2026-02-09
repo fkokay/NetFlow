@@ -15,10 +15,14 @@
         <ToolbarTemplate>
             <DxToolbar>
                 <Items>
-                    <DxToolbarItem Text="Yeni Servis Kalemi Ekle"
-                                   Click="OnAddNewClick"
-                                   Alignment="ToolbarItemAlignment.Right"
-                                   RenderStyleMode="ToolbarItemRenderStyleMode.Plain" />
+                    @if (!IsReadOnly)
+                    {
+                        <DxToolbarItem Text="Yeni Servis Kalemi Ekle"
+                                       Click="OnAddNewClick"
+                                       Alignment="ToolbarItemAlignment.Right"
+                                       RenderStyleMode="ToolbarItemRenderStyleMode.Plain" />
+                    }
+
                 </Items>
             </DxToolbar>
         </ToolbarTemplate>
@@ -65,9 +69,24 @@
                               Caption="Oluşturma Tarihi"
                               DisplayFormat="dd.MM.yyyy HH:mm" />
 
+            @if (!IsReadOnly)
+            {
 
-            <DxGridCommandColumn Width="6em" DeleteButtonVisible="true" EditButtonVisible="true" />
+                <DxGridCommandColumn Width="6em" DeleteButtonVisible="true" EditButtonVisible="true" />
+            }
+           
         </Columns>
+        <EmptyDataAreaTemplate>
+            @if (IsReadOnly)
+            {
+                <p>Servis kalemi eklemek için önce servis formunu kaydedin.</p>
+            }
+            else
+            {
+                <p>Görüntülenecek herhangi bir servis kalemi bulunamadı.</p>
+            }
+        </EmptyDataAreaTemplate>
+        
     </DxGrid>
 </div>
 
@@ -89,7 +108,15 @@
                         </span>
                     </div>
                 </DxFormLayoutItem>
-
+                <DxFormLayoutItem Caption="Servis Tipi" ColSpanMd="12">
+                    <DxComboBox Data="@DetailTypes"
+                                Value="Model.DetailType"
+                                ValueChanged="@((ServiceDetailType type) => OnDetailTypeChanged(type))"
+                                ValueFieldName="Value"
+                                TextFieldName="Text"
+                                ValidationEnabled="true"
+                                ShowValidationIcon="true" />
+                </DxFormLayoutItem>
                 <DxFormLayoutItem Caption="Ürün Kodu" ColSpanMd="12"
                                   Visible="IsMaterial">
                     <DxTextBox @bind-Text="Model.StockCode">
@@ -105,15 +132,7 @@
                     <DxTextBox @bind-Text="Model.StockName" ReadOnly="true" />
                 </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="Servis Tipi" ColSpanMd="12">
-                    <DxComboBox Data="@DetailTypes"
-                                Value="Model.DetailType"
-                                ValueChanged="@((ServiceDetailType type) => OnDetailTypeChanged(type))"
-                                ValueFieldName="Value"
-                                TextFieldName="Text"
-                                ValidationEnabled="true"
-                                ShowValidationIcon="true" />
-                </DxFormLayoutItem>
+                
 
                 <DxFormLayoutItem Caption="Açıklama" ColSpanMd="12">
                     <DxMemo @bind-Text="Model.Description" Rows="3" />
@@ -237,9 +256,11 @@
 </DxPopup>
 
 
+
 @code {
     [Parameter]
     public int ServiceFormId { get; set; }
+
     private GridDevExtremeDataSource<ServiceFormDetailModel>? ServiceFormDetailDataSource { get; set; }
     private bool PopupVisible { get; set; } = false;
     private ServiceFormDetailModel? Model = new();
@@ -248,47 +269,51 @@
     private bool ProductPopupVisible { get; set; } = false;
     private bool IsLoadingForPopup { get; set; }
     private bool IsGridLoading { get; set; }
+
     private bool IsMaterial => Model?.DetailType == ServiceDetailType.Material;
     private bool IsExpense => Model?.DetailType == ServiceDetailType.Expense;
     private bool IsServiceFee => Model?.DetailType == ServiceDetailType.ServiceFee;
+
+    private bool IsReadOnly => ServiceFormId == 0;
+
     private List<EnumItem<ServiceDetailType>> DetailTypes =
-   Enum.GetValues<ServiceDetailType>()
-       .Select(x => new EnumItem<ServiceDetailType>
-       {
-           Value = x,
-           Text = x.GetDescription()
-       })
-       .ToList();
-
-
+        Enum.GetValues<ServiceDetailType>()
+            .Select(x => new EnumItem<ServiceDetailType>
+            {
+                Value = x,
+                Text = x.GetDescription()
+            })
+            .ToList();
 
     protected override async Task OnInitializedAsync()
     {
-        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
         string baseUrl = "https://localhost:7071/api";
-        await LoadDataAsync();
+
+        if (!IsReadOnly)
+        {
+            await LoadDataAsync();
+        }
+
         ProductDataSource = new GridDevExtremeDataSource<ProductModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/netsis/products/pagedList"));
         TenderDataSource = new GridDevExtremeDataSource<TenderModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tenders/"));
     }
 
     private async Task LoadDataAsync()
     {
+        if (IsReadOnly) return;
+
         try
         {
             IsLoadingForPopup = true;
-
-            var client = await ApiClientFactory.CreateAsync(
-                HttpClientFactory.CreateClient("ApiClient"));
-
+            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
             string baseUrl = "https://localhost:7071/api";
 
-            ServiceFormDetailDataSource =
-                new GridDevExtremeDataSource<ServiceFormDetailModel>(
-                    client,
-                    NavigationManager.ToAbsoluteUri(
-                        $"{baseUrl}/service-form-details?serviceFormId={ServiceFormId}"
-                    )
-                );
+            ServiceFormDetailDataSource = new GridDevExtremeDataSource<ServiceFormDetailModel>(
+                client,
+                NavigationManager.ToAbsoluteUri($"{baseUrl}/service-form-details?serviceFormId={ServiceFormId}")
+            );
         }
         catch (Exception ex)
         {
@@ -300,81 +325,21 @@
         }
     }
 
-
-    private async Task OnWarrantyChanged(bool value)
+    private void OnAddNewClick()
     {
-        if (Model == null) return;
-        Model.IsWarranty = value;
-
-        if (value)
-        {
-            Model.ApplyWarrantyRules();
-        }
-        StateHasChanged();
-        await Task.CompletedTask;
-    }
-
-
-    private async Task HandleSave()
-    {
-        if (Model == null || IsLoadingForPopup) return;
-        if (Model.IsWarranty)
-        {
-            Model.ApplyWarrantyRules();
-        }
-        try
-        {
-            IsLoadingForPopup = true;
-
-            var client = await ApiClientFactory.CreateAsync(
-                HttpClientFactory.CreateClient("ApiClient"));
-
-            string baseUrl = "https://localhost:7071/api/service-form-details";
-
-            HttpResponseMessage response;
-
-            if (Model.Id > 0)
-            {
-                response = await client.PutAsJsonAsync(baseUrl, Model);
-            }
-            else
-            {
-                Model.ServiceFormId = ServiceFormId;
-                response = await client.PostAsJsonAsync(baseUrl, Model);
-            }
-
-            if (response.IsSuccessStatusCode)
-            {
-                ShowToast("Başarılı", "Kayıt başarıyla tamamlandı", ToastRenderStyle.Success);
-
-                PopupVisible = false;
-                NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
-            }
-            else
-            {
-                ShowToast("Hata",
-                    await response.Content.ReadAsStringAsync(),
-                    ToastRenderStyle.Danger);
-            }
-        }
-        catch (Exception ex)
-        {
-            ShowToast("Sistem Hatası", ex.Message, ToastRenderStyle.Danger);
-        }
-        finally
-        {
-            IsLoadingForPopup = false;
-            StateHasChanged();
-        }
-    }
-
-    private void OpenProductPopup()
-    {
-        ProductPopupVisible = true;
+        if (IsReadOnly) return;
+        Model = new ServiceFormDetailModel();
+        PopupVisible = true;
     }
 
     private void OnEditStart(GridEditStartEventArgs e)
     {
+        if (IsReadOnly)
+        {
+            e.Cancel = true;
+            return;
+        }
+
         e.Cancel = true;
         var dataItem = (ServiceFormDetailModel)e.DataItem;
 
@@ -398,25 +363,64 @@
 
         PopupVisible = true;
     }
-    private void OnProductSelected(object selectedItem)
+
+    private async Task HandleSave()
     {
-        if (selectedItem is ProductModel selectedProduct)
+        if (Model == null || IsLoadingForPopup || IsReadOnly) return;
+
+        if (Model.IsWarranty)
         {
-            Model ??= new ServiceFormDetailModel();
-            Model.StockCode = selectedProduct.Code;
-            Model.StockName = selectedProduct.Name;
-            ProductPopupVisible = false;
+            Model.ApplyWarrantyRules();
+        }
+
+        try
+        {
+            IsLoadingForPopup = true;
+            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+            string baseUrl = "https://localhost:7071/api/service-form-details";
+
+            HttpResponseMessage response;
+            if (Model.Id > 0)
+            {
+                response = await client.PutAsJsonAsync(baseUrl, Model);
+            }
+            else
+            {
+                Model.ServiceFormId = ServiceFormId;
+                response = await client.PostAsJsonAsync(baseUrl, Model);
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                ShowToast("Başarılı", "Kayıt başarıyla tamamlandı", ToastRenderStyle.Success);
+                PopupVisible = false;
+                // Veriyi yenilemek için sayfayı zorla yükle veya LoadDataAsync() çağır
+                NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+            }
+            else
+            {
+                ShowToast("Hata", await response.Content.ReadAsStringAsync(), ToastRenderStyle.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowToast("Sistem Hatası", ex.Message, ToastRenderStyle.Danger);
+        }
+        finally
+        {
+            IsLoadingForPopup = false;
             StateHasChanged();
         }
-    }
-    private void OnAddNewClick()
-    {
-        Model = new ServiceFormDetailModel();
-        PopupVisible = true;
     }
 
     async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
     {
+        if (IsReadOnly)
+        {
+            e.Cancel = true;
+            return;
+        }
+
         e.Cancel = true;
         var serviceDetail = (ServiceFormDetailModel)e.DataItem;
 
@@ -427,7 +431,6 @@
 
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
-
             var response = await client.DeleteAsync($"api/service-form-details/{serviceDetail.Id}");
 
             if (response.IsSuccessStatusCode)
@@ -453,17 +456,15 @@
 
     private async Task OnDetailTypeChanged(ServiceDetailType type)
     {
-        if (Model == null) return;
+        if (Model == null || IsReadOnly) return;
 
         Model.DetailType = type;
-
         switch (type)
         {
             case ServiceDetailType.Material:
                 Model.Unit = "Adet";
                 if (Model.Quantity <= 0) Model.Quantity = 1;
                 break;
-
             case ServiceDetailType.Expense:
                 Model.StockCode = null;
                 Model.StockName = null;
@@ -472,7 +473,6 @@
                 Model.DiscountRate = 0;
                 Model.IsWarranty = false;
                 break;
-
             case ServiceDetailType.ServiceFee:
                 Model.StockCode = null;
                 Model.StockName = null;
@@ -481,11 +481,33 @@
                 Model.DiscountRate = 0;
                 break;
         }
-
-
         StateHasChanged();
         await Task.CompletedTask;
     }
+
+    private void OnProductSelected(object selectedItem)
+    {
+        if (selectedItem is ProductModel selectedProduct)
+        {
+            Model ??= new ServiceFormDetailModel();
+            Model.StockCode = selectedProduct.Code;
+            Model.StockName = selectedProduct.Name;
+            ProductPopupVisible = false;
+            StateHasChanged();
+        }
+    }
+
+    private void OpenProductPopup() => ProductPopupVisible = true;
+
+    private async Task OnWarrantyChanged(bool value)
+    {
+        if (Model == null || IsReadOnly) return;
+        Model.IsWarranty = value;
+        if (value) Model.ApplyWarrantyRules();
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+
     private void ShowToast(string title, string text, ToastRenderStyle style)
     {
         ToastService.ShowToast(new ToastOptions

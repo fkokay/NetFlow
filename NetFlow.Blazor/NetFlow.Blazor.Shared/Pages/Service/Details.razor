@@ -16,7 +16,11 @@
             <DxToolbarItem IconCssClass="back-icon icon medium-icon"
                            Tooltip="Geri"
                            Click="NavigateBack" />
-
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                <Template>
+                    <DxButton Text="Düzenle" Click="@OnEditClick" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
+                </Template>
+            </DxToolbarItem>
             <DxToolbarItem>
                 <Template>
                     <div class="custom-item">
@@ -94,9 +98,9 @@
                                     </div>
 
                                     <span class="authority-badge
-                                                    @(Model.ServiceStatus == ServiceStatus.Completed ? "bg-success" :
-                                                          Model.ServiceStatus == ServiceStatus.InProgress ? "bg-warning" :
-                                                          "bg-secondary")">
+                                                            @(Model.ServiceStatus == ServiceStatus.Completed ? "bg-success" :
+                                                                                                                                              Model.ServiceStatus == ServiceStatus.InProgress ? "bg-warning" :
+                                                                                                                                              "bg-secondary")">
                                         @Model.ServiceStatus.GetDescription()
                                     </span>
                                 </div>
@@ -204,13 +208,9 @@
                             <DxTabPage Text="Ürünler">
                                 <ProductComponent ServiceFormId="Id" />
                             </DxTabPage>
-                            <DxTabPage Text="Atanan Teknisyen">
-                                <TechicianComponent ServiceFormId="Id" />
-                            </DxTabPage>
                             <DxTabPage Text="Hareketler">
                                 <HistoryComponent ServiceFormId="Id" />
                             </DxTabPage>
-
                         </DxTabs>
                     </Template>
                 </DxGridLayoutItem>
@@ -359,9 +359,10 @@
         @<div class="d-flex gap-2">
         <DxButton Click="@(isError? OnPopupError : OnPopupOk)"
                   RenderStyle="@(isError ? ButtonRenderStyle.Danger: ButtonRenderStyle.Success)">
-        Kapat
-    </DxButton>
-</div>;
+            Kapat
+        </DxButton>
+    </div>;
+    private async Task OnEditClick() => NavigationManager.NavigateTo($"/service/createorupdate/{Id}");
 
     private void OnPopupOk()
         => NavigationManager.NavigateTo("/service/requests");

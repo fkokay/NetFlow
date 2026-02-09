@@ -213,12 +213,9 @@
     </div>
 
 
-    @if (Id.HasValue && Id.Value > 0)
-    {
-        <div class="service-form-component-space">
-            <ServiceFormDetailComponent ServiceFormId="@Id.Value" />
-        </div>
-    }
+    <div class="service-form-component-space">
+        <ServiceFormDetailComponent ServiceFormId="@(Id == null ? 0 : Id.Value)" />
+    </div>
 </div>
 
 

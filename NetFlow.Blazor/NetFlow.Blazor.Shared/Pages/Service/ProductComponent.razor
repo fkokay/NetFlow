@@ -9,7 +9,15 @@
 
     <Columns>
         <DxGridDataColumn FieldName="LineNo" Caption="Satýr No" Width="80px" />
-        <DxGridDataColumn FieldName="DetailType" Caption="Detay Tipi" />
+        <DxGridDataColumn Caption="Detay Tipi"
+                          FieldName="DetailType"
+                          Width="140px">
+            <CellDisplayTemplate>
+                <span class="status-badge">
+                    @(((ServiceFormDetailModel)context.DataItem).DetailType.GetDescription())
+                </span>
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
         <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
         <DxGridDataColumn FieldName="StockName" Caption="Stok Adý" />
         <DxGridDataColumn FieldName="Description" Caption="Açýklama" />

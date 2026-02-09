@@ -4,16 +4,10 @@
 @inject IHttpClientFactory HttpClientFactory
 @inject IToastNotificationService ToastService
 
+
 <div class="content-root">
     <div class="card toolbar">
         <DxToolbar Title="@Title" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
-            <DxToolbarItem Text="Personel Oluþtur"
-                           Tooltip="Yeni Personel Ekle"
-                           Alignment="ToolbarItemAlignment.Right"
-                           Click="OnAddClick"
-                           IconCssClass="add-icon icon medium-icon"
-                           RenderStyleMode="ToolbarItemRenderStyleMode.Plain" />
-
             <DxToolbarItem Tooltip="Column Chooser" Alignment="ToolbarItemAlignment.Right" Click="OnColumnChooserItemClick" IconCssClass="column-chooser-icon icon medium-icon" />
 
             <DxToolbarItem Text="Dýþarý Aktar" Alignment="ToolbarItemAlignment.Right" IconCssClass="export-icon icon medium-icon">
@@ -43,12 +37,12 @@
         </DxToolbar>
     </div>
 
-    <div class="Personnel-list-root h-100">
+    <div class="Customer-list-root h-100">
         <div class="h-100">
             <DxGrid @ref="Grid"
                     Data="Data"
                     KeyFieldName="Id"
-                    CssClass="Personnel-list"
+                    CssClass="Customer-list"
                     style="height:100%;"
                     SearchText="@SearchText"
                     SkeletonRowsEnabled="true"
@@ -58,57 +52,39 @@
                     ShowAllRows="true"
                     VirtualScrollingEnabled="true"
                     RowClick="@OnRowClick"
-                    HighlightRowOnHover="true" CustomizeEditModel="Grid_CustomizeEditModel">
+                    HighlightRowOnHover="true">
                 <Columns>
                     <DxGridSelectionColumn Width="75px" />
                     <DxGridDataColumn Caption="Id" FieldName="Id" Visible="false" />
-                    <DxGridDataColumn Caption="Personel Kodu" FieldName="PersonnelCode" >
+                    <DxGridDataColumn Caption="Müþteri Kodu" FieldName="Code">
                         <CellDisplayTemplate>
                             <a href="javascript:void(0);"
                                style="font-weight:bold;color:#0056b3"
-                               @onclick="() => OpenDetails((PersonnelModel)context.DataItem)"
+                               @onclick="() => OpenDetails((CustomerModel)context.DataItem)"
                                @onclick:stopPropagation>
                                 @context.Value
                             </a>
                         </CellDisplayTemplate>
                     </DxGridDataColumn>
-                    <DxGridDataColumn Caption="Cari Kodu" FieldName="CustomerCode"  />
-                    <DxGridDataColumn Caption="Cari Adý" FieldName="CustomerName" />
-                    <DxGridDataColumn Caption="Cari Adý" FieldName="CustomerName" />
-                    <DxGridDataColumn Caption="Ýþe Giriþ Tarihi" FieldName="HireDate" />
-                    <DxGridDataColumn Caption="Ýþten Çýkýþ Tarihi" FieldName="TerminationDate" />
-                    <DxGridDataColumn Caption="Maaþ" FieldName="Salary" />
-                    <DxGridDataColumn Caption="Adý Soyadý" FieldName="FullName" />
-                    <DxGridDataColumn Caption="Mail Adresi" FieldName="Email" />
-                    <DxGridDataColumn Caption="Telefon Numarasý" FieldName="Phone" Visible="false" />
-                    <DxGridDataColumn Caption="Departman" FieldName="Department" />
-                    <DxGridDataColumn Caption="Ünvan" FieldName="Title" />
-                    <DxGridCommandColumn Width="6em" DeleteButtonVisible="false" EditButtonVisible="true" />
+                    <DxGridDataColumn Caption="Müþteri Adý" FieldName="Name" />
                 </Columns>
+                <EmptyDataAreaTemplate>
+                    <p>Görüntülenecek herhangi bir müþteri bulunamadý.</p>
+                </EmptyDataAreaTemplate>
             </DxGrid>
         </div>
     </div>
 </div>
-
-
-
 @code {
 
-    [Parameter] public required string Title { get; set; } = "Personel Listesi";
+    [Parameter] public required string Title { get; set; } = "Müþteri Listesi";
     [Parameter] public required string Page { get; set; }
-    [Parameter] public bool ShowExtensionButton { get; set; } = false;
-
     [CascadingParameter(Name = "ParentSizeMode")]
     public SizeMode SizeMode { get; set; }
-
-    private GridDevExtremeDataSource<PersonnelModel> Data { get; set; } = null!;
+    private GridDevExtremeDataSource<CustomerModel> Data { get; set; } = null!;
     private IGrid? Grid { get; set; }
     private string? SearchText { get; set; }
-    private PersonnelModel? SelectedPersonnel;
-
     private CancellationTokenSource disposalTokenSource = new CancellationTokenSource();
-
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -119,7 +95,7 @@
     {
         var httpClient = HttpClientFactory.CreateClient("ApiClient");
         var client = await ApiClientFactory.CreateAsync(httpClient);
-        Data = new GridDevExtremeDataSource<PersonnelModel>(client, NavigationManager.ToAbsoluteUri($"https://localhost:7071/api/personnels/{Page}"));
+        Data = new GridDevExtremeDataSource<CustomerModel>(client, NavigationManager.ToAbsoluteUri($"https://localhost:7071/api/netsis/customers/{Page}"));
 
         if (Grid != null)
             Grid.Reload();
@@ -128,38 +104,26 @@
     }
 
 
-    void OpenExtensionPopup(PersonnelModel item)
-    {
-        SelectedPersonnel = item;
-    }
 
 
     void OnColumnChooserItemClick(ToolbarItemClickEventArgs e) => Grid!.ShowColumnChooser();
 
-   
-
     async Task OnRowClick(GridRowClickEventArgs args)
     {
-        var personnel = (PersonnelModel)Grid!.GetDataItem(args.VisibleIndex);
+        var personnel = (CustomerModel)Grid!.GetDataItem(args.VisibleIndex);
     }
 
     void OnAddClick(ToolbarItemClickEventArgs e) => NavigationManager.NavigateTo("/personnel/createorupdate/");
 
 
-    Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Personeller");
-    Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Seçili Personeller", new GridXlExportOptions { ExportSelectedRowsOnly = true });
-    Task ExportAllDataToCsv() => Grid!.ExportToCsvAsync("Personeller");
-    Task ExportSelectedRowsDataToCsv() => Grid!.ExportToCsvAsync("Seçili Personeller", new GridCsvExportOptions { ExportSelectedRowsOnly = true });
-    Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Personeller");
-    Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Seçili Personeller", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
-    void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e)
-    {
-        var personnel = (PersonnelModel)e.DataItem;
-        NavigationManager.NavigateTo($"/personnel/createorupdate/{personnel.Id}");
-    }
+    Task ExportAllDataToExcel() => Grid!.ExportToXlsxAsync("Müþteriler");
+    Task ExportSelectedRowsToExcel() => Grid!.ExportToXlsxAsync("Seçili Müþteriler", new GridXlExportOptions { ExportSelectedRowsOnly = true });
+    Task ExportAllDataToCsv() => Grid!.ExportToCsvAsync("Müþteriler");
+    Task ExportSelectedRowsDataToCsv() => Grid!.ExportToCsvAsync("Seçili Müþteriler", new GridCsvExportOptions { ExportSelectedRowsOnly = true });
+    Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Müþteriler");
+    Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Seçili Müþteriler", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
 
-    void OpenDetails(PersonnelModel item)
-        => NavigationManager.NavigateTo($"/personnel/details/{item.Id}");
+    void OpenDetails(CustomerModel item) { }
 
     public void Dispose()
     {
