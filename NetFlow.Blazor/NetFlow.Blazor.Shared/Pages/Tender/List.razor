@@ -6,6 +6,12 @@
 <div class="content-root">
     <div class="card toolbar">
         <DxToolbar Title="İhale Listesi" ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <DxToolbarItem Text="İhale Oluştur"
+                           Tooltip="Yeni İhale Oluştur"
+                           Alignment="ToolbarItemAlignment.Right"
+                           Click="OnAddClick"
+                           IconCssClass="add-icon icon medium-icon"
+                           RenderStyleMode="ToolbarItemRenderStyleMode.Plain" />
             <DxToolbarItem Tooltip="Sütun Seçici" Alignment="ToolbarItemAlignment.Right" Click="OnColumnChooserItemClick" IconCssClass="column-chooser-icon icon medium-icon" />
             <DxToolbarItem Text="Dışarı Aktarı" Alignment="ToolbarItemAlignment.Right" IconCssClass="export-icon icon medium-icon">
                 <Items>
@@ -106,6 +112,8 @@
     Task ExportAllDataToPdf() => Grid!.ExportToPdfAsync("Satış Siparişleri");
 
     Task ExportSelectedRowsDataToPdf() => Grid!.ExportToPdfAsync("Seçili Satış Siparişleri", new GridPdfExportOptions { ExportSelectedRowsOnly = true });
+
+    void OnAddClick(ToolbarItemClickEventArgs e) => NavigationManager.NavigateTo("/tender/createorupdate/");
     void OnTenderCodeClick(TenderModel tender)
     {
         if (tender != null)

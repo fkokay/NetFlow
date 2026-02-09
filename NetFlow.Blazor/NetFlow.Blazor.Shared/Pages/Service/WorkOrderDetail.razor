@@ -16,7 +16,11 @@
             <DxToolbarItem IconCssClass="back-icon icon medium-icon"
                            Tooltip="Geri"
                            Click="NavigateBack" />
-
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                <Template>
+                    <DxButton Text="Düzenle" Click="@OnEditClick" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
+                </Template>
+            </DxToolbarItem>
             <DxToolbarItem>
                 <Template>
                     <div class="custom-item">
@@ -341,7 +345,7 @@
         await Task.Yield();
     }
 
-
+    private async Task OnEditClick() => NavigationManager.NavigateTo($"/service/createorupdate/{Id}");
     private async Task OnTerminateSuccess()
     {
         await LoadDataAsync();
