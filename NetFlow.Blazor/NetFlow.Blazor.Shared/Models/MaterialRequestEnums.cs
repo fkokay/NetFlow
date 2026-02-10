@@ -4,16 +4,18 @@ namespace NetFlow.Blazor.Shared.Models
 {
     public enum MaterialRequestType
     {
-        [Description("Üretim")]
-        Production = 1, // Üretim
-        [Description("Bakım / Onarım")]
-        Maintenance = 2, // Bakım / Onarım
-        [Description("Ofis / Genel")]
-        Office = 3, // Ofis / Genel
-        [Description("Proje bazlı")]
-        Project = 4, // Proje bazlı
-        [Description("Ar-Ge")]
-        RnD = 5 // Ar-Ge
+        //[Description("Üretim")]
+        //Production = 1, // Üretim
+        //[Description("Bakım / Onarım")]
+        //Maintenance = 2, // Bakım / Onarım
+        //[Description("Ofis / Genel")]
+        //Office = 3, // Ofis / Genel
+        //[Description("Proje bazlı")]
+        //Project = 4, // Proje bazlı
+        //[Description("Ar-Ge")]
+        //RnD = 5 // Ar-Ge
+        [Description("İhale")]
+        Tender = 1, 
     }
 
     public enum MaterialRequestStatus
@@ -72,19 +74,12 @@ namespace NetFlow.Blazor.Shared.Models
     {
         [Description("Henüz belirlenmedi")]
         Undefined = 0, // Henüz belirlenmedi
-        [Description("Stoktan karşılandı")]
-        FromStock = 1, // Stoktan karşılandı
-        [Description("Satın alma yapıldı")]
-        Purchase = 2, // Satın alma yapıldı
-        [Description("Depolar arası transfer")]
-        Transfer = 3, // Depolar arası transfer
-        [Description("Üretimden karşılandı")]
-        Production = 4, // Üretimden karşılandı
-        [Description("Dış tedarik / fason")]
-        Outsourcing = 5, // Dış tedarik / fason
-        [Description("İade / geri kazanım")]
-        Return = 6 // İade / geri kazanım
+        [Description("Stok")]
+        FromStock = 1, // Stok
+        [Description("Satın alma")]
+        Purchase = 2, // Satın alma
     }
+
     public enum MaterialRequestItemStatus
     {
         [Description("Bekliyor")]

@@ -9,7 +9,7 @@ namespace NetFlow.Application.TenderCapexes
     {
         public int TenderId { get; set; }
         public int TenderCapexId { get; set; }
-        public MaterialRequestType RequestType { get; set; } = MaterialRequestType.Project;
+        public MaterialRequestType RequestType { get; set; } = MaterialRequestType.Tender;
         public DateTime RequiredDate { get; set; }
         public MaterialRequestPriority Priority { get; set; } = MaterialRequestPriority.Normal;
         public string? RequestedDepartment { get; set; }

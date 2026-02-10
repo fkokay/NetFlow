@@ -15,7 +15,7 @@ namespace NetFlow.Blazor.Shared.Models
         public string? RequestedDepartment { get; set; }
         public DateTime RequestDate { get; set; } = DateTime.UtcNow;
         public DateTime RequiredDate { get; set; } = DateTime.UtcNow.AddDays(7);
-        public MaterialRequestType RequestType { get; set; } = MaterialRequestType.Production;
+        public MaterialRequestType RequestType { get; set; } = MaterialRequestType.Tender;
         public MaterialRequestPriority Priority { get; set; } = MaterialRequestPriority.Normal;
         public MaterialRequestStatus Status { get; set; } = MaterialRequestStatus.Draft;
         public string? Description { get; set; }

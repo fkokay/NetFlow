@@ -91,6 +91,8 @@ namespace NetFlow.Application.MaterialRequests
                 requestItem.FulfillmentType = item.FulfillmentType;
                 requestItem.RequestedQuantity = item.RequestedQuantity;
                 requestItem.FulfilledQuantity = item.FulfilledQuantity;
+                requestItem.PurchaseCustomerCode = item.PurchaseCustomerCode;
+                requestItem.Currency = item.Currency;
                 updatedIds.Add(requestItem.Id);
             }
             await _db.SaveChangesAsync();           

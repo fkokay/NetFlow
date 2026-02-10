@@ -49,17 +49,34 @@
         </DxGridDataColumn>
     </Columns>
 </DxGrid>
-
-<OpexMaterialRequestComponent IsPopupVisible="@IsOpexMaterialRequestPopupVisible" Tender="@Tender" TenderOpex="@SelectedTenderOpex"></OpexMaterialRequestComponent>
+@if (IsOpexMaterialRequestPopupVisible && SelectedTenderOpex != null)
+{
+   
+    <OpexMaterialRequestComponent @bind-IsPopupVisible="@IsOpexMaterialRequestPopupVisible"
+                                  Tender="@Tender"
+                                  TenderOpex="@SelectedTenderOpex">
+    </OpexMaterialRequestComponent>
+}
 
 
 @code {
     private GridDevExtremeDataSource<TenderOpexModel>? OpexDataSource { get; set; }
 
-    [Parameter]
-    public required TenderModel Tender { get; set; }
-    private bool IsOpexMaterialRequestPopupVisible { get; set; } = false;
+    [Parameter] public required TenderModel Tender { get; set; }
     private TenderOpexModel? SelectedTenderOpex { get; set; }
+    private bool _isOpexMaterialRequestPopupVisible;
+    private bool IsOpexMaterialRequestPopupVisible
+    {
+        get => _isOpexMaterialRequestPopupVisible;
+        set
+        {
+            _isOpexMaterialRequestPopupVisible = value;
+            if (!value)
+            {
+                SelectedTenderOpex = null;
+            }
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

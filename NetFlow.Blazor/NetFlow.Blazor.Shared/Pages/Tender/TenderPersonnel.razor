@@ -8,32 +8,48 @@
         DataItemDeleting="async (e) => await DeleteTenderPersonnel(((TenderPersonnelModel)e.DataItem).Id)"
         style="height:100%;">
     <ToolbarTemplate>
-        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
-            <DxToolbarItem Text="Personel Ata"
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Contained">
+            <DxToolbarItem Text="Personel Ekle"
                            Click="() => { ValidationMessage = null; PopupVisible = true; }"
-                           RenderStyle="ButtonRenderStyle.Success"
-                           RenderStyleMode="ToolbarItemRenderStyleMode.Auto"
+                           RenderStyle="ButtonRenderStyle.Light"
                            Alignment="ToolbarItemAlignment.Right" />
         </DxToolbar>
 
     </ToolbarTemplate>
 
-    
+
     <Columns>
         <DxGridDataColumn FieldName="PersonnelCode" Caption="Personel Kodu" />
         <DxGridDataColumn FieldName="FullName" Caption="Ad Soyad" />
         <DxGridDataColumn FieldName="Salary" Caption="Maaþ" />
-        <DxGridDataColumn FieldName="TenderCode" Caption="Ýhale Kodu" />
-        <DxGridDataColumn FieldName="TenderName" Caption="Ýhale Adý" />
         <DxGridDataColumn FieldName="FirmName" Caption="Firma" />
+        <DxGridDataColumn Caption="Ýþe Giriþ Tarihi" FieldName="HireDate" />
+        <DxGridDataColumn Caption="Ýþten Çýkýþ Tarihi" FieldName="TerminationDate" />
         <DxGridDataColumn FieldName="CreatedAt"
                           Caption="Oluþturma Tarihi"
                           DisplayFormat="dd.MM.yyyy" />
-
+        <DxGridDataColumn Caption="Ýþlemler" Width="100px">
+            <CellDisplayTemplate Context="c">
+                @{
+                    var item = (TenderPersonnelModel)c.DataItem;
+                }
+                @if (item.TerminationDate == null)
+                {
+                    <DxButton RenderStyle="ButtonRenderStyle.Danger"
+                              IconCssClass="dx-icon-user-minus"
+                              RenderStyleMode="ButtonRenderStyleMode.Text"
+                              Text="Ýþten Çýkar"
+                              Click="@(() => OpenTerminatePopup(item.PersonnelId))" />
+                }
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
         <DxGridCommandColumn Width="120px"
                              EditButtonVisible="false"
                              DeleteButtonVisible="true"
                              NewButtonVisible="false" />
+
+
+
     </Columns>
 </DxGrid>
 
@@ -93,17 +109,20 @@
     </FooterContentTemplate>
 </DxPopup>
 
+
+<NetFlow.Blazor.Shared.Pages.Personnel.TerminatePersonnelComponent @bind-Visible="IsTerminatedPopupVisible"
+                                                                   PersonnelId="SelectedPersonnelIdForTerminate"
+                                                                   OnSuccess="OnTerminateSuccess" />
+
 @code {
+    [Parameter] public int TenderId { get; set; }
     private GridDevExtremeDataSource<TenderPersonnelModel>? TenderPersonnelDataSource { get; set; }
     private GridDevExtremeDataSource<PersonnelModel>? PersonnelDataSource { get; set; }
-
+    private bool IsTerminatedPopupVisible { get; set; } = false;
     private bool PopupVisible { get; set; } = false;
     private IReadOnlyList<object>? SelectedPersonnel { get; set; } = new List<object>();
-
+    private int SelectedPersonnelIdForTerminate { get; set; }
     private string? ValidationMessage { get; set; }
-
-    [Parameter]
-    public int TenderId { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -121,14 +140,14 @@
 
     private async Task HandleSave()
     {
-      
+
         if (SelectedPersonnel == null || !SelectedPersonnel.Any())
         {
             ValidationMessage = "Lütfen kaydetmeden önce en az bir personel seçiniz.";
             return;
         }
 
-     
+
         ValidationMessage = null;
 
         var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
@@ -158,5 +177,18 @@
         var response = await client.DeleteAsync($"api/tender-personnel/{tenderPersonnelId}");
         if (response.IsSuccessStatusCode)
             await LoadDataAsync();
+    }
+
+    private void OpenTerminatePopup(int personnelId)
+    {
+        SelectedPersonnelIdForTerminate = personnelId;
+        IsTerminatedPopupVisible = true;
+    }
+
+    private async Task OnTerminateSuccess()
+    {
+        await LoadDataAsync();
+        IsTerminatedPopupVisible = false;
+        StateHasChanged();
     }
 }

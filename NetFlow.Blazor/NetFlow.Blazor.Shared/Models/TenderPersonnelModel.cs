@@ -14,6 +14,8 @@ namespace NetFlow.Blazor.Shared.Models
         public string TenderCode { get; set; } = string.Empty;
         public string TenderName { get; set; } = string.Empty;
         public string FirmName { get; set; } = string.Empty;
+        public DateTime HireDate { get; set; }
+        public DateTime? TerminationDate { get; set; }
         public decimal? Salary { get; set; }
         public DateTime CreatedAt { get; set; }
     }

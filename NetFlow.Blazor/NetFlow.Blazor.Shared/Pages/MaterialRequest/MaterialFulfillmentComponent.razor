@@ -6,7 +6,7 @@
 
 <DxPopup @bind-Visible="@Visible"
          HeaderText="Talep Karþýla"
-         Width="1200px"
+         Width="90%"
          ShowFooter="true">
     <BodyContentTemplate Context="fulfillmentContext">
         <div style="position: relative;">
@@ -39,12 +39,20 @@
                             }
                             <DxSpinEdit Value="@source.Price"
                                         T="decimal"
-                                        ReadOnly="true"
-                                        Enabled="false"
                                         Mask="@NumericMask.RealNumber" />
                         </CellDisplayTemplate>
                     </DxGridDataColumn>
-
+                    <DxGridDataColumn Caption="Para Birimi" Width="120px">
+                        <CellDisplayTemplate Context="c">
+                            @{
+                                var source = (MaterialRequestItemModel)c.DataItem;
+                                var item = GetOrCreateItem(source);
+                            }
+                            <DxComboBox Data="@ParaBirimleri"
+                                        @bind-Value="item.Currency"
+                                        Enabled="@(IsEditable && !IsLoading)" />
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
                     <DxGridDataColumn Caption="Karþýlanan Miktar" Width="150px">
                         <CellDisplayTemplate Context="c">
                             @{
@@ -65,12 +73,50 @@
                                 var item = GetOrCreateItem(source);
                             }
                             <DxComboBox Data="@FulfillmentTypes"
-                                        @bind-Value="item.FulfillmentType"
+                                        Value="item.FulfillmentType"
+                                        ValueChanged="@((MaterialRequestItemFulfillmentType newValue) => OnFulfillmentTypeChanged(newValue, item))"
                                         TextFieldName="Text"
                                         ValueFieldName="Value"
                                         Enabled="@(IsEditable && !IsLoading)" />
                         </CellDisplayTemplate>
                     </DxGridDataColumn>
+                    
+
+                    <DxGridDataColumn Caption="Cari Kodu" Width="200px">
+                        <CellDisplayTemplate Context="c">
+                            @{
+                                var item = GetOrCreateItem((MaterialRequestItemModel)c.DataItem);
+                            }
+
+                            @if (item.FulfillmentType == MaterialRequestItemFulfillmentType.Purchase)
+                            {
+                                <DxTextBox Text="@item.PurchaseCustomerCode"
+                                           ReadOnly="true">
+                                    <Buttons>
+                                        <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
+                                                        Tooltip="Cari Seç"
+                                                        Click="@(() => OpenCustomerPopup(item))"
+                                                        Enabled="@(IsEditable && !IsLoading)" />
+                                    </Buttons>
+                                </DxTextBox>
+                            }
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+
+
+                    <DxGridDataColumn Caption="Cari Adý">
+                        <CellDisplayTemplate Context="c">
+                            @{
+                                var item = GetOrCreateItem((MaterialRequestItemModel)c.DataItem);
+                            }
+
+                            @if (item.FulfillmentType == MaterialRequestItemFulfillmentType.Purchase)
+                            {
+                                <DxTextBox Text="@item.PurchaseCustomerName" ReadOnly="true" />
+                            }
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+
 
                 </Columns>
             </DxGrid>
@@ -92,16 +138,32 @@
     </FooterContentTemplate>
 </DxPopup>
 
+
+<DxPopup @bind-Visible="CustomerPopupVisible" HeaderText="Kamu Ýdare Unvaný Seçimi" Width="800px" Height="600px" Scrollable="true">
+    <BodyTemplate>
+        <DxGrid Data="@CustomerDataSource" ShowFilterRow="true" PageSize="12" SelectionMode="GridSelectionMode.Single" SelectedDataItemChanged="@OnCustomerSelected" VirtualScrollingEnabled="true" KeyFieldName="Code">
+            <Columns>
+                <DxGridSelectionColumn Width="100px" />
+                <DxGridDataColumn FieldName="Code" Caption="Hesap Kodu" Width="150px" />
+                <DxGridDataColumn FieldName="Name" Caption="Hesap Adý" />
+            </Columns>
+        </DxGrid>
+    </BodyTemplate>
+</DxPopup>
 @code {
     [Parameter] public bool Visible { get; set; }
     [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
     [Parameter] public int RequestId { get; set; }
     [Parameter] public bool IsEditable { get; set; }
     [Parameter] public EventCallback OnSuccess { get; set; }
+    private bool CustomerPopupVisible { get; set; } = false;
     private bool IsLoading { get; set; }
     private GridDevExtremeDataSource<MaterialRequestItemModel>? FulfillmentItems;
     private FulfillmentRequestModel Model { get; set; } = new();
-
+    List<string> ParaBirimleri = new List<string> { "TRY", "USD", "EUR" };
+    string? SecilenPara;
+    private FulfillmentRequestItemModel? activeEditingItem;
+    private GridDevExtremeDataSource<CustomerModel>? CustomerDataSource;
     private List<EnumItem<MaterialRequestItemFulfillmentType>> FulfillmentTypes =
         Enum.GetValues<MaterialRequestItemFulfillmentType>()
             .Select(x => new EnumItem<MaterialRequestItemFulfillmentType>
@@ -131,7 +193,7 @@
                 HttpClientFactory.CreateClient("ApiClient"));
 
             var baseUrl = "https://localhost:7071/api";
-
+            CustomerDataSource = new GridDevExtremeDataSource<CustomerModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/netsis/customers/pagedList"));
             FulfillmentItems = new GridDevExtremeDataSource<MaterialRequestItemModel>(
                 client,
                 NavigationManager.ToAbsoluteUri(
@@ -158,6 +220,9 @@
             RequestedQuantity = model.RequestedQuantity,
             FulfilledQuantity = model.FulfilledQuantity,
             FulfillmentType = model.FulfillmentType,
+            Currency = model.Currency,
+            PurchaseCustomerCode = model.PurchaseCustomerCode,
+            PurchaseCustomerName = model.PurchaseCustomerName,
         };
 
         Model.Items.Add(item);
@@ -214,7 +279,39 @@
             Text = text,
         });
     }
+    private void OnFulfillmentTypeChanged(MaterialRequestItemFulfillmentType newValue, FulfillmentRequestItemModel item)
+    {
+        
+        item.FulfillmentType = newValue;
+        if (newValue != MaterialRequestItemFulfillmentType.Purchase)
+        {
+            item.PurchaseCustomerCode = null;
+            item.PurchaseCustomerName = null;
+        }
 
+        StateHasChanged();
+    }
+
+    #region Customers
+    private void OpenCustomerPopup(FulfillmentRequestItemModel item)
+    {
+        activeEditingItem = item;
+        CustomerPopupVisible = true;
+    }
+    private void OnCustomerSelected(object selectedItem)
+    {
+        if (selectedItem is CustomerModel selectedCustomer && activeEditingItem != null)
+        {
+            activeEditingItem.PurchaseCustomerCode = selectedCustomer.Code;
+            activeEditingItem.PurchaseCustomerName = selectedCustomer.Name;
+
+            CustomerPopupVisible = false;
+            activeEditingItem = null;
+            StateHasChanged();
+        }
+    }
+
+    #endregion
     private async Task Close() =>
         await VisibleChanged.InvokeAsync(false);
 }

@@ -21,6 +21,8 @@ namespace NetFlow.ReadModel.MaterialRequestItems
         public bool IsAlternateUsed { get; set; }
         public MaterialRequestItemFulfillmentType FulfillmentType { get; set; }    
         public string? PurchaseCustomerCode { get; set; }
+        public string? PurchaseCustomerName { get; set; }
+        public string? Currency { get; set; }
         public MaterialRequestItemStatus Status { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

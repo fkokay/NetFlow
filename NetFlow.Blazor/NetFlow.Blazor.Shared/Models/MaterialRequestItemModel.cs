@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace NetFlow.Blazor.Shared.Models
@@ -13,7 +14,10 @@ namespace NetFlow.Blazor.Shared.Models
         public decimal RequestedQuantity { get; set; }
         public decimal FulfilledQuantity { get; set; }
         public decimal Price { get; set; }
-
+        public string? PurchaseCustomerCode { get; set; }
+        [NotMapped]
+        public string? PurchaseCustomerName { get; set; }
+        public string? Currency { get; set; }
         public string Unit { get; set; } = null!;
         public string? WarehouseCode { get; set; }
         public string? AlternateItemCode { get; set; }

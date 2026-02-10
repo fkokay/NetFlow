@@ -18,11 +18,7 @@
                     </div>
                 </Template>
             </DxToolbarItem>
-            <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
-                <Template>
-                    <DxButton Text="Düzenle" Click="@OnEditClick" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
-                </Template>
-            </DxToolbarItem>
+            
             <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
                 <Template>
                     <DxButton Text="Sil" Click="@OnDeleteClick" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
@@ -157,6 +153,9 @@
                                     <DxTabPage Text="Personeller">
                                         <TenderPersonnel TenderId="Id" />
                                     </DxTabPage>
+                                    <DxTabPage Text="Alt Kurum Bilgileri">
+                                        <TenderSub Tender="@Model" />
+                                    </DxTabPage>
                                 </DxTabs>
                             }
 
@@ -168,28 +167,13 @@
     </div>
 </div>
 
-<DxPopup @bind-Visible="@EditPopupVisible"
-    ShowFooter="true"
-    HeaderText="İhale Düzenleme">
-    <BodyContentTemplate>
-        <TenderEditForm />
-    </BodyContentTemplate>
-    <FooterContentTemplate>
-        <DxButton CssClass="popup-button my-1 ms-2" RenderStyle="ButtonRenderStyle.Primary" Text="OK" Click="@(() => EditPopupVisible = false)" />
-        <DxButton CssClass="popup-button my-1 ms-2" RenderStyle="ButtonRenderStyle.Secondary" Text="Cancel" Click="@(() => EditPopupVisible = false)" />
-    </FooterContentTemplate>
-</DxPopup>
-
-
-
-
 @code {
     [Parameter] public int Id { get; set; }
     private TenderModel? Model { get; set; }
     private bool IsSmallScreen { get; set; }
     private bool IsDataLoaded { get; set; }
     private int ActiveTabIndex { get; set; } = 0;
-    private bool EditPopupVisible { get; set; }
+
 
 
     protected override async Task OnInitializedAsync()
@@ -233,15 +217,10 @@
         await InvokeAsync(StateHasChanged);
     }
 
-  
-
-    private async Task OnEditClick()
-    {
-        EditPopupVisible = true;
-    }
 
     private async Task OnDeleteClick()
     {
+        await InvokeAsync(StateHasChanged);
     }
 
     private void NavigateBack()

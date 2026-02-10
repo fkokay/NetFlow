@@ -256,7 +256,6 @@
 @code {
     [Parameter]
     public int ServiceFormId { get; set; }
-
     private GridDevExtremeDataSource<ServiceFormDetailModel>? ServiceFormDetailDataSource { get; set; }
     private bool PopupVisible { get; set; } = false;
     private ServiceFormDetailModel? Model = new();
@@ -265,7 +264,6 @@
     private bool ProductPopupVisible { get; set; } = false;
     private bool IsLoadingForPopup { get; set; }
     private bool IsGridLoading { get; set; }
-
     private bool IsMaterial => Model?.DetailType == ServiceDetailType.Material;
     private bool IsExpense => Model?.DetailType == ServiceDetailType.Expense;
     private bool IsServiceFee => Model?.DetailType == ServiceDetailType.ServiceFee;

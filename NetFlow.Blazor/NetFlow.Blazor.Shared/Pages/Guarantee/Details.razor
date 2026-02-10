@@ -40,19 +40,19 @@
                             <DxButton Text="İade Et"
                                       class="action-button-return"
                                       Click="@ReturnClick"
-                                      RenderStyleMode="ButtonRenderStyleMode.Outline"
-                                      RenderStyle="ButtonRenderStyle.Primary" />
+                                      RenderStyleMode="ButtonRenderStyleMode.Contained"
+                                      RenderStyle="ButtonRenderStyle.Info" />
                         </Template>
                     </DxToolbarItem>
 
                     <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
                         <Template>
-                            <DxButton Text="Düzenle" Click="@OnEditClick" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
+                            <DxButton Text="Düzenle" Click="@OnEditClick" class="action-button-return" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
                         </Template>
                     </DxToolbarItem>
                     <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
                         <Template>
-                            <DxButton Text="Sil" Click="@OnDeleteClick" class="action-button-delete" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
+                            <DxButton Text="Sil" Click="@OnDeleteClick"   RenderStyleMode="ButtonRenderStyleMode.Contained" RenderStyle="ButtonRenderStyle.Danger" />
                         </Template>
                     </DxToolbarItem>
 

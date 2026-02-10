@@ -8,6 +8,7 @@ namespace NetFlow.ReadModel.Tenders
     {
         public int Id { get; set; }
         public int FirmId { get; set; }
+        public int? TenderId { get; set; }
         public string? FirmName { get; set; }
         public string TenderCode { get; set; } = "";
         public string TenderName { get; set; } = "";

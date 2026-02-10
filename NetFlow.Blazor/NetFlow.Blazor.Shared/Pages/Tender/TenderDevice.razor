@@ -46,16 +46,33 @@
     </Columns>
 </DxGrid>
 
-<DeviceMaterialRequestComponent IsPopupVisible="@IsDeviceMaterialRequestPopupVisible" Tender="@Tender" TenderDevice="@SelectedTenderDevice"></DeviceMaterialRequestComponent>
+@if (IsDeviceMaterialRequestPopupVisible && SelectedTenderDevice != null)
+{
 
+    <DeviceMaterialRequestComponent @bind-IsPopupVisible="@IsDeviceMaterialRequestPopupVisible"
+                                   Tender="@Tender"
+                                    TenderDevice="@SelectedTenderDevice">
+    </DeviceMaterialRequestComponent>
+}
 
 @code {
     private GridDevExtremeDataSource<TenderDeviceModel>? DeviceDataSource { get; set; }
 
     [Parameter] public required TenderModel Tender { get; set; }
-    private bool IsDeviceMaterialRequestPopupVisible { get; set; } = false;
     private TenderDeviceModel? SelectedTenderDevice { get; set; }
-
+    private bool _isDeviceMaterialRequestPopupVisible;
+    private bool IsDeviceMaterialRequestPopupVisible
+    {
+        get => _isDeviceMaterialRequestPopupVisible;
+        set
+        {
+            _isDeviceMaterialRequestPopupVisible = value;
+            if (!value)
+            {
+                SelectedTenderDevice = null;
+            }
+        }
+    }
     protected override async Task OnInitializedAsync()
     {
         var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));

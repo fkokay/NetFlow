@@ -98,7 +98,7 @@
             IsLoadingForPopup = true;
             var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
             string baseUrl = "https://localhost:7071/api";
-            TenderAuthorityDataSource = new GridDevExtremeDataSource<TenderAuthorityModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-authorities?tenderId={TenderId}"));
+            TenderAuthorityDataSource = new GridDevExtremeDataSource<TenderAuthorityModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-authorities?tenderId=1002"));
         }
         catch (Exception ex)
         {

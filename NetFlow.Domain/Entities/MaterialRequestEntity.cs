@@ -10,11 +10,12 @@ namespace NetFlow.Domain.Entities
         public int Id { get; set; }
         public string RequestNo { get; set; } = null!;
         public int FirmId { get; set; }
+        public int? TenderId { get; set; }
         public int RequestedByUserId { get; set; }
         public string? RequestedDepartment { get; set; }
         public DateTime RequestDate { get; set; } = DateTime.UtcNow;
         public DateTime RequiredDate { get; set; } = DateTime.UtcNow.AddDays(7);
-        public MaterialRequestType RequestType { get; set; } = MaterialRequestType.Project;
+        public MaterialRequestType RequestType { get; set; } = MaterialRequestType.Tender;
         public MaterialRequestPriority Priority { get; set; } = MaterialRequestPriority.Normal; 
         public MaterialRequestStatus Status { get; set; } = MaterialRequestStatus.Open;         
         public string? Description { get; set; }

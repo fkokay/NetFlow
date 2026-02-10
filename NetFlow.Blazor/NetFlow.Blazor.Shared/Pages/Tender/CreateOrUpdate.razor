@@ -228,7 +228,7 @@
                         {
                             <DxTabs CssClass="card tabs">
                                 <DxTabPage Text="Alt Kurumlar">
-                                    <TenderSubComponent TenderId=@Id.Value/>
+                                    <TenderSubComponent TenderId="@(Id ?? 0)" />
                                 </DxTabPage>
                             </DxTabs>
                         }

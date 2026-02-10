@@ -18,16 +18,24 @@
                     <DxFormLayoutItem ColSpanMd="12">
                         <ValidationSummary />
                     </DxFormLayoutItem>
+                    
+
 
                     <DxFormLayoutItem Caption="Ürün Kodu" ColSpanMd="6">
                         <DxTextBox @bind-Text="model.ItemCode"
                                    NullText="Ürün kodu giriniz"
-                                   ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                                   ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto">
+                            <Buttons>
+                                <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
+                                                Click="OpenProductPopup" />
+                            </Buttons>
+                        </DxTextBox>
                     </DxFormLayoutItem>
 
                     <DxFormLayoutItem Caption="Ürün Adı" ColSpanMd="6">
                         <DxTextBox @bind-Text="model.ItemName"
-                                   NullText="Ürün adı"
+                                   ReadOnly="true"
+                                   NullText="Ürün seçiniz..."
                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
                     </DxFormLayoutItem>
 
@@ -83,6 +91,24 @@
     </FooterContentTemplate>
 </DxPopup>
 
+<DxPopup @bind-Visible="ProductPopupVisible" HeaderText="Ürün Seçimi" Width="800px" Height="600px" Scrollable="true">
+    <BodyTemplate>
+        <DxGrid Data="@ProductDataSource"
+                ShowFilterRow="true"
+                PageSize="12"
+                SelectionMode="GridSelectionMode.Single"
+                SelectedDataItemChanged="@OnProductSelected"
+                VirtualScrollingEnabled="true"
+                KeyFieldName="Code">
+            <Columns>
+                <DxGridSelectionColumn Width="100px" />
+                <DxGridDataColumn FieldName="Code" Caption="Stok Kodu" Width="150px" />
+                <DxGridDataColumn FieldName="Name" Caption="Stok Adı" />
+            </Columns>
+        </DxGrid>
+    </BodyTemplate>
+</DxPopup>
+
 @code {
     [Parameter] public bool Visible { get; set; }
     [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
@@ -94,6 +120,18 @@
     private MaterialRequestItemModel model = new();
     private bool IsLoading;
 
+    private bool ProductPopupVisible { get; set; }
+    private GridDevExtremeDataSource<ProductModel>? ProductDataSource;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        string baseUrl = "https://localhost:7071/api"; 
+
+        ProductDataSource = new GridDevExtremeDataSource<ProductModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/netsis/products/pagedList"));
+    }
     protected override async Task OnParametersSetAsync()
     {
         if (!Visible) return;
@@ -105,8 +143,6 @@
         {
             PrepareNewItem();
         }
-
-      
         editContext = new EditContext(model);
     }
 
@@ -181,7 +217,18 @@
             Text = text,
         });
     }
+    private void OpenProductPopup() => ProductPopupVisible = true;
 
+    private void OnProductSelected(object selectedItem)
+    {
+        if (selectedItem is ProductModel selectedProduct)
+        {
+            model.ItemCode = selectedProduct.Code;
+            model.ItemName = selectedProduct.Name;
+            ProductPopupVisible = false;
+            StateHasChanged();
+        }
+    }
     private async Task Close()
     {
         await VisibleChanged.InvokeAsync(false);

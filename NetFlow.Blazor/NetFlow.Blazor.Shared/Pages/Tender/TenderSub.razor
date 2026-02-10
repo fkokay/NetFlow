@@ -1,0 +1,33 @@
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+
+<DxGrid Data="UnitDataSource"
+        ShowSearchBox="true"
+        ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+        TextWrapEnabled="false"
+        FocusedRowEnabled="false"
+        HighlightRowOnHover="true"
+        SearchBoxNullText="Arama yapmak için metin girin…"
+        style="height:100%;">
+    <Columns>
+        <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
+        <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
+    </Columns>
+</DxGrid>
+
+
+
+@code {
+    private GridDevExtremeDataSource<TenderUnitModel>? UnitDataSource { get; set; }
+    [Parameter] public required TenderModel Tender { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        string baseUrl = "https://localhost:7071/api";
+        UnitDataSource = new GridDevExtremeDataSource<TenderUnitModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tenders/sub?tenderId={Tender.Id}&authorityCode={Tender.PublicAuthorityCode}"));
+    }
+}
+
+

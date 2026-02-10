@@ -6,11 +6,12 @@ namespace NetFlow.Domain.Enums
 {
     public enum MaterialRequestType
     {
-        Production = 1, // Üretim
-        Maintenance = 2, // Bakım / Onarım
-        Office = 3, // Ofis / Genel
-        Project = 4, // Proje bazlı
-        RnD = 5 // Ar-Ge
+        //Production = 1, // Üretim
+        //Maintenance = 2, // Bakım / Onarım
+        //Office = 3, // Ofis / Genel
+        //Project = 4, // Proje bazlı
+        //RnD = 5 // Ar-Ge
+        Tender= 1, // İhale
     }
 
     public enum MaterialRequestStatus
@@ -48,12 +49,8 @@ namespace NetFlow.Domain.Enums
     public enum MaterialRequestItemFulfillmentType
     {
         Undefined = 0, // Henüz belirlenmedi
-        FromStock = 1, // Stoktan karşılandı
-        Purchase = 2, // Satın alma yapıldı
-        Transfer = 3, // Depolar arası transfer
-        Production = 4, // Üretimden karşılandı
-        Outsourcing = 5, // Dış tedarik / fason
-        Return = 6 // İade / geri kazanım
+        FromStock = 1, // Stok
+        Purchase = 2, // Satın alma
     }
     public enum MaterialRequestItemStatus
     {

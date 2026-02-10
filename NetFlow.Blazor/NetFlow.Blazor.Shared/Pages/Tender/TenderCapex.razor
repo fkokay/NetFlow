@@ -46,16 +46,34 @@
     </Columns>
 </DxGrid>
 
-<CapexMaterialRequestComponent IsPopupVisible="@IsCapexMaterialRequestPopupVisible" Tender="@Tender" TenderCapex="@SelectedTenderCapex"></CapexMaterialRequestComponent>
+@if (IsCapexMaterialRequestPopupVisible && SelectedTenderCapex != null)
+{
 
+    <CapexMaterialRequestComponent @bind-IsPopupVisible="@IsCapexMaterialRequestPopupVisible"
+                                  Tender="@Tender"
+                                  TenderCapex="@SelectedTenderCapex">
+    </CapexMaterialRequestComponent>
+}
 
 @code {
     private GridDevExtremeDataSource<TenderCapexModel>? CapexDataSource { get; set; }
 
     [Parameter]
     public required TenderModel Tender { get; set; }
-    private bool IsCapexMaterialRequestPopupVisible { get; set; } = false;
     private TenderCapexModel? SelectedTenderCapex { get; set; }
+    private bool _isCapexMaterialRequestPopupVisible;
+    private bool IsCapexMaterialRequestPopupVisible
+    {
+        get => _isCapexMaterialRequestPopupVisible;
+        set
+        {
+            _isCapexMaterialRequestPopupVisible = value;
+            if (!value)
+            {
+                SelectedTenderCapex = null;
+            }
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

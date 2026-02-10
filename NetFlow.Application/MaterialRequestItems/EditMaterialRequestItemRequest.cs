@@ -17,6 +17,8 @@ namespace NetFlow.Application.MaterialRequestItems
         public string Unit { get; set; } = null!;
         public string? WarehouseCode { get; set; }
         public string? AlternateItemCode { get; set; }
+        public string? PurchaseCustomerCode { get; set; }
+        public string? Currency { get; set; }
         public MaterialRequestItemStatus Status { get; set; } = MaterialRequestItemStatus.Pending;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public MaterialRequestItemFulfillmentType FulfillmentType { get; set; } = MaterialRequestItemFulfillmentType.Undefined;

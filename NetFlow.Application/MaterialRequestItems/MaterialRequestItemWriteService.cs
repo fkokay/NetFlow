@@ -27,6 +27,7 @@ namespace NetFlow.Application.MaterialRequestItems
             materialRequestItem.FulfilledQuantity = createMaterialRequestItem.FulfilledQuantity;
             materialRequestItem.Unit = createMaterialRequestItem.Unit;
             materialRequestItem.WarehouseCode = createMaterialRequestItem.WarehouseCode;
+            materialRequestItem.PurchaseCustomerCode = createMaterialRequestItem.PurchaseCustomerCode;
             materialRequestItem.AlternateItemCode = createMaterialRequestItem.AlternateItemCode;
             materialRequestItem.Status = (MaterialRequestItemStatus)createMaterialRequestItem.Status;
             materialRequestItem.CreatedAt = createMaterialRequestItem.CreatedAt;
@@ -48,7 +49,7 @@ namespace NetFlow.Application.MaterialRequestItems
             materialRequestItem.Unit= request.Unit;
             materialRequestItem.WarehouseCode= request.WarehouseCode;
             materialRequestItem.AlternateItemCode= request.AlternateItemCode;
-
+            materialRequestItem.PurchaseCustomerCode= request.PurchaseCustomerCode;
             await _db.SaveChangesAsync();
             return materialRequestItem.Id;
         }

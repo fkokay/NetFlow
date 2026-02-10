@@ -17,5 +17,7 @@ namespace NetFlow.Application.MaterialRequests
         public MaterialRequestItemFulfillmentType FulfillmentType { get; set; } = MaterialRequestItemFulfillmentType.Undefined;
         public decimal RequestedQuantity { get; set; }
         public decimal FulfilledQuantity { get; set; }
+        public string? Currency { get; set; }
+        public string? PurchaseCustomerCode { get; set; }
     }
 }
