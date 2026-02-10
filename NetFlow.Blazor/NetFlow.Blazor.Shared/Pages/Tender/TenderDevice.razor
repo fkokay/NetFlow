@@ -4,7 +4,14 @@
 
 
 
-<DxGrid Data="DeviceDataSource" ShowSearchBox="true" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer" SearchBoxNullText="Arama yapmak için metin girin…" style="height:100%;">
+<DxGrid Data="DeviceDataSource"
+        ShowSearchBox="true"
+        ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+        TextWrapEnabled="false"
+        FocusedRowEnabled="false"
+        HighlightRowOnHover="true"
+        SearchBoxNullText="Arama yapmak için metin girin…"
+        style="height:100%;">
     <Columns>
         <DxGridDataColumn FieldName="SupplyType" Caption="Tedarik Türü" />
         <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />

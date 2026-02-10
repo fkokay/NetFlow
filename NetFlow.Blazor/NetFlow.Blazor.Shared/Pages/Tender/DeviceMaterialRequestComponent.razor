@@ -98,7 +98,7 @@
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
 
-            var response = await client.PostAsJsonAsync("api/tender-device/create-material-request", new
+            var response = await client.PostAsJsonAsync("api/tender-devices/create-material-request", new
             {
                 TenderId = Tender.Id,
                 TenderDeviceId = TenderDevice.Id,
