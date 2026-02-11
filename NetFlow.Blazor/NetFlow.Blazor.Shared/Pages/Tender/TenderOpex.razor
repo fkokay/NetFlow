@@ -2,7 +2,14 @@
 @inject IApiClientFactory ApiClientFactory
 @inject IHttpClientFactory HttpClientFactory
 
-<DxGrid Data="OpexDataSource" ShowSearchBox="true" ColumnResizeMode="GridColumnResizeMode.ColumnsContainer" SearchBoxNullText="Arama yapmak için metin girin…" style="height:100%;">
+<DxGrid Data="OpexDataSource"
+        ShowSearchBox="true"
+        ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+        TextWrapEnabled="false"
+        FocusedRowEnabled="false"
+        HighlightRowOnHover="true"
+        SearchBoxNullText="Arama yapmak için metin girin…"
+        style="height:100%;">
     <Columns>
         <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
         <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
@@ -11,7 +18,7 @@
         <DxGridDataColumn FieldName="Quantity" Caption="Miktar" DisplayFormat="n2" />
         <DxGridDataColumn FieldName="UnitPrice" Caption="Tahmini Maliyet Fiyatý" DisplayFormat="n4" />
         <DxGridDataColumn FieldName="Currency" Caption="Para Birimi" />
-        <DxGridDataColumn FieldName="MaterialRequestNo" Caption="Talep No" >
+        <DxGridDataColumn FieldName="MaterialRequestNo" Caption="Talep No">
             <CellDisplayTemplate>
                 @if (((TenderOpexModel)context.DataItem).MaterialRequestId.HasValue)
                 {
@@ -21,7 +28,7 @@
                 }
                 else
                 {
-                   <span>-</span>
+                    <span>-</span>
                 }
             </CellDisplayTemplate>
 
@@ -51,7 +58,7 @@
 </DxGrid>
 @if (IsOpexMaterialRequestPopupVisible && SelectedTenderOpex != null)
 {
-   
+
     <OpexMaterialRequestComponent @bind-IsPopupVisible="@IsOpexMaterialRequestPopupVisible"
                                   Tender="@Tender"
                                   TenderOpex="@SelectedTenderOpex">
