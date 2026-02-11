@@ -24,6 +24,13 @@
             <DxFormLayoutItem Caption="Miktar" ColSpanMd="12">
                 <DxTextBox Text="@TenderOpex.Quantity.ToString()" ReadOnly="true" />
             </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Para Birimi" ColSpanMd="12">
+                <DxComboBox Data="@ParaBirimleri"
+                            @bind-Value="@SecilenPara"
+                            FilteringMode="DataGridFilteringMode.Contains"
+                            NullText="Birim arayın veya seçin..."
+                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+            </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Talep Türü" ColSpanMd="12">
                 <DxComboBox Data="RequestTypes" @bind-Value="model.RequestType" ValueFieldName="Value" TextFieldName="Text" ValidationEnabled="true" ShowValidationIcon="true" />
             </DxFormLayoutItem>
@@ -41,6 +48,7 @@
                             NullText="--Seçiniz--" />
 
             </DxFormLayoutItem>
+
             <DxFormLayoutItem Caption="Kaynak Referans" ColSpanMd="12">
                 <DxComboBox Data="SourceTypes"
                             @bind-Value="model.SourceType"
@@ -68,6 +76,8 @@
     [Parameter] public EventCallback<bool> IsPopupVisibleChanged { get; set; }
     private IEnumerable<DepartmentModel>? Departments { get; set; }
     private MaterialRequestModel model = new();
+    List<string> ParaBirimleri = new List<string> { "TRY", "USD", "EUR" };
+    string? SecilenPara;
     private List<EnumItem<MaterialRequestPriority>> Priorities =
     Enum.GetValues<MaterialRequestPriority>()
     .Select(x => new EnumItem<MaterialRequestPriority>
@@ -101,6 +111,7 @@
         try
         {
             await LoadDepartmentsAsync();
+            SecilenPara = TenderOpex.Currency;
         }
         catch (Exception ex)
         {
@@ -139,6 +150,7 @@
                 Unit = TenderOpex.Unit,
                 WarehouseCode = "1000",
                 AlternateItemCode = "",
+                Currency = SecilenPara,
                 Status = MaterialRequestItemStatus.Pending,
                 FulfillmentType = MaterialRequestItemFulfillmentType.Undefined
             });

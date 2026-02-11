@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetFlow.Domain.Identity;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -11,6 +12,7 @@ namespace NetFlow.Domain.Entities
     {
         [Key]
         public int Id { get; set; }
+        public int FirmId { get; set; }
         public string PersonnelCode { get; set; } = null!;
         public string CustomerCode { get; set; } = null!;
         public string FirstName { get; set; } = null!;
@@ -19,13 +21,13 @@ namespace NetFlow.Domain.Entities
         public string FullName { get; private set; } = null!;
         public string? Email { get; set; }
         public string? Phone { get; set; }
-        public string? Department { get; set; }
+        public int DepartmentId { get; set; }
         public decimal? Salary { get; set; }
         public string? Title { get; set; }
         public byte AuthorityLevel { get; set; }
+        public DateTime HireDate { get; set; }
         public bool IsActive { get; set; }
         public int? UserId { get; set; }
-        public DateTime HireDate { get; set; }
         public DateTime? TerminationDate { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

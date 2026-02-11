@@ -1,5 +1,5 @@
 ﻿using NetFlow.Domain.Enums;
-using NetFlow.ReadModel.ServiceFormDetails;
+using NetFlow.ReadModel.ServiceDetails;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;

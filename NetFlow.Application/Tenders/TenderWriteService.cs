@@ -2,6 +2,7 @@
 using NetFlow.Application.Common.Interfaces;
 using NetFlow.Application.Roles;
 using NetFlow.Domain.Entities;
+using NetFlow.Domain.Identity;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,11 +17,11 @@ namespace NetFlow.Application.Tenders
             _db = db;
         }
 
-        public async Task<int> CreateAsync(CreateTenderRequest request)
+        public async Task<int> CreateAsync(int firmId, CreateTenderRequest request)
         {
             TenderEntity tender = new()
             {
-                FirmId = request.FirmId,
+                FirmId = firmId,
                 TenderType = request.TenderType,
                 AnnouncementDate = request.AnnouncementDate,
                 ContractDate = request.ContractDate,

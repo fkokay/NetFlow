@@ -71,7 +71,8 @@
                 ShowAllRows="true"
                 VirtualScrollingEnabled="true"
                 HighlightRowOnHover="true"
-                RowClick="OnRowClick">
+                RowClick="OnRowClick"
+                EditStart="OnEditStart">
 
             <Columns>
                 <DxGridSelectionColumn Width="70px" />
@@ -109,11 +110,11 @@
                         </span>
                     </CellDisplayTemplate>
                 </DxGridDataColumn>
-                <DxGridDataColumn Caption="Talep Eden Bölüm" FieldName="RequestedDepartment" />
-                <DxGridDataColumn Caption="Atayan Kullanýcý" FieldName="RequestedByUser" />
-                <DxGridDataColumn Caption="Atanan Kullanýcý" FieldName="AssignedToUser" />
+                <DxGridDataColumn Caption="Talep Eden Departman" FieldName="RequestedDepartment" />
+                <DxGridDataColumn Caption="Atayan Personel" FieldName="RequestedByUser" />
+                <DxGridDataColumn Caption="Atanan Personel" FieldName="AssignedToUser" />
                 <DxGridDataColumn Caption="Atanan Departman" FieldName="AssignedDepartment" />
-                <DxGridDataColumn Caption="Onaylayan Kullanýcý" FieldName="ApprovedByUser" />
+                <DxGridDataColumn Caption="Onaylayan Personel" FieldName="ApprovedByUser" />
                 <DxGridDataColumn Caption="Talep Tarihi" FieldName="RequestDate" />
                 <DxGridDataColumn Caption="Gerekli Tarih" FieldName="RequiredDate" />
                 <DxGridDataColumn Caption="Açýklama" FieldName="Description" />
@@ -125,6 +126,7 @@
                         </span>
                     </CellDisplayTemplate>
                 </DxGridDataColumn>
+                <DxGridCommandColumn Width="6em" DeleteButtonVisible="false" EditButtonVisible="true" />
             </Columns>
         </DxGrid>
     </div>
@@ -135,7 +137,7 @@
     CancellationTokenSource disposalTokenSource = new();
     [Parameter] public string Title { get; set; } = "Malzeme Talepleri";
     [Parameter] public string? RequestParameter { get; set; }
-    
+
 
     private GridDevExtremeDataSource<MaterialRequestModel> Data = null!;
     private IGrid? Grid;
@@ -161,7 +163,7 @@
 
         var baseUrl = "https://localhost:7071/api/material-requests";
 
-        var url = RequestParameter!=null
+        var url = RequestParameter != null
             ? $"{baseUrl}/{RequestParameter}"
             : baseUrl;
 
@@ -217,7 +219,17 @@
         => NavigationManager.NavigateTo($"/material-request/details/{item.Id}");
 
     void OnAddClick(ToolbarItemClickEventArgs e)
-    => NavigationManager.NavigateTo("/material-request/create");
+    => NavigationManager.NavigateTo("/material-request/createorupdate");
+
+
+
+
+    private void OnEditStart(GridEditStartEventArgs e)
+    {
+        e.Cancel = true;
+        var request = (MaterialRequestModel)e.DataItem;
+        NavigationManager.NavigateTo($"/material-request/createorupdate/{request.Id}");
+    }
 
     void IDisposable.Dispose()
     {

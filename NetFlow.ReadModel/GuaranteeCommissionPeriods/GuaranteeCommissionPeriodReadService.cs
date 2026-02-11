@@ -46,11 +46,11 @@ namespace NetFlow.ReadModel.GuaranteeCommissionPeriods
             var orderBy = DevExtremeSqlBuilder.BuildOrderBy(pagedRequest.Sort, "ORDER BY Id DESC");
 
             string countSql = @"
-                 SELECT COUNT(1) FROM dbo.VM_GuaranteeCommissionPeriod WITH (NOLOCK)
+                 SELECT COUNT(1) FROM dbo.VW_GuaranteeCommissionPeriod WITH (NOLOCK)
              ";
 
             string dataSql = $@"
-                 SELECT * FROM dbo.VM_GuaranteeCommissionPeriod WITH (NOLOCK)
+                 SELECT * FROM dbo.VW_GuaranteeCommissionPeriod WITH (NOLOCK)
                  {orderBy}
                  OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
              ";
@@ -82,7 +82,7 @@ namespace NetFlow.ReadModel.GuaranteeCommissionPeriods
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
 
-            var sql = "SELECT TOP 1 * FROM dbo.VM_GuaranteeCommissionPeriod WITH (NOLOCK) WHERE Id=@Id";
+            var sql = "SELECT TOP 1 * FROM dbo.VW_GuaranteeCommissionPeriod WITH (NOLOCK) WHERE Id=@Id";
             return await cn.QueryFirstOrDefaultAsync<GuaranteeCommissionPeriodDto>(sql, new { Id = id });
         }
     }

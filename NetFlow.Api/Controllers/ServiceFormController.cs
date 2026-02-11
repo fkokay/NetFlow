@@ -1,13 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using NetFlow.Application.Guarantees;
-using NetFlow.Application.Roles;
-using NetFlow.Application.ServiceFormHistories;
+﻿using Microsoft.AspNetCore.Mvc;
 using NetFlow.Application.ServiceForms;
+using NetFlow.Application.ServiceHistories;
 using NetFlow.Domain.Common.Pagination;
 using NetFlow.Domain.Enums;
 using NetFlow.Domain.Identity;
-using NetFlow.ReadModel.Guarantees;
 using NetFlow.ReadModel.ServiceForms;
 
 namespace NetFlow.Api.Controllers
@@ -18,10 +14,10 @@ namespace NetFlow.Api.Controllers
     {
         private readonly ServiceFormReadService _read;
         private readonly ServiceFormWriteService _write;
-        private readonly ServiceFormHistoryWriteService _historyWrite;
+        private readonly ServiceHistoryWriteService _historyWrite;
         protected readonly CurrentUser _current;
 
-        public ServiceFormController(ServiceFormReadService read, CurrentUser current, ServiceFormWriteService write, ServiceFormHistoryWriteService historyWrite)
+        public ServiceFormController(ServiceFormReadService read, CurrentUser current, ServiceFormWriteService write, ServiceHistoryWriteService historyWrite)
         {
             _read = read;
             _current = current;
@@ -77,7 +73,7 @@ namespace NetFlow.Api.Controllers
             }
 
             var id = await _write.CreateAsync(_current.User.Id.Value, request);
-            var historyRequest = new CreateServiceFormHistoryRequest
+            var historyRequest = new CreateServiceHistoryRequest
             {
                 ServiceFormId = id,
                 ActionType = ServiceActionType.Created,

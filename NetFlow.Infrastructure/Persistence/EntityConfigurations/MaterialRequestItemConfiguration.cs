@@ -17,12 +17,9 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
 
             builder.Property(x => x.MaterialRequestId).IsRequired();
 
-            builder.Property(x => x.ItemCode)
+            builder.Property(x => x.StockCode)
             .HasMaxLength(50)
             .IsRequired();
-
-            builder.Property(x => x.ItemName)
-            .HasMaxLength(200);
 
             builder.Property(x => x.Unit)
             .HasMaxLength(20)
@@ -55,7 +52,6 @@ namespace NetFlow.Infrastructure.Persistence.EntityConfigurations
             builder.Property(x => x.CreatedAt)
             .HasDefaultValueSql("GETUTCDATE()");
 
-            builder.HasIndex(x => x.ItemCode);
             builder.HasIndex(x => x.MaterialRequestId);
             builder.HasIndex(x => x.Status);
             builder.HasIndex(x => x.FulfillmentType);

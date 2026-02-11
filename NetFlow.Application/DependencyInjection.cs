@@ -18,10 +18,11 @@ using NetFlow.Application.Netsis.Shipments;
 using NetFlow.Application.Netsis.Warehouses;
 using NetFlow.Application.Personnels;
 using NetFlow.Application.Roles;
-using NetFlow.Application.ServiceFormDetails;
-using NetFlow.Application.ServiceFormHistories;
+using NetFlow.Application.ServiceDetails;
 using NetFlow.Application.ServiceForms;
-using NetFlow.Application.ServiceFormTechnicians;
+using NetFlow.Application.ServiceHistories;
+using NetFlow.Application.ServiceTechnicians;
+using NetFlow.Application.TenderAuthorities;
 using NetFlow.Application.TenderCapexes;
 using NetFlow.Application.TenderDevices;
 using NetFlow.Application.TenderOpexes;
@@ -29,9 +30,6 @@ using NetFlow.Application.TenderPersonnels;
 using NetFlow.Application.TenderReaktifs;
 using NetFlow.Application.Tenders;
 using NetFlow.Application.Users;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NetFlow.Application
 {
@@ -55,9 +53,9 @@ namespace NetFlow.Application
             services.AddScoped<RoleWriteService>();
             services.AddScoped<PersonnelWriteService>();
             services.AddScoped<ServiceFormWriteService>();
-            services.AddScoped<ServiceFormDetailWriteService>();
-            services.AddScoped<ServiceFormHistoryWriteService>();
-            services.AddScoped<ServiceFormTechnicianWriteService>();
+            services.AddScoped<ServiceDetailWriteService>();
+            services.AddScoped<ServiceHistoryWriteService>();
+            services.AddScoped<ServiceTechnicianWriteService>();
             services.AddScoped<ModuleWriteService>();
             services.AddScoped<UserWriteService>();
             services.AddScoped<GuaranteeWriteService>();
@@ -66,6 +64,7 @@ namespace NetFlow.Application
             services.AddScoped<TenderWriteService>();
             services.AddScoped<TenderOpexWriterService>();
             services.AddScoped<TenderCapexWriterService>();
+            services.AddScoped<TenderAuthorityWriteService>();
             services.AddScoped<TenderDeviceWriterService>();
             services.AddScoped<TenderReaktifWriterService>();
             services.AddScoped<TenderPersonnelWriteService>();

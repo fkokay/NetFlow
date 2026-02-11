@@ -6,6 +6,7 @@ namespace NetFlow.ReadModel.Tenders
 {
     public class TenderUnitDto
     {
+        public int Id { get; set; }//TenderAuthorityId
         public int TenderId { get; set; }
         public string UnitCode { get; set; }
         public string UnitName { get; set; }

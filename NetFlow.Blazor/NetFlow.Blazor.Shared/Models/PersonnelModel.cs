@@ -9,8 +9,7 @@ namespace NetFlow.Blazor.Shared.Models
     public class PersonnelModel
     {
         public int Id { get; set; }
-        [Required(ErrorMessage = "Personel Kodu zorunludur.")]
-        public string PersonnelCode { get; set; } = null!;
+        public string? PersonnelCode { get; set; }
         [Required(ErrorMessage = "Cari Kodu zorunludur.")]
         public string CustomerCode { get; set; } = null!;
         [Required(ErrorMessage = "Cari Adı zorunludur.")]
@@ -24,7 +23,9 @@ namespace NetFlow.Blazor.Shared.Models
         [EmailAddress(ErrorMessage = "Geçersiz e-posta formatı")]
         public string? Email { get; set; }
         public string? Phone { get; set; }
-        public string? Department { get; set; }
+        public int DepartmentId { get; set; }
+        [NotMapped]
+        public string DepartmentName { get; set; }
         public string? Title { get; set; }
         [Required(ErrorMessage = "İşe alım tarih seçimi zorunludur.")]
         public DateTime HireDate { get; set; }=DateTime.UtcNow;

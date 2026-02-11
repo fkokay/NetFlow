@@ -50,7 +50,7 @@ namespace NetFlow.Api.Controllers
                 return NotFound();
             }
 
-            int materialRequestId = await _materialRequestWrite.CreateAsync(_current.User.Id.Value, new CreateMaterialRequest()
+            int materialRequestId = await _materialRequestWrite.CreateAsync(_current, new CreateMaterialRequest()
             {
                 Description = request.Description,
                 Priority = request.Priority,
@@ -63,8 +63,7 @@ namespace NetFlow.Api.Controllers
             int materialRequestItemId = await _materialRequestItemWrite.CreateAsync(new CreateMaterialRequestItemRequest()
             {
                 MaterialRequestId = materialRequestId,
-                ItemCode = request.ItemCode,
-                ItemName = request.ItemName,
+                StockCode= request.StockCode,
                 RequestedQuantity = request.RequestedQuantity,
                 FulfilledQuantity = request.FulfilledQuantity,
                 Unit = request.Unit,

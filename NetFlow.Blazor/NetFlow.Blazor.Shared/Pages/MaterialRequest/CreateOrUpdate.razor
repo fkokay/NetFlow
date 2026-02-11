@@ -1,0 +1,311 @@
+﻿@page "/material-request/createorupdate/{Id:int?}"
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
+
+
+
+<div class="content-root">
+    <div class="card toolbar">
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <Items>
+                <DxToolbarItem IconCssClass="back-icon icon medium-icon" Tooltip="Geri Dön" Click="@NavigateBack" />
+                <DxToolbarItem>
+                    <Template>
+                        <div class="custom-item">
+                            <div class="title">@(Id > 0 ? "Malzeme Talebi Düzenleme" : "Yeni Malzeme Talebi Tanımlama")</div>
+                        </div>
+                    </Template>
+                </DxToolbarItem>
+                <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                    <Template>
+                        <DxButton Text="Kaydet"
+                                  Click="SaveFromOutside"
+                                  Enabled="@(!IsSaving)"
+                                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                                  RenderStyle="ButtonRenderStyle.Success" />
+                    </Template>
+                </DxToolbarItem>
+            </Items>
+        </DxToolbar>
+    </div>
+
+    <div class="material-request-edit">
+        <DxLoadingPanel Visible="@(EditContext == null)" IsContentBlocked="true" IsContentVisible="false" IndicatorVisible="true" IndicatorAreaVisible="true" ZIndex="101" Text="Yükleniyor...">
+            @if (EditContext != null && Model != null)
+            {
+                <DxGridLayout ColumnSpacing="1rem" RowSpacing="1rem" CssClass="h-100">
+                    <Columns>
+                        <DxGridLayoutColumn Width="100%" />
+                    </Columns>
+                    <Rows>
+                        <DxGridLayoutRow Areas="Item1" />
+                    </Rows>
+                    <Items>
+                        <DxGridLayoutItem Area="item1">
+                            <Template>
+                                <EditForm EditContext="@EditContext" Context="formContext">
+                                    <DataAnnotationsValidator />
+
+                                    <DxFormLayout>
+
+                                        <DxFormLayoutItem Caption="Talep Türü" ColSpanMd="6">
+                                            <DxComboBox Data="@Types"
+                                                        @bind-Value="Model.RequestType"
+                                                        ValueFieldName="Value"
+                                                        TextFieldName="Text"
+                                                        ValidationEnabled="true"
+                                                        ShowValidationIcon="true" />
+                                        </DxFormLayoutItem>
+
+
+                                        <DxFormLayoutItem Caption="Gerekli Tarih">
+                                            <DxDateEdit @bind-Date="Model.RequiredDate"
+                                                        DisplayFormat="dd.MM.yyyy"
+                                                        ValidationEnabled="true"
+                                                        ShowValidationIcon="true" />
+                                        </DxFormLayoutItem>
+
+
+                                        <DxFormLayoutItem Caption="Atanan Personel" ColSpanMd="6">
+                                            <DxComboBox Data="@Users"
+                                                        @bind-Value="Model.AssignedToUserId"
+                                                        TextFieldName="FullName"
+                                                        ValueFieldName="Id"
+                                                        SearchMode="ListSearchMode.AutoSearch" />
+                                        </DxFormLayoutItem>
+
+                                        <DxFormLayoutItem Caption="Açıklama" ColSpanMd="12">
+                                            <DxMemo @bind-Text="Model.Description"
+                                                    Rows="4" />
+                                        </DxFormLayoutItem>
+
+                                        <DxFormLayoutItem ColSpanMd="12">
+                                            <ValidationSummary />
+                                        </DxFormLayoutItem>
+
+                                    </DxFormLayout>
+
+                                </EditForm>
+                            </Template>
+                        </DxGridLayoutItem>
+
+                    </Items>
+                </DxGridLayout>
+            }
+
+        </DxLoadingPanel>
+    </div>
+
+</div>
+
+
+@code {
+    [Parameter] public int? Id { get; set; }
+    private MaterialRequestModel? Model = new();
+    private EditContext? EditContext;
+    private bool IsSaving, IsSuccess;
+    private bool ShowValidationMessages { get; set; } = false;
+    private bool HasSubCustomers { get; set; } = false;
+    private IEnumerable<UserModel>? Users { get; set; }
+    private IEnumerable<DepartmentModel>? Departments { get; set; }
+    private ValidationMessageStore? _validationMessageStore;
+    private bool IsEditMode => Id is > 0;
+    private bool IsEndDateReadOnly => !IsEditMode;
+
+    private List<EnumItem<MaterialRequestType>> Types =
+    Enum.GetValues<MaterialRequestType>()
+        .Select(x => new EnumItem<MaterialRequestType>
+        {
+            Value = x,
+            Text = x.GetDescription()
+        })
+        .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+            string baseUrl = "https://localhost:7071/api";
+            await LoadUsersAsync();
+            await LoadDepartmentsAsync();
+            if (Id.HasValue && Id.Value > 0)
+            {
+
+                var result = await client.GetFromJsonAsync<MaterialRequestModel>($"{baseUrl}/material-requests/{Id.Value}");
+
+                if (result != null)
+                {
+                    Model = result;
+                    EditContext = new EditContext(Model);
+                    _validationMessageStore = new ValidationMessageStore(EditContext);
+                }
+                else
+                {
+                    throw new Exception("Malzeme Talebi bulunamadı");
+                }
+            }
+            else
+            {
+                Model = new MaterialRequestModel { };
+            }
+
+            EditContext = new EditContext(Model);
+            _validationMessageStore = new ValidationMessageStore(EditContext);
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast(new ToastOptions()
+            {
+                ProviderName = "Overview",
+                ThemeMode = ToastThemeMode.Light,
+                RenderStyle = ToastRenderStyle.Warning,
+                Title = "Veriler Yüklenirken bir hata oluştu",
+                Text = $"{ex.Message}"
+            }, RenderToastButton(true));
+        }
+    }
+
+    private RenderFragment RenderToastButton(bool isError)
+    {
+        return @<div class="d-flex gap-2">
+            <DxButton Click="@(isError? OnPopupError:OnPopupOk)" RenderStyle="@(isError? ButtonRenderStyle.Danger: ButtonRenderStyle.Success)">Kapat</DxButton>
+        </div>;
+    }
+
+    private async Task SaveFromOutside()
+    {
+        if (IsSaving || EditContext == null) return;
+
+        ShowValidationMessages = true;
+
+        var isDataAnnotationValid = EditContext.Validate();
+        var isBusinessLogicValid = IsSaveButtonEnabledForValidation();
+
+        if (isDataAnnotationValid && isBusinessLogicValid)
+        {
+            await HandleValidSubmit();
+        }
+        else
+        {
+            StateHasChanged();
+        }
+    }
+
+    private bool IsSaveButtonEnabledForValidation()
+    {
+        if (Model == null || EditContext == null || _validationMessageStore == null)
+            return false;
+
+        _validationMessageStore.Clear();
+        bool isValid = true;
+
+        void AddError(string fieldName, string message)
+        {
+            _validationMessageStore.Add(EditContext.Field(fieldName), message);
+            isValid = false;
+        }
+
+
+        if (!Model.AssignedToUserId.HasValue)
+            AddError(nameof(Model.AssignedToUserId), "Atanan personel seçilmelidir.");
+
+        EditContext.NotifyValidationStateChanged();
+        return isValid;
+    }
+    private async Task HandleValidSubmit()
+    {
+        if (IsSaving) return;
+        IsSaving = true;
+        IsSuccess = false;
+
+        try
+        {
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+            HttpResponseMessage response;
+
+            if (Model?.Id > 0)
+            {
+                response = await client.PutAsJsonAsync("api/material-requests", Model);
+            }
+            else
+            {
+                response = await client.PostAsJsonAsync("api/material-requests", Model);
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                IsSuccess = true;
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Success,
+                    Title = "Başarılı",
+                    Text = "Talep bilgileri başarılı bir şekilde kaydedildi."
+                }, RenderToastButton(false));
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+
+                ToastService.ShowToast(new ToastOptions()
+                {
+                    Id = "toast",
+                    ProviderName = "Overview",
+                    ThemeMode = ToastThemeMode.Light,
+                    RenderStyle = ToastRenderStyle.Danger,
+                    Title = "Hata",
+                    Text = errorMsg
+                }, RenderToastButton(true));
+            }
+        }
+        catch (Exception)
+        {
+
+            IsSuccess = false;
+        }
+        finally
+        {
+
+            IsSaving = false;
+        }
+    }
+
+
+
+
+    #region Users
+    private async Task LoadUsersAsync()
+    {
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        Users = await client.GetFromJsonAsync<List<UserModel>>("https://localhost:7071/api/users/list");
+    }
+    #endregion
+
+    private async Task LoadDepartmentsAsync()
+    {
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        Departments = await client.GetFromJsonAsync<List<DepartmentModel>>("api/departments/list");
+    }
+
+
+
+
+    private void OnPopupOk()
+    {
+        if (IsSuccess) NavigationManager.NavigateTo($"material-request/details/{Id}");
+    }
+
+    private void OnPopupError()
+    {
+    }
+
+    private void NavigateBack() => NavigationManager.NavigateTo($"material-request/details/{Id}");
+}

@@ -21,8 +21,7 @@ namespace NetFlow.Application.MaterialRequestItems
         {
             var materialRequestItem = new Domain.Entities.MaterialRequestItemEntity();
             materialRequestItem.MaterialRequestId = createMaterialRequestItem.MaterialRequestId;
-            materialRequestItem.ItemCode = createMaterialRequestItem.ItemCode;
-            materialRequestItem.ItemName = createMaterialRequestItem.ItemName;
+            materialRequestItem.StockCode = createMaterialRequestItem.StockCode;
             materialRequestItem.RequestedQuantity = createMaterialRequestItem.RequestedQuantity;
             materialRequestItem.FulfilledQuantity = createMaterialRequestItem.FulfilledQuantity;
             materialRequestItem.Unit = createMaterialRequestItem.Unit;
@@ -42,8 +41,7 @@ namespace NetFlow.Application.MaterialRequestItems
         {
             var materialRequestItem = await _db.MaterialRequestItems.FirstOrDefaultAsync(x => x.Id == request.Id) ?? throw new Exception("Kalem bulunamadı");
 
-            materialRequestItem.ItemCode= request.ItemCode;
-            materialRequestItem.ItemName= request.ItemName;
+            materialRequestItem.StockCode= request.StockCode;
             materialRequestItem.RequestedQuantity= request.RequestedQuantity;
             materialRequestItem.Price= request.Price;
             materialRequestItem.Unit= request.Unit;

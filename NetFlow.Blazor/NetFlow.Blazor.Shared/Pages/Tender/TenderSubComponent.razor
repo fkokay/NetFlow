@@ -7,8 +7,7 @@
 
     <DxLoadingPanel @bind-Visible="IsGridLoading" Text="İşlem yapılıyor..." />
 
-    <!--Alt Kurum Bilgisi-->
-    <DxGrid Data="ServiceFormDetailDataSource"
+    <DxGrid Data="TenderUnitDataSource"
             EditStart="OnEditStart"
             ShowSearchBox="true"
             SearchBoxNullText="Arama yapmak için metin girin…"
@@ -17,24 +16,18 @@
         <ToolbarTemplate>
             <DxToolbar>
                 <Items>
-                    @if (!IsReadOnly)
-                    {
-                        <DxToolbarItem Text="Yeni Alt Kurum Ekle"
-                                       Click="OnAddNewClick"
-                                       Alignment="ToolbarItemAlignment.Right"
-                                       RenderStyleMode="ToolbarItemRenderStyleMode.Plain" />
-                    }
-
+                    <DxToolbarItem Text="Yeni Alt Kurum Ekle"
+                                   Click="OnAddNewClick"
+                                   Alignment="ToolbarItemAlignment.Right"
+                                   Enabled="!IsReadOnly"
+                                   RenderStyleMode="ToolbarItemRenderStyleMode.Contained"
+                                   RenderStyle="ButtonRenderStyle.Light" />
                 </Items>
             </DxToolbar>
         </ToolbarTemplate>
         <Columns>
-            <DxGridDataColumn FieldName="TenderId" Caption="İhale ID" Width="80px" />
-            <DxGridDataColumn FieldName="ParentAuthorityCode" Caption="Kurum Kodu" />
-            <DxGridDataColumn FieldName="ParentAuthorityName" Caption="Kurum Adı" />
-            <DxGridDataColumn FieldName="UnitCode" Caption="Alt Birim Kodu" />
-            <DxGridDataColumn FieldName="UnitName" Caption="Alt Birim Adı" />
-
+            <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
+            <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adı" />
             @if (!IsReadOnly)
             {
 
@@ -56,21 +49,81 @@
     </DxGrid>
 </div>
 
+<DxPopup @bind-Visible="@PopupVisible"
+         HeaderText="Alt Kurum Ekle"
+         Width="800px">
+    <BodyContentTemplate Context="popupContext">
+        <DxLoadingPanel @bind-Visible="IsLoadingForPopup" Text="İşlem yapılıyor..." />
 
+        @if (Model != null)
+        {
+            <DxFormLayout>
+
+                <DxFormLayoutItem Caption="Alt Cari Kodu" ColSpanMd="12">
+                    <DxTextBox Text="@Model.UnitCode"
+                               TextChanged="@((string val) => OnCustomerCodeChanged(val))"
+                               TextExpression="@(() => Model.UnitCode)"
+                               ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                               BindValueMode="BindValueMode.OnInput">
+                        <Buttons>
+                            <DxEditorButton IconCssClass="three-point-icon icon medium-icon"
+                                            Tooltip="Alt Birim Seç"
+                                            Click="OpenCustomerPopup" />
+                        </Buttons>
+                    </DxTextBox>
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Alt Cari Adı" ColSpanMd="12">
+                    <DxTextBox @bind-Text="Model.UnitName" BindValueMode="BindValueMode.OnInput" ReadOnly="true" />
+                </DxFormLayoutItem>
+            </DxFormLayout>
+
+        }
+        else
+        {
+            <p>Yükleniyor...</p>
+        }
+
+        <div class="popup-footer-container">
+            <DxButton Text="Vazgeç"
+                      Enabled="!IsLoadingForPopup"
+                      Click="() => PopupVisible = false"
+                      RenderStyle="ButtonRenderStyle.Secondary"
+                      CssClass="footer-action-btn" />
+
+            <DxButton Text="Kaydet"
+                      Click="HandleSave"
+                      Enabled="!IsLoadingForPopup"
+                      RenderStyle="ButtonRenderStyle.Primary"
+                      CssClass="footer-action-btn" />
+        </div>
+    </BodyContentTemplate>
+</DxPopup>
+<DxPopup @bind-Visible="CustomerPopupVisible" HeaderText="Alt Kurum Seçimi" Width="800px" Height="600px" Scrollable="true">
+    <BodyTemplate>
+        <DxGrid Data="@CustomerDataSource" ShowFilterRow="true" PageSize="12" SelectionMode="GridSelectionMode.Single" SelectedDataItemChanged="@OnCustomerSelected" VirtualScrollingEnabled="true" KeyFieldName="Code">
+            <Columns>
+                <DxGridSelectionColumn Width="100px" />
+                <DxGridDataColumn FieldName="Code" Caption="Hesap Kodu" Width="150px" />
+                <DxGridDataColumn FieldName="Name" Caption="Hesap Adı" />
+            </Columns>
+        </DxGrid>
+    </BodyTemplate>
+</DxPopup>
 
 
 @code {
-    [Parameter]
-    public int TenderId { get; set; }
-
-    private GridDevExtremeDataSource<ServiceFormDetailModel>? ServiceFormDetailDataSource { get; set; }
+    [Parameter] public TenderModel? Tender { get; set; }
     private bool PopupVisible { get; set; } = false;
-    private ServiceFormDetailModel? Model = new();
-    private GridDevExtremeDataSource<TenderAuthorityModel>? TenderAuthorityDataSource;
+    private TenderAuthorityModel? Model = new();
+    private GridDevExtremeDataSource<TenderUnitModel>? TenderUnitDataSource;
     private bool ProductPopupVisible { get; set; } = false;
     private bool IsLoadingForPopup { get; set; }
     private bool IsGridLoading { get; set; }
-    private bool IsReadOnly => TenderId == 0;
+    private bool IsReadOnly => Tender == null || Tender.Id == 0;
+    private bool CustomerPopupVisible { get; set; } = false;
+    private GridDevExtremeDataSource<CustomerModel>? CustomerDataSource;
+
 
     private List<EnumItem<ServiceDetailType>> DetailTypes =
         Enum.GetValues<ServiceDetailType>()
@@ -81,11 +134,12 @@
             })
             .ToList();
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        if (!IsReadOnly)
+        if (Tender != null && Tender.Id > 0)
         {
             await LoadDataAsync();
+
         }
     }
 
@@ -98,7 +152,8 @@
             IsLoadingForPopup = true;
             var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
             string baseUrl = "https://localhost:7071/api";
-            TenderAuthorityDataSource = new GridDevExtremeDataSource<TenderAuthorityModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-authorities?tenderId=1002"));
+            TenderUnitDataSource = new GridDevExtremeDataSource<TenderUnitModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tenders/sub?tenderId={Tender!.Id}&authorityCode={Tender!.PublicAuthorityCode}"));
+            CustomerDataSource = new GridDevExtremeDataSource<CustomerModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/netsis/customers/pagedList"));
         }
         catch (Exception ex)
         {
@@ -113,7 +168,7 @@
     private void OnAddNewClick()
     {
         if (IsReadOnly) return;
-        Model = new ServiceFormDetailModel();
+        Model = new TenderAuthorityModel();
         PopupVisible = true;
     }
 
@@ -126,24 +181,16 @@
         }
 
         e.Cancel = true;
-        var dataItem = (ServiceFormDetailModel)e.DataItem;
+        var dataItem = (TenderUnitModel)e.DataItem;
 
-        Model = new ServiceFormDetailModel
+        Model = new TenderAuthorityModel
         {
             Id = dataItem.Id,
-            ServiceFormId = dataItem.ServiceFormId,
-            LineNo = dataItem.LineNo,
-            StockCode = dataItem.StockCode,
-            StockName = dataItem.StockName,
-            DetailType = dataItem.DetailType,
-            Description = dataItem.Description,
-            Quantity = dataItem.Quantity,
-            Unit = dataItem.Unit,
-            UnitPrice = dataItem.UnitPrice,
-            DiscountRate = dataItem.DiscountRate,
-            TaxRate = dataItem.TaxRate,
-            IsWarranty = dataItem.IsWarranty,
-            IsBillable = dataItem.IsBillable
+            ParentAuthorityCode = Tender.PublicAuthorityCode,
+            ParentAuthorityName = Tender.PublicAuthorityName,
+            TenderId = Tender.Id,
+            UnitCode = dataItem.UnitCode,
+            UnitName = dataItem.UnitName
         };
 
         PopupVisible = true;
@@ -153,16 +200,15 @@
     {
         if (Model == null || IsLoadingForPopup || IsReadOnly) return;
 
-        if (Model.IsWarranty)
-        {
-            Model.ApplyWarrantyRules();
-        }
 
         try
         {
             IsLoadingForPopup = true;
             var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
-            string baseUrl = "https://localhost:7071/api/service-form-details";
+            string baseUrl = "https://localhost:7071/api/tender-authorities";
+
+            Model.TenderId = Tender!.Id;
+            Model.ParentAuthorityCode = Tender.PublicAuthorityCode;
 
             HttpResponseMessage response;
             if (Model.Id > 0)
@@ -171,7 +217,6 @@
             }
             else
             {
-                Model.ServiceFormId = TenderId;
                 response = await client.PostAsJsonAsync(baseUrl, Model);
             }
 
@@ -179,7 +224,6 @@
             {
                 ShowToast("Başarılı", "Kayıt başarıyla tamamlandı", ToastRenderStyle.Success);
                 PopupVisible = false;
-                // Veriyi yenilemek için sayfayı zorla yükle veya LoadDataAsync() çağır
                 NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
             }
             else
@@ -207,7 +251,7 @@
         }
 
         e.Cancel = true;
-        var serviceDetail = (ServiceFormDetailModel)e.DataItem;
+        var tenderUnit = (TenderUnitModel)e.DataItem;
 
         try
         {
@@ -216,7 +260,7 @@
 
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
-            var response = await client.DeleteAsync($"api/service-form-details/{serviceDetail.Id}");
+            var response = await client.DeleteAsync($"api/tender-authorities/{tenderUnit.Id}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -239,60 +283,32 @@
         }
     }
 
-    private async Task OnDetailTypeChanged(ServiceDetailType type)
+    #region Customers
+    private void OpenCustomerPopup()
     {
-        if (Model == null || IsReadOnly) return;
-
-        Model.DetailType = type;
-        switch (type)
-        {
-            case ServiceDetailType.Material:
-                Model.Unit = "Adet";
-                if (Model.Quantity <= 0) Model.Quantity = 1;
-                break;
-            case ServiceDetailType.Expense:
-                Model.StockCode = null;
-                Model.StockName = null;
-                Model.Unit = "Adet";
-                Model.Quantity = 1;
-                Model.DiscountRate = 0;
-                Model.IsWarranty = false;
-                break;
-            case ServiceDetailType.ServiceFee:
-                Model.StockCode = null;
-                Model.StockName = null;
-                Model.Unit = "Saat";
-                Model.Quantity = 1;
-                Model.DiscountRate = 0;
-                break;
-        }
-        StateHasChanged();
-        await Task.CompletedTask;
+        CustomerPopupVisible = true;
     }
-
-    private void OnProductSelected(object selectedItem)
+    private void OnCustomerSelected(object selectedItem)
     {
-        if (selectedItem is ProductModel selectedProduct)
+        if (selectedItem is CustomerModel selectedCustomer)
         {
-            Model ??= new ServiceFormDetailModel();
-            Model.StockCode = selectedProduct.Code;
-            Model.StockName = selectedProduct.Name;
-            ProductPopupVisible = false;
+            Model?.UnitCode = selectedCustomer.Code;
+            Model?.UnitName = selectedCustomer.Name;
+            CustomerPopupVisible = false;
             StateHasChanged();
         }
     }
-
-    private void OpenProductPopup() => ProductPopupVisible = true;
-
-    private async Task OnWarrantyChanged(bool value)
+    private void OnCustomerCodeChanged(string newValue)
     {
-        if (Model == null || IsReadOnly) return;
-        Model.IsWarranty = value;
-        if (value) Model.ApplyWarrantyRules();
-        StateHasChanged();
-        await Task.CompletedTask;
+        Model.UnitCode = newValue;
+
+        if (string.IsNullOrWhiteSpace(newValue))
+        {
+            Model.UnitName = null;
+        }
     }
 
+    #endregion
     private void ShowToast(string title, string text, ToastRenderStyle style)
     {
         ToastService.ShowToast(new ToastOptions

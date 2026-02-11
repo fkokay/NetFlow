@@ -24,16 +24,32 @@ namespace NetFlow.Application.MaterialRequests
             _materialRequestHistoryWriteService = materialRequestHistoryWriteService;
         }
 
-        public async Task<int> CreateAsync(int userId, CreateMaterialRequest request)
+        public async Task<int> CreateAsync(CurrentUser currentUser, CreateMaterialRequest request)
         {
 
+            var lastNo = await _db.MaterialRequests
+            .Where(x => x.FirmId == currentUser.User.Firm.Id && x.RequestNo.StartsWith("MR"))
+            .OrderByDescending(x => x.RequestNo)
+            .Select(x => x.RequestNo)
+            .FirstOrDefaultAsync();
+
+            int nextNumber = 1;
+
+            if (!string.IsNullOrEmpty(lastNo))
+            {
+                var numericPart = lastNo.Substring(2);
+                if (int.TryParse(numericPart, out int parsed))
+                    nextNumber = parsed + 1;
+            }
+
+            var newRequestNo = $"MR{nextNumber:D5}";
             var materialRequest = new MaterialRequestEntity();
-            materialRequest.FirmId = 2015;
-            materialRequest.RequestedByUserId = 1;
+            materialRequest.FirmId = currentUser.User.Firm.Id;
+            materialRequest.RequestedByUserId = currentUser.User.Id.Value;
             materialRequest.RequestDate = DateTime.UtcNow;
             materialRequest.CreatedAt = DateTime.UtcNow;
-            materialRequest.CreatedByUserId = userId;
-            materialRequest.RequestNo = "MR-" + DateTime.UtcNow.Ticks;
+            materialRequest.CreatedByUserId = currentUser.User.Id.Value;
+            materialRequest.RequestNo = newRequestNo;
             materialRequest.RequestType = request.RequestType;
             materialRequest.RequiredDate = request.RequiredDate;
             materialRequest.Priority = request.Priority;
@@ -47,6 +63,17 @@ namespace NetFlow.Application.MaterialRequests
             return materialRequest.Id;
         }
 
+
+        public async Task<int> EditAsync(EditMaterialRequest request)
+        {
+            var materialRequest = await _db.MaterialRequests.FirstOrDefaultAsync(x => x.Id == request.Id) ?? throw new Exception("Talep bulunamadı");
+
+            materialRequest.AssignedToUserId= request.AssignedToUserId;
+            materialRequest.RequestType = request.RequestType;
+            materialRequest.Description = request.Description;
+            await _db.SaveChangesAsync();
+            return materialRequest.Id;
+        }
         public async Task<int> RejectionAsync(int currentUserId, RejectionMaterialRequest request)
         {
             var materialRequest = await _db.MaterialRequests
@@ -79,7 +106,7 @@ namespace NetFlow.Application.MaterialRequests
         public async Task<List<int>> FulFillmentAsync(int currentUserId, FulfillmentRequest request)
         {
             var updatedIds = new List<int>();
-            
+
             foreach (var item in request.Items)
             {
                 var requestItem = await _db.MaterialRequestItems
@@ -95,7 +122,7 @@ namespace NetFlow.Application.MaterialRequests
                 requestItem.Currency = item.Currency;
                 updatedIds.Add(requestItem.Id);
             }
-            await _db.SaveChangesAsync();           
+            await _db.SaveChangesAsync();
             return updatedIds;
         }
     }

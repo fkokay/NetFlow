@@ -14,9 +14,10 @@ namespace NetFlow.Application.TenderOpexes
         public MaterialRequestPriority Priority { get; set; } = MaterialRequestPriority.Normal;
         public string? RequestedDepartment { get; set; }
         public string? Description { get; set; }
+        public string Currency { get; set; }
         public MaterialRequestSourceType SourceType { get; set; } = MaterialRequestSourceType.None;
-        public string ItemCode { get; set; } = null!;
-        public string ItemName { get; set; } = null!;
+        public string StockCode { get; set; } = null!;
+        public string StockName { get; set; } = null!;
         public decimal RequestedQuantity { get; set; }
         public decimal FulfilledQuantity { get; set; }
         public string Unit { get; set; } = null!;

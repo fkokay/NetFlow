@@ -12,12 +12,12 @@ using NetFlow.ReadModel.Modules;
 using NetFlow.ReadModel.Personnel;
 using NetFlow.ReadModel.Requests;
 using NetFlow.ReadModel.Roles;
-using NetFlow.ReadModel.ServiceFormDetails;
-using NetFlow.ReadModel.ServiceFormDocuments;
+using NetFlow.ReadModel.ServiceDetails;
+using NetFlow.ReadModel.ServiceDocuments;
 using NetFlow.ReadModel.ServiceFormHistories;
 using NetFlow.ReadModel.ServiceForms;
-using NetFlow.ReadModel.ServiceFormTechnicians;
 using NetFlow.ReadModel.ServiceReplacedParts;
+using NetFlow.ReadModel.ServiceTechnicians;
 using NetFlow.ReadModel.TenderDevices;
 using NetFlow.ReadModel.TenderDocuments;
 using NetFlow.ReadModel.TenderExternalQuality;
@@ -26,9 +26,6 @@ using NetFlow.ReadModel.TenderPersonnel;
 using NetFlow.ReadModel.TenderReaktif;
 using NetFlow.ReadModel.Tenders;
 using NetFlow.ReadModel.Users;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NetFlow.ReadModel
 {
@@ -65,11 +62,11 @@ namespace NetFlow.ReadModel
             services.AddScoped<MaterialRequestItemReadService>();
             services.AddScoped<MaterialRequestHistoryReadService>();
             services.AddScoped<ServiceFormReadService>();
-            services.AddScoped<ServiceFormHistoryReadService>();
-            services.AddScoped<ServiceFormDetailReadService>();
-            services.AddScoped<ServiceFormDocumentReadService>();
+            services.AddScoped<ServiceHistoryReadService>();
+            services.AddScoped<ServiceDetailReadService>();
+            services.AddScoped<ServiceDocumentReadService>();
             services.AddScoped<ServiceReplacedPartReadService>();
-            services.AddScoped<ServiceFormTechnicianReadService>();
+            services.AddScoped<ServiceTechnicianReadService>();
 
             return services;
         }

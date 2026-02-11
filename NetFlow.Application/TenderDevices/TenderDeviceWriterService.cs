@@ -19,6 +19,7 @@ namespace NetFlow.Application.TenderDevices
             }
             tenderDevice.MaterialRequestId = materialRequestId;
             tenderDevice.MaterialRequestItemId = materialRequestItemId;
+            tenderDevice.Currency = request.Currency;
             _db.TenderDevices.Update(tenderDevice);
             await _db.SaveChangesAsync();
             return true;

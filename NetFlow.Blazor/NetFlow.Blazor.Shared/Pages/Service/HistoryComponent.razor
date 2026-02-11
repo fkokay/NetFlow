@@ -17,7 +17,7 @@
         <DxGridDataColumn Caption="Ýþlem Tipi" FieldName="ActionType" Width="120px">
             <CellDisplayTemplate>
                 <span class="status-badge">
-                    @(((ServiceFormHistoryModel)context.DataItem).ActionType.GetDescription())
+                    @(((ServiceHistoryModel)context.DataItem).ActionType.GetDescription())
                 </span>
             </CellDisplayTemplate>
         </DxGridDataColumn>
@@ -26,7 +26,7 @@
         <DxGridDataColumn Caption="Eski Durum" FieldName="OldStatus" Width="120px">
             <CellDisplayTemplate>
                 <span class="status-badge">
-                    @(((ServiceFormHistoryModel)context.DataItem).OldStatus?.GetDescription())
+                    @(((ServiceHistoryModel)context.DataItem).OldStatus?.GetDescription())
                 </span>
             </CellDisplayTemplate>
         </DxGridDataColumn>
@@ -34,7 +34,7 @@
         <DxGridDataColumn Caption="Yeni Durum" FieldName="NewStatus" Width="120px">
             <CellDisplayTemplate>
                 <span class="status-badge">
-                    @(((ServiceFormHistoryModel)context.DataItem).NewStatus?.GetDescription())
+                    @(((ServiceHistoryModel)context.DataItem).NewStatus?.GetDescription())
                 </span>
             </CellDisplayTemplate>
         </DxGridDataColumn>
@@ -76,7 +76,7 @@
 
 @code {
 
-    private GridDevExtremeDataSource<ServiceFormHistoryModel>? ServiceFormHistoryDataSource { get; set; }
+    private GridDevExtremeDataSource<ServiceHistoryModel>? ServiceFormHistoryDataSource { get; set; }
 
     [Parameter]
     public int ServiceFormId { get; set; }
@@ -94,10 +94,10 @@
         string baseUrl = "https://localhost:7071/api";
 
         ServiceFormHistoryDataSource =
-            new GridDevExtremeDataSource<ServiceFormHistoryModel>(
+            new GridDevExtremeDataSource<ServiceHistoryModel>(
                 client,
                 NavigationManager.ToAbsoluteUri(
-                    $"{baseUrl}/service-form-histories?serviceFormId={ServiceFormId}"
+                    $"{baseUrl}/service-histories?serviceFormId={ServiceFormId}"
                 )
             );
     }

@@ -9,23 +9,25 @@ namespace NetFlow.ReadModel.Personnel
     public class PersonnelDto
     {
         public int Id { get; set; }
-        public string CustomerCode { get; set; } = null!;
-        public string CustomerName { get; set; } = null!;
+        public int FirmId { get; set; }
         public string PersonnelCode { get; set; } = null!;
+        public string CustomerCode { get; set; } = null!;
+        public string CustomerName { get; set; }
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public string FullName { get; private set; } = null!;
         public string? Email { get; set; }
         public string? Phone { get; set; }
-        public string? Department { get; set; }
+        public int DepartmentId { get; set; }
+        public string DepartmentName { get; set; }
+        public decimal? Salary { get; set; }
         public string? Title { get; set; }
         public byte AuthorityLevel { get; set; }
-        public decimal? Salary { get; set; }
+        public DateTime HireDate { get; set; }
         public bool IsActive { get; set; }
         public int? UserId { get; set; }
-        public DateTime HireDate { get; set; }
         public DateTime? TerminationDate { get; set; }
-        public string? UserFullName { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }

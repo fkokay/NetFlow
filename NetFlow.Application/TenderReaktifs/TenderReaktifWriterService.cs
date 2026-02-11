@@ -22,7 +22,7 @@ namespace NetFlow.Application.TenderReaktifs
             }
             tenderReaktif.MaterialRequestId = materialRequestId;
             tenderReaktif.MaterialRequestItemId = materialRequestItemId;
-
+            tenderReaktif.Currency = request.Currency;
             _db.TenderReaktifs.Update(tenderReaktif);
             await _db.SaveChangesAsync();
             return true;

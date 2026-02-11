@@ -8,6 +8,7 @@ namespace NetFlow.Application.MaterialRequests
 {
     public class CreateMaterialRequest
     {
+        public int AssignedToUserId { get; set; }
         public MaterialRequestType RequestType { get; set; } = MaterialRequestType.Tender;
         public DateTime RequiredDate { get; set; }
         public MaterialRequestPriority Priority { get; set; } = MaterialRequestPriority.Normal;

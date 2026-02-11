@@ -18,23 +18,42 @@ namespace NetFlow.Application.Personnels
             _db = db;
         }
 
-        public async Task<int> CreateAsync(CreatePersonnelRequest request)
+        public async Task<int> CreateAsync(int firmId,CreatePersonnelRequest request)
         {
+            var lastCode = await _db.Personnels
+                .Where(x => x.FirmId == firmId && x.PersonnelCode.StartsWith("PRS"))
+                .OrderByDescending(x => x.PersonnelCode)
+                .Select(x => x.PersonnelCode)
+                .FirstOrDefaultAsync();
+
+            int nextNumber = 1;
+
+            if (!string.IsNullOrEmpty(lastCode))
+            {
+                var numericPart = lastCode.Substring(3);
+                if (int.TryParse(numericPart, out int parsed))
+                    nextNumber = parsed + 1;
+            }
+
+            var newCode = $"PRS{nextNumber:D5}";
+
             var personnel = new PersonnelEntity
             {
                 AuthorityLevel = request.AuthorityLevel,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 CustomerCode = request.CustomerCode,
-                Department = request.Department,
+                FirmId= firmId,
                 Email = request.Email,
                 DeletedAt = request.DeletedAt,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
+                DepartmentId=request.DepartmentId,
                 Salary = request.Salary,
-                PersonnelCode = request.PersonnelCode,
+                PersonnelCode = newCode,
                 Title = request.Title,
                 Phone = request.Phone,
                 IsActive = request.IsActive,
+                HireDate = request.HireDate,
                 UserId = request.UserId
             };
             _db.Personnels.Add(personnel);
@@ -47,7 +66,7 @@ namespace NetFlow.Application.Personnels
             personnel.AuthorityLevel = request.AuthorityLevel;
             personnel.CreatedAt = request.CreatedAt;
             personnel.CustomerCode = request.CustomerCode;
-            personnel.Department = request.Department;
+            personnel.DepartmentId = request.DepartmentId;
             personnel.Email = request.Email;
             personnel.DeletedAt = request.DeletedAt;
             personnel.FirstName = request.FirstName;
@@ -58,7 +77,7 @@ namespace NetFlow.Application.Personnels
             personnel.Phone = request.Phone;
             personnel.IsActive = request.IsActive;
             personnel.UserId = request.UserId;
-            personnel.UpdatedAt = DateTime.UtcNow;
+            personnel.UpdatedAt = DateTime.Now;
             _db.Personnels.Update(personnel);
             await _db.SaveChangesAsync();
             return personnel.Id;
@@ -82,3 +101,5 @@ namespace NetFlow.Application.Personnels
         }
     }
 }
+
+

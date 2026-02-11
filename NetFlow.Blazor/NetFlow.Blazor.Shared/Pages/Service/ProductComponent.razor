@@ -14,7 +14,7 @@
                           Width="140px">
             <CellDisplayTemplate>
                 <span class="status-badge">
-                    @(((ServiceFormDetailModel)context.DataItem).DetailType.GetDescription())
+                    @(((ServiceDetailModel)context.DataItem).DetailType.GetDescription())
                 </span>
             </CellDisplayTemplate>
         </DxGridDataColumn>
@@ -55,7 +55,7 @@
 
 @code {
 
-    private GridDevExtremeDataSource<ServiceFormDetailModel>? ServiceFormDetailDataSource { get; set; }
+    private GridDevExtremeDataSource<ServiceDetailModel>? ServiceFormDetailDataSource { get; set; }
 
     [Parameter]public int ServiceFormId { get; set; }
     [Parameter]public ServiceDetailType? ServiceDetailType { get; set; }
@@ -73,10 +73,10 @@
         string baseUrl = "https://localhost:7071/api";
 
         ServiceFormDetailDataSource =
-            new GridDevExtremeDataSource<ServiceFormDetailModel>(
+            new GridDevExtremeDataSource<ServiceDetailModel>(
                 client,
                 NavigationManager.ToAbsoluteUri(
-                    $"{baseUrl}/service-form-details?serviceFormId={ServiceFormId}"
+                    $"{baseUrl}/service-details?serviceFormId={ServiceFormId}"
                 )
             );
     }

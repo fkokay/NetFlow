@@ -13,8 +13,8 @@ namespace NetFlow.Blazor.Shared.Models
         public int FirmId { get; set; }
         public int RequestedByUserId { get; set; }
         public string? RequestedDepartment { get; set; }
-        public DateTime RequestDate { get; set; } = DateTime.UtcNow;
-        public DateTime RequiredDate { get; set; } = DateTime.UtcNow.AddDays(7);
+        public DateTime RequestDate { get; set; } = DateTime.Now;
+        public DateTime RequiredDate { get; set; }=DateTime.Now;
         public MaterialRequestType RequestType { get; set; } = MaterialRequestType.Tender;
         public MaterialRequestPriority Priority { get; set; } = MaterialRequestPriority.Normal;
         public MaterialRequestStatus Status { get; set; } = MaterialRequestStatus.Draft;

@@ -107,7 +107,7 @@ namespace NetFlow.Api.Controllers
             {
                 return NotFound();
             }
-            var id = await _write.CreateAsync(_current.User.Id.Value, request);
+            var id = await _write.CreateAsync(_current, request);
 
 
             var materialRequstHistory = new CreateMaterialRequestHistoryRequest();
@@ -123,7 +123,29 @@ namespace NetFlow.Api.Controllers
                 new { id },
                 null);
         }
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] EditMaterialRequest request)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+            var id = await _write.EditAsync(request);
 
+
+            var materialRequstHistory = new CreateMaterialRequestHistoryRequest();
+            materialRequstHistory.Action = MaterialRequestHistoryAction.Created;
+            materialRequstHistory.ActionDate = DateTime.UtcNow;
+            materialRequstHistory.MaterialRequestId = id;
+            materialRequstHistory.ActionByUserId = _current.User.Id.Value;
+            materialRequstHistory.Notes = "Talep Güncellendi";
+            var historyId = await _historyWrite.CreateAsync(materialRequstHistory);
+
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
         [HttpPut("rejection")]
         public async Task<IActionResult> Rejection([FromBody] RejectionMaterialRequest request)
         {
@@ -242,7 +264,7 @@ namespace NetFlow.Api.Controllers
                 {
                     slips.Kalems.Add(new ItemSlipLines
                     {
-                        StokKodu = item.ItemCode,
+                        StokKodu = item.StockCode,
                         STra_GCMIK = Convert.ToDouble(item.FulfilledQuantity),
                         STra_BF = Convert.ToDouble(item.Price),
                         DEPO_KODU = 1,

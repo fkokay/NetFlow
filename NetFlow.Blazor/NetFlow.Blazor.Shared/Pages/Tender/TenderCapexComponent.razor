@@ -1,0 +1,224 @@
+@inject NavigationManager NavigationManager
+@inject IApiClientFactory ApiClientFactory
+@inject IHttpClientFactory HttpClientFactory
+@inject IToastNotificationService ToastService
+
+<div style="position:relative">
+
+    <DxLoadingPanel @bind-Visible="IsGridLoading" Text="Ýþlem yapýlýyor..." />
+
+    <DxGrid Data="TenderCapexDataSource"
+            EditStart="OnEditStart"
+            ShowSearchBox="true"
+            SearchBoxNullText="Arama yapmak için metin girin…"
+            style="height:100%;"
+            DataItemDeleting="Grid_DataItemDeleting">
+        <ToolbarTemplate>
+            <DxToolbar>
+                <Items>
+                    <DxToolbarItem Text="Yeni Capex Ekle"
+                                   Click="OnAddNewClick"
+                                   Alignment="ToolbarItemAlignment.Right"
+                                   Enabled="!IsReadOnly"
+                                   RenderStyleMode="ToolbarItemRenderStyleMode.Contained"
+                                   RenderStyle="ButtonRenderStyle.Light" />
+                </Items>
+            </DxToolbar>
+        </ToolbarTemplate>
+        <Columns>
+            <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
+            <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
+            @if (!IsReadOnly)
+            {
+
+                <DxGridCommandColumn Width="6em" DeleteButtonVisible="true" EditButtonVisible="true" />
+            }
+
+        </Columns>
+        <EmptyDataAreaTemplate>
+            @if (IsReadOnly)
+            {
+                <p>Ýhale alt kurumu eklemek için önce ihale kaydedin.</p>
+            }
+            else
+            {
+                <p>Görüntülenecek herhangi bir alt kurum bulunamadý.</p>
+            }
+        </EmptyDataAreaTemplate>
+
+    </DxGrid>
+</div>
+
+@code {
+    [Parameter] public TenderModel? Tender { get; set; }
+    private bool PopupVisible { get; set; } = false;
+    private GridDevExtremeDataSource<TenderCapexModel>? TenderCapexDataSource { get; set; }
+    private bool IsLoadingForPopup { get; set; }
+    private bool IsGridLoading { get; set; }
+    private bool IsReadOnly => Tender == null || Tender.Id == 0;
+
+
+
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Tender != null && Tender.Id > 0)
+        {
+            await LoadDataAsync();
+
+        }
+    }
+
+    private async Task LoadDataAsync()
+    {
+        if (IsReadOnly) return;
+
+        try
+        {
+            IsLoadingForPopup = true;
+            var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+            string baseUrl = "https://localhost:7071/api";
+            TenderCapexDataSource = new GridDevExtremeDataSource<TenderCapexModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-capex?tenderId={Tender.Id}"));
+        }
+        catch (Exception ex)
+        {
+            ShowToast("Hata", ex.Message, ToastRenderStyle.Danger);
+        }
+        finally
+        {
+            IsLoadingForPopup = false;
+        }
+    }
+
+    private void OnAddNewClick()
+    {
+        if (IsReadOnly) return;
+
+        PopupVisible = true;
+    }
+
+    private void OnEditStart(GridEditStartEventArgs e)
+    {
+        if (IsReadOnly)
+        {
+            e.Cancel = true;
+            return;
+        }
+
+        e.Cancel = true;
+        var dataItem = (TenderUnitModel)e.DataItem;
+
+        // Model = new TenderAuthorityModel
+        // {
+        //     Id = dataItem.Id,
+        //     ParentAuthorityCode = Tender.PublicAuthorityCode,
+        //     ParentAuthorityName = Tender.PublicAuthorityName,
+        //     TenderId = Tender.Id,
+        //     UnitCode = dataItem.UnitCode,
+        //     UnitName = dataItem.UnitName
+        // };
+
+        PopupVisible = true;
+    }
+
+    private async Task HandleSave()
+    {
+        // if (Model == null || IsLoadingForPopup || IsReadOnly) return;
+
+
+        // try
+        // {
+        //     IsLoadingForPopup = true;
+        //     var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
+        //     string baseUrl = "https://localhost:7071/api/tender-authorities";
+
+        //     Model.TenderId = Tender!.Id;
+        //     Model.ParentAuthorityCode = Tender.PublicAuthorityCode;
+
+        //     HttpResponseMessage response;
+        //     if (Model.Id > 0)
+        //     {
+        //         response = await client.PutAsJsonAsync(baseUrl, Model);
+        //     }
+        //     else
+        //     {
+        //         response = await client.PostAsJsonAsync(baseUrl, Model);
+        //     }
+
+        //     if (response.IsSuccessStatusCode)
+        //     {
+        //         ShowToast("Baþarýlý", "Kayýt baþarýyla tamamlandý", ToastRenderStyle.Success);
+        //         PopupVisible = false;
+        //         NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+        //     }
+        //     else
+        //     {
+        //         ShowToast("Hata", await response.Content.ReadAsStringAsync(), ToastRenderStyle.Danger);
+        //     }
+        // }
+        // catch (Exception ex)
+        // {
+        //     ShowToast("Sistem Hatasý", ex.Message, ToastRenderStyle.Danger);
+        // }
+        // finally
+        // {
+        //     IsLoadingForPopup = false;
+        //     StateHasChanged();
+        // }
+    }
+
+    async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
+    {
+        if (IsReadOnly)
+        {
+            e.Cancel = true;
+            return;
+        }
+
+        e.Cancel = true;
+        var tenderUnit = (TenderUnitModel)e.DataItem;
+
+        try
+        {
+            IsGridLoading = true;
+            StateHasChanged();
+
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+            var client = await ApiClientFactory.CreateAsync(httpClient);
+            var response = await client.DeleteAsync($"api/tender-authorities/{tenderUnit.Id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                ShowToast("Baþarýlý", "Kayýt baþarýyla silindi", ToastRenderStyle.Success);
+                await LoadDataAsync();
+            }
+            else
+            {
+                ShowToast("Hata", await response.Content.ReadAsStringAsync(), ToastRenderStyle.Danger);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowToast("Sistem Hatasý", ex.Message, ToastRenderStyle.Danger);
+        }
+        finally
+        {
+            IsGridLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ShowToast(string title, string text, ToastRenderStyle style)
+    {
+        ToastService.ShowToast(new ToastOptions
+        {
+            Id = "toast",
+            ProviderName = "Overview",
+            ThemeMode = ToastThemeMode.Light,
+            RenderStyle = style,
+            Title = title,
+            Text = text
+        });
+    }
+}

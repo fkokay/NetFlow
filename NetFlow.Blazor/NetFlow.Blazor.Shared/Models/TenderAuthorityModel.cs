@@ -12,6 +12,6 @@ namespace NetFlow.Blazor.Shared.Models
         public string ParentAuthorityName { get; set; } = string.Empty;
         public string UnitCode { get; set; } = string.Empty;
         public string UnitName { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

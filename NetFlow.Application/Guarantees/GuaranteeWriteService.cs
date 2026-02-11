@@ -20,7 +20,7 @@ namespace NetFlow.Application.Guarantees
                 Currency = request.Currency,
                 CommissionRate = request.CommissionRate,
                 CommissionAmount = request.CommissionAmount,
-                CommissionPeriodId = 1,
+                CommissionPeriodId = request.CommissionPeriodId,
                 GuaranteeDate = request.GuaranteeDate,
                 ExpiryDate = request.ExpiryDate,
                 BankCode = request.BankCode,
@@ -31,12 +31,15 @@ namespace NetFlow.Application.Guarantees
                 CreatedAt = DateTime.Now
             };
 
-            guarantee.CommissionPeriod = await db.GuaranteeCommissionPeriods.FirstAsync(x => x.Id == guarantee.CommissionPeriodId);
+            guarantee.CommissionPeriod = await db.GuaranteeCommissionPeriods.FirstOrDefaultAsync(x => x.Id == guarantee.CommissionPeriodId);
 
             db.Guarantees.Add(guarantee);
             await db.SaveChangesAsync();
 
-            await CreateGuaranteeCommissionsAsync(guarantee);
+            if (guarantee.CommissionPeriod != null)
+            {
+                await CreateGuaranteeCommissionsAsync(guarantee);
+            }
 
             return guarantee.Id;
         }
@@ -69,7 +72,7 @@ namespace NetFlow.Application.Guarantees
             guarantee.ExpenseAccountCode = request.ExpenseAccountCode;
             guarantee.TakasbankReferenceNo = request.TakasbankReferenceNo;
 
-            guarantee.CommissionPeriod = await db.GuaranteeCommissionPeriods.FirstAsync(x => x.Id == guarantee.CommissionPeriodId);
+            guarantee.CommissionPeriod = await db.GuaranteeCommissionPeriods.FirstOrDefaultAsync(x => x.Id == guarantee.CommissionPeriodId);
 
             await db.SaveChangesAsync();
 
@@ -145,7 +148,7 @@ namespace NetFlow.Application.Guarantees
         {
             var guarantee = await db.Guarantees.FirstOrDefaultAsync(x => x.Id == request.Id) ?? throw new Exception("Teminat bulunamadı");
             guarantee.ReturnDate = request.ReturnDate;
-            guarantee.IsRefunded=true;
+            guarantee.IsRefunded = true;
             await db.SaveChangesAsync();
             return guarantee.Id;
         }

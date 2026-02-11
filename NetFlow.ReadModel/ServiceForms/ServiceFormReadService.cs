@@ -4,7 +4,7 @@ using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Domain.Common.Pagination;
 using NetFlow.Domain.Enums;
 using NetFlow.ReadModel.Requests;
-using NetFlow.ReadModel.ServiceFormDetails;
+using NetFlow.ReadModel.ServiceDetails;
 
 namespace NetFlow.ReadModel.ServiceForms
 {

@@ -145,6 +145,7 @@ namespace NetFlow.ReadModel.Tenders
 
           string dataSql = $@"
                 SELECT
+                    TenderAuthority.Id AS Id,
                     Tender.Id AS TenderId,
                     TenderAuthority.UnitCode,
                     TenderAuthority.UnitName

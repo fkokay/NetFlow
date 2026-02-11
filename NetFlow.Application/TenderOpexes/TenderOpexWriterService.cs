@@ -22,7 +22,7 @@ namespace NetFlow.Application.TenderOpexes
             }
             tenderOpex.MaterialRequestId = materialRequestId;
             tenderOpex.MaterialRequestItemId = materialRequestItemId;
-
+            tenderOpex.Currency = request.Currency;
             _db.TenderOpexes.Update(tenderOpex);
             await _db.SaveChangesAsync();
             return true;

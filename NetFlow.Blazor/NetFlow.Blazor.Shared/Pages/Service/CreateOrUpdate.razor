@@ -214,12 +214,12 @@
 
 
     <div class="service-form-component-space">
-        <ServiceFormDetailComponent ServiceFormId="@(Id == null ? 0 : Id.Value)" />
+        <ServiceDetailComponent ServiceFormId="@(Id == null ? 0 : Id.Value)" />
     </div>
 </div>
 
 
-<DxPopup @bind-Visible="CustomerPopupVisible" HeaderText="Kamu Ýdare Unvaný Seçimi" Width="800px" Height="600px" Scrollable="true">
+<DxPopup @bind-Visible="CustomerPopupVisible" HeaderText="Cari Seçimi" Width="800px" Height="600px" Scrollable="true">
     <BodyTemplate>
         <DxGrid Data="@CustomerDataSource" ShowFilterRow="true" PageSize="12" SelectionMode="GridSelectionMode.Single" SelectedDataItemChanged="@OnCustomerSelected" VirtualScrollingEnabled="true" KeyFieldName="Code">
             <Columns>
@@ -515,8 +515,6 @@
     {
         TenderPopupVisible = true;
     }
-
-
 
     private async Task OnTenderSelected(object selectedItem)
     {

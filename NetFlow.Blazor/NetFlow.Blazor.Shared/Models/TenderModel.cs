@@ -8,11 +8,14 @@ namespace NetFlow.Blazor.Shared.Models
     public class TenderModel
     {
         public int Id { get; set; }
-        public int FirmId { get; set; }
+        public int? FirmId { get; set; }
         public int? TenderId { get; set; }
         public string? FirmName { get; set; }
         public string TenderCode { get; set; } = "";
         public string TenderName { get; set; } = "";
+
+        [NotMapped]
+        public int TenderAuthorityId { get; set; }
         public string PublicAuthorityCode { get; set; } = "";
         public string? PublicAuthorityName { get; set; }
         public string TenderType { get; set; } = "";
@@ -23,13 +26,13 @@ namespace NetFlow.Blazor.Shared.Models
         public decimal TenderQuantity { get; set; }
         public decimal TenderAmount { get; set; }
         public string Currency { get; set; } = "TRY";
-        public int? TemporaryGuaranteeRateId { get; set; }
+        public int TemporaryGuaranteeRateId { get; set; }
         public string? TemporaryGuaranteeSubject { get; set; }
         public int? FinalGuaranteeRateId { get; set; }
         public string? FinalGuaranteeSubject { get; set; }
         public DateTime AnnouncementDate { get; set; } = DateTime.Now;
         public string? TenderStatus { get; set; } = "Devam Ediyor";
-        public decimal? UnitPrice { get; set; }
+        public decimal UnitPrice { get; set; }
         public DateTime? DocumentUploadDate { get; set; }
         public DateTime? ContractDate { get; set; }
         public DateTime? ContractInvitationDate { get; set; }

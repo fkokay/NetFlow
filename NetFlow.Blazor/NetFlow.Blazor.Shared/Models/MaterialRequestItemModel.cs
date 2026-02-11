@@ -9,8 +9,8 @@ namespace NetFlow.Blazor.Shared.Models
     {
         public int Id { get; set; }
         public int MaterialRequestId { get; set; }
-        public string ItemCode { get; set; } = null!;
-        public string? ItemName { get; set; }
+        public string StockCode { get; set; } = null!;
+        public string? StockName { get; set; }
         public decimal RequestedQuantity { get; set; }
         public decimal FulfilledQuantity { get; set; }
         public decimal Price { get; set; }

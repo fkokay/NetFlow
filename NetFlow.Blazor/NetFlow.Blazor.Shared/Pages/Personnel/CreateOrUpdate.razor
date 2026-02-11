@@ -47,9 +47,7 @@
                                     <DataAnnotationsValidator />
 
                                     <DxFormLayout ColSpanMd="6">
-                                        <DxFormLayoutItem Caption="Personel Kodu" ColSpanMd="6">
-                                            <DxTextBox @bind-Text="Model.PersonnelCode" />
-                                        </DxFormLayoutItem>
+                                       
 
                                         <DxFormLayoutItem Caption="Cari Kodu" ColSpanMd="6">
                                             <DxTextBox @bind-Text="Model.CustomerCode" BindValueMode="BindValueMode.OnInput">
@@ -114,9 +112,9 @@
 
                                         <DxFormLayoutItem Caption="Departman" ColSpanMd="6">
                                             <DxComboBox Data="@Departments"
-                                                        @bind-Value="Model.Department"
+                                                        @bind-Value="Model.DepartmentId"
                                                         TextFieldName="DepartmentName"
-                                                        ValueFieldName="DepartmentName"
+                                                        ValueFieldName="Id"
                                                         SearchMode="ListSearchMode.AutoSearch" />
 
                                         </DxFormLayoutItem>
@@ -277,9 +275,8 @@
         bool isBaseValid =
                             !string.IsNullOrWhiteSpace(Model?.FirstName) &&
                             !string.IsNullOrWhiteSpace(Model?.LastName) &&
-                            !string.IsNullOrWhiteSpace(Model?.CustomerCode) &&
-                            !string.IsNullOrWhiteSpace(Model?.PersonnelCode);
-                            
+                            !string.IsNullOrWhiteSpace(Model?.CustomerCode);
+
         bool isEmailValid = string.IsNullOrWhiteSpace(Model?.Email) ||
                         new EmailAddressAttribute().IsValid(Model.Email);
         return isBaseValid && isEmailValid;

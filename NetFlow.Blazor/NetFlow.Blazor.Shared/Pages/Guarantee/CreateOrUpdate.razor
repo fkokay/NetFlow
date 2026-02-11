@@ -78,6 +78,17 @@
                                             }
                                         </DxFormLayoutItem>
 
+                                        <DxFormLayoutItem Caption="Komisyon Dönemi" ColSpanMd="6">
+                                            <DxComboBox Data="@GuaranteeCommissionPeriods"
+                                                        @bind-Value="Model.CommissionPeriodId"
+                                                        TextFieldName="PeriodName"
+                                                        ValueFieldName="Id"
+                                                        SearchMode="ListSearchMode.AutoSearch" />
+                                            @if (ShowValidationMessages && Model.CommissionPeriodId <= 0)
+                                            {
+                                                <small class="text-danger mt-1">Lütfen bir Periyot seçiniz.</small>
+                                            }
+                                        </DxFormLayoutItem>
 
                                         <DxFormLayoutItem Caption="Konu" ColSpanMd="6">
                                             <DxTextBox @bind-Text="Model.Subject"
@@ -248,6 +259,7 @@
     private EditContext? EditContext;
     private bool IsSaving, IsSuccess;
     private IEnumerable<FirmSelectModel>? Firms { get; set; }
+    private IEnumerable<GuaranteeCommissionPeriodModel>? GuaranteeCommissionPeriods { get; set; }
     private IEnumerable<BankModel>? Banks { get; set; }
     private IEnumerable<BankBranchModel>? BankBranches { get; set; }
 
@@ -268,7 +280,7 @@
 
             await LoadBanksAsync();
             await LoadFirmsAsync();
-
+            await LoadGuaranteeCommissionPeriodAsync();
             if (Id.HasValue && Id.Value > 0)
             {
 
@@ -340,7 +352,12 @@
         var client = await ApiClientFactory.CreateAsync(httpClient);
         Firms = await client.GetFromJsonAsync<List<FirmSelectModel>>("api/firms/list");
     }
-
+    private async Task LoadGuaranteeCommissionPeriodAsync()
+    {
+        var httpClient = HttpClientFactory.CreateClient("ApiClient");
+        var client = await ApiClientFactory.CreateAsync(httpClient);
+        GuaranteeCommissionPeriods = await client.GetFromJsonAsync<List<GuaranteeCommissionPeriodModel>>("api/guarantee-commission-periods/");
+    }
     private async Task LoadBanksAsync()
     {
         var httpClient = HttpClientFactory.CreateClient("ApiClient");

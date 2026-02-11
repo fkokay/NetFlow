@@ -62,7 +62,11 @@
                 }
 
 
-
+                <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                    <Template>
+                        <DxButton Text="Düzenle" Click="@OnEditClick" class="action-button-return" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
+                    </Template>
+                </DxToolbarItem>
 
                 <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
                                Click="LoadDataAsync"
@@ -232,8 +236,8 @@
                                         DataItemDeleting="Grid_DataItemDeleting"
                                         EditStart="Grid_EditStart">
                                     <Columns>
-                                        <DxGridDataColumn FieldName="ItemCode" Caption="Kod" />
-                                        <DxGridDataColumn FieldName="ItemName" Caption="Adı" />
+                                        <DxGridDataColumn FieldName="StockCode" Caption="Kod" />
+                                        <DxGridDataColumn FieldName="StockName" Caption="Adı" />
                                         <DxGridDataColumn FieldName="RequestedQuantity" Caption="Talep" />
                                         <DxGridDataColumn FieldName="FulfilledQuantity" Caption="Karşılanan" />
                                         <DxGridDataColumn FieldName="Price" Caption="Fiyat" />
@@ -480,6 +484,10 @@
             Title = title,
             Text = text,
         }, RenderToastButton(isError));
+    }
+    private async Task OnEditClick()
+    {
+        NavigationManager.NavigateTo($"/material-request/createorupdate/{Id}");
     }
 
     private RenderFragment RenderToastButton(bool isError) =>

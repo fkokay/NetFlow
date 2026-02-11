@@ -36,15 +36,15 @@ namespace NetFlow.Infrastructure.Persistence
         public DbSet<MaterialRequestItemEntity> MaterialRequestItems => Set<MaterialRequestItemEntity>();
         public DbSet<MaterialRequestHistoryEntity> MaterialRequestsHistory => Set<MaterialRequestHistoryEntity>();
         public DbSet<ServiceFormEntity> ServiceForms => Set<ServiceFormEntity>();
-        public DbSet<ServiceFormDetailEntity> ServiceFormDetails => Set<ServiceFormDetailEntity>();
-        public DbSet<ServiceFormDocumentEntity> ServiceFormDocuments => Set<ServiceFormDocumentEntity>();
-        public DbSet<ServiceFormHistoryEntity> ServiceFormHistories => Set<ServiceFormHistoryEntity>();
+        public DbSet<ServiceDetailEntity> ServiceDetails => Set<ServiceDetailEntity>();
+        public DbSet<ServiceDocumentEntity> ServiceDocuments => Set<ServiceDocumentEntity>();
+        public DbSet<ServiceHistoryEntity> ServiceHistories => Set<ServiceHistoryEntity>();
         public DbSet<ServiceReplacedPartEntity> ServiceReplacedParts => Set<ServiceReplacedPartEntity>();
         public DbSet<TenderCapexEntity> TenderCapexes => Set<TenderCapexEntity>();
         public DbSet<TenderReaktifEntity> TenderReaktifs => Set<TenderReaktifEntity>();
         public DbSet<TenderDeviceEntity> TenderDevices => Set<TenderDeviceEntity>();
-
-        public DbSet<ServiceFormTechnicianEntity> ServiceFormTechnicians => Set<ServiceFormTechnicianEntity>();
+        public DbSet<ServiceTechnicianEntity> ServiceTechnicians => Set<ServiceTechnicianEntity>();
+        public DbSet<TenderAuthorityEntity> TenderAuthorities => Set<TenderAuthorityEntity>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

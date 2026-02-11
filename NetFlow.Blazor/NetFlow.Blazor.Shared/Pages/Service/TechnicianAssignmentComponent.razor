@@ -60,7 +60,7 @@
                 AssignedPersonnelId = SelectedPersonnelId,
                 CreatedAt = DateTime.UtcNow
             };
-            var response = await client.PostAsJsonAsync($"https://localhost:7071/api/service-form-technicians/", model);
+            var response = await client.PostAsJsonAsync($"https://localhost:7071/api/service-technicians/", model);
 
             if (response.IsSuccessStatusCode)
             {

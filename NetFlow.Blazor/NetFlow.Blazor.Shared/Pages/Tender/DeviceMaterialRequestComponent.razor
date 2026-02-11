@@ -27,6 +27,13 @@
             <DxFormLayoutItem Caption="Miktar" ColSpanMd="12">
                 <DxTextBox Text="@TenderDevice.Quantity.ToString()" ReadOnly="true" />
             </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Para Birimi" ColSpanMd="12">
+                <DxComboBox Data="@ParaBirimleri"
+                            @bind-Value="@SecilenPara"
+                            FilteringMode="DataGridFilteringMode.Contains"
+                            NullText="Birim arayýn veya seçin..."
+                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+            </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Talep Türü" ColSpanMd="12">
                 <DxComboBox Data="RequestTypes" @bind-Value="model.RequestType" ValueFieldName="Value" TextFieldName="Text" ValidationEnabled="true" ShowValidationIcon="true" />
             </DxFormLayoutItem>
@@ -67,7 +74,8 @@
     [Parameter] public EventCallback<bool> IsPopupVisibleChanged { get; set; }
     private IEnumerable<DepartmentModel>? Departments { get; set; }
     private MaterialRequestModel model = new();
-
+    List<string> ParaBirimleri = new List<string> { "TRY", "USD", "EUR" };
+    string? SecilenPara;
     private List<EnumItem<MaterialRequestPriority>> Priorities =
     Enum.GetValues<MaterialRequestPriority>()
     .Select(x => new EnumItem<MaterialRequestPriority>
@@ -137,6 +145,7 @@
                 FulfilledQuantity = TenderDevice.Quantity,
                 Unit = "Adet",
                 WarehouseCode = "1000",
+                Currency = SecilenPara,
                 AlternateItemCode = "",
                 Status = MaterialRequestItemStatus.Pending,
                 FulfillmentType = MaterialRequestItemFulfillmentType.Undefined

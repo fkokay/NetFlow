@@ -47,19 +47,6 @@
                                     <DataAnnotationsValidator />
 
                                     <DxFormLayout>
-                                        <DxFormLayoutItem Caption="Firma" ColSpanMd="12">
-                                            <DxComboBox TData="FirmModel"
-                                                        TValue="int"
-                                                        Data="@Firms"
-                                                        TextFieldName="@nameof(FirmModel.FirmName)"
-                                                        ValueFieldName="@nameof(FirmModel.Id)"
-                                                        @bind-Value="@Model.FirmId"
-                                                        FilteringMode="DataGridFilteringMode.Contains"
-                                                        NullText="Firma seçiniz veya arayýn..."
-                                                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto">
-                                            </DxComboBox>
-                                        </DxFormLayoutItem>
-
 
                                         <DxFormLayoutItem Caption="Ýhale Kodu" ColSpanMd="6">
                                             <DxTextBox @bind-Text="Model.TenderCode" BindValueMode="BindValueMode.OnInput" />
@@ -150,7 +137,7 @@
 
                                         <DxFormLayoutItem Caption="Geçici Teminat" ColSpanMd="6">
                                             <DxComboBox TData="GuaranteeModel"
-                                                        TValue="int?"
+                                                        TValue="int"
                                                         Data="@TemporaryGuarantees"
                                                         TextFieldName="@nameof(GuaranteeModel.Subject)"
                                                         ValueFieldName="@nameof(GuaranteeModel.Id)"
@@ -228,7 +215,10 @@
                         {
                             <DxTabs CssClass="card tabs">
                                 <DxTabPage Text="Alt Kurumlar">
-                                    <TenderSubComponent TenderId="@(Id ?? 0)" />
+                                    <TenderSubComponent Tender="@Model" />
+                                </DxTabPage>
+                                <DxTabPage Text="Capex">
+                                    <TenderCapexComponent Tender="@Model" />
                                 </DxTabPage>
                             </DxTabs>
                         }
@@ -261,8 +251,6 @@
     string? SecilenTur;
     string? SecilenMetot;
     string? SecilenPara;
-
-    private List<FirmModel> Firms { get; set; } = new();
     private List<GuaranteeModel> TemporaryGuarantees { get; set; } = new();
     private TenderModel? Model = new();
     private EditContext? EditContext;
@@ -292,7 +280,6 @@
             string baseUrl = "https://localhost:7071/api";
             await LoadUsersAsync();
             await LoadTemporaryGuaranteesAsync();
-            await LoadFirmsAsync();
             if (Id.HasValue && Id.Value > 0)
             {
                 var httpClient = HttpClientFactory.CreateClient("ApiClient");
@@ -384,6 +371,10 @@
 
         if (string.IsNullOrWhiteSpace(Model.TenderCode))
             AddError(nameof(Model.TenderCode), "Ýhale kodu zorunludur.");
+
+        if (Model.TemporaryGuaranteeRateId <= 0)
+            AddError(nameof(Model.TemporaryGuaranteeRateId), "Geçici teminat seçilmesi zorunludur.");
+
         if (string.IsNullOrWhiteSpace(Model.TenderName))
             AddError(nameof(Model.TenderName), "Ýhale adý zorunludur.");
 
@@ -555,29 +546,6 @@
     }
     #endregion
 
-    #region Firms
-    private async Task LoadFirmsAsync()
-    {
-        try
-        {
-            var httpClient = HttpClientFactory.CreateClient("ApiClient");
-            var client = await ApiClientFactory.CreateAsync(httpClient);
-
-            var result = await client.GetFromJsonAsync<List<FirmModel>>("api/firms/list");
-
-            if (result != null)
-            {
-                Firms = result;
-                await InvokeAsync(StateHasChanged);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Firma yükleme hatasý: {ex.Message}");
-        }
-    }
-    #endregion
-
     #region TemporaryGuarantees
     private async Task LoadTemporaryGuaranteesAsync()
     {
@@ -603,12 +571,12 @@
 
     private void OnPopupOk()
     {
-        if (IsSuccess) NavigationManager.NavigateTo("/service/requests");
+        if (IsSuccess) NavigationManager.NavigateTo("/tender/list");
     }
 
     private void OnPopupError()
     {
     }
 
-    private void NavigateBack() => NavigationManager.NavigateTo("/service/requests");
+    private void NavigateBack() => NavigationManager.NavigateTo("/tender/list");
 }

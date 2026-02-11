@@ -55,7 +55,12 @@ namespace NetFlow.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateTenderRequest request)
         {
-            var id = await _write.CreateAsync(request);
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            var id = await _write.CreateAsync(_current.User.Firm.Id, request);
             return CreatedAtAction(
                 nameof(Get),
                 new { id },

@@ -1,16 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using NetFlow.Application.Common.Interfaces;
-using NetFlow.Application.Personnels;
-using NetFlow.Application.ServiceFormHistories;
+using NetFlow.Application.ServiceHistories;
 using NetFlow.Domain.Entities;
 using NetFlow.Domain.Enums;
-using NetFlow.Domain.Identity;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Net;
-using System.Text;
 
 namespace NetFlow.Application.ServiceForms
 {
@@ -18,8 +10,8 @@ namespace NetFlow.Application.ServiceForms
     {
 
         private readonly INetFlowDbContext _db;
-        private readonly ServiceFormHistoryWriteService _historyWrite;
-        public ServiceFormWriteService(INetFlowDbContext db, ServiceFormHistoryWriteService historyWrite)
+        private readonly ServiceHistoryWriteService _historyWrite;
+        public ServiceFormWriteService(INetFlowDbContext db, ServiceHistoryWriteService historyWrite)
         {
             _db = db;
             _historyWrite = historyWrite;
@@ -62,7 +54,7 @@ namespace NetFlow.Application.ServiceForms
 
             if (service.ServiceStatus != request.ServiceStatus)
             {
-                await _historyWrite.CreateAsync(request.CreatedBy, new CreateServiceFormHistoryRequest
+                await _historyWrite.CreateAsync(request.CreatedBy, new CreateServiceHistoryRequest
                 {
                     ServiceFormId = service.Id,
                     ActionType = ServiceActionType.StatusChanged,
@@ -79,7 +71,7 @@ namespace NetFlow.Application.ServiceForms
 
             if (service.ServiceType != request.ServiceType)
             {
-                await _historyWrite.CreateAsync(request.CreatedBy, new CreateServiceFormHistoryRequest
+                await _historyWrite.CreateAsync(request.CreatedBy, new CreateServiceHistoryRequest
                 {
                     ServiceFormId = service.Id,
                     ActionType = ServiceActionType.StatusChanged,
@@ -95,7 +87,7 @@ namespace NetFlow.Application.ServiceForms
             }
             if (service.AssignedPersonnelId != request.AssignedPersonnelId)
             {
-                await _historyWrite.CreateAsync(request.CreatedBy, new CreateServiceFormHistoryRequest
+                await _historyWrite.CreateAsync(request.CreatedBy, new CreateServiceHistoryRequest
                 {
                     ServiceFormId = service.Id,
                     ActionType = ServiceActionType.PersonnelAssigned,
@@ -117,7 +109,7 @@ namespace NetFlow.Application.ServiceForms
 
             if (otherChanged)
             {
-                await _historyWrite.CreateAsync(request.CreatedBy, new CreateServiceFormHistoryRequest
+                await _historyWrite.CreateAsync(request.CreatedBy, new CreateServiceHistoryRequest
                 {
                     ServiceFormId = service.Id,
                     ActionType = ServiceActionType.Updated,
@@ -164,7 +156,7 @@ namespace NetFlow.Application.ServiceForms
 
             if (service.IsTechnicianAssigned != request.IsTechnicianAssigned)
             {
-                await _historyWrite.CreateAsync(request.CreatedBy, new CreateServiceFormHistoryRequest
+                await _historyWrite.CreateAsync(request.CreatedBy, new CreateServiceHistoryRequest
                 {
                     ServiceFormId = service.Id,
                     ActionType = ServiceActionType.StatusChanged,

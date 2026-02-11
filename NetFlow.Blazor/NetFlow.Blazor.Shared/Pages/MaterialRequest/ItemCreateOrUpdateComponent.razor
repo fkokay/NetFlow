@@ -22,7 +22,7 @@
 
 
                     <DxFormLayoutItem Caption="Ürün Kodu" ColSpanMd="6">
-                        <DxTextBox @bind-Text="model.ItemCode"
+                        <DxTextBox @bind-Text="model.StockCode"
                                    NullText="Ürün kodu giriniz"
                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto">
                             <Buttons>
@@ -33,7 +33,7 @@
                     </DxFormLayoutItem>
 
                     <DxFormLayoutItem Caption="Ürün Adı" ColSpanMd="6">
-                        <DxTextBox @bind-Text="model.ItemName"
+                        <DxTextBox @bind-Text="model.StockName"
                                    ReadOnly="true"
                                    NullText="Ürün seçiniz..."
                                    ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
@@ -223,8 +223,8 @@
     {
         if (selectedItem is ProductModel selectedProduct)
         {
-            model.ItemCode = selectedProduct.Code;
-            model.ItemName = selectedProduct.Name;
+            model.StockCode = selectedProduct.Code;
+            model.StockName = selectedProduct.Name;
             ProductPopupVisible = false;
             StateHasChanged();
         }
