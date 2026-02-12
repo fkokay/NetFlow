@@ -7,7 +7,7 @@
 
     <DxLoadingPanel @bind-Visible="IsGridLoading" Text="Ýþlem yapýlýyor..." />
 
-    <DxGrid Data="TenderCapexDataSource"
+    <DxGrid Data="TenderReagentDataSource"
             EditStart="OnEditStart"
             ShowSearchBox="true"
             SearchBoxNullText="Arama yapmak için metin girin…"
@@ -16,7 +16,7 @@
         <ToolbarTemplate>
             <DxToolbar>
                 <Items>
-                    <DxToolbarItem Text="Yeni Capex Ekle"
+                    <DxToolbarItem Text="Yeni Reaktif Ekle"
                                    Click="OnAddNewClick"
                                    Alignment="ToolbarItemAlignment.Right"
                                    Enabled="!IsReadOnly"
@@ -30,30 +30,37 @@
             <DxGridDataColumn FieldName="UnitName" Caption="Kurum Adý" />
             <DxGridDataColumn FieldName="StockCode" Caption="Ürün Kodu" />
             <DxGridDataColumn FieldName="StockName" Caption="Ürün Adý" />
+            <DxGridDataColumn FieldName="SutCode" Caption="Sut Kodu" />
+            <DxGridDataColumn FieldName="TestName" Caption="Test Adý" />
             <DxGridDataColumn FieldName="Quantity" Caption="Miktar" />
-            <DxGridDataColumn FieldName="Unit" Caption="Birim" />
-            <DxGridDataColumn FieldName="Quantity" Caption="Miktar" DisplayFormat="n2" />
-            <DxGridDataColumn FieldName="PurchasePrice" Caption="Satýn Alma Fiyatý" DisplayFormat="n4" />
-            <DxGridDataColumn FieldName="TotalAmount" Caption="Toplam Fiyat" DisplayFormat="n4" />
+            <DxGridDataColumn FieldName="TestCount" Caption="Test Sayýsý" />
+            <DxGridDataColumn FieldName="SutPoint" Caption="Sut Puaný" DisplayFormat="n2" />
+            <DxGridDataColumn FieldName="TotalSutPoint" Caption="Toplam Sut Puaný" DisplayFormat="n2" />
             <DxGridDataColumn FieldName="Currency" Caption="Para Birim" />
+            <DxGridDataColumn FieldName="UnitPrice" Caption="Birim Fiyatý" DisplayFormat="n4" />
+            <DxGridDataColumn FieldName="TotalAmount" Caption="Toplam Tutar" DisplayFormat="n4" />
+            <DxGridDataColumn FieldName="Quantity" Caption="Miktar" DisplayFormat="n2" />
+            <DxGridDataColumn FieldName="TotalAmount" Caption="Toplam Fiyat" DisplayFormat="n4" />
+            <DxGridDataColumn FieldName="PurchasePrice" Caption="Satýn Alma Fiyatý" DisplayFormat="n4" />
+            <DxGridDataColumn FieldName="TotalPurchaseAmount" Caption="Toplam Satýn Alma Fiyatý" DisplayFormat="n4" />
             <DxGridDataColumn Caption="Talep Tipi" FieldName="RequestType" Width="120px">
                 <CellDisplayTemplate>
                     <span class="status-badge">
-                        @(((TenderCapexModel)context.DataItem).RequestType.GetDescription())
+                        @(((TenderReagentModel)context.DataItem).RequestType.GetDescription())
                     </span>
                 </CellDisplayTemplate>
             </DxGridDataColumn>
             <DxGridDataColumn Caption="Durumu" FieldName="MaterialRequestStatus" Width="120px">
                 <CellDisplayTemplate>
                     <span class="status-badge">
-                        @(((TenderCapexModel)context.DataItem).MaterialRequestStatus.GetDescription())
+                        @(((TenderReagentModel)context.DataItem).MaterialRequestStatus.GetDescription())
                     </span>
                 </CellDisplayTemplate>
             </DxGridDataColumn>
             <DxGridDataColumn Caption="Öncelik" FieldName="Priority" Width="120px">
                 <CellDisplayTemplate>
                     <span class="status-badge">
-                        @(((TenderCapexModel)context.DataItem).Priority.GetDescription())
+                        @(((TenderReagentModel)context.DataItem).Priority.GetDescription())
                     </span>
                 </CellDisplayTemplate>
             </DxGridDataColumn>
@@ -67,11 +74,11 @@
         <EmptyDataAreaTemplate>
             @if (IsReadOnly)
             {
-                <p>Ýhale alt kurumu eklemek için önce ihale kaydedin.</p>
+                <p>Ýhale reaktifi eklemek için önce ihale kaydedin.</p>
             }
             else
             {
-                <p>Görüntülenecek herhangi bir alt kurum bulunamadý.</p>
+                <p>Görüntülenecek herhangi bir reaktif bulunamadý.</p>
             }
         </EmptyDataAreaTemplate>
 
@@ -79,16 +86,17 @@
 </div>
 
 <DxPopup @bind-Visible="@PopupVisible"
-         HeaderText="Capex Ekle"
+         HeaderText="Reaktif Ekle"
          Width="800px">
     <BodyContentTemplate Context="popupContext">
         <DxLoadingPanel @bind-Visible="IsLoadingForPopup" Text="Ýþlem yapýlýyor..." />
 
-        @if (CapexModel != null)
+        @if (ReagentModel != null)
         {
             <DxFormLayout>
+
                 <DxFormLayoutItem Caption="Ürün Kodu" ColSpanMd="12">
-                    <DxTextBox @bind-Text="CapexModel.StockCode"
+                    <DxTextBox @bind-Text="ReagentModel.StockCode"
                                @bind-Text:after="OnProductChanged"
                                NullText="Ürün kodu giriniz"
                                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto">
@@ -100,46 +108,98 @@
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Ürün Adý" ColSpanMd="12">
-                    <DxTextBox @bind-Text="CapexModel.StockName"
+                    <DxTextBox @bind-Text="ReagentModel.StockName"
                                ReadOnly="true"
                                NullText="Ürün seçiniz..."
                                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Miktar" ColSpanMd="12">
-                    <DxSpinEdit @bind-Value="CapexModel.Quantity"
-                                @bind-Value:after="StateHasChanged"
-                                MinValue="1" />
+                    <DxSpinEdit @bind-Value="ReagentModel.Quantity"
+                                @bind-Value:after="OnCalculationChanged"
+                                MinValue="0"
+                                DisplayFormat="N2" />
                 </DxFormLayoutItem>
 
-                <DxFormLayoutItem Caption="Birim Fiyat" ColSpanMd="12">
-                    <DxSpinEdit @bind-Value="CapexModel.PurchasePrice"
-                                @bind-Value:after="StateHasChanged"
+                <DxFormLayoutItem Caption="Birim Fiyat (Satýþ)" ColSpanMd="12">
+                    <DxSpinEdit @bind-Value="ReagentModel.UnitPrice"
+                                @bind-Value:after="OnCalculationChanged"
                                 DisplayFormat="N2"
                                 MinValue="0" />
                 </DxFormLayoutItem>
-                <DxFormLayoutItem Caption="Birim" ColSpanMd="12">
-                    <DxTextBox @bind-Text="CapexModel.Unit" />
-                </DxFormLayoutItem>
-                <DxFormLayoutItem Caption="Toplam Tutar" ColSpanMd="12">
-                    <DxSpinEdit Value="CapexModel.TotalAmount"
+
+                <DxFormLayoutItem Caption="Toplam Tutar (Satýþ)" ColSpanMd="12">
+                    <DxSpinEdit Value="ReagentModel.TotalAmount"
                                 ReadOnly="true"
                                 DisplayFormat="N2"
                                 CssClass="fw-bold" />
                 </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Alýþ Fiyatý" ColSpanMd="12">
+                    <DxSpinEdit @bind-Value="ReagentModel.PurchasePrice"
+                                @bind-Value:after="OnCalculationChanged"
+                                DisplayFormat="N2"
+                                MinValue="0" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Toplam Alýþ Tutarý" ColSpanMd="12">
+                    <DxSpinEdit Value="ReagentModel.TotalPurchaseAmount"
+                                ReadOnly="true"
+                                DisplayFormat="N2"
+                                CssClass="fw-bold" />
+                </DxFormLayoutItem>
+
+
+
+                <DxFormLayoutItem Caption="SUT Kodu" ColSpanMd="12">
+                    <DxTextBox @bind-Text="ReagentModel.SutCode"
+                               NullText="SUT kodu giriniz"
+                               ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Test Adý" ColSpanMd="12">
+                    <DxTextBox @bind-Text="ReagentModel.TestName"
+                               NullText="Test adý giriniz"
+                               ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="SUT Puaný" ColSpanMd="12">
+                    <DxSpinEdit @bind-Value="ReagentModel.SutPoint"
+                                @bind-Value:after="OnCalculationChanged"
+                                DisplayFormat="N2"
+                                MinValue="0" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Toplam SUT Puaný" ColSpanMd="12">
+                    <DxSpinEdit Value="ReagentModel.TotalSutPoint"
+                                ReadOnly="true"
+                                DisplayFormat="N2"
+                                CssClass="fw-bold" />
+                </DxFormLayoutItem>
+
+                <DxFormLayoutItem Caption="Test Sayýsý" ColSpanMd="12">
+                    <DxSpinEdit Value="ReagentModel.TestCount"
+                                ReadOnly="true"
+                                DisplayFormat="N2" />
+                </DxFormLayoutItem>
+
+
                 <DxFormLayoutItem Caption="Para Birimi" ColSpanMd="12">
                     <DxComboBox Data="@ParaBirimleri"
-                                @bind-Value="@SecilenPara"
+                                @bind-Value="SecilenPara"
                                 FilteringMode="DataGridFilteringMode.Contains"
                                 NullText="Birim arayýn veya seçin..."
                                 ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Açýklama" ColSpanMd="12">
-                    <DxMemo @bind-Text="CapexModel.Description"
+                    <DxMemo @bind-Text="ReagentModel.Description"
                             Rows="4" />
                 </DxFormLayoutItem>
+
             </DxFormLayout>
+
+
 
         }
         else
@@ -184,8 +244,8 @@
     [Parameter] public TenderModel? Tender { get; set; }
     private bool ProductPopupVisible { get; set; }
     private bool PopupVisible { get; set; } = false;
-    private GridDevExtremeDataSource<TenderCapexModel>? TenderCapexDataSource { get; set; }
-    private TenderCapexModel? CapexModel { get; set; }
+    private GridDevExtremeDataSource<TenderReagentModel>? TenderReagentDataSource { get; set; }
+    private TenderReagentModel? ReagentModel { get; set; }
     private bool IsLoadingForPopup { get; set; }
     private bool IsGridLoading { get; set; }
     private bool IsReadOnly => Tender == null || Tender.Id == 0;
@@ -210,7 +270,7 @@
             IsLoadingForPopup = true;
             var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
             string baseUrl = "https://localhost:7071/api";
-            TenderCapexDataSource = new GridDevExtremeDataSource<TenderCapexModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-capex?tenderId={Tender.Id}"));
+            TenderReagentDataSource = new GridDevExtremeDataSource<TenderReagentModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-reagent?tenderId={Tender.Id}"));
             ProductDataSource = new GridDevExtremeDataSource<ProductModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/netsis/products/pagedList"));
         }
         catch (Exception ex)
@@ -226,7 +286,7 @@
     private void OnAddNewClick()
     {
         if (IsReadOnly) return;
-        CapexModel = new TenderCapexModel();
+        ReagentModel = new TenderReagentModel();
         PopupVisible = true;
     }
 
@@ -239,22 +299,26 @@
         }
 
         e.Cancel = true;
-        var dataItem = (TenderCapexModel)e.DataItem;
+        var dataItem = (TenderReagentModel)e.DataItem;
         SecilenPara = dataItem.Currency;
-        CapexModel = new TenderCapexModel
+        ReagentModel = new TenderReagentModel
         {
             Id = dataItem.Id,
             ParentAuthorityCode = Tender.PublicAuthorityCode,
-            StockName=dataItem.StockName,
+            StockName = dataItem.StockName,
             StockCode = dataItem.StockCode,
             Quantity = dataItem.Quantity,
             PurchasePrice = dataItem.PurchasePrice,
             Description = dataItem.Description,
             TenderAuthorityId = Tender.TenderAuthorityId,
-            Unit = dataItem.Unit,
             TenderId = Tender.Id,
             UnitCode = dataItem.UnitCode,
             UnitName = dataItem.UnitName,
+            UnitPrice = dataItem.UnitPrice,
+            SutCode = dataItem.SutCode,
+            SutPoint = dataItem.SutPoint,
+            TestName = dataItem.TestName,
+            
         };
 
         PopupVisible = true;
@@ -262,27 +326,27 @@
 
     private async Task HandleSave()
     {
-        if (CapexModel == null || IsLoadingForPopup || IsReadOnly) return;
+        if (ReagentModel == null || IsLoadingForPopup || IsReadOnly) return;
 
 
         try
         {
             IsLoadingForPopup = true;
             var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
-            string baseUrl = "https://localhost:7071/api/tender-capex";
+            string baseUrl = "https://localhost:7071/api/tender-reagent";
 
-            CapexModel.TenderId = Tender!.Id;
-            CapexModel.ParentAuthorityCode = Tender.PublicAuthorityCode;
-            CapexModel.TenderAuthorityId = Tender.TenderAuthorityId;
-            CapexModel.Currency = SecilenPara;
+            ReagentModel.TenderId = Tender!.Id;
+            ReagentModel.ParentAuthorityCode = Tender.PublicAuthorityCode;
+            ReagentModel.TenderAuthorityId = Tender.TenderAuthorityId;
+            ReagentModel.Currency = SecilenPara;
             HttpResponseMessage response;
-            if (CapexModel.Id > 0)
+            if (ReagentModel.Id > 0)
             {
-                response = await client.PutAsJsonAsync(baseUrl, CapexModel);
+                response = await client.PutAsJsonAsync(baseUrl, ReagentModel);
             }
             else
             {
-                response = await client.PostAsJsonAsync(baseUrl, CapexModel);
+                response = await client.PostAsJsonAsync(baseUrl, ReagentModel);
             }
 
             if (response.IsSuccessStatusCode)
@@ -312,8 +376,8 @@
     {
         if (selectedItem is ProductModel selectedProduct)
         {
-            CapexModel.StockCode = selectedProduct.Code;
-            CapexModel.StockName = selectedProduct.Name;
+            ReagentModel.StockCode = selectedProduct.Code;
+            ReagentModel.StockName = selectedProduct.Name;
             ProductPopupVisible = false;
             StateHasChanged();
         }
@@ -321,9 +385,9 @@
     private void OnProductChanged()
     {
 
-        if (string.IsNullOrWhiteSpace(CapexModel.StockCode))
+        if (string.IsNullOrWhiteSpace(ReagentModel.StockCode))
         {
-            CapexModel.StockName = string.Empty;
+            ReagentModel.StockName = string.Empty;
         }
     }
 
@@ -336,7 +400,7 @@
         }
 
         e.Cancel = true;
-        var tenderOpex = (TenderCapexModel)e.DataItem;
+        var tenderOpex = (TenderReagentModel)e.DataItem;
 
         try
         {
@@ -345,7 +409,7 @@
 
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
-            var response = await client.DeleteAsync($"api/tender-capex/{tenderOpex.Id}");
+            var response = await client.DeleteAsync($"api/tender-reagent/{tenderOpex.Id}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -367,7 +431,10 @@
             StateHasChanged();
         }
     }
-
+    void OnCalculationChanged()
+    {
+        StateHasChanged();
+    }
     private void ShowToast(string title, string text, ToastRenderStyle style)
     {
         ToastService.ShowToast(new ToastOptions

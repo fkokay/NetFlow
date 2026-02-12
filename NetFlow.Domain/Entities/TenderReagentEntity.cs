@@ -6,24 +6,32 @@ using System.Text;
 
 namespace NetFlow.Domain.Entities
 {
-    [Table("TenderOpex")]
-    public class TenderOpexEntity
+    [Table("TenderReagent")]
+    public class TenderReagentEntity
     {
         [Key]
         public int Id { get; set; }
         public int TenderId { get; set; }
         public int TenderAuthorityId { get; set; }
-        public string StockCode { get; set; } = string.Empty;
+        public string StockCode { get; set; }
+        public string SutCode { get; set; }
+        public string? TestName { get; set; }
         public decimal Quantity { get; set; }
-        public string Unit { get; set; } = string.Empty;
-        public decimal PurchasePrice { get; set; }
+        public decimal SutPoint { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public decimal TotalSutPoint { get; private set; }
+        public string Currency { get; set; }
+        public decimal UnitPrice { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal TotalAmount { get; private set; }
-        public string Currency { get; set; } = string.Empty;
+        public decimal PurchasePrice { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public decimal TotalPurchaseAmount { get; private set; }
         public string? Description { get; set; }
         public int? MaterialRequestId { get; set; }
         public int? MaterialRequestItemId { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+
     }
 }

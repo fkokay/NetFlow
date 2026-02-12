@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NetFlow.Application.MaterialRequestItems;
 using NetFlow.Application.MaterialRequests;
+using NetFlow.Application.ServiceDetails;
 using NetFlow.Application.TenderOpexes;
 using NetFlow.Domain.Common;
 using NetFlow.Domain.Common.Pagination;
@@ -74,6 +75,39 @@ namespace NetFlow.Api.Controllers
             var status = await _write.UpdateMaterialRequest(request, materialRequestId, materialRequestItemId);
 
             return Ok(status);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateTenderOpexRequest request)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            var id = await _write.CreateAsync(_current.User.Id.Value, request);
+
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] EditTenderOpexRequest request)
+        {
+            var id = await _write.EditAsync(request);
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _write.DeleteAsync(id);
+            return Ok();
         }
     }
 }

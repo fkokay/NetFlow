@@ -3,11 +3,12 @@
 @inject IHttpClientFactory HttpClientFactory
 @inject IToastNotificationService ToastService
 
+
 <div style="position:relative">
 
     <DxLoadingPanel @bind-Visible="IsGridLoading" Text="Ýþlem yapýlýyor..." />
 
-    <DxGrid Data="TenderCapexDataSource"
+    <DxGrid Data="TenderOpexDataSource"
             EditStart="OnEditStart"
             ShowSearchBox="true"
             SearchBoxNullText="Arama yapmak için metin girin…"
@@ -16,7 +17,7 @@
         <ToolbarTemplate>
             <DxToolbar>
                 <Items>
-                    <DxToolbarItem Text="Yeni Capex Ekle"
+                    <DxToolbarItem Text="Yeni Opex Ekle"
                                    Click="OnAddNewClick"
                                    Alignment="ToolbarItemAlignment.Right"
                                    Enabled="!IsReadOnly"
@@ -35,25 +36,25 @@
             <DxGridDataColumn FieldName="Quantity" Caption="Miktar" DisplayFormat="n2" />
             <DxGridDataColumn FieldName="PurchasePrice" Caption="Satýn Alma Fiyatý" DisplayFormat="n4" />
             <DxGridDataColumn FieldName="TotalAmount" Caption="Toplam Fiyat" DisplayFormat="n4" />
-            <DxGridDataColumn FieldName="Currency" Caption="Para Birim" />
+            <DxGridDataColumn FieldName="Currency" Caption="Para Birimi"/>
             <DxGridDataColumn Caption="Talep Tipi" FieldName="RequestType" Width="120px">
                 <CellDisplayTemplate>
                     <span class="status-badge">
-                        @(((TenderCapexModel)context.DataItem).RequestType.GetDescription())
+                        @(((TenderOpexModel)context.DataItem).RequestType.GetDescription())
                     </span>
                 </CellDisplayTemplate>
             </DxGridDataColumn>
             <DxGridDataColumn Caption="Durumu" FieldName="MaterialRequestStatus" Width="120px">
                 <CellDisplayTemplate>
                     <span class="status-badge">
-                        @(((TenderCapexModel)context.DataItem).MaterialRequestStatus.GetDescription())
+                        @(((TenderOpexModel)context.DataItem).MaterialRequestStatus.GetDescription())
                     </span>
                 </CellDisplayTemplate>
             </DxGridDataColumn>
             <DxGridDataColumn Caption="Öncelik" FieldName="Priority" Width="120px">
                 <CellDisplayTemplate>
                     <span class="status-badge">
-                        @(((TenderCapexModel)context.DataItem).Priority.GetDescription())
+                        @(((TenderOpexModel)context.DataItem).Priority.GetDescription())
                     </span>
                 </CellDisplayTemplate>
             </DxGridDataColumn>
@@ -79,16 +80,16 @@
 </div>
 
 <DxPopup @bind-Visible="@PopupVisible"
-         HeaderText="Capex Ekle"
+         HeaderText="Opex Ekle"
          Width="800px">
     <BodyContentTemplate Context="popupContext">
         <DxLoadingPanel @bind-Visible="IsLoadingForPopup" Text="Ýþlem yapýlýyor..." />
 
-        @if (CapexModel != null)
+        @if (OpexModel != null)
         {
             <DxFormLayout>
                 <DxFormLayoutItem Caption="Ürün Kodu" ColSpanMd="12">
-                    <DxTextBox @bind-Text="CapexModel.StockCode"
+                    <DxTextBox @bind-Text="OpexModel.StockCode"
                                @bind-Text:after="OnProductChanged"
                                NullText="Ürün kodu giriniz"
                                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto">
@@ -100,33 +101,34 @@
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Ürün Adý" ColSpanMd="12">
-                    <DxTextBox @bind-Text="CapexModel.StockName"
+                    <DxTextBox @bind-Text="OpexModel.StockName"
                                ReadOnly="true"
                                NullText="Ürün seçiniz..."
                                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Miktar" ColSpanMd="12">
-                    <DxSpinEdit @bind-Value="CapexModel.Quantity"
+                    <DxSpinEdit @bind-Value="OpexModel.Quantity"
                                 @bind-Value:after="StateHasChanged"
                                 MinValue="1" />
                 </DxFormLayoutItem>
 
                 <DxFormLayoutItem Caption="Birim Fiyat" ColSpanMd="12">
-                    <DxSpinEdit @bind-Value="CapexModel.PurchasePrice"
+                    <DxSpinEdit @bind-Value="OpexModel.PurchasePrice"
                                 @bind-Value:after="StateHasChanged"
                                 DisplayFormat="N2"
                                 MinValue="0" />
                 </DxFormLayoutItem>
                 <DxFormLayoutItem Caption="Birim" ColSpanMd="12">
-                    <DxTextBox @bind-Text="CapexModel.Unit" />
+                    <DxTextBox @bind-Text="OpexModel.Unit" />
                 </DxFormLayoutItem>
                 <DxFormLayoutItem Caption="Toplam Tutar" ColSpanMd="12">
-                    <DxSpinEdit Value="CapexModel.TotalAmount"
+                    <DxSpinEdit Value="OpexModel.TotalAmount"
                                 ReadOnly="true"
                                 DisplayFormat="N2"
                                 CssClass="fw-bold" />
                 </DxFormLayoutItem>
+
                 <DxFormLayoutItem Caption="Para Birimi" ColSpanMd="12">
                     <DxComboBox Data="@ParaBirimleri"
                                 @bind-Value="@SecilenPara"
@@ -134,9 +136,8 @@
                                 NullText="Birim arayýn veya seçin..."
                                 ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
                 </DxFormLayoutItem>
-
                 <DxFormLayoutItem Caption="Açýklama" ColSpanMd="12">
-                    <DxMemo @bind-Text="CapexModel.Description"
+                    <DxMemo @bind-Text="OpexModel.Description"
                             Rows="4" />
                 </DxFormLayoutItem>
             </DxFormLayout>
@@ -184,14 +185,14 @@
     [Parameter] public TenderModel? Tender { get; set; }
     private bool ProductPopupVisible { get; set; }
     private bool PopupVisible { get; set; } = false;
-    private GridDevExtremeDataSource<TenderCapexModel>? TenderCapexDataSource { get; set; }
-    private TenderCapexModel? CapexModel { get; set; }
+    private GridDevExtremeDataSource<TenderOpexModel>? TenderOpexDataSource { get; set; }
+    private TenderOpexModel? OpexModel { get; set; }
     private bool IsLoadingForPopup { get; set; }
     private bool IsGridLoading { get; set; }
     private bool IsReadOnly => Tender == null || Tender.Id == 0;
-    private GridDevExtremeDataSource<ProductModel>? ProductDataSource;
     List<string> ParaBirimleri = new List<string> { "TRY", "USD", "EUR" };
     string? SecilenPara;
+    private GridDevExtremeDataSource<ProductModel>? ProductDataSource;
     protected override async Task OnParametersSetAsync()
     {
         if (Tender != null && Tender.Id > 0)
@@ -210,7 +211,7 @@
             IsLoadingForPopup = true;
             var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
             string baseUrl = "https://localhost:7071/api";
-            TenderCapexDataSource = new GridDevExtremeDataSource<TenderCapexModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-capex?tenderId={Tender.Id}"));
+            TenderOpexDataSource = new GridDevExtremeDataSource<TenderOpexModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/tender-opex?tenderId={Tender.Id}"));
             ProductDataSource = new GridDevExtremeDataSource<ProductModel>(client, NavigationManager.ToAbsoluteUri($"{baseUrl}/netsis/products/pagedList"));
         }
         catch (Exception ex)
@@ -226,7 +227,7 @@
     private void OnAddNewClick()
     {
         if (IsReadOnly) return;
-        CapexModel = new TenderCapexModel();
+        OpexModel = new TenderOpexModel();
         PopupVisible = true;
     }
 
@@ -239,22 +240,20 @@
         }
 
         e.Cancel = true;
-        var dataItem = (TenderCapexModel)e.DataItem;
+        var dataItem = (TenderOpexModel)e.DataItem;
         SecilenPara = dataItem.Currency;
-        CapexModel = new TenderCapexModel
+        OpexModel = new TenderOpexModel
         {
             Id = dataItem.Id,
             ParentAuthorityCode = Tender.PublicAuthorityCode,
-            StockName=dataItem.StockName,
+            StockName = dataItem.StockName,
             StockCode = dataItem.StockCode,
             Quantity = dataItem.Quantity,
             PurchasePrice = dataItem.PurchasePrice,
             Description = dataItem.Description,
             TenderAuthorityId = Tender.TenderAuthorityId,
             Unit = dataItem.Unit,
-            TenderId = Tender.Id,
-            UnitCode = dataItem.UnitCode,
-            UnitName = dataItem.UnitName,
+            TenderId = Tender.Id
         };
 
         PopupVisible = true;
@@ -262,27 +261,27 @@
 
     private async Task HandleSave()
     {
-        if (CapexModel == null || IsLoadingForPopup || IsReadOnly) return;
+        if (OpexModel == null || IsLoadingForPopup || IsReadOnly) return;
 
 
         try
         {
             IsLoadingForPopup = true;
             var client = await ApiClientFactory.CreateAsync(HttpClientFactory.CreateClient("ApiClient"));
-            string baseUrl = "https://localhost:7071/api/tender-capex";
+            string baseUrl = "https://localhost:7071/api/tender-opex";
 
-            CapexModel.TenderId = Tender!.Id;
-            CapexModel.ParentAuthorityCode = Tender.PublicAuthorityCode;
-            CapexModel.TenderAuthorityId = Tender.TenderAuthorityId;
-            CapexModel.Currency = SecilenPara;
+            OpexModel.TenderId = Tender!.Id;
+            OpexModel.ParentAuthorityCode = Tender.PublicAuthorityCode;
+            OpexModel.TenderAuthorityId = Tender.TenderAuthorityId;
+            OpexModel.Currency = SecilenPara;
             HttpResponseMessage response;
-            if (CapexModel.Id > 0)
+            if (OpexModel.Id > 0)
             {
-                response = await client.PutAsJsonAsync(baseUrl, CapexModel);
+                response = await client.PutAsJsonAsync(baseUrl, OpexModel);
             }
             else
             {
-                response = await client.PostAsJsonAsync(baseUrl, CapexModel);
+                response = await client.PostAsJsonAsync(baseUrl, OpexModel);
             }
 
             if (response.IsSuccessStatusCode)
@@ -312,8 +311,8 @@
     {
         if (selectedItem is ProductModel selectedProduct)
         {
-            CapexModel.StockCode = selectedProduct.Code;
-            CapexModel.StockName = selectedProduct.Name;
+            OpexModel.StockCode = selectedProduct.Code;
+            OpexModel.StockName = selectedProduct.Name;
             ProductPopupVisible = false;
             StateHasChanged();
         }
@@ -321,9 +320,9 @@
     private void OnProductChanged()
     {
 
-        if (string.IsNullOrWhiteSpace(CapexModel.StockCode))
+        if (string.IsNullOrWhiteSpace(OpexModel.StockCode))
         {
-            CapexModel.StockName = string.Empty;
+            OpexModel.StockName = string.Empty;
         }
     }
 
@@ -336,7 +335,7 @@
         }
 
         e.Cancel = true;
-        var tenderOpex = (TenderCapexModel)e.DataItem;
+        var tenderOpex = (TenderOpexModel)e.DataItem;
 
         try
         {
@@ -345,7 +344,7 @@
 
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
-            var response = await client.DeleteAsync($"api/tender-capex/{tenderOpex.Id}");
+            var response = await client.DeleteAsync($"api/tender-opex/{tenderOpex.Id}");
 
             if (response.IsSuccessStatusCode)
             {

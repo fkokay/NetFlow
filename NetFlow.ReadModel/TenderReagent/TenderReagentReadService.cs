@@ -3,16 +3,17 @@ using Microsoft.Data.SqlClient;
 using NetFlow.Application.Common.DevExtreme;
 using NetFlow.Domain.Common.Pagination;
 using NetFlow.ReadModel.TenderOpex;
+using NetFlow.ReadModel.TenderReaktif;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace NetFlow.ReadModel.TenderReaktif
+namespace NetFlow.ReadModel.TenderReagent
 {
-    public sealed class TenderReaktifReadService
+    public sealed class TenderReagentReadService
     {
         private readonly ReadModelOptions _opt;
-        public TenderReaktifReadService(ReadModelOptions opt) => _opt = opt;
+        public TenderReagentReadService(ReadModelOptions opt) => _opt = opt;
 
 
         public async Task<PagedResult> ListAsync(int tenderId, PagedRequest pagedRequest)
@@ -38,7 +39,7 @@ namespace NetFlow.ReadModel.TenderReaktif
 
             string countSql = $@"
                 SELECT COUNT(1)
-                FROM dbo.VW_TenderReaktif WITH (NOLOCK)
+                FROM dbo.VW_TenderReagent WITH (NOLOCK)
                 {whereSql}
             ";
 
@@ -51,7 +52,7 @@ namespace NetFlow.ReadModel.TenderReaktif
             {
                 return new PagedResult
                 {
-                    Data = Array.Empty<TenderReaktifDto>(),
+                    Data = Array.Empty<TenderReagentDto>(),
                     TotalCount = totalCount
                 };
             }
@@ -61,13 +62,13 @@ namespace NetFlow.ReadModel.TenderReaktif
 
             string dataSql = $@"
                 SELECT *
-                FROM dbo.VW_TenderReaktif WITH (NOLOCK)
+                FROM dbo.VW_TenderReagent WITH (NOLOCK)
                 {whereSql}
                 {orderBy}
                 OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY
             ";
 
-            var data = cn.Query<TenderReaktifDto>(
+            var data = cn.Query<TenderReagentDto>(
                 dataSql,
                 parameters
             ).ToList();
@@ -79,11 +80,11 @@ namespace NetFlow.ReadModel.TenderReaktif
             };
         }
 
-        public async Task<TenderReaktifDto?> GetAsync(int id)
+        public async Task<TenderReagentDto?> GetAsync(int id)
         {
             using var cn = new SqlConnection(_opt.ConnectionString);
-            var sql = "SELECT TOP 1 * FROM dbo.VW_TenderReaktif WITH (NOLOCK) WHERE Id=@Id";
-            return await cn.QueryFirstOrDefaultAsync<TenderReaktifDto>(sql, new { Id = id });
+            var sql = "SELECT TOP 1 * FROM dbo.VW_TenderReagent WITH (NOLOCK) WHERE Id=@Id";
+            return await cn.QueryFirstOrDefaultAsync<TenderReagentDto>(sql, new { Id = id });
         }
     }
 }

@@ -2,24 +2,23 @@
 using NetFlow.Application.MaterialRequestItems;
 using NetFlow.Application.MaterialRequests;
 using NetFlow.Application.TenderOpexes;
-using NetFlow.Application.TenderReaktifs;
-using NetFlow.Domain.Common;
+using NetFlow.Application.TenderReagents;
 using NetFlow.Domain.Common.Pagination;
 using NetFlow.Domain.Identity;
-using NetFlow.ReadModel.TenderReaktif;
+using NetFlow.ReadModel.TenderReagent;
 
 namespace NetFlow.Api.Controllers
 {
     [ApiController]
-    [Route("api/tender-reaktif")]
-    public class TenderReaktifController : ControllerBase
+    [Route("api/tender-reagent")]
+    public class TenderReagentController : ControllerBase
     {
-        private readonly TenderReaktifReadService _read;
-        private readonly TenderReaktifWriterService _write;
+        private readonly TenderReagentReadService _read;
+        private readonly TenderReagentWriterService _write;
         private readonly MaterialRequestWriteService _materialRequestWrite;
         private readonly MaterialRequestItemWriteService _materialRequestItemWrite;
         private readonly CurrentUser _current;
-        public TenderReaktifController(TenderReaktifReadService read, TenderReaktifWriterService write, CurrentUser current, MaterialRequestItemWriteService materialRequestItemWrite, MaterialRequestWriteService materialRequestWrite)
+        public TenderReagentController(TenderReagentReadService read, TenderReagentWriterService write, CurrentUser current, MaterialRequestItemWriteService materialRequestItemWrite, MaterialRequestWriteService materialRequestWrite)
         {
             _read = read;
             _write = write;
@@ -42,7 +41,7 @@ namespace NetFlow.Api.Controllers
         }
 
         [HttpPost("create-material-request")]
-        public async Task<IActionResult> CreateMaterialRequest([FromBody] TenderReaktifCreateMaterialRequest request)
+        public async Task<IActionResult> CreateMaterialRequest([FromBody] TenderReagentCreateMaterialRequest request)
         {
             if (_current.User == null)
             {
@@ -73,6 +72,38 @@ namespace NetFlow.Api.Controllers
             });
             var status = await _write.UpdateMaterialRequest(request, materialRequestId, materialRequestItemId);
             return Ok(status);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateTenderReagentRequest request)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            var id = await _write.CreateAsync(_current.User.Id.Value, request);
+
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] EditTenderReagentRequest request)
+        {
+            var id = await _write.EditAsync(request);
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _write.DeleteAsync(id);
+            return Ok();
         }
     }
 }

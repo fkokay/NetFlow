@@ -44,7 +44,7 @@ namespace NetFlow.Blazor.Shared.Models
         [NotMapped]
         public List<TenderCapexModel> Capexs { get; set; } = new();
         [NotMapped]
-        public List<TenderReaktifModel> Reaktifs { get; set; } = new();
+        public List<TenderReagentModel> Reaktifs { get; set; } = new();
         [NotMapped]
         public List<TenderRequiredDocument> Documents { get; set; } = new();
     }

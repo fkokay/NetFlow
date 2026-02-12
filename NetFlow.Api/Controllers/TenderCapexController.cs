@@ -63,7 +63,7 @@ namespace NetFlow.Api.Controllers
             int materialRequestItemId = await _materialRequestItemWrite.CreateAsync(new CreateMaterialRequestItemRequest()
             {
                 MaterialRequestId = materialRequestId,
-                StockCode= request.StockCode,
+                StockCode = request.StockCode,
                 RequestedQuantity = request.RequestedQuantity,
                 FulfilledQuantity = request.FulfilledQuantity,
                 Unit = request.Unit,
@@ -75,6 +75,39 @@ namespace NetFlow.Api.Controllers
 
             var status = await _write.UpdateMaterialRequest(request, materialRequestId, materialRequestItemId);
             return Ok(status);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateTenderCapexRequest request)
+        {
+            if (_current.User == null)
+            {
+                return NotFound();
+            }
+
+            var id = await _write.CreateAsync(_current.User.Id.Value, request);
+
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] EditTenderCapexRequest request)
+        {
+            var id = await _write.EditAsync(request);
+            return CreatedAtAction(
+                nameof(Get),
+                new { id },
+                null);
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _write.DeleteAsync(id);
+            return Ok();
         }
     }
 }

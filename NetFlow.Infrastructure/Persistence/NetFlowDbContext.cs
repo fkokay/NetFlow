@@ -41,7 +41,7 @@ namespace NetFlow.Infrastructure.Persistence
         public DbSet<ServiceHistoryEntity> ServiceHistories => Set<ServiceHistoryEntity>();
         public DbSet<ServiceReplacedPartEntity> ServiceReplacedParts => Set<ServiceReplacedPartEntity>();
         public DbSet<TenderCapexEntity> TenderCapexes => Set<TenderCapexEntity>();
-        public DbSet<TenderReaktifEntity> TenderReaktifs => Set<TenderReaktifEntity>();
+        public DbSet<TenderReagentEntity> TenderReagents => Set<TenderReagentEntity>();
         public DbSet<TenderDeviceEntity> TenderDevices => Set<TenderDeviceEntity>();
         public DbSet<ServiceTechnicianEntity> ServiceTechnicians => Set<ServiceTechnicianEntity>();
         public DbSet<TenderAuthorityEntity> TenderAuthorities => Set<TenderAuthorityEntity>();

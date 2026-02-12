@@ -1,0 +1,14 @@
+﻿.popup-footer-container {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center;
+    gap: 12px;
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+}
+
+
+.footer-action-btn {
+    min-width: 100px;
+}

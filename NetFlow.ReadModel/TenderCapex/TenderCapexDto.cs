@@ -1,6 +1,7 @@
 ﻿using NetFlow.Domain.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace NetFlow.ReadModel.TenderCapex
@@ -13,12 +14,16 @@ namespace NetFlow.ReadModel.TenderCapex
         public string ParentAuthorityCode { get; set; } = string.Empty;
         public string UnitCode { get; set; } = string.Empty;
         public string UnitName { get; set; } = string.Empty;
-        public string AssetCode { get; set; } = string.Empty;
         public string StockCode { get; set; } = string.Empty;
         public string StockName { get; set; } = string.Empty;
-        public int Quantity { get; set; }
+        public string Currency { get; set; } = string.Empty;
+        public decimal Quantity { get; set; }
         public string Unit { get; set; } = string.Empty;
         public int? MaterialRequestId { get; set; }
+        public decimal PurchasePrice { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public decimal TotalAmount { get; private set; }
+        public string? Description { get; set; }
         public string? MaterialRequestNo { get; set; }
         public MaterialRequestStatus MaterialRequestStatus { get; set; } = MaterialRequestStatus.Open;
         public int? MaterialRequestItemId { get; set; }

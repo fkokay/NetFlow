@@ -116,7 +116,7 @@ namespace NetFlow.ReadModel.Tenders
 
             string orderBy = DevExtremeSqlBuilder.BuildOrderBy(
                 pagedRequest.Sort,
-                "ORDER BY TenderAuthority.UnitCode"
+                "ORDER BY TenderAuthority.AuthorityCode"
             );
 
             string countSql = $@"
@@ -125,7 +125,7 @@ namespace NetFlow.ReadModel.Tenders
                 INNER JOIN dbo.VW_TenderAuthority AS TenderAuthority
                     ON TenderAuthority.TenderId = Tender.Id
                 INNER JOIN TEST2025.dbo.TBLCASABIT AS UnitAuthority
-                    ON UnitAuthority.CARI_KOD = TenderAuthority.UnitCode
+                    ON UnitAuthority.CARI_KOD = TenderAuthority.AuthorityCode
                 {whereSql}
             ";
 
@@ -147,13 +147,13 @@ namespace NetFlow.ReadModel.Tenders
                 SELECT
                     TenderAuthority.Id AS Id,
                     Tender.Id AS TenderId,
-                    TenderAuthority.UnitCode,
+                    TenderAuthority.AuthorityCode As UnitCode,
                     TenderAuthority.UnitName
                 FROM dbo.VW_Tender AS Tender WITH (NOLOCK)
                 INNER JOIN dbo.VW_TenderAuthority AS TenderAuthority
                     ON TenderAuthority.TenderId = Tender.Id
                 INNER JOIN TEST2025.dbo.TBLCASABIT AS UnitAuthority
-                    ON UnitAuthority.CARI_KOD = TenderAuthority.UnitCode
+                    ON UnitAuthority.CARI_KOD = TenderAuthority.AuthorityCode
                 {whereSql}
                 {orderBy}
                 OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY

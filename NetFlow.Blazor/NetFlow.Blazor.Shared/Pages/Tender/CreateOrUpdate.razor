@@ -217,8 +217,17 @@
                                 <DxTabPage Text="Alt Kurumlar">
                                     <TenderSubComponent Tender="@Model" />
                                 </DxTabPage>
+                                <DxTabPage Text="Cihazlar">
+                                    <TenderDeviceComponent Tender="@Model" />
+                                </DxTabPage>
                                 <DxTabPage Text="Capex">
                                     <TenderCapexComponent Tender="@Model" />
+                                </DxTabPage>
+                                <DxTabPage Text="Opex">
+                                    <TenderOpexComponent Tender="@Model" />
+                                </DxTabPage>
+                                <DxTabPage Text="Reaktif">
+                                    <TenderReagentComponent Tender="@Model" />
                                 </DxTabPage>
                             </DxTabs>
                         }

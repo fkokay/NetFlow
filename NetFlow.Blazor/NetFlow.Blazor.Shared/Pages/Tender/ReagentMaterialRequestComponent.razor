@@ -14,13 +14,13 @@
                 <DxTextBox Text="@Tender.PublicAuthorityName" ReadOnly="true" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Alt Kamu/Kurum" ColSpanMd="12">
-                <DxTextBox Text="@TenderReaktif.UnitName" ReadOnly="true" />
+                <DxTextBox Text="@TenderReagent.UnitName" ReadOnly="true" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Stok Kodu" ColSpanMd="12">
-                <DxTextBox Text="@TenderReaktif.StockCode" ReadOnly="true" />
+                <DxTextBox Text="@TenderReagent.StockCode" ReadOnly="true" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Stok Adý" ColSpanMd="12">
-                <DxTextBox Text="@TenderReaktif.StockName" ReadOnly="true" />
+                <DxTextBox Text="@TenderReagent.StockName" ReadOnly="true" />
             </DxFormLayoutItem>
             <DxFormLayoutItem Caption="Para Birimi" ColSpanMd="12">
                 <DxComboBox Data="@ParaBirimleri"
@@ -63,7 +63,7 @@
 @code {
     [Parameter] public required bool IsPopupVisible { get; set; }
     [Parameter] public required TenderModel Tender { get; set; }
-    [Parameter] public required TenderReaktifModel TenderReaktif { get; set; }
+    [Parameter] public required TenderReagentModel TenderReagent { get; set; }
     [Parameter] public EventCallback OnSaved { get; set; }
     [Parameter] public EventCallback OnCanceled { get; set; }
     [Parameter] public EventCallback<bool> IsPopupVisibleChanged { get; set; }
@@ -124,20 +124,20 @@
             var httpClient = HttpClientFactory.CreateClient("ApiClient");
             var client = await ApiClientFactory.CreateAsync(httpClient);
 
-            var response = await client.PostAsJsonAsync("api/tender-reaktif/create-material-request", new
+            var response = await client.PostAsJsonAsync("api/tender-reagent/create-material-request", new
             {
                 TenderId = Tender.Id,
-                TenderReaktifId = TenderReaktif.Id,
+                TenderReagentId = TenderReagent.Id,
                 RequestType = model.RequestType,
                 Priority = model.Priority,
                 RequiredDate = model.RequiredDate,
                 RequestedDepartment = model.RequestedDepartment,
                 SourceType = model.SourceType,
                 Description = model.Description,
-                ItemCode = TenderReaktif.StockCode,
-                ItemName = TenderReaktif.StockName,
-                RequestedQuantity = TenderReaktif.TestCount,
-                FulfilledQuantity = TenderReaktif.TestCount,
+                ItemCode = TenderReagent.StockCode,
+                ItemName = TenderReagent.StockName,
+                RequestedQuantity = TenderReagent.TestCount,
+                FulfilledQuantity = TenderReagent.TestCount,
                 Unit = "Test",
                 WarehouseCode = "1000",
                 Currency = SecilenPara,

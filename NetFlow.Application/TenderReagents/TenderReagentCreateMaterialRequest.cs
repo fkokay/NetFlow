@@ -1,11 +1,8 @@
 ﻿using NetFlow.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace NetFlow.Application.TenderReaktifs
+namespace NetFlow.Application.TenderReagents
 {
-    public class TenderReaktifCreateMaterialRequest
+    public class TenderReagentCreateMaterialRequest
     {
         public int TenderId { get; set; }
         public int TenderReaktifId { get; set; }

@@ -6,7 +6,11 @@
     <Columns>
         <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
         <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adý" />
+        <DxGridDataColumn FieldName="StockCode" Caption="Ürün Kodu" />
+        <DxGridDataColumn FieldName="StockName" Caption="Ürün Adý" />
         <DxGridDataColumn FieldName="Quantity" Caption="Miktar" DisplayFormat="n2" />
+        <DxGridDataColumn FieldName="PurchasePrice" Caption="Satýn Alma Fiyatý" DisplayFormat="n4" />
+        <DxGridDataColumn FieldName="TotalAmount" Caption="Toplam Fiyat" DisplayFormat="n4" />
         <DxGridDataColumn FieldName="MaterialRequestNo" Caption="Talep No">
             <CellDisplayTemplate>
                 @if (((TenderCapexModel)context.DataItem).MaterialRequestId.HasValue)

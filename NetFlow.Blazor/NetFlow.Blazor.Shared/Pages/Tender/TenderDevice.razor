@@ -13,14 +13,14 @@
         SearchBoxNullText="Arama yapmak için metin girin…"
         style="height:100%;">
     <Columns>
+        <DxGridDataColumn FieldName="UnitCode" Caption="Alt Kurum Kodu" />
+        <DxGridDataColumn FieldName="UnitName" Caption="Alt Kurum Adı" />
         <DxGridDataColumn FieldName="SupplyType" Caption="Tedarik Türü" />
         <DxGridDataColumn FieldName="StockCode" Caption="Stok Kodu" />
         <DxGridDataColumn FieldName="Quantity" Caption="Miktar" />
-        <DxGridDataColumn FieldName="CustomerCode" Caption="Müşteri Kodu" />
-        <DxGridDataColumn FieldName="CustomerName" Caption="Müşteri Ünvanı" />
-        <DxGridDataColumn FieldName="RentUnitPrice" Caption="Kira" DisplayFormat="n2" />
-        <DxGridDataColumn FieldName="ServiceUnitPrice" Caption="Servis" DisplayFormat="n2" />
-        <DxGridDataColumn FieldName="LinkUnitPrice" Caption="Link" DisplayFormat="n2" />
+        <DxGridDataColumn FieldName="RentPrice" Caption="Kira" DisplayFormat="n2" />
+        <DxGridDataColumn FieldName="ServicePrice" Caption="Servis" DisplayFormat="n2" />
+        <DxGridDataColumn FieldName="LinkPrice" Caption="Link" DisplayFormat="n2" />
         <DxGridDataColumn FieldName="PurchasePrice" Caption="Satınalma" DisplayFormat="n2" />
         <DxGridDataColumn Caption="Talep Durumu" FieldName="MaterialRequestStatus" Width="120px">
             <CellDisplayTemplate>

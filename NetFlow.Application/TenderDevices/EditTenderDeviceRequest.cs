@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace NetFlow.Domain.Entities
+namespace NetFlow.Application.TenderDevices
 {
-
-    [Table("TenderDevice")]
-    public class TenderDeviceEntity
+    public class EditTenderDeviceRequest
     {
         public int Id { get; set; }
         public int TenderId { get; set; }
@@ -25,6 +21,6 @@ namespace NetFlow.Domain.Entities
         public int? MaterialRequestId { get; set; }
         public int? MaterialRequestItemId { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime? UpdateAt { get; set; }
     }
 }

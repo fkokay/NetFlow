@@ -23,7 +23,7 @@ using NetFlow.ReadModel.TenderDocuments;
 using NetFlow.ReadModel.TenderExternalQuality;
 using NetFlow.ReadModel.TenderOpex;
 using NetFlow.ReadModel.TenderPersonnel;
-using NetFlow.ReadModel.TenderReaktif;
+using NetFlow.ReadModel.TenderReagent;
 using NetFlow.ReadModel.Tenders;
 using NetFlow.ReadModel.Users;
 
@@ -46,7 +46,7 @@ namespace NetFlow.ReadModel
             services.AddScoped<TenderDeviceReadService>();
             services.AddScoped<TenderOpexReadService>();
             services.AddScoped<TenderPersonnelReadService>();
-            services.AddScoped<TenderReaktifReadService>();
+            services.AddScoped<TenderReagentReadService>();
             services.AddScoped<TenderRequiredDocumentReadService>();
             services.AddScoped<TenderExternalQualityReadService>();
             services.AddScoped<GuaranteeReadService>();

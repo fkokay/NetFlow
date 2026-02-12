@@ -27,7 +27,7 @@ using NetFlow.Application.TenderCapexes;
 using NetFlow.Application.TenderDevices;
 using NetFlow.Application.TenderOpexes;
 using NetFlow.Application.TenderPersonnels;
-using NetFlow.Application.TenderReaktifs;
+using NetFlow.Application.TenderReagents;
 using NetFlow.Application.Tenders;
 using NetFlow.Application.Users;
 
@@ -66,7 +66,7 @@ namespace NetFlow.Application
             services.AddScoped<TenderCapexWriterService>();
             services.AddScoped<TenderAuthorityWriteService>();
             services.AddScoped<TenderDeviceWriterService>();
-            services.AddScoped<TenderReaktifWriterService>();
+            services.AddScoped<TenderReagentWriterService>();
             services.AddScoped<TenderPersonnelWriteService>();
             services.AddScoped<MaterialRequestWriteService>();
             services.AddScoped<MaterialRequestItemWriteService>();
