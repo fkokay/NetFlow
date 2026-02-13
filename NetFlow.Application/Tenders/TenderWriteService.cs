@@ -19,6 +19,17 @@ namespace NetFlow.Application.Tenders
 
         public async Task<int> CreateAsync(int firmId, CreateTenderRequest request)
         {
+
+
+            var lastNumber = await _db.Tenders
+                .Where(x => x.FirmId == firmId && x.TenderCode.StartsWith("TND"))
+                .Select(x => (int?)Convert.ToInt32(x.TenderCode.Substring(3)))
+                .MaxAsync() ?? 0;
+
+            var nextNumber = lastNumber + 1;
+
+            var newTenderCode = $"TND{nextNumber:D5}";
+
             TenderEntity tender = new()
             {
                 FirmId = firmId,
@@ -32,7 +43,7 @@ namespace NetFlow.Application.Tenders
                 PublicAuthorityCode = request.PublicAuthorityCode,
                 TemporaryGuaranteeRateId = request.TemporaryGuaranteeRateId,
                 TenderAmount = request.TenderAmount,
-                TenderCode = request.TenderCode,
+                TenderCode = newTenderCode,
                 TenderDueDate = request.TenderDueDate,
                 TenderEndDate = request.TenderEndDate,
                 TenderMethod = request.TenderMethod,

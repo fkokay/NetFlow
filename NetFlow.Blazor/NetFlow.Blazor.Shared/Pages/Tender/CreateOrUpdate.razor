@@ -48,9 +48,7 @@
 
                                     <DxFormLayout>
 
-                                        <DxFormLayoutItem Caption="Ýhale Kodu" ColSpanMd="6">
-                                            <DxTextBox @bind-Text="Model.TenderCode" BindValueMode="BindValueMode.OnInput" />
-                                        </DxFormLayoutItem>
+                                       
                                         <DxFormLayoutItem Caption="Ýhale Adý" ColSpanMd="6">
                                             <DxTextBox @bind-Text="Model.TenderName" BindValueMode="BindValueMode.OnInput" />
                                         </DxFormLayoutItem>
@@ -378,8 +376,6 @@
         if (Model.FirmId <= 0)
             AddError(nameof(Model.FirmId), "Firma seçilmesi zorunludur.");
 
-        if (string.IsNullOrWhiteSpace(Model.TenderCode))
-            AddError(nameof(Model.TenderCode), "Ýhale kodu zorunludur.");
 
         if (Model.TemporaryGuaranteeRateId <= 0)
             AddError(nameof(Model.TemporaryGuaranteeRateId), "Geçici teminat seçilmesi zorunludur.");

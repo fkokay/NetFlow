@@ -7,7 +7,7 @@ namespace NetFlow.Application.Tenders
     public class CreateTenderRequest
     {
         public int? FirmId { get; set; }
-        public string TenderCode { get; set; } = "";
+        public string? TenderCode { get; set; }
         public string TenderName { get; set; } = "";
         public string PublicAuthorityCode { get; set; } = "";
         public string TenderType { get; set; } = "";

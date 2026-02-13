@@ -11,7 +11,7 @@ namespace NetFlow.Blazor.Shared.Models
         public int? FirmId { get; set; }
         public int? TenderId { get; set; }
         public string? FirmName { get; set; }
-        public string TenderCode { get; set; } = "";
+        public string? TenderCode { get; set; }
         public string TenderName { get; set; } = "";
 
         [NotMapped]
