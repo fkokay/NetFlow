@@ -18,7 +18,11 @@
                     </div>
                 </Template>
             </DxToolbarItem>
-            
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
+                <Template>
+                    <DxButton Text="Düzenle" Click="@OnEditClick" CssClass="edit-button" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Info" />
+                </Template>
+            </DxToolbarItem>
             <DxToolbarItem Alignment="ToolbarItemAlignment.Right">
                 <Template>
                     <DxButton Text="Sil" Click="@OnDeleteClick" RenderStyleMode="ButtonRenderStyleMode.Outline" RenderStyle="ButtonRenderStyle.Danger" />
@@ -221,6 +225,10 @@
     private async Task OnDeleteClick()
     {
         await InvokeAsync(StateHasChanged);
+    }
+    private async Task OnEditClick()
+    {
+        NavigationManager.NavigateTo($"/tender/createorupdate/{Id}");
     }
 
     private void NavigateBack()
